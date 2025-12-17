@@ -1,0 +1,7 @@
+../../src/app/NavSource/controller/controller.c:37:7:SelfStatusUpdata	8	static
+../../src/app/NavSource/controller/controller.c:98:11:Average	32	static
+../../src/app/NavSource/controller/controller.c:109:7:SelfFrameOut	4	static
+../../src/app/NavSource/controller/controller.c:342:8:GetAppInfo	24	static
+../../src/app/NavSource/controller/controller.c:362:8:ReloadAppInfoFromFlash	16	static
+../../src/app/NavSource/controller/controller.c:375:5:GetMonthday	24	static
+../../src/app/NavSource/controller/controller.c:430:5:UTC_to_Localtime	56	static

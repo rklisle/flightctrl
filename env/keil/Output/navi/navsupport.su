@@ -1,0 +1,15 @@
+../../src/app/NavSource/navSupport.c:46:7:NavInputGenerate	4	static
+../../src/app/NavSource/navSupport.c:77:7:NavOutputHandle	8	static
+../../src/app/NavSource/navSupport.c:93:7:DoNavRun	16	static
+../../src/app/NavSource/navSupport.c:116:7:CalcXYZ	160	static
+../../src/app/NavSource/navSupport.c:135:6:DoCalc	200	static
+../../src/app/NavSource/navSupport.c:158:6:DoCalcXYZ	184	static
+../../src/app/NavSource/navSupport.c:184:6:ConSys_Matrix3x1	40	static
+../../src/app/NavSource/navSupport.c:213:6:ConSys_Matrix3x3	48	static
+../../src/app/NavSource/navSupport.c:245:6:ConSys_cx	32	static
+../../src/app/NavSource/navSupport.c:273:6:ConSys_cy	32	static
+../../src/app/NavSource/navSupport.c:301:6:ConSys_cz	32	static
+../../src/app/NavSource/navSupport.c:329:6:ConSys_EarthLBH_To_EarthFixed	88	static
+../../src/app/NavSource/navSupport.c:362:6:ConSys_M3x3_transpose	24	static
+../../src/app/NavSource/navSupport.c:389:6:CalcRoxyz	120	static
+../../src/app/NavSource/navSupport.c:404:6:ConSys_EarthWGS84_To_Launch	1176	static

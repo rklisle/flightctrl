@@ -1,0 +1,6 @@
+../../src/app/AppSource/payload/fuse.c:19:7:InitFuse	4	static
+../../src/app/AppSource/payload/fuse.c:32:8:ChkFuseStandardFrame	136	static
+../../src/app/AppSource/payload/fuse.c:64:8:FuseRtHandler	176	static
+../../src/app/AppSource/payload/fuse.c:97:14:GenFuseBuf	32	static
+../../src/app/AppSource/payload/fuse.c:117:14:MsgToFuse	152	static
+../../src/app/AppSource/payload/fuse.c:126:7:FuseSend	224	static

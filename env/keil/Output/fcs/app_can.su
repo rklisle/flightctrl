@@ -1,0 +1,6 @@
+../../src/app/app_can.c:43:6:HAL_FDCAN_TxEventFifoCallback	24	static
+../../src/app/app_can.c:54:6:HAL_FDCAN_RxFifo0Callback	88	static
+../../src/app/app_can.c:117:13:prv_FDCAN_Init	56	static
+../../src/app/app_can.c:197:9:app_can_send	64	static
+../../src/app/app_can.c:223:6:app_can_demo	56	static
+../../src/app/app_can.c:266:9:app_can_init	64	static

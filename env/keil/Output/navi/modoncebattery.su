@@ -1,0 +1,6 @@
+../../src/app/AppSource/modules/modOnceBattery.c:17:7:OnceBatteryInit	8	static
+../../src/app/AppSource/modules/modOnceBattery.c:23:7:SaveOnceBattery	24	static
+../../src/app/AppSource/modules/modOnceBattery.c:34:8:OnceBatteryCmdHandler	16	static
+../../src/app/AppSource/modules/modOnceBattery.c:49:8:OnceBatteryRtHandler	24	static
+../../src/app/AppSource/modules/modOnceBattery.c:67:7:MsgToOnceBattery	16	static
+../../src/app/AppSource/modules/modOnceBattery.c:88:7:OnceBatteryStatusUpdate	8	static

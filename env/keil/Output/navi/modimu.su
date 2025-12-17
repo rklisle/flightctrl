@@ -1,0 +1,2 @@
+../../src/app/NavSource/modules/modImu.c:15:6:ImuSourceDataUpdate	152	static
+../../src/app/NavSource/modules/modImu.c:188:8:AverageIMU	40	static

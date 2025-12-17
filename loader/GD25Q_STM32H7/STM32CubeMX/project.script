@@ -1,0 +1,7 @@
+load STM32H750XBHx 
+project name STCubeGenerated 
+project toolchain "MDK-ARM V5" 
+project path "D:\Works\flightctrl\loader\GD25Q_STM32H7\STM32CubeMX\" 
+set tpl_path "D:\ProgramFiles\KeilPack\Keil\STM32H7xx_DFP\3.1.1\MDK\CubeMX\SC" 
+set dest_path "D:\Works\flightctrl\loader\GD25Q_STM32H7" 
+SetCopyLibrary  "copy as reference"

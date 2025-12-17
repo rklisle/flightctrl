@@ -1,0 +1,15 @@
+../../src/app/uart_agent.c:94:13:uart_callback_1	16	static
+../../src/app/uart_agent.c:98:13:uart_callback_2	16	static
+../../src/app/uart_agent.c:102:13:uart_callback_3	16	static
+../../src/app/uart_agent.c:106:13:uart_callback_4	16	static
+../../src/app/uart_agent.c:110:13:uart_callback_5	16	static
+../../src/app/uart_agent.c:114:13:uart_callback_6	16	static
+../../src/app/uart_agent.c:118:13:uart_callback_7	16	static
+../../src/app/uart_agent.c:122:13:uart_callback_8	16	static
+../../src/app/uart_agent.c:127:13:uart_callback_9	16	static
+../../src/app/uart_agent.c:132:13:prv_uart_event_handle	56	static
+../../src/app/uart_agent.c:196:6:uart_drv_task	56	static
+../../src/app/uart_agent.c:266:9:fcs_uart_recv	64	static
+../../src/app/uart_agent.c:305:9:fcs_uart_send	48	static
+../../src/app/uart_agent.c:330:9:fcs_uart_init	80	static
+../../src/app/uart_agent.c:397:6:ReConnectUart	8	static

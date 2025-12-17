@@ -1,0 +1,6 @@
+../../src/app/NavSource/modules/modGps.c:40:8:GpsRtHandler	24	static
+../../src/app/NavSource/modules/modGps.c:99:8:ChkGpsFrame	24	static
+../../src/app/NavSource/modules/modGps.c:119:7:StartGPS	8	static
+../../src/app/NavSource/modules/modGps.c:149:12:splitString	40	static
+../../src/app/NavSource/modules/modGps.c:177:15:AnalysisGnssMsg	464	static
+../../src/app/NavSource/modules/modGps.c:253:6:calculate_utc_time	112	static

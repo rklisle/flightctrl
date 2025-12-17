@@ -1,0 +1,45 @@
+#ifndef _OS_ERROR_H_
+#define _OS_ERROR_H_
+//  系统错误处理函数
+
+#include "os_framework.h"
+typedef signed short ERROR_RESULT;
+#define ERROR_NOERROR					(0)
+#define ERROR_UART_PORT_ILLEGAL			(-1000)
+
+#define ERROR_INPUT_POINT_IS_NULL		(-1001)
+#define ERROR_LENGTH_LESS_ZERO			(-1002)
+#define ERROR_NO_AVAILIBLE_BUFFER		(-1003)
+#define ERROR_NO_CORRESPOINDING_CHANNEL	(-1004)
+#define ERROR_NO_AVAILIBLE_BLOCK		(-1005)
+
+#define ERROR_PROCESS_TYPE_ABNORMAL		(-1006)
+
+#define ERROR_PROCESS_HAVE_INITED		(-1007)
+#define ERROR_PROCESS_NOT_INITED		(-1008)
+#define ERROR_PROCESS_INDEX_ILLGEL		(-1009)
+#define ERROR_PROCESS_PARAM_ILLGEL		(-1010)
+#define ERROR_PROCESS_NO_FUNC			(-1011)
+
+#define ERROR_TIME_HAVE_INITED			(-1012)
+
+#define ERROR_FLIGHT_DATA_INPUT_HAVE_REGIST		(-1013)
+#define ERROR_FLIGHT_DATA_OUTPUT_HAVE_REGIST	(-1014)
+#define ERROR_FLIGHT_LAUNCH_ENCAP_HAVE_REGIST	(-1015)
+#define ERROR_FLIGHT_LOOP_HAVE_INITED			(-1016)
+
+#define ERROR_DRIVER_1553_BC_PARAM_ILLGEL		(-1017)
+
+#ifdef _WORK_MODE_REPORT_ERROR_
+#define ERROR_LIST_FULL							(-1018)
+#define ERROR(ERROR_CODE)		Push2ErrorList(ERROR_CODE)
+
+OS_S32 Push2ErrorList(OS_S32 s32ErrorCode);
+OS_S32 PopAllError(OS_S32* pu32ErrorList);
+
+#else
+#define ERROR(ERROR_CODE)		ERROR_CODE
+#endif
+
+extern OS_U8 EnterError(char *errorInfo);
+#endif

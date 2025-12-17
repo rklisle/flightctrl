@@ -1,0 +1,17 @@
+../../src/app/AppSource/flight/PGuide.c:11:6:PGuide_init	16	static
+../../src/app/AppSource/flight/PGuide.c:57:6:SetPGuide	32	static
+../../src/app/AppSource/flight/PGuide.c:121:6:PGuide	8	static
+../../src/app/AppSource/flight/PGuide.c:130:7:GUID_LongMan	4	static
+../../src/app/AppSource/flight/PGuide.c:151:6:GUID_VcmdUpdate	4	static
+../../src/app/AppSource/flight/PGuide.c:169:6:GUID_Airspeed_Ctrl	16	static
+../../src/app/AppSource/flight/PGuide.c:174:7:GUID_Spec	40	static
+../../src/app/AppSource/flight/PGuide.c:234:7:GUID_Way	152	static
+../../src/app/AppSource/flight/PGuide.c:367:7:GUID_LongSafe	8	static
+../../src/app/AppSource/flight/PGuide.c:391:7:GUID_Enter	104	static
+../../src/app/AppSource/flight/PGuide.c:467:6:Guide_L1	96	static
+../../src/app/AppSource/flight/PGuide.c:495:6:Guide_Line	88	static
+../../src/app/AppSource/flight/PGuide.c:534:6:Guide_Circ	88	static
+../../src/app/AppSource/flight/PGuide.c:560:8:Guid_VcmdInit	48	static
+../../src/app/AppSource/flight/PGuide.c:577:8:Guid_VcmdReal	32	static
+../../src/app/AppSource/flight/PGuide.c:594:6:GUID_Inte_Zero	24	static
+../../src/app/AppSource/flight/PGuide.c:602:6:GUID_Axis_Change	96	static

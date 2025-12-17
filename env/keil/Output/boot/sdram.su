@@ -1,0 +1,2 @@
+../../src/boot/sdram.c:34:16:prv_SDRAM_Initialization_Sequence	24	static
+../../src/boot/sdram.c:90:9:mem_sdram_init	56	static

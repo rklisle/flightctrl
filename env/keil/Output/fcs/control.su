@@ -1,0 +1,8 @@
+../../src/app/AppSource/flight/Control.c:15:6:Control_init	24	static
+../../src/app/AppSource/flight/Control.c:39:6:SetControlPara	32	static
+../../src/app/AppSource/flight/Control.c:92:6:FlyStabilityControl	64	static
+../../src/app/AppSource/flight/Control.c:585:6:ESO_RollAutopilot	80	static
+../../src/app/AppSource/flight/Control.c:610:6:FlyEngineControl	32	static
+../../src/app/AppSource/flight/Control.c:716:6:EngineMaxRpm	4	static
+../../src/app/AppSource/flight/Control.c:750:6:RudderTrans	32	static
+../../src/app/AppSource/flight/Control.c:765:6:DftFreqIdentify	48	static

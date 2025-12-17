@@ -1,0 +1,5 @@
+../../src/app/AppSource/Interface/interface_power.c:12:7:InitPwrSeq	16	static
+../../src/app/AppSource/Interface/interface_power.c:22:7:PowerOn	40	static
+../../src/app/AppSource/Interface/interface_power.c:71:7:PowerOff	40	static
+../../src/app/AppSource/Interface/interface_power.c:121:7:SeqOn	80	static
+../../src/app/AppSource/Interface/interface_power.c:149:7:SeqOff	32	static

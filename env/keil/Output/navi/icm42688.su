@@ -1,0 +1,8 @@
+../../src/app/icm42688.c:44:13:prv_spi_callback	16	static
+../../src/app/icm42688.c:59:16:prv_imu_read	72	static
+../../src/app/icm42688.c:95:16:prv_imu_write	56	static
+../../src/app/icm42688.c:125:16:prv_icm42688_getdata	40	static
+../../src/app/icm42688.c:156:16:prv_icm45686_getdata	40	static
+../../src/app/icm42688.c:187:16:prv_icm42688_init	24	static
+../../src/app/icm42688.c:255:13:icm42688_task	24	static
+../../src/app/icm42688.c:283:6:icm42688_Init	40	static

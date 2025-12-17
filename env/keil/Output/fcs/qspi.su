@@ -1,0 +1,2 @@
+../../src/boot/qspi.c:36:16:prv_QSPI_Configuration	72	static
+../../src/boot/qspi.c:87:9:mem_qspi_init	72	static

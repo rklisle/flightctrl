@@ -1,0 +1,2 @@
+../../src/libs/threadx/common/src/tx_mutex_cleanup.c:77:7:_tx_mutex_cleanup	64	static
+../../src/libs/threadx/common/src/tx_mutex_cleanup.c:258:7:_tx_mutex_thread_release	48	static

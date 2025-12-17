@@ -1,0 +1,75 @@
+<html>
+<body>
+<pre>
+<h1>µVision Build Log</h1>
+<h2>Tool Versions:</h2>
+IDE-Version: µVision V5.30.0.0
+Copyright (C) 2020 ARM Ltd and ARM Germany GmbH. All rights reserved.
+License Information: fan fan, a, LIC=GE7DL-0NJR6-PHX89-40TZU-4JUCU-QI64G
+ 
+Tool Versions:
+Toolchain:       MDK-ARM Professional  Version: 5.30.0.0
+Toolchain Path:  C:\Program Files (x86)\Arm GNU Toolchain arm-none-eabi\12.3 rel1\bin
+C Compiler:      GCC.exe
+Assembler:       AS.exe
+Linker/Locator:  LD.exe
+Library Manager: AR.exe
+Hex Converter:   OBJCOPY.exe
+CPU DLL:         SARMCM3.DLL V5.30.0.0
+Dialog DLL:      DCM.DLL V1.17.3.0
+Target DLL:      UL2CM3.DLL V1.163.3.0
+Dialog DLL:      TCM.DLL V1.42.0.0
+ 
+<h2>Project:</h2>
+D:\Works\flightctrl\env\keil\flightctrl.uvprojx
+Project File Date:  09/12/2024
+
+<h2>Output:</h2>
+Build target 'fcs'
+Note: source file '..\..\src\libs\threadx\ports\cortex_m7\gnu\src\tx_misra.S' - object file renamed from '.\Objects\tx_misra.o' to '.\Objects\tx_misra_1.o'.
+compiling bsp_main.c...
+../../src/bsp/bsp_main.c: In function 'MX_I2C2_Init':
+../../src/bsp/bsp_main.c(542): warning: unused variable 'val' [-Wunused-variable]
+../../src/bsp/bsp_main.c(541): warning: unused variable 'status' [-Wunused-variable]
+../../src/bsp/bsp_main.c: In function 'MX_TIM3_Init':
+../../src/bsp/bsp_main.c(899): warning: implicit declaration of function 'HAL_TIM_MspPostInit'; did you mean 'HAL_TIM_IC_MspInit'? [-Wimplicit-function-declaration]
+../../src/bsp/bsp_main.c: At top level:
+../../src/bsp/bsp_main.c(142): warning: 'MX_LPUART1_UART_Init' declared 'static' but never defined [-Wunused-function]
+../../src/bsp/bsp_main.c(1281): warning: 'MX_GPIO_Init' defined but not used [-Wunused-function]
+../../src/bsp/bsp_main.c(1206): warning: 'MX_FMC_Init' defined but not used [-Wunused-function]
+../../src/bsp/bsp_main.c(1146): warning: 'MX_DMA_Init' defined but not used [-Wunused-function]
+../../src/bsp/bsp_main.c(1127): warning: 'MX_BDMA_Init' defined but not used [-Wunused-function]
+../../src/bsp/bsp_main.c(1041): warning: 'MX_TIM5_Init' defined but not used [-Wunused-function]
+../../src/bsp/bsp_main.c(940): warning: 'MX_TIM4_Init' defined but not used [-Wunused-function]
+../../src/bsp/bsp_main.c(828): warning: 'MX_TIM3_Init' defined but not used [-Wunused-function]
+../../src/bsp/bsp_main.c(781): warning: 'MX_SPI1_Init' defined but not used [-Wunused-function]
+../../src/bsp/bsp_main.c(704): warning: 'MX_SDMMC1_SD_Init' defined but not used [-Wunused-function]
+../../src/bsp/bsp_main.c(682): warning: 'Wait_SDCARD_Ready' defined but not used [-Wunused-function]
+../../src/bsp/bsp_main.c(647): warning: 'MX_QUADSPI_Init' defined but not used [-Wunused-function]
+../../src/bsp/bsp_main.c(619): warning: 'MX_IWDG1_Init' defined but not used [-Wunused-function]
+../../src/bsp/bsp_main.c(533): warning: 'MX_I2C2_Init' defined but not used [-Wunused-function]
+../../src/bsp/bsp_main.c(471): warning: 'MX_FDCAN2_Init' defined but not used [-Wunused-function]
+../../src/bsp/bsp_main.c(418): warning: 'MX_FDCAN1_Init' defined but not used [-Wunused-function]
+../../src/bsp/bsp_main.c(369): warning: 'MX_ETH_Init' defined but not used [-Wunused-function]
+linking...
+c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.3 rel1/bin/../lib/gcc/arm-none-eabi/12.3.1/../../../../arm-none-eabi/bin/ld.exe: warning: ./Objects/fcs.elf has a LOAD segment with RWX permissions
+After Build - User command #1: c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.3 rel1/bin/arm-none-eabi-size  --format=berkeley ./Output/fcs/fcs.elf
+c:/program files (x86)/arm gnu toolchain arm-none-eabi/12.3 rel1/bin/arm-none-eabi-size: './Output/fcs/fcs.elf': No such file
+".\Objects\fcs.elf" - 0 Error(s), 20 Warning(s).
+
+<h2>Software Packages used:</h2>
+
+Package Vendor: Keil
+                https://www.keil.com/pack/Keil.STM32H7xx_DFP.3.1.1.pack
+                Keil.STM32H7xx_DFP.3.1.1
+                STMicroelectronics STM32H7 Series Device Support and Examples
+
+<h2>Collection of Component include folders:</h2>
+  .\RTE\_fcs
+  D:\ProgramFiles\KeilPack\Keil\STM32H7xx_DFP\3.1.1\Drivers\CMSIS\Device\ST\STM32H7xx\Include
+
+<h2>Collection of Component Files used:</h2>
+Build Time Elapsed:  00:00:01
+</pre>
+</body>
+</html>

@@ -1,0 +1,6 @@
+../../src/app/NavSource/modules/modFlyCtrl.c:32:7:MsgToFlyCtrl	152	static
+../../src/app/NavSource/modules/modFlyCtrl.c:41:14:SetNavInstallMode	24	static
+../../src/app/NavSource/modules/modFlyCtrl.c:55:7:ToNavModel	4	static
+../../src/app/NavSource/modules/modFlyCtrl.c:62:7:EncpEphSet	16	static
+../../src/app/NavSource/modules/modFlyCtrl.c:101:8:FlyctrlRtHandler	24	static
+../../src/app/NavSource/modules/modFlyCtrl.c:175:7:StartEncpEphToNav	16	static

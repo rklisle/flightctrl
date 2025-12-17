@@ -1,0 +1,11 @@
+../../src/app/NavSource/modules/modFlash.c:40:7:getNextsptr	16	static
+../../src/app/NavSource/modules/modFlash.c:55:7:AllocFileBuffer	16	static
+../../src/app/NavSource/modules/modFlash.c:62:6:FreeFileBuffer	16	static
+../../src/app/NavSource/modules/modFlash.c:73:8:ReadFileByName	176	static
+../../src/app/NavSource/modules/modFlash.c:99:8:ReadFileByIndex	24	static
+../../src/app/NavSource/modules/modFlash.c:114:8:ReadFileInfoByIndex	176	static
+../../src/app/NavSource/modules/modFlash.c:129:8:UpdateFlashFileInfo	16	static
+../../src/app/NavSource/modules/modFlash.c:139:8:ClearFlashDatFile	16	static
+../../src/app/NavSource/modules/modFlash.c:158:14:FlashWriteReadTest	24	static
+../../src/app/NavSource/modules/modFlash.c:195:7:AutoTestFlash	16	static
+../../src/app/NavSource/modules/modFlash.c:221:8:FlashCmdHandler	1488	static

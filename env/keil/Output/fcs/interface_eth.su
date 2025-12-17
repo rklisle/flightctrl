@@ -1,0 +1,3 @@
+../../src/app/AppSource/Interface/interface_eth.c:12:19:LAN9303_WriteReg	16	static
+../../src/app/AppSource/Interface/interface_eth.c:18:19:LAN9303_ReadReg	16	static
+../../src/app/AppSource/Interface/interface_eth.c:27:19:LAN9303_Init	16	static

@@ -1,0 +1,2 @@
+../../src/app/AppSource/Interface/interface_flash.c:9:15:QspiFlashProgram	24	static
+../../src/app/AppSource/Interface/interface_flash.c:14:15:QspiFlashRead	24	static

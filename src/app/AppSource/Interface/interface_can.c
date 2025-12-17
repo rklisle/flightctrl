@@ -1,0 +1,14 @@
+/*
+ * interface_power.c
+ *  Created on: 2022年8月7日
+ *      Author: 成宏璟
+ */
+#include "interface_can.h"
+#include "../../app_can.h"
+
+int SendCanFrame(OS_U8 canIndex, OS_U16 id, OS_U8 length, OS_U8 * TxData)
+{
+	int Status = 0;
+    app_can_send(fdCan[canIndex], id, false, TxData, length);
+	return Status;
+}

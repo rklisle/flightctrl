@@ -1,0 +1,115 @@
+<html>
+<body>
+<pre>
+<h1>礦ision Build Log</h1>
+<h2>Tool Versions:</h2>
+IDE-Version: 礦ision V5.30.0.0
+Copyright (C) 2020 ARM Ltd and ARM Germany GmbH. All rights reserved.
+License Information: fan fan, a, LIC=GE7DL-0NJR6-PHX89-40TZU-4JUCU-QI64G
+ 
+Tool Versions:
+Toolchain:       MDK-ARM Professional  Version: 5.30.0.0
+Toolchain Path:  C:\Program Files (x86)\Keil_v5\ARM\ARMCLANG\Bin
+C Compiler:      ArmClang.exe V6.14
+Assembler:       Armasm.exe V6.14
+Linker/Locator:  ArmLink.exe V6.14
+Library Manager: ArmAr.exe V6.14
+Hex Converter:   FromElf.exe V6.14
+CPU DLL:         SARMCM3.DLL V5.30.0.0
+Dialog DLL:      DCM.DLL V1.17.3.0
+Target DLL:      UL2CM3.DLL V1.163.3.0
+Dialog DLL:      TCM.DLL V1.42.0.0
+ 
+<h2>Project:</h2>
+D:\Works\flightctrl\loader\GD25Q_STM32H7\GD25Q_STM32H7.uvprojx
+Project File Date:  11/21/2024
+
+<h2>Output:</h2>
+*** Using Compiler 'V6.14', folder: 'C:\Program Files (x86)\Keil_v5\ARM\ARMCLANG\Bin'
+Build target 'Cortex-M'
+compiling quadspi.c...
+linking...
+Program Size: Code=22538 RO-data=4274 RW-data=20 ZI-data=88  
+After Build - User command #1: cmd.exe /C copy "Objects\GD25Q_STM32H7.axf" ".\GD25Q_STM32H7.FLM"
+已复制         1 个文件。
+".\Objects\GD25Q_STM32H7.axf" - 0 Error(s), 0 Warning(s).
+
+<h2>Software Packages used:</h2>
+
+Package Vendor: ARM
+                http://www.keil.com/pack/ARM.CMSIS.5.7.0.pack
+                ARM.CMSIS.5.7.0
+                CMSIS (Cortex Microcontroller Software Interface Standard)
+   * Component: CORE Version: 5.4.0
+
+Package Vendor: Keil
+                project-path/Keil.FrameworkCubeMX.1.0.0.pack
+                Keil.FrameworkCubeMX.1.0.0
+                STM32CubeMX generated pack description
+   * Component: STM32CubeMX Version: 2.0.0
+
+Package Vendor: Keil
+                https://www.keil.com/pack/Keil.STM32H7xx_DFP.3.1.1.pack
+                Keil.STM32H7xx_DFP.3.1.1
+                STMicroelectronics STM32H7 Series Device Support and Examples
+   * Component: STM32Cube Framework Version: 1.1.0
+   * Component: Common Version: 1.11.0
+   * Component: Cortex Version: 1.11.0
+   * Component: GPIO Version: 1.11.0
+   * Component: MDMA Version: 1.11.0
+   * Component: PWR Version: 1.11.0
+   * Component: QSPI Version: 1.11.0
+   * Component: RCC Version: 1.11.0
+   * Component: Startup Version: 1.11.0
+
+<h2>Collection of Component include folders:</h2>
+  .\RTE\_Cortex-M
+  .\STM32CubeMX
+  .\STM32CubeMX\STCubeGenerated\Inc
+  D:\ProgramFiles\KeilPack\ARM\CMSIS\5.7.0\CMSIS\Core\Include
+  D:\ProgramFiles\KeilPack\Keil\STM32H7xx_DFP\3.1.1\Drivers\CMSIS\Device\ST\STM32H7xx\Include
+  D:\ProgramFiles\KeilPack\Keil\STM32H7xx_DFP\3.1.1\Drivers\STM32H7xx_HAL_Driver\Inc
+
+<h2>Collection of Component Files used:</h2>
+
+   * Component: ::Device:STM32Cube Framework:1.1.0 (API)
+
+   * Component: ARM::CMSIS:CORE:5.4.0
+
+   * Component: Keil::Device:STM32Cube Framework:STM32CubeMX:2.0.0
+      Include file:  MX_Device.h
+      Include file:  STCubeGenerated\Inc\stm32h7xx_hal_conf.h
+      Source file:   STCubeGenerated\Src\stm32h7xx_hal_msp.c
+
+   * Component: Keil::Device:STM32Cube HAL:Common:1.11.0
+      Source file:   Drivers\STM32H7xx_HAL_Driver\Src\stm32h7xx_hal.c
+      Include file:  Drivers\STM32H7xx_HAL_Driver\Inc\stm32h7xx_hal.h
+
+   * Component: Keil::Device:STM32Cube HAL:Cortex:1.11.0
+      Source file:   Drivers\STM32H7xx_HAL_Driver\Src\stm32h7xx_hal_cortex.c
+
+   * Component: Keil::Device:STM32Cube HAL:GPIO:1.11.0
+      Source file:   Drivers\STM32H7xx_HAL_Driver\Src\stm32h7xx_hal_gpio.c
+
+   * Component: Keil::Device:STM32Cube HAL:MDMA:1.11.0
+      Source file:   Drivers\STM32H7xx_HAL_Driver\Src\stm32h7xx_hal_mdma.c
+
+   * Component: Keil::Device:STM32Cube HAL:PWR:1.11.0
+      Source file:   Drivers\STM32H7xx_HAL_Driver\Src\stm32h7xx_hal_pwr_ex.c
+      Source file:   Drivers\STM32H7xx_HAL_Driver\Src\stm32h7xx_hal_pwr.c
+
+   * Component: Keil::Device:STM32Cube HAL:QSPI:1.11.0
+      Source file:   Drivers\STM32H7xx_HAL_Driver\Src\stm32h7xx_hal_qspi.c
+
+   * Component: Keil::Device:STM32Cube HAL:RCC:1.11.0
+      Source file:   Drivers\STM32H7xx_HAL_Driver\Src\stm32h7xx_hal_rcc_ex.c
+      Source file:   Drivers\STM32H7xx_HAL_Driver\Src\stm32h7xx_hal_rcc.c
+
+   * Component: Keil::Device:Startup:1.11.0
+      Include file:  Drivers\CMSIS\Device\ST\STM32H7xx\Include\stm32h7xx.h
+      Source file:   Drivers\CMSIS\Device\ST\STM32H7xx\Source\Templates\arm\startup_stm32h750xx.s
+      Source file:   Drivers\CMSIS\Device\ST\STM32H7xx\Source\Templates\system_stm32h7xx.c
+Build Time Elapsed:  00:00:01
+</pre>
+</body>
+</html>

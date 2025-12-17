@@ -1,0 +1,19 @@
+The 'Blinky' project is a simple CMSIS RTOS2 based example for
+ST 'STM32L496AG' microcontroller using ST 'STM32L496G-Discovery' Board.
+Compliant to Cortex Microcontroller Software Interface Standard (CMSIS).
+
+Example functionality:
+ - Clock Settings:
+   - MSI     =           80 MHz
+   - SYSCLK  =           80 MHz
+
+ - LED LD1 is blinking as running light 
+ - JOYSTICK press is used to change the blinking speed
+
+The Blinky program is available in different targets:
+ - Ext Data:
+   - Constant delay_data[] is positioned in external QUADSPI memory
+
+ - Ext Data + Code:
+   - Constant delay_data[] is positioned in external QUADSPI memory
+   - Code from Blinky.c is positioned in external QUADSPI memory

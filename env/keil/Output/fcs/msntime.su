@@ -1,0 +1,2 @@
+../../src/app/AppSource/payload/MsnTime.c:11:8:GetDateBySecond	136	static
+../../src/app/AppSource/payload/MsnTime.c:30:8:SetSecondByDate	104	static

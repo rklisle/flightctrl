@@ -1,0 +1,8 @@
+../../src/app/NavSource/controller/controller.c:38:7:SelfStatusUpdata	8	static
+../../src/app/NavSource/controller/controller.c:63:8:CalcMagDir	64	static
+../../src/app/NavSource/controller/controller.c:84:8:estimate_magnetic_declination	56	static
+../../src/app/NavSource/controller/controller.c:100:7:SelfFrameOut	416	static
+../../src/app/NavSource/controller/controller.c:284:5:GetMonthday	24	static
+../../src/app/NavSource/controller/controller.c:339:5:UTC_to_Localtime	56	static
+../../src/app/NavSource/controller/controller.c:397:6:ADC3_Init	48	static
+../../src/app/NavSource/controller/controller.c:452:7:System_GetCoreTemperature	32	static

@@ -1,0 +1,5 @@
+../../src/app/AppSource/Interface/interface_flash.c:10:15:FlashInit	8	static
+../../src/app/AppSource/Interface/interface_flash.c:16:15:QspiFlashProgram	32	static
+../../src/app/AppSource/Interface/interface_flash.c:26:15:QspiErase	16	static
+../../src/app/AppSource/Interface/interface_flash.c:33:15:QspiWrite256	16	static
+../../src/app/AppSource/Interface/interface_flash.c:39:15:QspiFlashRead	32	static

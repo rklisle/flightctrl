@@ -1,0 +1,5 @@
+../../src/app/main.c:21:6:idle	16	static
+../../src/app/main.c:64:13:led_gpio_init	32	static
+../../src/app/main.c:95:6:app_task	16	static
+../../src/app/main.c:115:5:main	16	static
+../../src/app/main.c:131:6:tx_application_define	56	static

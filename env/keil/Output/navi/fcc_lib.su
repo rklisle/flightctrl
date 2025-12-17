@@ -1,0 +1,7 @@
+../../src/app/AppSource/flight/FCC_Lib.c:3:8:Limit_In	40	static
+../../src/app/AppSource/flight/FCC_Lib.c:15:8:Limit_Out	40	static
+../../src/app/AppSource/flight/FCC_Lib.c:24:8:lip1_IN	56	static
+../../src/app/AppSource/flight/FCC_Lib.c:55:6:Tustin_FirstIO	80	static
+../../src/app/AppSource/flight/FCC_Lib.c:70:6:Tustin_SecondIO	120	static
+../../src/app/AppSource/flight/FCC_Lib.c:84:8:deadzone	40	static
+../../src/app/AppSource/flight/FCC_Lib.c:95:6:matmat	24	static

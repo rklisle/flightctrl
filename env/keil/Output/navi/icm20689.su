@@ -1,0 +1,7 @@
+../../src/app/icm20689.c:44:13:prv_spi_callback	16	static
+../../src/app/icm20689.c:59:16:prv_imu_reg_read	72	static
+../../src/app/icm20689.c:95:16:prv_imu_reg_write	56	static
+../../src/app/icm20689.c:125:16:prv_icm20689_getdata	40	static
+../../src/app/icm20689.c:156:16:prv_icm20689_init	24	static
+../../src/app/icm20689.c:230:13:icm20689_task	24	static
+../../src/app/icm20689.c:258:6:icm20689_Init	40	static

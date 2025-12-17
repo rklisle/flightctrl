@@ -1,0 +1,2 @@
+../../src/app/AppSource/Interface/interface_gpio.c:24:5:ADC_GetVoltage	4	static
+../../src/app/AppSource/Interface/interface_gpio.c:30:5:ADC_GetGpio28V	4	static

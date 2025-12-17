@@ -1,0 +1,16 @@
+../../src/app/NavSource/support/common.c:29:8:ChkStandardFrame	24	static
+../../src/app/NavSource/support/common.c:62:28:PeekStandardMessage	3120	static
+../../src/app/NavSource/support/common.c:108:8:Handle0x5AFE	32	static
+../../src/app/NavSource/support/common.c:138:14:RecvMessageS422FPGA	2096	static
+../../src/app/NavSource/support/common.c:178:8:SendCRCed422Message	16	static
+../../src/app/NavSource/support/common.c:223:14:RecvMessageS1553B	24	static
+../../src/app/NavSource/support/common.c:228:8:SendCRCed1553BMessage	16	static
+../../src/app/NavSource/support/common.c:233:13:ConSys_cx	32	static
+../../src/app/NavSource/support/common.c:261:13:ConSys_cy	32	static
+../../src/app/NavSource/support/common.c:289:13:ConSys_cz	32	static
+../../src/app/NavSource/support/common.c:317:13:ConSys_Matrix3x3	48	static
+../../src/app/NavSource/support/common.c:352:7:GeoQtoLunchDeg7801	1104	static
+../../src/app/NavSource/support/common.c:417:7:GeoQtoLunchDegMems	872	static
+../../src/app/NavSource/support/common.c:523:9:doubleEqual	24	static
+../../src/app/NavSource/support/common.c:535:7:uav_density	48	static
+../../src/app/NavSource/support/common.c:604:8:EcllipesToAltitude	136	static

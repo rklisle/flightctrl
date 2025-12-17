@@ -1,0 +1,2 @@
+../../src/app/AppSource/StateMachine.c:29:6:RunInitialInit	8	static
+../../src/app/AppSource/StateMachine.c:69:6:RunStageMachineStep	16	static

@@ -1,0 +1,4 @@
+load STM32L496AGIx 
+project name STCubeGenerated 
+project toolchain "MDK-ARM V5" 
+project path "D:\Work\ST Flash Algorithm\STM32L496IDiscovery_QSPI_MX25R6435F\RTE\Device\STM32L496AGIx\" 

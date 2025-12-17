@@ -1,0 +1,3 @@
+../../src/app/drv_test.c:32:13:nor_task	1120	static
+../../src/app/drv_test.c:119:13:echo_task	104	static
+../../src/app/drv_test.c:160:6:drv_test_init	48	static

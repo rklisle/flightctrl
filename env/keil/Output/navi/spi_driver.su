@@ -1,0 +1,7 @@
+../../src/app/spi_driver.c:44:13:prv_spi_callback	16	static
+../../src/app/spi_driver.c:59:16:prv_imu_read	72	static
+../../src/app/spi_driver.c:95:16:prv_imu_write	56	static
+../../src/app/spi_driver.c:125:16:prv_icm42688_getdata	40	static
+../../src/app/spi_driver.c:155:16:prv_icm42688_init	24	static
+../../src/app/spi_driver.c:233:13:icm42688_task	64	static
+../../src/app/spi_driver.c:262:6:adis16507_Init	40	static

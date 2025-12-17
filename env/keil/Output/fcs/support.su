@@ -1,0 +1,2 @@
+../../src/app/AppSource/support/support.c:9:6:uart_mode_init	24	static
+../../src/app/AppSource/support/support.c:28:8:BoardInit	8	static

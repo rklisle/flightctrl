@@ -1,0 +1,14 @@
+{
+    "files.associations": {
+        "uart_stm32h7xx.h": "c",
+        "stm32h7xx_hal.h": "c",
+        "driver_usart.h": "c",
+        "driver_common.h": "c",
+        "spi_stm32h7xx.h": "c",
+        "icm42688_reg.h": "c",
+        "flash_def.h": "c",
+        "flashos.h": "c",
+        "uart_agent.h": "c",
+        "tx_api.h": "c"
+    }
+}

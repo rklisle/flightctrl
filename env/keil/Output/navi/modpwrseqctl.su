@@ -1,0 +1,9 @@
+../../src/app/AppSource/modules/modPwrSeqCtl.c:56:7:TrigerSeq	24	static
+../../src/app/AppSource/modules/modPwrSeqCtl.c:76:7:TrigerSeqWithWidth	32	static
+../../src/app/AppSource/modules/modPwrSeqCtl.c:104:12:PWRTimSeq	24	static
+../../src/app/AppSource/modules/modPwrSeqCtl.c:130:7:TrigerGroupSeq	24	static
+../../src/app/AppSource/modules/modPwrSeqCtl.c:152:7:SeqHandle	24	static
+../../src/app/AppSource/modules/modPwrSeqCtl.c:199:7:SeqGroupHandle	32	static
+../../src/app/AppSource/modules/modPwrSeqCtl.c:253:7:GeneratePwrBuf	32	static
+../../src/app/AppSource/modules/modPwrSeqCtl.c:283:8:PwrCmdHandler	24	static
+../../src/app/AppSource/modules/modPwrSeqCtl.c:316:7:AutoPower	8	static

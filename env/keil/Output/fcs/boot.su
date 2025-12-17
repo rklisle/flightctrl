@@ -1,0 +1,14 @@
+../../src/boot/boot.c:38:5:main	16	static
+../../src/boot/boot.c:83:13:Error_Handler	4	static
+../../src/boot/boot.c:110:6:SystemClock_Config	128	static
+../../src/boot/boot.c:188:6:PeriphCommonClock_Config	200	static
+../../src/boot/boot.c:216:13:CPU_CACHE_Enable	24	static
+../../src/boot/boot.c:230:13:CPU_CACHE_Disable	24	static
+../../src/boot/boot.c:244:6:SysTick_Handler	8	static
+../../src/boot/boot.c:252:6:HAL_MspInit	16	static
+../../src/boot/boot.c:273:6:HAL_QSPI_MspInit	248	static
+../../src/boot/boot.c:351:6:HAL_QSPI_MspDeInit	16	static
+../../src/boot/boot.c:388:13:HAL_FMC_MspInit	32	static
+../../src/boot/boot.c:494:6:HAL_SDRAM_MspInit	16	static
+../../src/boot/boot.c:506:13:HAL_FMC_MspDeInit	8	static
+../../src/boot/boot.c:580:6:HAL_SDRAM_MspDeInit	16	static
