@@ -1,0 +1,8 @@
+# 忽略�?录下的所�?.o文件，但保留�?�?
+*/env/keil/Objects/*
+*/env/keil/Output/*
+*.o
+*.d
+*.su
+*.tmp
+*.swp

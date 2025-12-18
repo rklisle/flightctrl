@@ -10,7 +10,7 @@ MEMORY
     RAM_D2 (xrw)    : ORIGIN = 0x30000000,  LENGTH = 288K
     RAM_D3 (xrw)    : ORIGIN = 0x38000000,  LENGTH = 64K
     RAM_ITCM (xr)   : ORIGIN = 0x00000000,  LENGTH = 64K
-    FLASH (rx)      : ORIGIN = 0x08040000,  LENGTH = 2M	
+    FLASH (rx)      : ORIGIN = 0x08000000,  LENGTH = 2M	
     /* SDRAM (xrw)     : ORIGIN = 0xD0000000,  LENGTH = 8M */
 }
 

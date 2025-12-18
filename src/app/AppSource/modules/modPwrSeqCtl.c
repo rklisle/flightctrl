@@ -334,32 +334,33 @@ void SavePwrSeq()
 
 void CanRtPwrSeqHandler(long unsigned int id, bool ext_id, const OS_U8* pdata, long unsigned int datalen)
 {
-    unsigned long long data;
-    memcpy(&data, pdata, 8);
-    OS_U16 mcuTempLow = 0, mcuTempHigh = 0;
-    if(id == 0x183)//V
+    if(id == 0x183)//V	//MML 协议解析
     {
-        canRecvVa.battV = (OS_U16)((data >> 0 ) & 0xFFF);  //0.1
-        canRecvVa.groundV = (OS_U16)((data >> 12 ) & 0xFFF);//0.1
-        canRecvVa.engineV = (OS_U16)((data >> 24 ) & 0xFFF);//0.1
-        canRecvVa.mainV = (OS_U16)((data >> 36 ) & 0xFFF);//0.1
-        canRecvVa.fireV = (OS_U16)((data >> 48 ) & 0xFFF);//0.1
-        mcuTempLow = ((data >> 60 ) & 0xF); //1
-        
+		//e.g. unsigned long long data = 0x0001D63AAF164000ULL;(实际CAN抓来的数据是小端序，这里存入内存，反了一下字节序)
+		//得到
+		// pdata[0] = 0x00  // Byte1
+		// pdata[1] = 0x40  // Byte2
+		// pdata[2] = 0x16  // Byte3
+		// pdata[3] = 0xAF  // Byte4
+		// pdata[4] = 0x3A  // Byte5
+		// pdata[5] = 0xD6  // Byte6
+		// pdata[6] = 0x01  // Byte7
+		// pdata[7] = 0x00  // Byte8
+		canRecvVa.battV = (pdata[0] << 4) | (pdata[1] >> 4);      //0.01	// 在上面例子中，解析得到0x004
+		canRecvVa.groundV = ((pdata[1] & 0x0F) << 8) | pdata[2];  //0.01	// 在上面例子中，解析得到0x016
+		canRecvVa.engineV = (pdata[3] << 4) | (pdata[4] >> 4);    //0.01	// 在上面例子中，解析得到0xAF3
+		canRecvVa.mainV = ((pdata[4] & 0x0F) << 8) | pdata[5];    //0.01	// 在上面例子中，解析得到0xAD6
     }
-    else if(id == 0x184)//A
+    else if(id == 0x184)//A	//MML 协议解析
     {
-        canRecvVa.battA = (OS_U16)((data >> 0 ) & 0xFFF);  //0.1
-        canRecvVa.groundA = (OS_U16)((data >> 12 ) & 0xFFF);//0.1
-        canRecvVa.engineA = (OS_U16)((data >> 24 ) & 0xFFF);//0.1
-        canRecvVa.mainA = (OS_U16)((data >> 36 ) & 0xFFF);//0.1
-        canRecvVa.fireA = (OS_U8)((data >> 48 ) & 0xFF);//0.1
-        mcuTempHigh = ((data >> 56 ) & 0xFF); //1
-       
+        canRecvVa.battA = pdata[0];  	//0.1
+        canRecvVa.groundA = pdata[1];	//0.1
+        canRecvVa.engineA = pdata[2];	//0.1
+        canRecvVa.mainA = pdata[3];		//0.1
+		canRecvVa.mcuTemp = (pdata[7] << 8) | pdata[6]; //0.1
     }
     //SavePwrSeq();
-    canRecvVa.mcuTemp = ((mcuTempHigh << 4) & 0xFF0) + (mcuTempLow & 0xF);
-    g_DeviceState.powerCountDown = 200;
+    g_DeviceState.powerCountDown = 200;	//MML 如果超过200*5ms还没有重置此值，说明CAN2，也就是配电板一直没有上报数据
     
 }
 

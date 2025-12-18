@@ -144,7 +144,7 @@ static void prv_FDCAN_Init(FDCAN_HandleTypeDef* phdl, int32_t fd)
     phdl->Init.NominalPrescaler = 2;
     phdl->Init.NominalSyncJumpWidth = 7;
     phdl->Init.NominalTimeSeg1 = 23;
-    phdl->Init.NominalTimeSeg2 = 8; // 500K = 64M/(1/4/(1+Seg1 + Seg2))
+    phdl->Init.NominalTimeSeg2 = 8; // 500K = 64M/(1/4/(1+Seg1 + Seg2)) //MML 1Mbps
 
     phdl->Init.DataPrescaler = 2;
     phdl->Init.DataSyncJumpWidth = 7;

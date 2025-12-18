@@ -91,13 +91,13 @@ void RunStageMachineStep()
     // 12.输出到遥测，组帧发送
 	TelemetryFrameOut();
 	// 8.载荷处理
-	PayloadHandle();
+	PayloadHandle();        //MML 配电板→飞控 上报实时电压电流数据
 	// 9.伺服定时处理（伺服小回路，伺服位置查询)
 	SrvStatusUpdata();
 	// 10.电调发动机定时处理
 	AutoDriveEnginePwm();
     // 11.
-    AutoLuanchProcess();
+    AutoLuanchProcess();    //MML 飞控→配电板 下发各外设开关命令
      // 2.
 	RunMissionTask(10);   
     //unsigned long current_time1 = tx_time_get();

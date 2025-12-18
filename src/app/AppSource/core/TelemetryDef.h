@@ -162,7 +162,7 @@ telemetryParam tm_200hz[] =
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuseaz",	4},
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"cpuTemp",	2},
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"cpuTemp2",	2},
-	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"mcuTemp",	2},
+	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"mcuTemp",	2},	//MML 这里的参数对应遥测表
 	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"Batt28V",	2},
 	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"Batt28A",	2},
 	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"VCombin",	2},

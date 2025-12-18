@@ -12,13 +12,13 @@
 
 typedef enum
 {
-	DEVICE_MAIN_BATT = 1,
-	DEVICE_IMU_28V,
-	DEVICE_FUSE_1_E28V,
-	DEVICE_FUSE_2_ISO28V,
-    DEVICE_FUSE_5V,
-    DEVICE_BATT_ENGINE,
-    DEVICE_BATT_SRV,
+	DEVICE_MAIN_BATT = 1,   //主电池******
+	DEVICE_IMU_28V,         //对外供电********
+	DEVICE_FUSE_1_E28V,     //引信
+	DEVICE_FUSE_2_ISO28V,   //引信点火电路*****
+    DEVICE_FUSE_5V,         //引信5V信号*******
+    DEVICE_BATT_ENGINE,     //发动机
+    DEVICE_BATT_SRV,        //舵机*********
     DEVICE_BATT_BATT2,
 }POWER_DEVICE;
 
