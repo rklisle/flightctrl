@@ -47,7 +47,7 @@ static FREQ_SCAN fs = {
 
 OS_U8 AutoZero();
     
-OS_U8 InitSrv()
+OS_U8 InitSrv()	//TODO: MML舵机
 {
     buffLoop[RT_SRV].syncHead_A = 0xEE;
 	buffLoop[RT_SRV].syncHead_B = 0x00;
@@ -60,7 +60,7 @@ OS_U8 InitSrv()
     return 0;
 }
 
-OS_U16 ChkSrvFrame(OS_MEM* pmData)
+OS_U16 ChkSrvFrame(OS_MEM* pmData)	//TODO: MML舵机
 {
 	if(pmData == PTR_NULL)
 		return 0;
@@ -95,7 +95,7 @@ OS_U16 ChkSrvFrame(OS_MEM* pmData)
  * 函数功能: 伺服额外要求指令计数及发送帧计数，因此剥离一层控制数据，再发送
  * 作者:	未知
  ***********************************************************/
-OS_U8 MsgToSrv(OS_DOUBLE ctrlDeg[6], OS_U8 ctrlMode/*control = 0x02, 0x44=setZero*/)
+OS_U8 MsgToSrv(OS_DOUBLE ctrlDeg[6], OS_U8 ctrlMode/*control = 0x02, 0x44=setZero*/)	//TODO: MML舵机
 {
     SETDATA(pDataPoolSrv, "Sr1Cmd", ctrlDeg[0] * 100, OS_S16); 
 	SETDATA(pDataPoolSrv, "Sr2Cmd", ctrlDeg[1] * 100, OS_S16);
@@ -130,7 +130,7 @@ OS_U8 MsgToSrv(OS_DOUBLE ctrlDeg[6], OS_U8 ctrlMode/*control = 0x02, 0x44=setZer
  ***********************************************************/
 
 OS_U8 ServoCtlOnce_6Rudder(double actDeg_1, double actDeg_2, double actDeg_3, 
-    double actDeg_4, double actDeg_5, double actDeg_6)
+    double actDeg_4, double actDeg_5, double actDeg_6)	//TODO: MML舵机
 {
     double deg[6];
     deg[0] = actDeg_1; 
@@ -189,7 +189,7 @@ int InsertServoTestData(
 }
 
 OS_U16 waitForStart = 0;
-OS_U8 MiniLoopSimulation()
+OS_U8 MiniLoopSimulation()	//TODO: MML舵机
 {
 	if((g_DeviceState.workStage & DOM_SIMSRVDAT) != DOM_SIMSRVDAT)
 		return -1;
@@ -206,7 +206,7 @@ OS_U8 MiniLoopSimulation()
 	return 0;
 }
 
-OS_U8 SaveSrvInDataPool(STRU_SRV_INFO *data)
+OS_U8 SaveSrvInDataPool(STRU_SRV_INFO *data)	//TODO: MML舵机
 {
     SETDATA(pDataPoolSrv, "Sr1Read", data->srv1Read / 10,	OS_S16);
 	SETDATA(pDataPoolSrv, "Sr2Read", data->srv2Read / 10,	OS_S16);
@@ -235,7 +235,7 @@ OS_U8 SaveSrvInDataPool(STRU_SRV_INFO *data)
  * 参考资料: <TXII-Y1 422箭上通信协议>
  * 作者:	成宏璟
  ***********************************************************/
-OS_U32 SrvRtHandler(STRU_422_MSG_INFO * srvMsg)
+OS_U32 SrvRtHandler(STRU_422_MSG_INFO * srvMsg)	//TODO: MML舵机
 {
 	//首先判断是什么类型的指令
 	//对数据区前四字节进行判断
@@ -274,7 +274,7 @@ OS_U8 StartMiniLoop(float freq, float amp, float zero, OS_U8 enable[6])
  * 参考资料: <TXII-Y1 箭地通信协议>
  * 作者:	成宏璟
  ***********************************************************/
-OS_U32 ServoCmdHandler(STRU_422_MSG_INFO * frame)
+OS_U32 ServoCmdHandler(STRU_422_MSG_INFO * frame)	//TODO: MML舵机
 {
 	OS_U8 msgID = frame->u8MsgID;
 	switch(msgID)
@@ -327,7 +327,7 @@ OS_U32 ServoCmdHandler(STRU_422_MSG_INFO * frame)
 	return 0;
 }
 
-OS_U8 SrvStatusUpdata()
+OS_U8 SrvStatusUpdata()	//TODO: MML舵机
 {
     
 	MiniLoopSimulation();	//伺服小回路
@@ -360,7 +360,7 @@ OS_U8 SrvStatusUpdata()
 	return 0;
 }
 
-OS_U8 DoSrvProtect()
+OS_U8 DoSrvProtect()	//TODO: MML舵机
 {
 	if(SrvProtect > 0)
 	{
@@ -372,7 +372,7 @@ OS_U8 DoSrvProtect()
 
 OS_U16 AutoZeroCount = 0;
 
-OS_U8 AutoZero()
+OS_U8 AutoZero()	//TODO: MML舵机
 {
 	if(BookingMode == 1)
 		return 1;

@@ -32,8 +32,8 @@ output/fcs/telecontrol.o: ../../src/app/AppSource/core/Telecontrol.c \
  ../../src/app/AppSource/core/../support/./os_types.h \
  ../../src/app/AppSource/core/../support/./os_error.h \
  ../../src/app/AppSource/core/../support/../controller/controller.h \
- d:\11-20转台测试\flightctrl\src\app\appsource\support\os_framework.h \
- d:\11-20转台测试\flightctrl\src\app\appsource\support\os_types.h \
+ ../../src/app/AppSource/core/../support/../controller/../support/os_framework.h \
+ ../../src/app/AppSource/core/../support/../controller/../support/os_types.h \
  ../../src/app/AppSource/core/BusInteract.h \
  ../../src/app/AppSource/core/../modules/modFlash.h \
  ../../src/app/AppSource/core/../modules/../support/os_framework.h \

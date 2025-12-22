@@ -27,9 +27,6 @@ OS_S8 PowerOn(POWER_DEVICE dev)
 	switch(dev)
 	{
     //MML 014协议
-    case DEVICE_BATT_SRV:	    //舵机
-        powerCmd = 0x04000000;
-        break;
     case DEVICE_IMU_28V:        //导引头
         powerCmd = 0x10000000;
         break;
@@ -38,6 +35,9 @@ OS_S8 PowerOn(POWER_DEVICE dev)
         break;
     case DEVICE_FUSE_5V:        //引信5V信号
         powerCmd = 0x00010000;
+        break;
+    case DEVICE_BATT_SRV:	    //舵机
+        powerCmd = 0x04000000;
         break;
 	}
     if(powerCmd != 0)
@@ -68,9 +68,6 @@ OS_S8 PowerOff(POWER_DEVICE dev)
     case DEVICE_MAIN_BATT:	    //主电池
         powerCmd = (0x01000000 << 1);
         break;
-    case DEVICE_BATT_SRV:	    //舵机
-        powerCmd = (0x04000000 << 1);
-        break;
     case DEVICE_IMU_28V:        //导引头
         powerCmd = (0x10000000 << 1);
         break;
@@ -79,6 +76,9 @@ OS_S8 PowerOff(POWER_DEVICE dev)
         break;
     case DEVICE_FUSE_5V:        //引信5V信号
         powerCmd = (0x00010000 << 1);
+        break;
+    case DEVICE_BATT_SRV:	    //舵机
+        powerCmd = (0x04000000 << 1);
         break;
 	}
     if(powerCmd != 0)
@@ -99,7 +99,7 @@ OS_S8 PowerOff(POWER_DEVICE dev)
 }
 
 OS_U8 SeqCmd = 0;
-OS_S8 SeqOn(OS_U8 channel)      //MML 014是用PWM和一个开伞舵机通信，只需要开舵机就行了。后面就不管了。
+OS_S8 SeqOn(OS_U8 channel)      //MML 014是用PWM和一个开伞舵机通信，只需要开舵机就行了。开伞舵机不用关。
 {
 	SeqCmd |= (1<<channel);
     SETDATA(pDataPoolPwr, "FireCmd", SeqCmd,	OS_U8);
@@ -122,7 +122,8 @@ OS_S8 SeqOn(OS_U8 channel)      //MML 014是用PWM和一个开伞舵机通信，只需要开舵机
         break;
     }
 
-    //TODO 此处需要改为PWM控制开伞脱机，不用CAN发命令了。
+    //此处需要改为PWM控制开伞舵机（7号舵机），不用CAN发命令了。
+    //TODO: MML舵机
         
     // OS_U32 cmd = 1 << (channel*2 + 12);
     // SendCanFrame(CAN_RT_POWERSEQ, 0x242, 4, (OS_U8 *)&cmd);

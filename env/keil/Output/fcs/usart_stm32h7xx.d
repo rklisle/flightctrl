@@ -39,6 +39,7 @@ output/fcs/usart_stm32h7xx.o: \
  ../../src/libs/cmsis/Core/Include/cachel1_armv7.h \
  ../../src/bsp/stm32h7xx_hal/CMSIS/Device/ST/STM32H7xx/Include/system_stm32h7xx.h \
  ../../src/bsp/stm32h7xx_hal/STM32H7xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h \
+ C:/Program\ Files\ (x86)/Arm\ GNU\ Toolchain\ arm-none-eabi/12.3\ rel1/arm-none-eabi/include/c++/12.3.1/math.h \
  c:\program\ files\ (x86)\arm\ gnu\ toolchain\ arm-none-eabi\12.3\ rel1\arm-none-eabi\include\math.h \
  ../../src/bsp/stm32h7xx_hal/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_rcc_ex.h \
  ../../src/bsp/stm32h7xx_hal/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_gpio.h \

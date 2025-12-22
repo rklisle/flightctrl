@@ -31,8 +31,8 @@ output/fcs/modflash.o: ../../src/app/AppSource/modules/modFlash.c \
  ../../src/app/AppSource/modules/../support/./os_types.h \
  ../../src/app/AppSource/modules/../support/./os_error.h \
  ../../src/app/AppSource/modules/../support/../controller/controller.h \
- d:\11-20转台测试\flightctrl\src\app\appsource\support\os_framework.h \
- d:\11-20转台测试\flightctrl\src\app\appsource\support\os_types.h \
+ ../../src/app/AppSource/modules/../support/../controller/../support/os_framework.h \
+ ../../src/app/AppSource/modules/../support/../controller/../support/os_types.h \
  ../../src/app/AppSource/modules/../flight/os_flight_io.h \
  ../../src/app/AppSource/modules/../core/Telecontrol.h \
  ../../src/app/AppSource/modules/../core/DataPool.h \
@@ -40,7 +40,7 @@ output/fcs/modflash.o: ../../src/app/AppSource/modules/modFlash.c \
  ../../src/app/AppSource/modules/../core/../support/os_types.h \
  ../../src/app/AppSource/modules/../core/DataPool.h \
  ../../src/app/AppSource/modules/../Interface/interface_flash.h \
- d:\11-20转台测试\flightctrl\src\app\appsource\support\os_types.h \
+ ../../src/app/AppSource/modules/../Interface/../support/os_types.h \
  ../../src/app/AppSource/modules/../support/common.h \
  ../../src/app/AppSource/modules/../support/os_bufferQueue.h \
  ../../src/app/AppSource/modules/../support/os_basic.h \

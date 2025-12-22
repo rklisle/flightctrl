@@ -66,7 +66,7 @@ typedef struct
 typedef struct
 {
 	OS_U8 CanIndex;
-	OS_U8 NodeIndex;	//舵机节点号，默认0x25
+	OS_U8 NodeIndex;	//舵机节点号，默认0x25	//TODO: MML舵机
 	OS_U16 MsgID;
 	OS_U8 MsgLen;
 	OS_U8 MsgData[8];

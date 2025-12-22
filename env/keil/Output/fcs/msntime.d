@@ -31,8 +31,8 @@ output/fcs/msntime.o: ../../src/app/AppSource/payload/MsnTime.c \
  ../../src/app/AppSource/payload/../support/./os_types.h \
  ../../src/app/AppSource/payload/../support/./os_error.h \
  ../../src/app/AppSource/payload/../support/../controller/controller.h \
- d:\11-20转台测试\flightctrl\src\app\appsource\support\os_framework.h \
- d:\11-20转台测试\flightctrl\src\app\appsource\support\os_types.h \
+ ../../src/app/AppSource/payload/../support/../controller/../support/os_framework.h \
+ ../../src/app/AppSource/payload/../support/../controller/../support/os_types.h \
  ../../src/app/AppSource/payload/../core/DataPool.h \
  ../../src/app/AppSource/payload/../core/../support/os_framework.h \
  ../../src/app/AppSource/payload/../core/../support/os_types.h \

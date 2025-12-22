@@ -44,7 +44,7 @@ void FlightRun()
 	pOutput->rudderYawCmd = control_para.fduoy;//degree
 	pOutput->rudderRollCmd = control_para.fduox;//degree
 
-	pOutput->rudder1Cmd = control_para.g_fUdelta01;
+	pOutput->rudder1Cmd = control_para.g_fUdelta01;	//MML¶æ»ú
 	pOutput->rudder2Cmd = control_para.g_fUdelta02;
 	pOutput->rudder3Cmd = control_para.g_fUdelta03;
 	pOutput->rudder4Cmd = control_para.g_fUdelta04;

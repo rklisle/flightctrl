@@ -44,8 +44,8 @@ void InitCanRts()
 {
     hfdcan1.Instance = FDCAN1;
     hfdcan2.Instance = FDCAN2;
-    fdCan[0] = app_can_init(NULL, &hfdcan1, CanRtBattHandler);
-    fdCan[1] = app_can_init(NULL, &hfdcan2, CanRtPwrSeqHandler);
+    fdCan[0] = app_can_init(NULL, &hfdcan1, CanRtBattHandler);	//TODO: MML舵机
+    fdCan[1] = app_can_init(NULL, &hfdcan2, CanRtPwrSeqHandler);	//MML配电板
 
 }
 /***********************************************************
@@ -115,7 +115,7 @@ void InitRts()
     rtList[RT_DATA_LINK].ptr_ChkFrameSum = ChkDataLinkFrame;
 	rtList[RT_DATA_LINK].ptr_RtHandler = CmdHandler;
     
-    rtList[RT_SRV].ckIndex = 0;//0		//链路  射后透传
+    rtList[RT_SRV].ckIndex = 0;//0		//链路  射后透传	//TODO: MML舵机
 	rtList[RT_SRV].chIndex = 4;//4
 	rtList[RT_SRV].devID = 0x01;
 	rtList[RT_SRV].devBuad = 115200;

@@ -31,11 +31,12 @@ output/fcs/modsd.o: ../../src/app/AppSource/modules/modSD.c \
  ../../src/app/AppSource/modules/../support/./os_types.h \
  ../../src/app/AppSource/modules/../support/./os_error.h \
  ../../src/app/AppSource/modules/../support/../controller/controller.h \
- d:\11-20转台测试\flightctrl\src\app\appsource\support\os_framework.h \
- d:\11-20转台测试\flightctrl\src\app\appsource\support\os_types.h \
+ ../../src/app/AppSource/modules/../support/../controller/../support/os_framework.h \
+ ../../src/app/AppSource/modules/../support/../controller/../support/os_types.h \
  ../../src/libs/threadx/common/inc/tx_api.h \
  ../../src/libs/threadx/ports/cortex_m7/gnu/inc/tx_port.h \
  ../../src/app/tx_user.h \
+ C:/Program\ Files\ (x86)/Arm\ GNU\ Toolchain\ arm-none-eabi/12.3\ rel1/arm-none-eabi/include/c++/12.3.1/stdlib.h \
  c:\program\ files\ (x86)\arm\ gnu\ toolchain\ arm-none-eabi\12.3\ rel1\arm-none-eabi\include\stdlib.h \
  c:\program\ files\ (x86)\arm\ gnu\ toolchain\ arm-none-eabi\12.3\ rel1\arm-none-eabi\include\machine\stdlib.h \
  ../../src/app/AppSource/modules/../drive/ff.h \
@@ -44,7 +45,7 @@ output/fcs/modsd.o: ../../src/app/AppSource/modules/modSD.c \
  c:\program\ files\ (x86)\arm\ gnu\ toolchain\ arm-none-eabi\12.3\ rel1\arm-none-eabi\include\stdint.h \
  c:\program\ files\ (x86)\arm\ gnu\ toolchain\ arm-none-eabi\12.3\ rel1\arm-none-eabi\include\sys\_intsup.h \
  c:\program\ files\ (x86)\arm\ gnu\ toolchain\ arm-none-eabi\12.3\ rel1\arm-none-eabi\include\sys\_stdint.h \
- d:\11-20转台测试\flightctrl\src\app\sd_flash.h \
+ ../../src/app/AppSource/modules/../../sd_flash.h \
  ../../src/app/AppSource/modules/../core/DataPool.h \
  ../../src/app/AppSource/modules/../core/../support/os_framework.h \
  ../../src/app/AppSource/modules/../core/../support/os_types.h

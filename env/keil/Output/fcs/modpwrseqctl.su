@@ -7,4 +7,4 @@
 ../../src/app/AppSource/modules/modPwrSeqCtl.c:253:7:GeneratePwrBuf	32	static
 ../../src/app/AppSource/modules/modPwrSeqCtl.c:283:8:PwrCmdHandler	24	static
 ../../src/app/AppSource/modules/modPwrSeqCtl.c:320:6:SavePwrSeq	144	static
-../../src/app/AppSource/modules/modPwrSeqCtl.c:335:6:CanRtPwrSeqHandler	48	static
+../../src/app/AppSource/modules/modPwrSeqCtl.c:335:6:CanRtPwrSeqHandler	24	static

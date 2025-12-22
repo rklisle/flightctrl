@@ -34,6 +34,6 @@ output/fcs/stmtozynq.o: ../../src/app/AppSource/stmToZynq.c \
  ../../src/app/AppSource/./core/../support/./os_types.h \
  ../../src/app/AppSource/./core/../support/./os_error.h \
  ../../src/app/AppSource/./core/../support/../controller/controller.h \
- d:\11-20转台测试\flightctrl\src\app\appsource\support\os_framework.h \
- d:\11-20转台测试\flightctrl\src\app\appsource\support\os_types.h \
+ ../../src/app/AppSource/./core/../support/../controller/../support/os_framework.h \
+ ../../src/app/AppSource/./core/../support/../controller/../support/os_types.h \
  ../../src/app/AppSource/./core/Telecontrol.h

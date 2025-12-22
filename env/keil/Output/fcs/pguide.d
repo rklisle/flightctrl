@@ -26,4 +26,5 @@ output/fcs/pguide.o: ../../src/app/AppSource/flight/PGuide.c \
  c:\program\ files\ (x86)\arm\ gnu\ toolchain\ arm-none-eabi\12.3\ rel1\arm-none-eabi\include\stdio.h \
  c:\program\ files\ (x86)\arm\ gnu\ toolchain\ arm-none-eabi\12.3\ rel1\lib\gcc\arm-none-eabi\12.3.1\include\stdarg.h \
  c:\program\ files\ (x86)\arm\ gnu\ toolchain\ arm-none-eabi\12.3\ rel1\arm-none-eabi\include\sys\stdio.h \
+ C:/Program\ Files\ (x86)/Arm\ GNU\ Toolchain\ arm-none-eabi/12.3\ rel1/arm-none-eabi/include/c++/12.3.1/math.h \
  c:\program\ files\ (x86)\arm\ gnu\ toolchain\ arm-none-eabi\12.3\ rel1\arm-none-eabi\include\math.h

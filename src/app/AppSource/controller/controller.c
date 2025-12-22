@@ -103,12 +103,12 @@ OS_U8 AutoLuanchProcess()
 			}
 			else
 			{
-				AutoStep = 2;
+				AutoStep = 1;
 			}
 		}
 		else
 		{
-			AutoStep = 2;//跳过引信上电步骤
+			AutoStep = 1;
 		}
 	}
 	//7s时对引信上电
@@ -117,7 +117,16 @@ OS_U8 AutoLuanchProcess()
 		//引信供电无采集点，判断引信通信状态
 		if(g_DeviceState.fuseCountDown == 0)
 		{
-			PowerOn(DEVICE_FUSE_1_E28V);
+			static int sendFlag = 0;
+			if(sendFlag == 0)
+			{
+				PowerOn(DEVICE_FUSE_2_ISO28V);
+				PowerOn(DEVICE_FUSE_5V);
+				sendFlag = 1;
+			}
+			else{
+				AutoStep = 2;
+			}
 		}
 		else
 		{

@@ -31,8 +31,8 @@ output/fcs/os_bufferqueue.o: \
  ../../src/app/AppSource/support/./os_types.h \
  ../../src/app/AppSource/support/./os_error.h \
  ../../src/app/AppSource/support/../controller/controller.h \
- d:\11-20转台测试\flightctrl\src\app\appsource\support\os_framework.h \
- d:\11-20转台测试\flightctrl\src\app\appsource\support\os_types.h \
+ ../../src/app/AppSource/support/../controller/../support/os_framework.h \
+ ../../src/app/AppSource/support/../controller/../support/os_types.h \
  ../../src/app/AppSource/support/os_error.h \
  ../../src/app/AppSource/support/../core/BusInteract.h \
  ../../src/app/AppSource/support/../core/DataPool.h \

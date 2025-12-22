@@ -61,7 +61,7 @@ static void FlightSeqOutputHandle()
 		
 		if(waitOneSec == 200)//1ÃëÊ±±£³Ö¶æ»ú»Ø0ÇÒ½â³ý¿ØÖÆ
 		{			
-			ServoCtlOnce_6Rudder(0, 0, 0, 0, 0, 0);
+			ServoCtlOnce_6Rudder(0, 0, 0, 0, 0, 0);	//TODO: MML¶æ»ú
 		}
 		if(waitOneSec == 3000)//15ÃëÊ±¿ªÆøÄÒÇ°
 		{
@@ -186,7 +186,7 @@ void FlightTMOutputHandle()
 	}
 }
 
-void FlightSrvOutputHandle()
+void FlightSrvOutputHandle()	//MML¶æ»ú 280ÊÇ6¸ö¶æ»ú£¬014ÐèÒªÐÞ¸Ä
 {
 	if((DOM_AUTOMATIC & g_DeviceState.workStage) && flightSeq.luanched == 1)
 	{
@@ -194,7 +194,7 @@ void FlightSrvOutputHandle()
 		SETDATA(pDataPoolSrv, "Sr1Cmd", pOutput->rudder1Cmd * 100, OS_S16);
 		SETDATA(pDataPoolSrv, "Sr2Cmd", pOutput->rudder2Cmd * 100, OS_S16);
 		SETDATA(pDataPoolSrv, "Sr3Cmd", pOutput->rudder3Cmd * 100, OS_S16);
-    SETDATA(pDataPoolSrv, "Sr4Cmd", pOutput->rudder4Cmd * 100, OS_S16);
+		SETDATA(pDataPoolSrv, "Sr4Cmd", pOutput->rudder4Cmd * 100, OS_S16);
 		SETDATA(pDataPoolSrv, "Sr5Cmd", pOutput->rudder5Cmd * 100, OS_S16);
 		SETDATA(pDataPoolSrv, "Sr6Cmd", pOutput->rudder6Cmd * 100, OS_S16);
 
@@ -213,7 +213,7 @@ void FlightSrvOutputHandle()
         //rudder6 = 0;
 
 		//¿ØÖÆÒÑ¿¼ÂÇ¶æ°²×°·½Ê½
-		ServoCtlOnce_6Rudder(rudder1, rudder2, rudder3, rudder4, rudder5, rudder6);
+		ServoCtlOnce_6Rudder(rudder1, rudder2, rudder3, rudder4, rudder5, rudder6);	//TODO: MML¶æ»ú
 	}
 }
 OS_U8 OutSafeCount = 0;
@@ -333,7 +333,7 @@ void FlightInputGenerate()
 			pInput->DD2 = srv2 * 0.01;
 			if(g_DeviceState.srvCountDown == 0)
 			{
-					pInput->DD1 = pOutput->rudder1Cmd;
+					pInput->DD1 = pOutput->rudder1Cmd;	//MML¶æ»ú
 					pInput->DD2 = pOutput->rudder2Cmd;
 			}				
 			pInput->DD5 = 0;
@@ -478,7 +478,7 @@ OS_U8 JudgeHomeward()
 			OutSafeCount--;
 		}
 	}
-	//³ö°²È«Çø¿ªÉ
+	//³ö°²È«Çø¿ª?
   static int judgeError = 0;
 	if(JudgeInSafe2(lon,lat) == FALSE)
 	{

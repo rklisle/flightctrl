@@ -31,8 +31,8 @@ output/fcs/flightsupport.o: ../../src/app/AppSource/FlightSupport.c \
  ../../src/app/AppSource/./support/./os_types.h \
  ../../src/app/AppSource/./support/./os_error.h \
  ../../src/app/AppSource/./support/../controller/controller.h \
- d:\11-20转台测试\flightctrl\src\app\appsource\support\os_framework.h \
- d:\11-20转台测试\flightctrl\src\app\appsource\support\os_types.h \
+ ../../src/app/AppSource/./support/../controller/../support/os_framework.h \
+ ../../src/app/AppSource/./support/../controller/../support/os_types.h \
  ../../src/app/AppSource/stmToZynq.h \
  ../../src/app/AppSource/./modules/modPwrSeqCtl.h \
  ../../src/app/AppSource/./modules/../support/os_framework.h \
@@ -58,6 +58,8 @@ output/fcs/flightsupport.o: ../../src/app/AppSource/FlightSupport.c \
  ../../src/app/AppSource/./mission/mission.h \
  ../../src/app/AppSource/./mission/../support/os_framework.h \
  ../../src/app/AppSource/./mission/../support/os_types.h \
+ C:/Program\ Files\ (x86)/Arm\ GNU\ Toolchain\ arm-none-eabi/12.3\ rel1/arm-none-eabi/include/c++/12.3.1/math.h \
  c:\program\ files\ (x86)\arm\ gnu\ toolchain\ arm-none-eabi\12.3\ rel1\arm-none-eabi\include\math.h \
+ C:/Program\ Files\ (x86)/Arm\ GNU\ Toolchain\ arm-none-eabi/12.3\ rel1/arm-none-eabi/include/c++/12.3.1/stdlib.h \
  c:\program\ files\ (x86)\arm\ gnu\ toolchain\ arm-none-eabi\12.3\ rel1\arm-none-eabi\include\stdlib.h \
  c:\program\ files\ (x86)\arm\ gnu\ toolchain\ arm-none-eabi\12.3\ rel1\arm-none-eabi\include\machine\stdlib.h

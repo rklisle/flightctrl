@@ -25,16 +25,17 @@ output/fcs/os_bufferloop.o: \
  c:\program\ files\ (x86)\arm\ gnu\ toolchain\ arm-none-eabi\12.3\ rel1\arm-none-eabi\include\stdio.h \
  c:\program\ files\ (x86)\arm\ gnu\ toolchain\ arm-none-eabi\12.3\ rel1\lib\gcc\arm-none-eabi\12.3.1\include\stdarg.h \
  c:\program\ files\ (x86)\arm\ gnu\ toolchain\ arm-none-eabi\12.3\ rel1\arm-none-eabi\include\sys\stdio.h \
- d:\11-20转台测试\flightctrl\src\app\appsource\support\support.h \
+ ../../src/app/AppSource/support/../core/../support/../support/support.h \
  ../../src/app/AppSource/support/../core/../support/./os_basic.h \
- d:\11-20转台测试\flightctrl\src\app\appsource\support\os_framework.h \
- d:\11-20转台测试\flightctrl\src\app\appsource\support\os_types.h \
+ ../../src/app/AppSource/support/../core/../support/././os_framework.h \
+ ../../src/app/AppSource/support/../core/../support/././os_types.h \
  ../../src/app/AppSource/support/../core/../support/./os_bufferQueue.h \
  ../../src/app/AppSource/support/../core/../support/./os_framework.h \
  ../../src/app/AppSource/support/../core/../support/./os_types.h \
  ../../src/app/AppSource/support/../core/../support/./os_error.h \
- d:\11-20转台测试\flightctrl\src\app\appsource\controller\controller.h \
- d:\11-20转台测试\flightctrl\src\app\appsource\support\os_framework.h \
+ ../../src/app/AppSource/support/../core/../support/../controller/controller.h \
+ ../../src/app/AppSource/support/../core/../support/../controller/../support/os_framework.h \
+ ../../src/app/AppSource/support/../core/../support/../controller/../support/os_types.h \
  ../../src/app/AppSource/support/../core/Telecontrol.h \
  ../../src/app/AppSource/support/os_framework.h \
  ../../src/app/AppSource/support/os_types.h \

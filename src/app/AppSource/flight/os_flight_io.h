@@ -84,12 +84,12 @@ typedef struct
 	OS_DOUBLE rudderYawCmd;	//通道舵航向
 	
 	//物理舵
-	OS_DOUBLE rudder1Cmd;   // 左副翼舵
-	OS_DOUBLE rudder2Cmd;   // 右副翼舵
-	OS_DOUBLE rudder3Cmd;   // 左俯仰舵
-	OS_DOUBLE rudder4Cmd;   // 右俯仰舵
-	OS_DOUBLE rudder5Cmd;   // 左航向舵
-	OS_DOUBLE rudder6Cmd;   // 右航向舵
+	OS_DOUBLE rudder1Cmd;   // 左副翼舵	//MML舵机 通过CAN控制
+	OS_DOUBLE rudder2Cmd;   // 右副翼舵	//通过CAN控制
+	OS_DOUBLE rudder3Cmd;   // 左俯仰舵	//通过CAN控制
+	OS_DOUBLE rudder4Cmd;   // 右俯仰舵	//通过CAN控制
+	OS_DOUBLE rudder5Cmd;   // 左航向舵	//通过PWM控制
+	OS_DOUBLE rudder6Cmd;   // 右航向舵	//通过PWM控制
 
 	//航点信息
 	OS_U16 curPtNo;			//当前航点号

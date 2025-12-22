@@ -31,8 +31,9 @@ output/fcs/mission.o: ../../src/app/AppSource/mission/mission.c \
  ../../src/app/AppSource/mission/../support/./os_types.h \
  ../../src/app/AppSource/mission/../support/./os_error.h \
  ../../src/app/AppSource/mission/../support/../controller/controller.h \
- d:\11-20转台测试\flightctrl\src\app\appsource\support\os_framework.h \
- d:\11-20转台测试\flightctrl\src\app\appsource\support\os_types.h \
+ ../../src/app/AppSource/mission/../support/../controller/../support/os_framework.h \
+ ../../src/app/AppSource/mission/../support/../controller/../support/os_types.h \
+ C:/Program\ Files\ (x86)/Arm\ GNU\ Toolchain\ arm-none-eabi/12.3\ rel1/arm-none-eabi/include/c++/12.3.1/math.h \
  c:\program\ files\ (x86)\arm\ gnu\ toolchain\ arm-none-eabi\12.3\ rel1\arm-none-eabi\include\math.h \
  ../../src/app/AppSource/mission/../core/BusInteract.h \
  ../../src/app/AppSource/mission/../core/DataPool.h \
