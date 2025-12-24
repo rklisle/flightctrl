@@ -22,6 +22,6 @@ int Drv_SetPwm(int PwmPort, int pwm_en, int pwm_freq_sel, int pulse_width_data)
     {
         pwm_ctrl_pulse(PwmPort, 0);
     }
-			
-	return 0;
+    
+    return 0;
 }

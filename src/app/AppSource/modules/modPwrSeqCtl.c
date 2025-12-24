@@ -332,7 +332,7 @@ void SavePwrSeq()
     SETDATA(pDataPoolPwr, "pwrTemp", canRecvVa.mcuTemp,	OS_U16);
 }
 
-void CanRtPwrSeqHandler(long unsigned int id, bool ext_id, const OS_U8* pdata, long unsigned int datalen)
+OS_U8 CanRtPwrSeqHandler(long unsigned int id, bool ext_id, const OS_U8* pdata, long unsigned int datalen)
 {
     if(id == 0x183)//V	//MML 协议解析
     {
@@ -359,9 +359,11 @@ void CanRtPwrSeqHandler(long unsigned int id, bool ext_id, const OS_U8* pdata, l
         canRecvVa.mainA = pdata[3];		//0.1
 		canRecvVa.mcuTemp = (pdata[7] << 8) | pdata[6]; //0.1
     }
+	else
+	{return -1;}
     //SavePwrSeq();
     g_DeviceState.powerCountDown = 200;	//MML 如果超过200*5ms还没有重置此值，说明CAN2，也就是配电板一直没有上报数据
-    
+    return 0;
 }
 
 

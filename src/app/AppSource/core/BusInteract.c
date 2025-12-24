@@ -44,7 +44,8 @@ void InitCanRts()
 {
     hfdcan1.Instance = FDCAN1;
     hfdcan2.Instance = FDCAN2;
-    fdCan[0] = app_can_init(NULL, &hfdcan1, CanRtBattHandler);	//TODO: MML舵机
+    // fdCan[0] = app_can_init(NULL, &hfdcan1, CanRtBattHandler);	//MML舵机
+	fdCan[0] = app_can_init(NULL, &hfdcan1, CanRtServoHandler);  // 改为舵机处理函数
     fdCan[1] = app_can_init(NULL, &hfdcan2, CanRtPwrSeqHandler);	//MML配电板
 
 }
@@ -115,16 +116,16 @@ void InitRts()
     rtList[RT_DATA_LINK].ptr_ChkFrameSum = ChkDataLinkFrame;
 	rtList[RT_DATA_LINK].ptr_RtHandler = CmdHandler;
     
-    rtList[RT_SRV].ckIndex = 0;//0		//链路  射后透传	//TODO: MML舵机
-	rtList[RT_SRV].chIndex = 4;//4
-	rtList[RT_SRV].devID = 0x01;
-	rtList[RT_SRV].devBuad = 115200;
-	rtList[RT_SRV].devStopLen = 1;
-	rtList[RT_SRV].oddCheckEnable = FALSE;
-    rtList[RT_SRV].evenCheckEnable = FALSE;
-	rtList[RT_SRV].ptr_RtHandler = SrvRtHandler;
-    rtList[RT_SRV].ptr_Init = InitSrv;
-	rtList[RT_SRV].ptr_ChkFrameSum = ChkSrvFrame;
+    // rtList[RT_SRV].ckIndex = 0;//0		//链路  射后透传	//MML舵机
+	// rtList[RT_SRV].chIndex = 4;//4
+	// rtList[RT_SRV].devID = 0x01;
+	// rtList[RT_SRV].devBuad = 115200;
+	// rtList[RT_SRV].devStopLen = 1;
+	// rtList[RT_SRV].oddCheckEnable = FALSE;
+    // rtList[RT_SRV].evenCheckEnable = FALSE;
+	// rtList[RT_SRV].ptr_RtHandler = SrvRtHandler;
+    // rtList[RT_SRV].ptr_Init = InitSrv;
+	// rtList[RT_SRV].ptr_ChkFrameSum = ChkSrvFrame;
     
     rtList[RT_ENGINE].ckIndex = 0;//0		//链路  射后透传
 	rtList[RT_ENGINE].chIndex = 5;//5
@@ -155,7 +156,7 @@ void InitRts()
     rtList[RT_NAV].evenCheckEnable = FALSE;
 	rtList[RT_NAV].ptr_RtHandler = NavRtHandler;
 
-    rtList[RT_P900].ckIndex = 0;//0		//链路  射后透传
+    rtList[RT_P900].ckIndex = 0;//0		//链路  射后透传	MML目前没用
 	rtList[RT_P900].chIndex = 8;//2
 	rtList[RT_P900].devID = 0x01;
 	rtList[RT_P900].devBuad = 115200;

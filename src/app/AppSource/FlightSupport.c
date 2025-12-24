@@ -61,7 +61,7 @@ static void FlightSeqOutputHandle()
 		
 		if(waitOneSec == 200)//1秒时保持舵机回0且解除控制
 		{			
-			ServoCtlOnce_6Rudder(0, 0, 0, 0, 0, 0);	//TODO: MML舵机
+			ServoCtlOnce_6Rudder(0, 0, 0, 0, 0, 0);	//MML舵机
 		}
 		if(waitOneSec == 3000)//15秒时开气囊前
 		{
@@ -213,7 +213,7 @@ void FlightSrvOutputHandle()	//MML舵机 280是6个舵机，014需要修改
         //rudder6 = 0;
 
 		//控制已考虑舵安装方式
-		ServoCtlOnce_6Rudder(rudder1, rudder2, rudder3, rudder4, rudder5, rudder6);	//TODO: MML舵机
+		ServoCtlOnce_6Rudder(rudder1, rudder2, rudder3, rudder4, rudder5, rudder6);	//MML舵机
 	}
 }
 OS_U8 OutSafeCount = 0;

@@ -1,7 +1,7 @@
 /*
  * modSrvCtl.h
  *
- *  Created on: 2021年10月16日
+ *  Created on: 2021?~{(:~}10??16??
  *      Author: QL
  */
 
@@ -27,11 +27,26 @@
 #define SERVO_ZEROENCAP_PAYLOAD_LEN	(23)
 #define SERVO_CHECK_REQ_LEN			(23)
 
+// CAN~{6f;zO`9X6(Re~}
+#define CAN_CMD_ID_BASE     0x00000600UL  // ~{V8An~}ID~{;yV7~}
+#define CAN_RESP_ID_BASE    0x00000580UL  // ~{OlS&~}ID~{;yV7~}
+#define SERVO_MIN_ANGLE     (-100.0)      // ~{WnP!=G6H~}
+#define SERVO_MAX_ANGLE     (100.0)       // ~{Wn4s=G6H~}
+
+// ~{6f;z=Z5c~}ID~{6(Re~}
+typedef enum {
+    SERVO_NODE_1 = 0x25,  // ~{6f;z~}1 CAN~{=Z5c:E~}
+    SERVO_NODE_2 = 0x26,  // ~{6f;z~}2 CAN~{=Z5c:E~}
+    SERVO_NODE_3 = 0x27,  // ~{6f;z~}3 CAN~{=Z5c:E~}
+    SERVO_NODE_4 = 0x28,  // ~{6f;z~}4 CAN~{=Z5c:E~}
+} ServoNodeID;
+
+// CAN~{C|An=a99~}
 typedef struct
 {
-	OS_U16 ID;
-	OS_U8 length;
-	OS_U8 data[8];
+	OS_U32 ID;            // CAN~{@)U9~}ID
+	OS_U8 length;         // ~{J}>]3$6H~}
+	OS_U8 data[8];        // ~{J}>]~}
 }CAN_CMD;
 
 extern CAN_CMD canCmds[];
@@ -70,7 +85,7 @@ typedef struct
 #pragma pack(1)
 typedef struct
 {
-	OS_U8 selfCheck;	//32位计数器
+	OS_U8 selfCheck;	//32???????~{!B~}
 	OS_S16 srv1Cmd;
 	OS_S16 srv1Read;
     OS_S16 srv2Cmd;
@@ -96,9 +111,9 @@ typedef struct
 
 typedef struct
 {
-	OS_U8 u8Acuator_Enb;	//扫频使能
-	OS_S16 Acuator_Offset;	//控制零偏
-	OS_U8 Acuator_Amp;		//控制幅值
+	OS_U8 u8Acuator_Enb;	//?~{!'~}??????
+	OS_S16 Acuator_Offset;	//????????
+	OS_U8 Acuator_Amp;		//?????~{(4~}??
 }STRU_SERVO_ONE;
 
 typedef struct
@@ -112,7 +127,23 @@ typedef struct
 }STRU_SERVO_MinLoopTest_REQUEST;
 #pragma pack()
 
-extern OS_U8 SrvStatusUpdata();
+OS_U8 CanRtServoHandler(uint32_t id, bool ext_id, uint8_t* data, uint32_t len);
+
+// ~{:/J}IyCw~}
+OS_U8 SrvStatusUpdata();
+
+// CAN~{O`9X:/J}~}
+OS_U8 Servo_SetAngle_CAN(ServoNodeID node, double angle);
+OS_U8 Servo_ReadAngle_CAN(ServoNodeID node, double *angle);
+OS_U8 Servo_SetTorqueZero_CAN(ServoNodeID node);
+OS_U8 Servo_SetMidpoint_CAN(ServoNodeID node);
+OS_U8 Servo_SendCANFrame(uint32_t id, uint8_t *data, uint8_t len);
+uint8_t AngleToPosition_CAN(double angle, uint8_t *high, uint8_t *low);
+double PositionToAngle_CAN(uint8_t high, uint8_t low);
+
+// PWM~{6f;zO`9X:/J}#(N14zBk#)~}
+OS_U8 Servo_SetAngle_PWM(OS_U8 pwm_channel, double angle);
+OS_U8 Servo_ReadAngle_PWM(OS_U8 pwm_channel, double *angle);
 
 OS_U8 StartMiniLoop(float freq, float amp, float zero, OS_U8 enable[6]);
 OS_U8 MiniLoopSimulation();

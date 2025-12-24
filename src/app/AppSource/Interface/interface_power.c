@@ -46,7 +46,7 @@ OS_S8 PowerOn(POWER_DEVICE dev)
     }
     if(battCmd != 0)
     {
-        SendCanFrame(CAN_RT_BATT, 0x241, 1, (OS_U8 *)&battCmd);
+        // SendCanFrame(CAN_RT_BATT, 0x241, 1, (OS_U8 *)&battCmd);
     }
     OS_U8 bytePowerState = 0;
     for(int i=0;i<8;i++)
@@ -87,7 +87,7 @@ OS_S8 PowerOff(POWER_DEVICE dev)
     }
     if(battCmd != 0)
     {
-        SendCanFrame(CAN_RT_BATT, 0x241, 1, (OS_U8 *)&battCmd);
+        // SendCanFrame(CAN_RT_BATT, 0x241, 1, (OS_U8 *)&battCmd);
     }
     OS_U8 bytePowerState = 0;
     for(int i=0;i<8;i++)
@@ -123,7 +123,7 @@ OS_S8 SeqOn(OS_U8 channel)      //MML 014是用PWM和一个开伞舵机通信，只需要开舵机
     }
 
     //此处需要改为PWM控制开伞舵机（7号舵机），不用CAN发命令了。
-    //TODO: MML舵机
+    //TODO: MML舵机7
         
     // OS_U32 cmd = 1 << (channel*2 + 12);
     // SendCanFrame(CAN_RT_POWERSEQ, 0x242, 4, (OS_U8 *)&cmd);

@@ -141,47 +141,108 @@ static void prv_FDCAN_Init(FDCAN_HandleTypeDef* phdl, int32_t fd)
     phdl->Init.AutoRetransmission = DISABLE;
     phdl->Init.TransmitPause = DISABLE;
     phdl->Init.ProtocolException = DISABLE;
-    phdl->Init.NominalPrescaler = 2;
-    phdl->Init.NominalSyncJumpWidth = 7;
-    phdl->Init.NominalTimeSeg1 = 23;
-    phdl->Init.NominalTimeSeg2 = 8; // 500K = 64M/(1/4/(1+Seg1 + Seg2)) //MML 1Mbps
-
-    phdl->Init.DataPrescaler = 2;
-    phdl->Init.DataSyncJumpWidth = 7;
-    phdl->Init.DataTimeSeg1 = 23;
-    phdl->Init.DataTimeSeg2 = 8;
     phdl->Init.MessageRAMOffset = 0;
-    phdl->Init.StdFiltersNbr = 16;
-    phdl->Init.ExtFiltersNbr = 0;
-
-    phdl->Init.RxFifo0ElmtsNbr = 2;
+    phdl->Init.StdFiltersNbr = 14;
+    phdl->Init.ExtFiltersNbr = 14;// 需要扩展帧过滤器
+    phdl->Init.RxFifo0ElmtsNbr = 3;
     phdl->Init.RxFifo0ElmtSize = FDCAN_DATA_BYTES_8;
-    phdl->Init.RxFifo1ElmtsNbr = 2;
+    phdl->Init.RxFifo1ElmtsNbr = 3;
     phdl->Init.RxFifo1ElmtSize = FDCAN_DATA_BYTES_8;
     phdl->Init.RxBuffersNbr = 0;
     phdl->Init.RxBufferSize = FDCAN_DATA_BYTES_8;
     phdl->Init.TxEventsNbr = 0;
     phdl->Init.TxBuffersNbr = 0;
-    phdl->Init.TxFifoQueueElmtsNbr = 2;
+    phdl->Init.TxFifoQueueElmtsNbr = 3;
     phdl->Init.TxFifoQueueMode = FDCAN_TX_FIFO_OPERATION;
     phdl->Init.TxElmtSize = FDCAN_DATA_BYTES_8;
+
+    /* 根据CAN通道配置不同的波特率 */
+    if(fd == 0)
+    {
+        // FDCAN1 - 舵机，500Kbps，扩展帧
+        // 500Kbps配置：64MHz / (21 * (1 + 4 + 1)) = 500KHz
+        phdl->Init.NominalPrescaler = 21;
+        phdl->Init.NominalSyncJumpWidth = 1;
+        phdl->Init.NominalTimeSeg1 = 4;
+        phdl->Init.NominalTimeSeg2 = 1; 
+        // 数据段配置
+        phdl->Init.DataPrescaler = 21;
+        phdl->Init.DataSyncJumpWidth = 1;
+        phdl->Init.DataTimeSeg1 = 4;
+        phdl->Init.DataTimeSeg2 = 1;
+    }
+    else
+    {
+        // FDCAN2 - 配电板，1000Kbps，标准帧
+        // 1000Kbps配置：64MHz / (21 * (1 + 4 + 1)) = 500KHz
+        phdl->Init.NominalPrescaler = 2;
+        phdl->Init.NominalSyncJumpWidth = 7;
+        phdl->Init.NominalTimeSeg1 = 23;
+        phdl->Init.NominalTimeSeg2 = 8; // 64M/(Prescaler*(1+Seg1 + Seg2)) //MML 1Mbps
+        phdl->Init.DataPrescaler = 2;
+        phdl->Init.DataSyncJumpWidth = 7;
+        phdl->Init.DataTimeSeg1 = 23;
+        phdl->Init.DataTimeSeg2 = 8;
+    }
+
     if (HAL_FDCAN_Init(phdl) != HAL_OK)
     {
         while(1){;}
     }
     /* USER CODE BEGIN FDCAN1_Init 2 */
 
-    /* Configure Rx filter */
-    sFilterConfig.IdType = FDCAN_STANDARD_ID;
-    sFilterConfig.FilterIndex = fd;
-    sFilterConfig.FilterType = FDCAN_FILTER_RANGE;
-    sFilterConfig.FilterConfig = FDCAN_FILTER_TO_RXFIFO0;
-    sFilterConfig.FilterID1 = 0x000;
-    sFilterConfig.FilterID2 = 0x7FF; /* For acceptance, MessageID and FilterID1 must match exactly */
-    HAL_FDCAN_ConfigFilter(phdl, &sFilterConfig);
+    /* 根据CAN通道配置不同的滤波器 */
+    if (fd == 0) 
+    {
+        // FDCAN1 - 舵机，扩展帧
+        // 滤波器0：接收舵机响应帧（0x00000580 - 0x000005FF）
+        sFilterConfig.IdType = FDCAN_EXTENDED_ID;
+        sFilterConfig.FilterIndex = 0;
+        sFilterConfig.FilterType = FDCAN_FILTER_RANGE;
+        sFilterConfig.FilterConfig = FDCAN_FILTER_TO_RXFIFO0;
+        sFilterConfig.FilterID1 = 0x00000580;  // 舵机响应起始ID
+        sFilterConfig.FilterID2 = 0x000005FF;  // 舵机响应结束ID
+        HAL_FDCAN_ConfigFilter(phdl, &sFilterConfig);
+        
+        // 滤波器1：如果需要，也可以接收舵机指令帧（0x00000600 - 0x000006FF）
+        sFilterConfig.FilterIndex = 1;
+        sFilterConfig.FilterType = FDCAN_FILTER_RANGE;
+        sFilterConfig.FilterConfig = FDCAN_FILTER_TO_RXFIFO0;
+        sFilterConfig.FilterID1 = 0x00000600;  // 舵机指令起始ID
+        sFilterConfig.FilterID2 = 0x000006FF;  // 舵机指令结束ID
+        HAL_FDCAN_ConfigFilter(phdl, &sFilterConfig);
+    }
+    else
+    {
+        // FDCAN2 - 配电板，标准帧
+        // 滤波器0：接收所有标准帧
+        sFilterConfig.IdType = FDCAN_STANDARD_ID;
+        sFilterConfig.FilterIndex = 0;
+        sFilterConfig.FilterType = FDCAN_FILTER_RANGE;
+        sFilterConfig.FilterConfig = FDCAN_FILTER_TO_RXFIFO0;
+        sFilterConfig.FilterID1 = 0x000;
+        sFilterConfig.FilterID2 = 0x7FF; /* For acceptance, MessageID and FilterID1 must match exactly */
+        HAL_FDCAN_ConfigFilter(phdl, &sFilterConfig);
+    }
 
+    /* Configure Rx filter */
     /* Configure global filter to reject all non-matching frames */
-    HAL_FDCAN_ConfigGlobalFilter(phdl, FDCAN_REJECT, FDCAN_REJECT, FDCAN_REJECT_REMOTE, FDCAN_REJECT_REMOTE);
+    if (fd == 0) {  // FDCAN1 - 舵机
+        // 拒绝所有未过滤的帧，只接收滤波器配置的扩展帧
+        HAL_FDCAN_ConfigGlobalFilter(phdl, 
+            FDCAN_REJECT,           // 标准帧：拒绝未过滤的
+            FDCAN_REJECT,           // 扩展帧：拒绝未过滤的（但上面已经过滤了）
+            FDCAN_REJECT_REMOTE,    // 远程标准帧
+            FDCAN_REJECT_REMOTE);   // 远程扩展帧
+            
+    } else {  // FDCAN2 - 配电板
+        // 拒绝所有未过滤的帧
+        HAL_FDCAN_ConfigGlobalFilter(phdl, 
+            FDCAN_REJECT,           // 标准帧：拒绝未过滤的
+            FDCAN_REJECT,           // 扩展帧：拒绝未过滤的
+            FDCAN_REJECT_REMOTE,    // 远程标准帧
+            FDCAN_REJECT_REMOTE);   // 远程扩展帧
+    }
 
     /* Configure Rx FIFO 0 watermark to 2 */
     HAL_FDCAN_ConfigFifoWatermark(phdl,  FDCAN_CFG_RX_FIFO0, 2);

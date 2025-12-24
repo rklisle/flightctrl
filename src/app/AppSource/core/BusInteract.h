@@ -18,14 +18,15 @@
 #define RT_FUSE			(1)	//
 #define RT_IMU		    (2)	//
 #define RT_DATA_LINK	(3)	//
-#define RT_SRV          (4)
+// #define RT_SRV          (4)
 #define RT_ENGINE       (5)
 #define RT_HIL          (6)
 
 #define RT_NAV  		(7)//组合导航
 #define RT_P900  		(8)//P900
 
-#define CAN_RT_BATT	 	(0)
+// #define CAN_RT_BATT	 	(0)
+#define CAN_RT_SRV	 	(0)//CAN控制的4个舵机
 #define CAN_RT_POWERSEQ	(1)
 
 typedef struct RT

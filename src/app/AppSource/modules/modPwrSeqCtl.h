@@ -89,5 +89,5 @@ extern OS_U32 PwrRtHandler(STRU_422_MSG_INFO * frame);
 extern OS_U8 StartCrashMearuare();
 extern void SavePwrSeq();
 
-extern void CanRtPwrSeqHandler(long unsigned int id, bool ext_id, const OS_U8* pdata, long unsigned int datalen);
+OS_U8 CanRtPwrSeqHandler(long unsigned int id, bool ext_id, const OS_U8* pdata, long unsigned int datalen);
 #endif /* SRC_PWRSEQCTL_H_ */
