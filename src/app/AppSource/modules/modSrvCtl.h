@@ -9,7 +9,7 @@
 #define SRC_MODSRVCTL_H_
 
 #include "../support/os_framework.h"
-
+#include <stdbool.h>
 
 
 #define SERVO_TEST_RSP_FRM_LEN		(0x33)
@@ -127,7 +127,7 @@ typedef struct
 }STRU_SERVO_MinLoopTest_REQUEST;
 #pragma pack()
 
-OS_U8 CanRtServoHandler(uint32_t id, bool ext_id, uint8_t* data, uint32_t len);
+OS_U8 CanRtServoHandler(OS_U32 id, OS_BOOL ext_id, const OS_U8* data, OS_U8 len);
 
 // ~{:/J}IyCw~}
 OS_U8 SrvStatusUpdata();
@@ -137,13 +137,12 @@ OS_U8 Servo_SetAngle_CAN(ServoNodeID node, double angle);
 OS_U8 Servo_ReadAngle_CAN(ServoNodeID node, double *angle);
 OS_U8 Servo_SetTorqueZero_CAN(ServoNodeID node);
 OS_U8 Servo_SetMidpoint_CAN(ServoNodeID node);
-OS_U8 Servo_SendCANFrame(uint32_t id, uint8_t *data, uint8_t len);
-uint8_t AngleToPosition_CAN(double angle, uint8_t *high, uint8_t *low);
-double PositionToAngle_CAN(uint8_t high, uint8_t low);
+OS_U8 Servo_SendCANFrame(OS_U32 id, OS_U8 *data, OS_U8 len);
+OS_U8 AngleToPosition_CAN(double angle, OS_U8 *high, OS_U8 *low);
+double PositionToAngle_CAN(OS_U8 high, OS_U8 low);
 
 // PWM~{6f;zO`9X:/J}#(N14zBk#)~}
 OS_U8 Servo_SetAngle_PWM(OS_U8 pwm_channel, double angle);
-OS_U8 Servo_ReadAngle_PWM(OS_U8 pwm_channel, double *angle);
 
 OS_U8 StartMiniLoop(float freq, float amp, float zero, OS_U8 enable[6]);
 OS_U8 MiniLoopSimulation();
@@ -153,7 +152,7 @@ extern OS_U32 ServoCmdHandler(STRU_422_MSG_INFO * frame);
 extern OS_U32 SrvRtHandler(STRU_422_MSG_INFO * frame);
 extern OS_U8 MsgToSrv(OS_DOUBLE ctrlDeg[6], OS_U8 ctrlMode/*control = 0x02, 0x44=setZero*/);
 
-extern OS_U8 InitSrv();
+// extern OS_U8 InitSrv();
 extern OS_U16 ChkSrvFrame(OS_MEM* pmData);
 
 #endif /* SRC_MODSRVCTL_H_ */

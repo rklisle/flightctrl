@@ -8,7 +8,7 @@
 
 int SetPwmgpio_Enable(int hz)//flag=1 enable;flag=0,disable
 {
-	pwm_ctrl_init(hz);//set pwm 200hz
+	pwm_ctrl_init(hz);//set pwm 200hz / 333Hz
 	return 0;
 }
 

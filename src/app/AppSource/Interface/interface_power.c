@@ -99,7 +99,7 @@ OS_S8 PowerOff(POWER_DEVICE dev)
 }
 
 OS_U8 SeqCmd = 0;
-OS_S8 SeqOn(OS_U8 channel)      //MML 014是用PWM和一个开伞舵机通信，只需要开舵机就行了。开伞舵机不用关。
+OS_S8 SeqOn(OS_U8 channel) 
 {
 	SeqCmd |= (1<<channel);
     SETDATA(pDataPoolPwr, "FireCmd", SeqCmd,	OS_U8);
@@ -109,7 +109,7 @@ OS_S8 SeqOn(OS_U8 channel)      //MML 014是用PWM和一个开伞舵机通信，只需要开舵机
     switch(channel)
     {
     case 0:
-        SETDATA(pDataPoolSelf, "seqDrop", 1,	OS_U8); //MML 时序抛伞  280是用CAN和开伞舵机通信，014是用PWM和一个开伞舵机通信
+        SETDATA(pDataPoolSelf, "seqDrop", 1,	OS_U8); //MML 时序抛伞
         break;
     case 1:
         SETDATA(pDataPoolSelf, "seqUmb", 1,	OS_U8);     //MML 时序开伞
@@ -122,15 +122,13 @@ OS_S8 SeqOn(OS_U8 channel)      //MML 014是用PWM和一个开伞舵机通信，只需要开舵机
         break;
     }
 
-    //此处需要改为PWM控制开伞舵机（7号舵机），不用CAN发命令了。
-    //TODO: MML舵机7
-        
+    // 开某一路火工品的开关
     // OS_U32 cmd = 1 << (channel*2 + 12);
     // SendCanFrame(CAN_RT_POWERSEQ, 0x242, 4, (OS_U8 *)&cmd);
 	return 0;
 }
 
-OS_S8 SeqOff(OS_U8 channel)     //MML 014不需要关开伞舵机
+OS_S8 SeqOff(OS_U8 channel)
 {
 	SeqCmd &= (~(1<<channel));
     SETDATA(pDataPoolPwr, "FireCmd", SeqCmd,	OS_U8);
@@ -152,8 +150,8 @@ OS_S8 SeqOff(OS_U8 channel)     //MML 014不需要关开伞舵机
         break;
     }
     */
-    //MML 014不需要关开伞舵机
-    OS_U32 cmd = 1 << (channel*2 + 1 + 12);
+    // 关某一路火工品的开关
+    // OS_U32 cmd = 1 << (channel*2 + 1 + 12);
     // SendCanFrame(CAN_RT_POWERSEQ, 0x242, 4, (OS_U8 *)&cmd);
 	return 0;
 }

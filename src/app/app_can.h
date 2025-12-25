@@ -7,10 +7,12 @@
 #include "tx_api.h"
 #include "stm32h7xx_hal.h"
 
+#include "AppSource/flight/Ctrl_Law_Typedef.h"
+
 extern int fdCan[2];
 
-typedef void (*pcan_recv_cb_t)(uint32_t id, bool ext_id, const uint8_t* pdata, uint32_t datalen);
-
+// typedef void (*pcan_recv_cb_t)(uint32_t id, bool ext_id, const uint8_t* pdata, uint32_t datalen);
+typedef OS_U8 (*pcan_recv_cb_t)(OS_U32 id, OS_BOOL ext, const OS_U8 *data, OS_U8 len);
 
 int32_t app_can_send(int32_t fd, uint32_t id, bool ext_id, const uint8_t* pdata, uint32_t datalen);
 

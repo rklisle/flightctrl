@@ -21,6 +21,10 @@
 
 #include <math.h>
 #include <string.h>
+
+extern TIM_HandleTypeDef htim3;
+extern TIM_HandleTypeDef htim4;
+
 #ifndef PI
 #define PI		(3.141592653589793)           //3.1415926535
 #endif
@@ -48,24 +52,24 @@ static FREQ_SCAN fs = {
 
 OS_U8 AutoZero();
     
-OS_U8 InitSrv()	//MML舵机: 没人调了，这是原先串口的Init
-{
-    // 初始化CAN通信（假设已经有CAN初始化函数）
-    // CAN_Init(500000); // 500Kbps波特率
-    
-    // 初始化PWM（5、6号舵机）
-    // PWM_Init(); // 初始化PWM输出
+//OS_U8 InitSrv()	//MML舵机: 没人调了，这是原先串口的Init
+//{
+//    // 初始化CAN通信（假设已经有CAN初始化函数）
+//    // CAN_Init(500000); // 500Kbps波特率
+//    
+//    // 初始化PWM（5、6号舵机）
+//    // PWM_Init(); // 初始化PWM输出
 
-	buffLoop[RT_SRV].syncHead_A = 0xEE;
-	buffLoop[RT_SRV].syncHead_B = 0x00;
-	buffLoop[RT_SRV].lenExtern = 6;	
-	buffLoop[RT_SRV].head = 0;
-	buffLoop[RT_SRV].tail = 0;
-	buffLoop[RT_SRV].lenPos = 1;	
-	buffLoop[RT_SRV].fixedLen = 48;
-	buffLoop[RT_SRV].inited = TRUE;
-    return 0;
-}
+//	buffLoop[RT_SRV].syncHead_A = 0xEE;
+//	buffLoop[RT_SRV].syncHead_B = 0x00;
+//	buffLoop[RT_SRV].lenExtern = 6;	
+//	buffLoop[RT_SRV].head = 0;
+//	buffLoop[RT_SRV].tail = 0;
+//	buffLoop[RT_SRV].lenPos = 1;	
+//	buffLoop[RT_SRV].fixedLen = 48;
+//	buffLoop[RT_SRV].inited = TRUE;
+//    return 0;
+//}
 
 OS_U16 ChkSrvFrame(OS_MEM* pmData)	//MML舵机 需要更新CAN帧检查逻辑 这个没人调了。是原先串口的。
 {
@@ -177,77 +181,73 @@ OS_U8 Servo_SetAngle_CAN(ServoNodeID node, double angle)
  * @param len 数据长度
  * @return 0:成功, 1:失败
  */
-OS_U8 Servo_SendCANFrame(uint32_t id, uint8_t *data, uint8_t len)
+OS_U8 Servo_SendCANFrame(OS_U32 id, OS_U8 *data, OS_U8 len)
 {
     // 使用FDCAN1（fdCan[0]）发送舵机控制指令
     // 舵机使用CAN扩展帧（29位ID）,500Kbps
-    if (SendCanFrameExt(0, id, len, data) == 0) {
+    if (SendCanFrameExt(CAN_RT_SRV, id, len, data) == 0) {
         return 0;  // 成功
     } else {
         return 1;  // 失败
     }
 }
 
-/**
- * @brief 设置PWM舵机角度（伪代码）
- * @param pwm_channel PWM通道号（5或6）
- * @param angle 目标角度
- * @return 0:成功, 1:失败
- */
-OS_U8 Servo_SetAngle_PWM(OS_U8 pwm_channel, double angle)
-{
-    // PWM舵机角度范围通常是0-180度
-    if (angle < 0 || angle > 180) {
-        return 1;  // 角度超出范围
-    }
+// 配置参数
+// #define PSC_VALUE       23      // 分频24
+// #define ARR_VALUE       30029   // 周期30030计数
+#define CNT_TIME_US     0.1f    // 每个计数0.1μs
+
+#define PULSE_MIN_US    900     // 最小脉宽
+#define PULSE_MAX_US    2100    // 最大脉宽
+#define PULSE_CENTER_US 1500    // 中心脉宽（0°）
+#define US_PER_DEG      10.0f   // 每度对应的μs数
+
+#define CCR_MIN         ((uint32_t)(PULSE_MIN_US / CNT_TIME_US))      // 9000
+#define CCR_MAX         ((uint32_t)(PULSE_MAX_US / CNT_TIME_US))      // 21000
+
+uint32_t angle_to_ccr(double angle_deg) {
+    // 角度转脉宽：1500μs + angle×10μs
+    double pulse_us = PULSE_CENTER_US + (angle_deg * US_PER_DEG);
+
+    // 脉宽转CCR：pulse_us / 0.1
+    uint32_t ccr = (uint32_t)(pulse_us / CNT_TIME_US);
     
-    // 将角度转换为PWM脉宽（假设500-2500us对应0-180度）
-    OS_U16 pulse_width = 500 + (angle * 2000 / 180);
+    // 确保在有效范围内
+    if (ccr < CCR_MIN) ccr = CCR_MIN;
+    if (ccr > CCR_MAX) ccr = CCR_MAX;
     
-    // 设置PWM脉宽
-    // PWM_SetPulseWidth(pwm_channel, pulse_width);
-    
-    // 伪代码实现
-    switch (pwm_channel) {
-        case 5:
-            SETDATA(pDataPoolSrv, "Sr5PWM", pulse_width, OS_U16);
-            break;
-        case 6:
-            SETDATA(pDataPoolSrv, "Sr6PWM", pulse_width, OS_U16);
-            break;
-        default:
-            return 1;
-    }
-    
-    return 0;
+    return ccr;
 }
 
 /**
- * @brief 读取PWM舵机角度（伪代码）
+ * @brief 设置PWM舵机角度
  * @param pwm_channel PWM通道号（5或6）
- * @param angle 返回的角度值
- * @return 0:成功, 1:失败
+ * @param angle 目标角度
+ * @return 0:成功, -1:失败
  */
-OS_U8 Servo_ReadAngle_PWM(OS_U8 pwm_channel, double *angle)
+OS_U8 Servo_SetAngle_PWM(OS_U8 pwm_channel, double angle)
 {
-    // PWM舵机通常没有角度反馈，这里返回设定的角度
-    // 实际应用中可能需要编码器或其他传感器
-    
-    // 伪代码实现
-    OS_S16 stored_angle = 0;
+    uint32_t ccr = angle_to_ccr(angle);
+
     switch (pwm_channel) {
         case 5:
-            GETDATA(pDataPoolSrv, "Sr5Cmd", &stored_angle, OS_S16);
-            *angle = stored_angle * 0.01;  // 转换为度
+            SETDATA(pDataPoolSrv, "Sr5Angle", angle, OS_U16);
+            // 设置PWM脉宽
+            __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, ccr);
             break;
         case 6:
-            GETDATA(pDataPoolSrv, "Sr6Cmd", &stored_angle, OS_S16);
-            *angle = stored_angle * 0.01;  // 转换为度
+            SETDATA(pDataPoolSrv, "Sr6Angle", angle, OS_U16);
+            // 设置PWM脉宽
+            __HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_2, ccr);
+            break;
+        case 7:
+            SETDATA(pDataPoolSrv, "Sr7Angle", angle, OS_U16);
+            // 设置PWM脉宽
+            __HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_3, ccr);
             break;
         default:
-            return 1;
+            return -1;
     }
-    
     return 0;
 }
 
@@ -275,9 +275,9 @@ OS_U8 MsgToSrv(OS_DOUBLE ctrlDeg[6], OS_U8 ctrlMode/*control = 0x02, 0x44=setZer
 		Servo_SetAngle_CAN(SERVO_NODE_3, ctrlDeg[2]);
 		Servo_SetAngle_CAN(SERVO_NODE_4, ctrlDeg[3]);
 		
-		// 控制5-6号PWM舵机（伪代码）
-		Servo_SetAngle_PWM(5, ctrlDeg[4]);//TODO: MML舵机16
-		Servo_SetAngle_PWM(6, ctrlDeg[5]);//TODO: MML舵机16
+		// 控制5-6号PWM舵机
+		Servo_SetAngle_PWM(5, ctrlDeg[4]);//MML舵机16
+		Servo_SetAngle_PWM(6, ctrlDeg[5]);//MML舵机16
     }
 	else if (ctrlMode == 0x44) 
 	{
@@ -288,9 +288,10 @@ OS_U8 MsgToSrv(OS_DOUBLE ctrlDeg[6], OS_U8 ctrlMode/*control = 0x02, 0x44=setZer
         Servo_SetMidpoint_CAN(SERVO_NODE_3);
         Servo_SetMidpoint_CAN(SERVO_NODE_4);
         
-        // PWM舵机零点设置（伪代码）
-        // PWM舵机通常需要机械调零，这里不做处理
-		//TODO: MML舵机16
+        // PWM舵机零点设置
+        // PWM舵机通常需要机械调零，这里仅让舵机回归0°位置
+		Servo_SetAngle_PWM(5, 0);//MML舵机16
+		Servo_SetAngle_PWM(6, 0);//MML舵机16
     }
     return 0;
 }
@@ -352,6 +353,8 @@ OS_U8 ServoCtlOnce_6Rudder(double actDeg_1, double actDeg_2, double actDeg_3,
     return 0;
 }
 
+OS_U8 SaveSrvInDataPool(STRU_SRV_INFO *data);	//函数声明
+
 /***********************************************************
  * 函数名称: ServoRtHandler()
  * 函数功能: 伺服总线处理函数，伺服的设定是不会定时给智能控制器发送内容的，仅在收到智能控制器的指令后回复。测发控阶段，均需下传地面
@@ -389,9 +392,9 @@ OS_U32 SrvRtHandler(STRU_422_MSG_INFO * srvMsg)
  * @param data 数据
  * @param len 数据长度
  */
-OS_U8 CanRtServoHandler(uint32_t id, bool ext_id, uint8_t* data, uint32_t len)
+OS_U8 CanRtServoHandler(OS_U32 id, OS_BOOL ext_id, const OS_U8* data, OS_U8 len)
 {
-	//TODO: MML舵机，这是新的CAN舵机的回调函数
+	//MML舵机，这是新的CAN舵机的回调函数
     // 只处理扩展帧
     if (!ext_id) {
         return -1;
@@ -468,9 +471,6 @@ OS_U8 CanRtServoHandler(uint32_t id, bool ext_id, uint8_t* data, uint32_t len)
 	g_DeviceState.srvCountDown = 200;
 	return 0;
 }
-
-
-
 
 /***********************************************************
  * 函数名称: InsertServoTestData()

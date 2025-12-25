@@ -31,31 +31,31 @@ DeviceState g_DeviceState={0};
 void RunInitialInit()
 {          	 
 	//根据箭上协议，配置422串口对应的设备，设置422串口校验方式，比特率
-	BoardInit();
+	BoardInit();        //初始化buffer，数据池，串口，CAN, 两个PWM333Hz
 
-    uart_mode_init();
+    uart_mode_init();   //初始化9路串口，并开启各自串口的收发任务
         
     //初始化遥测结构体
-    InitTelemetry();
+    InitTelemetry();    //各种遥测参数
      
     //控制初始化函数
-    FlightInit();
+    FlightInit();       //飞行航点描述
 
-    FlashInit(); 
+    FlashInit();        //把NorFlash准备好，读了一遍JEDEC
 
     //初始化载荷数据池
-    PayloadInit();
+    PayloadInit();      //目前没东西
        
     //初始化定时上报的变量
-    InitReportParam();
+    InitReportParam();  //往数据池里存数据
 
     //初始化任务机
-    MissionInit();
+    MissionInit();      //设置炮ID, 管ID
     
     
     //读取app信息
     // ReloadAppInfoFromFlash();
-    ADC3_Init();
+    ADC3_Init();        //测MCU温度
  
     
     

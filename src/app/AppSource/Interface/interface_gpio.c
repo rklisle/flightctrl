@@ -18,6 +18,9 @@
 
 int InitGPIO()
 {
+  __HAL_RCC_GPIOB_CLK_ENABLE(); //MML舵机16 保证舵机用到的pin开启时钟
+  __HAL_RCC_GPIOC_CLK_ENABLE(); //MML舵机16 保证舵机用到的pin开启时钟
+  __HAL_RCC_GPIOD_CLK_ENABLE(); //MML舵机16 保证舵机用到的pin开启时钟
     /*
     GPIO_InitTypeDef GPIO_InitStruct1 = {0};
     GPIO_InitTypeDef GPIO_InitStruct2 = {0};

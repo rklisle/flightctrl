@@ -332,7 +332,7 @@ void SavePwrSeq()
     SETDATA(pDataPoolPwr, "pwrTemp", canRecvVa.mcuTemp,	OS_U16);
 }
 
-OS_U8 CanRtPwrSeqHandler(long unsigned int id, bool ext_id, const OS_U8* pdata, long unsigned int datalen)
+OS_U8 CanRtPwrSeqHandler(OS_U32 id, OS_BOOL ext_id, const OS_U8* pdata, OS_U8 datalen)
 {
     if(id == 0x183)//V	//MML –≠“ÈΩ‚Œˆ
     {

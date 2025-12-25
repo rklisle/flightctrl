@@ -39,7 +39,7 @@ OS_S32 BoardInit()
     
     LAN9303_Init();
     
-    SetPwmgpio_Enable(200);
+    SetPwmgpio_Enable(333); //set pwm 333Hz(SRV)
 
     return OS_SUCCESS;
 }

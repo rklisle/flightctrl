@@ -56,7 +56,8 @@ static void FlightSeqOutputHandle()
 		//0.2秒后开伞
 		if(waitOneSec == 40)//0.2秒时开伞
 		{
-			TrigerSeqWithWidth(TEST_1 + 1, 100);
+			// TrigerSeqWithWidth(TEST_1 + 1, 100);
+			Servo_SetAngle_PWM(7, 50);	//TODO: MML舵机7 控制7号舵机至50°（此处角度根据需要修改）
 		}
 		
 		if(waitOneSec == 200)//1秒时保持舵机回0且解除控制

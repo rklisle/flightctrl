@@ -6,6 +6,7 @@
 
 
 #include "../support/os_types.h"
+#include "../drive/pwm_ctrl.h"
 
 #ifndef INTERFACE_PWM_H_
 #define INTERFACE_PWM_H_
