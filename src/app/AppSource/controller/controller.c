@@ -185,7 +185,7 @@ OS_U8 AutoLuanchProcess()
 		GetDataFast(pDataPoolMsn, "msnDevID", &msnID);
 		if(msnID != 0xFF)
 		{
-			// InitPwrSeq();	//MML s手动开总开关
+			// InitPwrSeq();	//MML 开火工品4
 			InitSD();
 			AutoStep = 5;
 		}

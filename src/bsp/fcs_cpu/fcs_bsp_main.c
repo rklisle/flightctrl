@@ -14,6 +14,18 @@
   * If no LICENSE file comes with this software, it is provided AS-IS.
   *
   ******************************************************************************
+  * CPU时钟 = HCLK = 240MHz
+  * APB1, APB2, APB3, APB4 = 120MHz
+  * TIM3, TIM4, TIM5 = APB1 = 240MHz
+  * TIM17  = APB2 =  240MHz
+  * SPI1 = APB2 = 120MHz
+  * I2C2 = APB1 = 120MHz
+  * UART = APB1/2 = 120MHz
+  * FDCAN = 专用 = 可变
+  * FMC = AHB3 = 240MHz
+  * SDMMC = 专用 = 可变
+  * QSPI = AHB3 = 240MHz
+  ******************************************************************************
   */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/

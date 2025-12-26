@@ -9,13 +9,13 @@
 #include "../core/BusInteract.h"
 #include "tx_api.h"
 
-OS_U8 InitPwrSeq()
-{
-    OS_U32 openSeqCmd = 0x00000400;
-    //tx_thread_sleep(20);
-    SendCanFrame(CAN_RT_POWERSEQ, 0x242, 4, (OS_U8 *)&openSeqCmd);//open seq switch
-    return 0;
-}
+// OS_U8 InitPwrSeq()
+// {
+//     OS_U32 openSeqCmd = 0x00000400;
+//     //tx_thread_sleep(20);
+//     SendCanFrame(CAN_RT_POWERSEQ, 0x242, 4, (OS_U8 *)&openSeqCmd);//open seq switch//MML ¿ª»ð¹¤Æ·4
+//     return 0;
+// }
 
 OS_BOOL powerState[8];
 OS_BOOL seqState[6];

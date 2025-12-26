@@ -32,5 +32,5 @@ extern OS_S8 SeqOn(OS_U8 channel);
 
 extern OS_S8 SeqOff(OS_U8 channel);
 
-extern OS_U8 InitPwrSeq();
+// extern OS_U8 InitPwrSeq();
 #endif /* SRC_UCAS_SERVICE_INTERFACE_H_ */
