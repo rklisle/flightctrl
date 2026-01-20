@@ -21,7 +21,7 @@ extern OS_U32 ControllerCmdHandler(STRU_422_MSG_INFO * frame);
 extern OS_U8 Ignition();
 extern OS_U8 DoIgnition();
 extern OS_U16 BatteryActived;
-extern OS_U8 IgnitionMark;  // 地面全部解锁按钮点击标志
+extern OS_U8 IgnitionMark;
 extern void ADC3_Init(void) ;
 #define CAN1_NODE_COUNT	(6)
 #define CAN2_NODE_COUNT	(1)
@@ -32,7 +32,7 @@ typedef struct
 	OS_U8 umOpen;//	开伞指令0:不操作， 1:开伞
 	//OS_U8 wingTouched;
 	OS_U8 steableFlight;
-	OS_U8 luanched;
+	OS_U8 luanched;	// 起飞tick>100,置1； 否则为0
 	OS_U8 destory;//自毁 0:不操作 1:自毁
 }FLIGHT_SEQ;
 #pragma pack()

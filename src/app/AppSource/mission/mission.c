@@ -588,10 +588,12 @@ static void GenerateTeamMsn()
 	}
 	OS_U8 takeoff;
 	GetDataFast(pDataPoolSelf,	"RecvLunc",	&takeoff );
-	if(takeoff != 0xEE)
+	if(takeoff != 0xEE)	
 	{
+		// 起飞未完成
 			return;
 	}
+	// 起飞完成
 	if(pOutput->enginge_off == 1)
 	{
 		SETDATA(pDataPoolMsn,	"msnComm2",	pOutput->enginge_off, OS_U8);

@@ -84,12 +84,12 @@ typedef struct
 	OS_DOUBLE rudderYawCmd;	//通道舵航向
 	
 	//物理舵
-	OS_DOUBLE rudder1Cmd;   // 左副翼舵	//MML舵机 通过CAN控制
-	OS_DOUBLE rudder2Cmd;   // 右副翼舵	//通过CAN控制
-	OS_DOUBLE rudder3Cmd;   // 左俯仰舵	//通过CAN控制
-	OS_DOUBLE rudder4Cmd;   // 右俯仰舵	//通过CAN控制
-	OS_DOUBLE rudder5Cmd;   // 左航向舵	//通过PWM控制
-	OS_DOUBLE rudder6Cmd;   // 右航向舵	//通过PWM控制
+	OS_DOUBLE rudder1Cmd;   // 左副翼舵	//通过CAN控制 // roll left
+	OS_DOUBLE rudder2Cmd;   // 右副翼舵	//通过CAN控制 // roll right
+	OS_DOUBLE rudder3Cmd;   // 左俯仰舵	//通过CAN控制 // pitch left
+	OS_DOUBLE rudder4Cmd;   // 右俯仰舵	//通过CAN控制 // pitch right
+	OS_DOUBLE rudder5Cmd;   // 左航向舵	//通过PWM控制 // yaw left
+	OS_DOUBLE rudder6Cmd;   // 右航向舵	//通过PWM控制 // yaw right
 
 	//航点信息
 	OS_U16 curPtNo;			//当前航点号
@@ -98,7 +98,7 @@ typedef struct
 	OS_DOUBLE curTargetAlt;	//当前目标航点高度
 	
 	//发动机推力设定
-	OS_DOUBLE engineSet;	//此处可指定为转速或推力
+	OS_DOUBLE engineSet;	//此处可指定为转速或推力	// MML:014定义为油门开度，取值为[0~100.0%]
 	
 	//其它需要代传遥测
 	//请在此添加

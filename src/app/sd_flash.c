@@ -216,6 +216,7 @@ int32_t sd_block_erase(uint32_t block_addr, uint32_t erase_blk_size)
     return (int32_t )erase_blk_size;
 }
 
+// SD卡硬件初始化。正常返回0，即FR_OK；初始化失败返回1或2
 int32_t  sd_flash_init(TX_BYTE_POOL *pmem)
 {
     GPIO_InitTypeDef  GPIO_InitStruct;

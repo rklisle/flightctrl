@@ -87,8 +87,8 @@ typedef struct
 {
 	OS_U8 selfCheck;	//32???????~{!B~}
 	OS_S16 srv1Cmd;
-	OS_S16 srv1Read;
-    OS_S16 srv2Cmd;
+	OS_S16 srv1Read;	//0.001
+    OS_S16 srv2Cmd;		//0.001
 	OS_S16 srv2Read;
     OS_S16 srv3Cmd;
 	OS_S16 srv3Read;
@@ -98,7 +98,7 @@ typedef struct
 	OS_S16 srv5Read;
     OS_S16 srv6Cmd;
 	OS_S16 srv6Read;
-	OS_S16 srv1A;
+	OS_S16 srv1A;	//0.001
     OS_S16 srv2A;
     OS_S16 srv3A;
     OS_S16 srv4A;
@@ -140,9 +140,6 @@ OS_U8 Servo_SetMidpoint_CAN(ServoNodeID node);
 OS_U8 Servo_SendCANFrame(OS_U32 id, OS_U8 *data, OS_U8 len);
 OS_U8 AngleToPosition_CAN(double angle, OS_U8 *high, OS_U8 *low);
 double PositionToAngle_CAN(OS_U8 high, OS_U8 low);
-
-// PWM~{6f;zO`9X:/J}#(N14zBk#)~}
-OS_U8 Servo_SetAngle_PWM(OS_U8 pwm_channel, double angle);
 
 OS_U8 StartMiniLoop(float freq, float amp, float zero, OS_U8 enable[6]);
 OS_U8 MiniLoopSimulation();

@@ -45,6 +45,7 @@ OS_U8 SaveHilInDataPool(STRU_HIL_INPUT *hilInfo)
 //		SETDATA(pDataPoolImu, "navRoll", hilInfo->roll * 1e2,	OS_S16);
 		if(g_DeviceState.srvCountDown == 0)
 		{
+			// MML 半实物过来的数据就是100倍的，hilInfo->DD1这个应该就是100倍的角度值
 			SETDATA(pDataPoolSrv, "Sr1Read", hilInfo->DD1, OS_S16);
 			SETDATA(pDataPoolSrv, "Sr2Read", hilInfo->DD2, OS_S16);
 		}
@@ -52,7 +53,7 @@ OS_U8 SaveHilInDataPool(STRU_HIL_INPUT *hilInfo)
 	return 0;
 }
 
-OS_U32 HilRtHandler(STRU_422_MSG_INFO * frame)
+OS_U32 HilRtHandler(STRU_422_MSG_INFO * frame)// RT_HIL
 {
 	g_DeviceState.hilCountDown = 200;
 	OS_U8 msgID = frame->u8MsgID;
@@ -124,7 +125,7 @@ OS_U32 HilRtHandler(STRU_422_MSG_INFO * frame)
 			UpdateMission(msn);
 		}
 		break;
-	case 0x20:
+	case 0x20:	// MML: 仿真已经起飞了
 		{
 			STRU_HIL_INPUT hilInfo = {0};
 			memcpy(&hilInfo, frame->au8Data, sizeof(hilInfo));

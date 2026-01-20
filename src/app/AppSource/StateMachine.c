@@ -28,7 +28,7 @@
 
 DeviceState g_DeviceState={0};
 
-void RunInitialInit()
+void RunInitialInit()   // MML 初始化调用一次
 {          	 
 	//根据箭上协议，配置422串口对应的设备，设置422串口校验方式，比特率
 	BoardInit();        //初始化buffer，数据池，串口，CAN, 两个PWM333Hz
@@ -69,7 +69,7 @@ void RunInitialInit()
  ***********************************************************/
 float calcTimeCpu0;
 float maxCalcTime = 0;
-void RunStageMachineStep()
+void RunStageMachineStep()  // 5ms运行一次
 {
 	g_DeviceState.CurrTick++;
    // unsigned long current_time0 = tx_time_get();
@@ -85,7 +85,7 @@ void RunStageMachineStep()
 	// 5.时序触发条件判断
 	SeqCalc();
 	// 6.处理飞控输出(舵控，时序开关设置)
-	FlightOutputHandle();
+	FlightOutputHandle();   // 控舵机、发动机、伞降要求
 	// 7.时序执行
 	SeqHandle();
     // 12.输出到遥测，组帧发送
@@ -97,7 +97,7 @@ void RunStageMachineStep()
 	// 10.电调发动机定时处理
 	AutoDriveEnginePwm();
     // 11.
-    AutoLuanchProcess();    //MML 飞控→配电板 下发各外设开关命令
+    AutoLuanchProcess();    //MML 飞控→给各个设备上电、加载任务信息、惯组对准、转导航、发动机启动、预发射、发射、
      // 2.
 	RunMissionTask(10);   
     //unsigned long current_time1 = tx_time_get();

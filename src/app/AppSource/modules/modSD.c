@@ -10,7 +10,7 @@
 #include "../../sd_flash.h"
 #include "../core/DataPool.h"
 
-int sd_card_fault = 0;
+int sd_card_fault = 0;  // 0：SD卡初始化成功； 1：初始化失败
 unsigned int SD_BLOCK = 8192;
 unsigned int BUFF_BLOCK = 0x8000;
 typedef struct
@@ -20,7 +20,7 @@ typedef struct
     OS_U8 fileBuffer[0x8000];
 }SD_FILE;
 
-unsigned char SD_Enable = FALSE;
+unsigned char SD_Enable = FALSE;    // TRUE：SD卡初始化成功；FALSE：SD卡初始化失败
 
 SD_FILE sdFile[FILE_COUNT];
 char fileName[FILE_COUNT][13] = {"TMData.dat","FireA.csv","GPS.csv","Mems.csv","navZ.csv","TMFlight.dat"};
@@ -36,6 +36,7 @@ OS_U8 DoWriteToSD(OS_U8 fileIndex, const OS_U8 *buf, OS_U32 length)
 	return fatFsFileWrite((OS_S32)fileIndex, (char *)buf, (OS_S32)length);
 }
 
+/** 1ms调用一次，当需要写入SD卡的数据，多到一定程度，这里是>SD_BLOCK时，再集中将其写入 */
 OS_U8 JudgeWriteToSD()
 {
     for(int fileIndex = 0; fileIndex < FILE_COUNT; fileIndex++)
@@ -57,6 +58,7 @@ OS_U8 JudgeWriteToSD()
     return 0;
 }
 
+/** 将数据安全地复制到指定文件的缓冲区中，准备后续批量写入SD卡。 */
 OS_U8 WriteToSD(OS_U8 fileIndex, OS_U8 *buf, OS_U32 length)
 {
 	if(SD_Enable == FALSE)
@@ -78,6 +80,11 @@ OS_U8 WriteToSD(OS_U8 fileIndex, OS_U8 *buf, OS_U32 length)
 	return 1;
 }
 
+/** 初始化SD卡存储系统，包括：
+ * 初始化SD卡硬件
+ * 创建多个数据文件并写入CSV表头
+ * 创建线程同步机制 
+ */
 OS_U8 InitSD()
 {
     if(SD_Enable == TRUE)

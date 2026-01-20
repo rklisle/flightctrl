@@ -41,14 +41,14 @@ OS_U8 ImuInit()
 	SETDATA(pDataPoolImu, "kfAy", 0,	OS_S16);
 	SETDATA(pDataPoolImu, "kfAz", 0,	OS_S16);
 
-	buffLoop[RT_IMU].syncHead_A = 0xEB;
-	buffLoop[RT_IMU].syncHead_B = 0x90;
-	buffLoop[RT_IMU].lenExtern = 0;	//若帧中表示长度的字段并非完整帧的长度，则额外长度为lenExtern（如排除帧头校验等）
-	buffLoop[RT_IMU].head = 0;
-	buffLoop[RT_IMU].tail = 0;
-	buffLoop[RT_IMU].lenPos = 0;	//同步头后第n个字节为长度
-	buffLoop[RT_IMU].fixedLen = 0x7C;
-	buffLoop[RT_IMU].inited = TRUE;
+	// buffLoop[RT_IMU].syncHead_A = 0xEB;
+	// buffLoop[RT_IMU].syncHead_B = 0x90;
+	// buffLoop[RT_IMU].lenExtern = 0;	//若帧中表示长度的字段并非完整帧的长度，则额外长度为lenExtern（如排除帧头校验等）
+	// buffLoop[RT_IMU].head = 0;
+	// buffLoop[RT_IMU].tail = 0;
+	// buffLoop[RT_IMU].lenPos = 0;	//同步头后第n个字节为长度
+	// buffLoop[RT_IMU].fixedLen = 0x7C;
+	// buffLoop[RT_IMU].inited = TRUE;
 	return 0;
 }
 
@@ -98,7 +98,7 @@ void ToImuNav()
 	toImuData[4] = toNAV_count++;
 	toImuData[5] = 0x02;
 	Insert16CRC_U8(toImuData + 2, 4, (OS_U16*)((OS_U8 *)(toImuData + 6)));
-	UART_PutBuff(rtList[RT_IMU].chIndex, toImuData, 0x08);
+	// UART_PutBuff(rtList[RT_IMU].chIndex, toImuData, 0x08);
 }
 
 OS_U8 ToImuFocus()
@@ -142,7 +142,7 @@ OS_U8 ToImuFocus()
     memcpy(toImuData + 33, &dluanchDir, 8);
     
     Insert16CRC_U8(toImuData + 2, 39, (OS_U16*)((OS_U8 *)(toImuData + 41)));
-    UART_PutBuff(rtList[RT_IMU].chIndex, toImuData, 0x2B);
+    // UART_PutBuff(rtList[RT_IMU].chIndex, toImuData, 0x2B);
 	return 0;
 }
 extern float fwxhil,fwyhil,fwzhil;

@@ -35,10 +35,10 @@ typedef enum
 #pragma pack(1)
 typedef struct
 {
-	OS_U8 u8HeadA;
-	OS_U8 u8HeadB;
-	OS_U16 u16Len;
-	OS_U8 u8Seq;
+	OS_U8 u8HeadA;//EB
+	OS_U8 u8HeadB;//90
+	OS_U16 u16Len;//au8Data长度
+	OS_U8 u8Seq;//
 	OS_U8 u8MsgID;
 	OS_U8 au8Data[2048];
 	OS_U8 u8CRCA;
@@ -239,18 +239,27 @@ typedef struct
 	/***************
 	 * 入遥测部分
 	 * *************/
+
+	 /** workStage	工作状态 */
+	// DOM_INTERACTIVE	= 0x1,		// 交互过程，包含了调试到发射过程中的一切交互逻辑，为射前过程
+	// DOM_SIMIMUDAT	= 0x1<<1,	// 模拟飞行模式，IMU数据从FLASH读取
+	// DOM_SIMSRVDAT	= 0x1<<2,	// 伺服小回路模式，伺服数据由地面给出，自动生成并替换输出
+	// DOM_TRIGGERON	= 0x1<<3,	// 时序开关，是否输出时序动作
+	// DOM_AUTOMATIC	= 0x1<<4,	// 自动过程，射后自动执行的过程，周期调用
+	// DOM_HILSMODE	= 0x1<<5,	// 半实物模式
+	// DOM_NAVON		= 0x1<<6,	// 开启导航
 	FUNC_DOMAIN workStage;
-		//各单机通信状态，初始设置为200tick，每个tick调用-1，每次收到数据恢复200.保证在通讯中断1秒内能够反馈到遥测
-	OS_U8 srvCountDown;
-	OS_U8 battCountDown;
-	OS_U8 navCountDown;
-    OS_U8 powerCountDown;
-	OS_U8 ecuCountDown;
+	/** 各单机通信状态，初始设置为200tick，每个tick调用-1，每次收到数据恢复200.保证在通讯中断1秒内能够反馈到遥测 */
+	OS_U8 srvCountDown;		// 设备通信状态
+	OS_U8 battCountDown;	// 设备通信状态
+	OS_U8 navCountDown;		// 设备通信状态
+    OS_U8 powerCountDown;	// 设备通信状态
+	OS_U8 ecuCountDown;		// 设备通信状态
 	OS_U8 pwrStatePos;
-	OS_U8 hilCountDown;
-    OS_U8 imuCountDown;
-    OS_U8 scoutCountDown;
-    OS_U8 fuseCountDown;
+	OS_U8 hilCountDown;		// 设备通信状态
+    OS_U8 imuCountDown;		// 设备通信状态
+    OS_U8 scoutCountDown;	// 设备通信状态
+    OS_U8 fuseCountDown;	// 设备通信状态（是不是没用上？）
 	//时序配电器的配电状态
 	OS_U8 pwrStateB1:1;
 	OS_U8 pwrStateB2:1;
@@ -266,7 +275,7 @@ typedef struct
 	OS_FLOAT temperature;
 	OS_U8 luanchStart;		//预发射标志
 	OS_DOUBLE flightStartTime;
-	OS_U64 CurrTick;
+	OS_U64 CurrTick;	// MML: 发射时置0，大状态机中，每5ms+1
 	OS_DOUBLE currTime;
 	OS_U64 BJTimeSecond;
 	OS_U16 BJTimeMS;

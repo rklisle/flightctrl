@@ -22,6 +22,8 @@
 #include "./mission/mission.h"
 #include "math.h"
 #include <stdlib.h>
+#include "interface_timer.h"
+
 //#include "flight_data.h"
 Point safePoints[20];
 int airHighArray[1000] = {0};
@@ -34,48 +36,49 @@ MISSION homeMsn = {0};
  * 函数名称:FlightSeqOutputHandle()
  * 函数功能:根据飞控运算的时序结果，触发时序开关
   ***********************************************************/
-static void FlightSeqOutputHandle()
+static void FlightSeqOutputHandle()	//02 如果收到伞降命令，关发动机、开伞、控舵机角度、气囊、舵机断电、割伞、发动机断电
 {
 	if(flightSeq.umOpen == 1)
 	{
+		//收到伞降命令
+		struct EngineStatus engineStatus = {0};
 		static int waitOneSec = 0;
 		//立刻关闭发动机，持续发送发动机转速到怠速指令，及发动机停机指令
 		if(waitOneSec >= 0 && waitOneSec <10000)
-		{	
+		{
+			//20ms后关闭发动机
             if(waitOneSec % 4 == 0)
             {
-                OS_U8 engineStatus;
-                GetDataFast(pDataPoolSelf, "ecuState", &engineStatus);
-                if(engineStatus != 0)//0停机，1启动中，2散热 3故障 4脱机 5运行
-                {
-                    SendEngineRpm(12000);
-                    StopEngine();//关闭发动机
-                }
+				modECU_GetEngineStatus(&engineStatus);
+				if(engineStatus.CntState != ENGINE_STOPED)
+				{
+					StopEngine();
+				}
             }
 		}
-		//0.2秒后开伞
-		if(waitOneSec == 40)//0.2秒时开伞
+		//200ms秒后开伞
+		if(waitOneSec == 40)
 		{
-			// TrigerSeqWithWidth(TEST_1 + 1, 100);
-			Servo_SetAngle_PWM(7, 50);	//TODO: MML舵机7 控制7号舵机至50°（此处角度根据需要修改）
+			// TrigerSeqWithWidth(TEST_1 + 1, 100);//开伞操作
+			AngleServo_SetAngle(SERVO_PWM7, 50.0f);//MML开伞舵机7 控制7号舵机至50°（此处角度根据需要修改）
 		}
 		
-		if(waitOneSec == 200)//1秒时保持舵机回0且解除控制
+		if(waitOneSec == 200)//1秒时保持舵机回0
 		{			
 			ServoCtlOnce_6Rudder(0, 0, 0, 0, 0, 0);	//MML舵机
 		}
 		if(waitOneSec == 3000)//15秒时开气囊前
 		{
-			TrigerSeqWithWidth(TEST_1 + 2, 100);
+			// TrigerSeqWithWidth(TEST_1 + 2, 100);//前气囊操作
 		}
 		if(waitOneSec == 3080)//15.4秒时开气囊后
 		{
-			TrigerSeqWithWidth(TEST_1 + 3, 100);
+			// TrigerSeqWithWidth(TEST_1 + 3, 100);//后气囊操作
 		}
 		if(waitOneSec == 4000)//20秒舵机下电
 		{
 			//断伺服电
-			PowerOff(DEVICE_BATT_SRV);
+			PowerOff(DEVICE_SRV_PWR28V);
 		}
 		static OS_U8 yijinggesan = 0;
 		if(waitOneSec > 4000 && yijinggesan == 0)
@@ -83,19 +86,22 @@ static void FlightSeqOutputHandle()
 			//开始判断割伞
 			OS_S16 navVs;
 			GetDataFast(pDataPoolImu, "navVs", 	&navVs);
-			float fvs = navVs * 0.01;
+			float fvs = navVs * 0.01;	// 得到实际导航天速
             if(g_DeviceState.imuCountDown != 0)
             {
+				// 表示 与IMU通信正常
                 if(fabs(fvs) < 1.0)
                 {
-                    TrigerSeqWithWidth(TEST_1 + 0, 100);
+					// 速度很慢了，说明降落伞起作用了
+                    TrigerSeqWithWidth(TEST_1 + 0, 100);//割伞操作
                     yijinggesan = 1;
                 }
             }
             else
             {
+				// 表示 与IMU通信不上
                 OS_S16 airHigh;
-                GetDataFast(pDataPoolSelf, "AirHigh", &airHigh);
+                GetDataFast(pDataPoolSelf, "AirHigh", &airHigh);//气压高度
                 memmove(&airHighArray[1], &airHighArray[0], sizeof(int) * 999);
                 airHighArray[0] = airHigh;
                 OS_U8 airStable = 1;
@@ -103,13 +109,14 @@ static void FlightSeqOutputHandle()
                 {
                     if(fabs(airHigh - airHighArray[i]) > 5)
                     {
+						// 表示 高度下降或上升很快，说明降落伞还没将飞机速度拉下来
                         airStable = 0;
                         break;
                     }                        
                 }
                 if(airStable == 1)
                 {
-                    TrigerSeqWithWidth(TEST_1 + 0, 100);
+                    TrigerSeqWithWidth(TEST_1 + 0, 100);//割伞操作
                     yijinggesan = 1;
                 }
             }
@@ -123,7 +130,7 @@ static void FlightSeqOutputHandle()
 		if(ecuTemp * 0.1 < 65)
 		{
 				//断发动机24v供电
-				PowerOff(DEVICE_BATT_ENGINE);
+				// PowerOff(DEVICE_BATT_ENGINE);	//MML 发动机
 		}
 	}
 }
@@ -132,7 +139,7 @@ static void FlightSeqOutputHandle()
  * 函数名称:FlightTMOutputHandle()
  * 函数功能:分析飞控运算后的输出数据，存数据池
   ***********************************************************/
-void FlightTMOutputHandle()
+void FlightTMOutputHandle()	//02 控制输出——>存入数据池
 {
 	SETDATA(pDataPoolFly,	"pitchCmd",	pOutput->rudderPitchCmd * 100,	OS_S16);	//起控标志
 	SETDATA(pDataPoolFly,	"rollCmd",	pOutput->rudderRollCmd* 100,	OS_S16);	//制导级数
@@ -187,62 +194,48 @@ void FlightTMOutputHandle()
 	}
 }
 
-void FlightSrvOutputHandle()	//MML舵机 280是6个舵机，014需要修改
+void FlightSrvOutputHandle()	//02 控制输出角度——>操作舵机
 {
 	if((DOM_AUTOMATIC & g_DeviceState.workStage) && flightSeq.luanched == 1)
 	{
-		//记录原始数值
-		SETDATA(pDataPoolSrv, "Sr1Cmd", pOutput->rudder1Cmd * 100, OS_S16);
-		SETDATA(pDataPoolSrv, "Sr2Cmd", pOutput->rudder2Cmd * 100, OS_S16);
-		SETDATA(pDataPoolSrv, "Sr3Cmd", pOutput->rudder3Cmd * 100, OS_S16);
-		SETDATA(pDataPoolSrv, "Sr4Cmd", pOutput->rudder4Cmd * 100, OS_S16);
-		SETDATA(pDataPoolSrv, "Sr5Cmd", pOutput->rudder5Cmd * 100, OS_S16);
-		SETDATA(pDataPoolSrv, "Sr6Cmd", pOutput->rudder6Cmd * 100, OS_S16);
-
-		//转换为物理舵数值
-        double rudder1 = pOutput->rudder1Cmd ; // roll left
-        double rudder2 = pOutput->rudder2Cmd ; // roll right
-        double rudder3 = pOutput->rudder3Cmd ; // pitch left
-        double rudder4 = pOutput->rudder4Cmd ; // pitch right
-        double rudder5 = pOutput->rudder5Cmd ; // yaw left
-        double rudder6 = pOutput->rudder6Cmd ; // yaw right
-        
-        //test
-        //rudder1 = 0;
-        //rudder3 = 0;
-        //rudder5 = 0;
-        //rudder6 = 0;
-
-		//控制已考虑舵安装方式
-		ServoCtlOnce_6Rudder(rudder1, rudder2, rudder3, rudder4, rudder5, rudder6);	//MML舵机
+		ServoCtlOnce_6Rudder(	pOutput->rudder1Cmd,
+								pOutput->rudder2Cmd,
+								pOutput->rudder3Cmd,
+								pOutput->rudder4Cmd,
+								pOutput->rudder5Cmd,
+								pOutput->rudder6Cmd
+								);
 	}
 }
 OS_U8 OutSafeCount = 0;
-OS_U8 OutSafeArea = 0;
-void FlightEngineOutputHandle()
+OS_U8 OutSafeArea = 0;	// 0安全区里	1出安全区，且等了一会儿确定出了安全区
+void FlightEngineOutputHandle()//02 在各种情况下（是否起飞？是否出安全区？）控制输出油门开度——>操作油门开度全局变量
 {
 	if(flightSeq.luanched == 1 && ((g_DeviceState.workStage & DOM_AUTOMATIC) == DOM_AUTOMATIC))
 	{
 		if(OutSafeArea)
 		{
-			//CurEngineRpm = 18000;
+			//离开安全区，降低发动机转速
+			// CurEngineRpm = 18000;
 		}
 		else
 		{
-			CurEngineRpm = pOutput->engineSet;
+			//安全区内，正常飞行，听控制的
+			CurEngineRpm = (OS_U32)(pOutput->engineSet * 10.0f);
 			if(CurEngineRpm == 0)
 			{
 				int a = 0;
 			}
 			
 		}
-		SETDATA(pDataPoolFly, "EngineRp", CurEngineRpm,	OS_U16);
 	}
     else if(flightSeq.luanched == 0 && ((g_DeviceState.workStage & DOM_AUTOMATIC) == DOM_AUTOMATIC))
     {
-        CurEngineRpm = 50500;
-        SETDATA(pDataPoolFly, "EngineRp", CurEngineRpm,	OS_U16);
+		//此时，马上就要飞了，油门应该很大才对
+        CurEngineRpm = 800;	// TODO: 油门设置需要再调整，目前是写软件时的临时设置。 油门暂且设置80.0%	//50500;
     }
+
+	SETDATA(pDataPoolFly, "EngineRp", CurEngineRpm,	OS_U16);
 }
 
 /***********************************************************
@@ -251,17 +244,17 @@ void FlightEngineOutputHandle()
  * 1.时序信息，用以触发时序，包括分离、火箭点火、开伞等需求
  * 2.遥测信息，用以下传地面
   ***********************************************************/
-void FlightOutputHandle()
+void FlightOutputHandle()  //01 5ms运行一次
 {
 	if(DOM_AUTOMATIC & g_DeviceState.workStage)
 	{		
-		FlightSrvOutputHandle();
-		FlightEngineOutputHandle();
-		FlightTMOutputHandle();
-		JudgeHomeward();
+		FlightSrvOutputHandle();//飞控输出——>控舵机
+		FlightEngineOutputHandle();//飞控输出——>控发动机
+		FlightTMOutputHandle();//存储飞控输出
+		JudgeHomeward();//判断安全区，判断是否需要伞降
 	}
-	FlightSeqOutputHandle();
-	CalcXYZ();
+	FlightSeqOutputHandle();//02 如果收到伞降命令，关发动机、开伞、控舵机角度、气囊、舵机断电、割伞、发动机断电
+	CalcXYZ();// 坐标系转换
 }
 
 /***********************************************************
@@ -305,9 +298,9 @@ void FlightInputGenerate()
 					//pInput->navHigh = temp16Alt * 0.1;
 					//test end
 					
-			GetDataFast(pDataPoolImu, "navVn", 		&temps16);pInput->navVn = temps16 * 0.01;
-			GetDataFast(pDataPoolImu, "navVs", 		&temps16);pInput->navVs = temps16 * 0.01;
-			GetDataFast(pDataPoolImu, "navVe", 		&temps16);pInput->navVe = temps16 * 0.01;
+			GetDataFast(pDataPoolImu, "navVn", &temps16);pInput->navVn = temps16 * 0.01;
+			GetDataFast(pDataPoolImu, "navVs", &temps16);pInput->navVs = temps16 * 0.01;
+			GetDataFast(pDataPoolImu, "navVe", &temps16);pInput->navVe = temps16 * 0.01;
 			
 			OS_U16 tempu16; //10-19修改OS_S16为OS_U16
 			GetDataFast(pDataPoolImu, "navPitch", 	&temps16);pInput->pitch = temps16 * 0.01;
@@ -446,7 +439,7 @@ OS_BOOL JudgeInSafe2(double lon, double lat)
 }
 
 extern OS_U8 RecoverMark;
-OS_U8 JudgeHomeward()
+OS_U8 JudgeHomeward()	//02 起飞2s后，每1s判断一次，看是否出了安全区？是否需要伞降？是否地面发出紧急返航？
 {
 	//每秒判断一次是否出安全区返航和任务机失联
 	if(g_DeviceState.CurrTick % 200 != 0)
@@ -465,6 +458,7 @@ OS_U8 JudgeHomeward()
 
 	if(OutSafeArea)
 	{
+		// 出安全区了
 		if(OutSafeCount == 30)
 		{
 			StopEngine();
@@ -483,7 +477,8 @@ OS_U8 JudgeHomeward()
   static int judgeError = 0;
 	if(JudgeInSafe2(lon,lat) == FALSE)
 	{
-		if(RecoverMark == 1)
+		// 出安全区了
+		if(RecoverMark == 1)	// 地面发出紧急返航，该值置为1
 		{
 				;
 		}
@@ -491,11 +486,11 @@ OS_U8 JudgeHomeward()
 		{
 			if(judgeError >= 3)
 			{
-					SETDATA(pDataPoolSelf,  "flyError", 0xCC,	OS_U8);
-					if(OutSafeArea == false)
-						OutSafeCount = 35;
-					OutSafeArea = true;
-					CurEngineRpm = 18000;
+				SETDATA(pDataPoolSelf,  "flyError", 0xCC,	OS_U8);
+				if(OutSafeArea == false)
+					OutSafeCount = 35;
+				OutSafeArea = true;
+				CurEngineRpm = 200;	// TODO: 油门设置需要再调整，目前是写软件时的临时设置。 油门暂且设置20.0%	//18000;
 			}
 			else
 			{
@@ -505,8 +500,9 @@ OS_U8 JudgeHomeward()
 	}
 	else
 	{
-			judgeError = 0;
-			OutSafeArea = false;
+		// 在安全区内
+		judgeError = 0;
+		OutSafeArea = false;
 	}
 
 	//地面指令紧急返航，到返航点后开伞

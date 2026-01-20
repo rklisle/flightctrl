@@ -11,126 +11,62 @@
 #include "../core/BusInteract.h"
 #include "../Interface/interface_uart.h"
 
-OS_U32 CurEngineRpm = 0;
+OS_U32 CurEngineRpm = 0;    //014 油门百分比*10 取值[0~1000]；  280 转速
 OS_U32 EngineRpmCmd = 0;
 OS_U8 EngineStartStatus = 0;
-OS_U8 SyncToGround = 0;
+OS_U8 SyncToGround = 0;     //地面控制的：控制是否给地面传输数据
+
 OS_U8 EngineInit()
 {
-	return 0;
+    modECU_EngineInit();
 }
 
-OS_U16 ChkEngineFrame(OS_MEM* pmData)
+/** 设置油门 */
+void SetEngineThrot(float percent)
 {
-	if(pmData == PTR_NULL)
-		return 0;
-	OS_U8 data[100];
-	memcpy(data,pmData, 100);
-
-	if(pmData[1] != 0xFF && pmData[1] != 0xFE && pmData[1] != 0xFD )
-	{
-		return 0;
-	}
-    int crcPos = 0;
-    if(pmData[1] == 0xFF)
-    {
-        crcPos = 53;       
-    }
-    if(pmData[1] == 0xFE)
-    {
-        crcPos = 29;
-    }
-    if(pmData[1] == 0xFD)
-    {
-        crcPos = 41;
-    }
-    OS_U8 read_crc = pmData[crcPos];
-    OS_U8 calc_crc = CalCRC8(pmData + 1, crcPos - 1);
-    if(read_crc != calc_crc)
-    {
-        return 0;
-    }
-    memmove(pmData + 7, pmData + 1, crcPos);
-	pmData[3] = crcPos - 1;
-	pmData[4] = 0;
-	pmData[5] = 0;
-	if(pmData[1] == 0xFF)
-    {
-        pmData[6] = 0x30;    
-    }
-    if(pmData[1] == 0xFE)
-    {
-        pmData[6] = 0x31;   
-    }
-    if(pmData[1] == 0xFD)
-    {
-       pmData[6] = 0x32;   
-    }
-	return crcPos + 9;
-}
-
-int SendEngineRpm(unsigned int rpm)
-{
+    unsigned int rpm = percent * 10.0f;//为了用上遥测表，我们将数据类型转化一下
     SETDATA(pDataPoolSelf,	"engSetRp",	rpm,  OS_U16);
-		OS_U8 EngineRpmData[8] = {0x48, 0x06, 0x00, 0x00, 0x00, 0x00, 0x00, 0x2F};
-    memcpy(EngineRpmData + 2, &rpm, 4);
-    EngineRpmData[6] = CalCRC8(EngineRpmData, 6);
-    UART_PutBuff(rtList[RT_ENGINE].chIndex, EngineRpmData, 8);
-	return 0;
+    modECU_setThrottle_percent(percent);
 }
 
+/** 启动发动机 */
 int StartEngine()
 {
-    OS_U8 StartData[4] = {0x48, 0x02, 0x03, 0x2F};
-    {
-        UART_PutBuff(rtList[RT_ENGINE].chIndex, StartData, 4);
-        return 0;
-    }
+    modECU_startEngine();
 }
-    
+
+/** 发动机停机 */
 int StopEngine()
 {
-    OS_U8 StopData[4] = {0x48, 0x04, 0x05, 0x2F};
-    {
-        UART_PutBuff(rtList[RT_ENGINE].chIndex, StopData, 4);
-        return 0;
-    }
+    modECU_stopEngine();
 }
 
-int GetCurEngineRpm()
-{
-    OS_U8 QueryData[4] = {0x50, 0x31, 0x30, 0x2F};
-    UART_PutBuff(rtList[RT_ENGINE].chIndex, QueryData, 4);
-    return 0;
-}
-
+/** 处理数据链传来的命令，也就是地面的遥控指令
+ * 控制转速指令：存数据池、控发动机转速
+ * 获取启动参数：发送相应命令
+ * 获取运行参数：
+ */
 OS_U32 EngineCmdHandler(STRU_422_MSG_INFO * frame)
 {
 	switch(frame->u8MsgID)
 	{
         case CMD_ECU_RPM_SETTING:
         {
-            OS_U32 rpm;
+            OS_U32 rpm;   //014 油门百分比*10 取值[0~1000]；  280 转速
             memcpy(&rpm, frame->au8Data, 4);
-            if(rpm > 60000)
-                rpm = 60000;
-            SETDATA(pDataPoolFly, "EnginePw", rpm,  OS_U16);
-            SendEngineRpm(rpm);
+            SETDATA(pDataPoolFly, "EngineRp", rpm,  OS_U16);
+			SetEngineThrot(rpm / 10.0f);// TODO: 油门设置需要再调整，目前是写软件时的临时设置
             break;
         }
-        case CMD_GET_START_PARAM:
+        case CMD_GET_START_PARAM: // 280发动机协议，获取发动机启动参数
         {
-            OS_U8 data[4] = {0x50, 0x31, 0x31, 0x2F};
-            UART_PutBuff(rtList[RT_ENGINE].chIndex, data, 4);
             break;
         }
-        case CMD_GET_RUNNING_PARAM:
+        case CMD_GET_RUNNING_PARAM: // 280发动机协议，获取发动机运行参数
         {
-            OS_U8 data[4] = {0x50, 0x31, 0x32, 0x2F};
-            UART_PutBuff(rtList[RT_ENGINE].chIndex, data, 4);
             break;
         }
-        case CMD_GET_RUNNING_INFO:
+        case CMD_GET_RUNNING_INFO://地面控制的：控制是否给地面传输数据
         {
             if(frame->au8Data[0] == 0x11)
             {
@@ -142,7 +78,7 @@ OS_U32 EngineCmdHandler(STRU_422_MSG_INFO * frame)
             }
             break;
         }
-        case CMD_START_STOP_ENGINE:
+        case CMD_START_STOP_ENGINE://地面发过来的启动命令
         {
             if(frame->au8Data[0] == 0x11)
             {
@@ -161,79 +97,75 @@ OS_U32 EngineCmdHandler(STRU_422_MSG_INFO * frame)
 	return 0;
 }
 
-OS_U8 SaveRunningInfo(STRU_RUNNING_INFO *data)
+/** 解析数据：发动机 ——> 飞控  存储数据 & 发给数据链 */
+OS_U32 EngineRtHandler(STRU_422_MSG_INFO * frame)   // MML发动机UART7 保存运行参数
 {
-    if(data->runningStatus == 1)
-    {
-        EngineStartStatus = 1;
-    }
-    else
-    {
-        EngineStartStatus = 0;
-    }
-    
-    SETDATA(pDataPoolSelf,	"ecuSetRp",	data->settingRpm,	OS_U16);
-    SETDATA(pDataPoolSelf,	"ecuGetRp",	data->curRpm,	OS_U16);
-    SETDATA(pDataPoolSelf,	"ecuTemp",	data->temp * 10,	OS_U16);
-    SETDATA(pDataPoolSelf,	"ecuState",	data->runningStatus,	OS_U8);
-    SETDATA(pDataPoolSelf,	"ecuError",	data->error,	OS_U8);
-    SETDATA(pDataPoolSelf,	"fuelRate",	data->fuelConsum,	OS_U16);
-    
-    SETDATA(pDataPoolSelf, "ecu24V", data->battV * 10,	OS_S16);
-		SETDATA(pDataPoolSelf, "ecu24A", data->battA * 10,	OS_S16);
+    // switch(frame->u8MsgID)
+    // {
+    //     case 0x30:
+    //         SaveRunningInfo((STRU_RUNNING_INFO *)frame->au8Data);
+    //         break;
+    //     case 0x31:
+    //         SaveStartParam((STRU_START_PARAM_INFO *)frame->au8Data);
+    //         break;
+    //     case 0x32:
+    //         SaveRunningParam((STRU_RUNNING_PARAM_INFO *)frame->au8Data);
+    //         break;
+    // }
+    // g_DeviceState.ecuCountDown = 200;
+    // return 0;
+}
+
+/** 解析数据：发动机 ——> 飞控  存储数据 & 发给数据链 */
+void EngineHandler()   // MML发动机UART7 保存运行参数
+{
+    g_DeviceState.ecuCountDown = 200;
+/** ****************014 新增******************* */
+    struct EngineStatus engineStatus = {0};
+    modECU_GetEngineStatus(&engineStatus);
+/** **************** 原先处理0x30需要用的参数 ******************* */
+    static STRU_RUNNING_INFO param30 = {0};
+    param30.runningStatus = engineStatus.CntState;
+    // param30.settingRpm = engineStatus.expect_rpm;
+    param30.curRpm = engineStatus.rpm;
+    param30.temp = engineStatus.ambient_temp;
+    param30.Pa = engineStatus.air_pressure * 100;
+
+    SETDATA(pDataPoolSelf, "ecuSetRp",	engineStatus.expect_rpm,	OS_U16);
+    SETDATA(pDataPoolSelf, "ecuGetRp",  engineStatus.rpm,              OS_U16);
+    SETDATA(pDataPoolSelf, "ecuTemp",   engineStatus.ambient_temp * 10,OS_U16);
+    SETDATA(pDataPoolSelf, "ecuState",	engineStatus.CntState,	OS_U8);
+    SETDATA(pDataPoolSelf, "ecuError",	0,	OS_U8);
+    SETDATA(pDataPoolSelf, "fuelRate",	0,	OS_U16);
+    SETDATA(pDataPoolSelf, "ecu24V", 0,	OS_S16);
+    SETDATA(pDataPoolSelf, "ecu24A", 0,	OS_S16);
     
     if(SyncToGround)
     {
-        MsgToDevice(RT_DATA_LINK, 0x30, sizeof(STRU_RUNNING_INFO), (OS_U8 *)data);
-//        MsgToDevice(RT_HIL, 0x30, sizeof(STRU_RUNNING_INFO), (OS_U8 *)data);
+        MsgToDevice(RT_DATA_LINK, 0x30, sizeof(STRU_RUNNING_INFO), (OS_U8 *)&param30);
     }
-    return 0;
+/** **************** 原先处理0x31需要用的参数 ******************* */
+    static STRU_START_PARAM_INFO param31 = {0};
+    MsgToDevice(RT_DATA_LINK, 0x31, sizeof(STRU_START_PARAM_INFO), (OS_U8 *)&param31);
+/** **************** 原先处理0x32需要用的参数 ******************* */
+    static STRU_RUNNING_PARAM_INFO param32 = {0};
+    MsgToDevice(RT_DATA_LINK, 0x32, sizeof(STRU_RUNNING_PARAM_INFO), (OS_U8 *)&param32);
 }
 
-OS_U8 SaveStartParam(STRU_START_PARAM_INFO *data)
-{
-    MsgToDevice(RT_DATA_LINK, 0x31, sizeof(STRU_START_PARAM_INFO), (OS_U8 *)data);
-    //MsgToDevice(RT_HIL, 0x31, sizeof(STRU_START_PARAM_INFO), (OS_U8 *)data);
-    return 0;
-    
-}
-
-OS_U8 SaveRunningParam(STRU_RUNNING_PARAM_INFO *data)
-{
-    MsgToDevice(RT_DATA_LINK, 0x32, sizeof(STRU_RUNNING_PARAM_INFO), (OS_U8 *)data);
-   // MsgToDevice(RT_HIL, 0x32, sizeof(STRU_RUNNING_PARAM_INFO), (OS_U8 *)data);
-    return 0;
-}
-
-OS_U32 EngineRtHandler(STRU_422_MSG_INFO * frame)
-{
-    switch(frame->u8MsgID)
-    {
-        case 0x30:
-            SaveRunningInfo((STRU_RUNNING_INFO *)frame->au8Data);
-            break;
-        case 0x31:
-            SaveStartParam((STRU_START_PARAM_INFO *)frame->au8Data);
-            break;
-        case 0x32:
-            SaveRunningParam((STRU_RUNNING_PARAM_INFO *)frame->au8Data);
-            break;
-    }
-    g_DeviceState.ecuCountDown = 200;
-    return 0;
-}
-
-OS_U8 AutoDriveEnginePwm()
+OS_U8 AutoDriveEnginePwm()//每100ms进来控制一次engine油门
 {
     if(g_DeviceState.CurrTick % 20 == 0)
     {
-        GetCurEngineRpm();
+        // GetCurEngineRpm();
+
     }
-    if((g_DeviceState.CurrTick + 10) % 20 == 0)
+    if((g_DeviceState.CurrTick + 10) % 20 == 0)//每5ms * 20 = 100ms，进一次if
     {
         if(((DOM_AUTOMATIC & g_DeviceState.workStage) == DOM_AUTOMATIC) && flightSeq.umOpen != 1)
         {
-            SendEngineRpm(CurEngineRpm);
+            // 状态：正常飞行，且未收到伞降命令。        控制发动机的油门
+            GetDataFast(pDataPoolFly, "EngineRp", &CurEngineRpm);
+			SetEngineThrot(CurEngineRpm *0.1f);// 全局变量中存的应该是控制给出的油门开度 * 10
         }
     }
 	return 0;

@@ -323,12 +323,10 @@ void SavePwrSeq()
     SETDATA(pDataPoolPwr, "groundV", canRecvVa.groundV,	OS_U16);
     SETDATA(pDataPoolPwr, "engineV", canRecvVa.engineV,	OS_U16);
     SETDATA(pDataPoolPwr, "VCombin", canRecvVa.mainV,	OS_U16);
-    SETDATA(pDataPoolPwr, "VFire", canRecvVa.fireV,	OS_U16);
     SETDATA(pDataPoolPwr, "battA", canRecvVa.battA,	OS_U16);
     SETDATA(pDataPoolPwr, "groundA", canRecvVa.groundA,	OS_U16);
     SETDATA(pDataPoolPwr, "engineA", canRecvVa.engineA,	OS_U16);
     SETDATA(pDataPoolPwr, "ACombin", canRecvVa.mainA,	OS_U16);
-    SETDATA(pDataPoolPwr, "Afire", canRecvVa.fireA,	OS_U16);
     SETDATA(pDataPoolPwr, "pwrTemp", canRecvVa.mcuTemp,	OS_U16);
 }
 
@@ -359,9 +357,9 @@ OS_U8 CanRtPwrSeqHandler(OS_U32 id, OS_BOOL ext_id, const OS_U8* pdata, OS_U8 da
         canRecvVa.mainA = pdata[3];		//0.1
 		canRecvVa.mcuTemp = (pdata[7] << 8) | pdata[6]; //0.1
     }
-	else
-	{return -1;}
-    //SavePwrSeq();
+	else{
+		return -1;
+	}
     g_DeviceState.powerCountDown = 200;	//MML 如果超过200*5ms还没有重置此值，说明CAN2，也就是配电板一直没有上报数据
     return 0;
 }

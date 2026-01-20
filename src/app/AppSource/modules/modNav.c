@@ -274,7 +274,7 @@ OS_U32 NavCmdHandler(STRU_422_MSG_INFO * frame)
 	return 0;
 }
 
-OS_U32 NavRtHandler(STRU_422_MSG_INFO * frame)
+OS_U32 NavRtHandler(STRU_422_MSG_INFO * frame)	// RT_NAV
 {
 	OS_U8 msgID = frame->u8MsgID;
 	switch(msgID)
@@ -418,25 +418,27 @@ OS_U8 CalcXYZ()
 	OS_U8 navState = 0;
     if(g_DeviceState.imuCountDown == 0)
     {
-        GetDataFast(pDataPoolNav, "navLon", 	&inavlon);
-        GetDataFast(pDataPoolNav, "navLat", 	&inavlat);
-        GetDataFast(pDataPoolNav, "navHigh", 	&fnavhigh);
+		// 与IMU断连，从nav数据池中取数据
+        GetDataFast(pDataPoolNav, "navLon",  &inavlon);
+        GetDataFast(pDataPoolNav, "navLat",  &inavlat);
+        GetDataFast(pDataPoolNav, "navHigh", &fnavhigh);
 
-        GetDataFast(pDataPoolNav, "navVn", 	&inavVn);
-        GetDataFast(pDataPoolNav, "navVs", 	&inavVs);
-        GetDataFast(pDataPoolNav, "navVe", 	&inavVe);
+        GetDataFast(pDataPoolNav, "navVn", &inavVn);
+        GetDataFast(pDataPoolNav, "navVs", &inavVs);
+        GetDataFast(pDataPoolNav, "navVe", &inavVe);
         
         GetDataFast(pDataPoolNav, "navState", &navState);//
     }
     else
     {
-        GetDataFast(pDataPoolImu, "navLon", 	&inavlon);
-        GetDataFast(pDataPoolImu, "navLat", 	&inavlat);
-        GetDataFast(pDataPoolImu, "navHigh", 	&fnavhigh);
+		// 与IMU连接正常，从IMU数据池中取数据
+        GetDataFast(pDataPoolImu, "navLon",  &inavlon);
+        GetDataFast(pDataPoolImu, "navLat",  &inavlat);
+        GetDataFast(pDataPoolImu, "navHigh", &fnavhigh);
 
-        GetDataFast(pDataPoolImu, "navVn", 	&inavVn);
-        GetDataFast(pDataPoolImu, "navVs", 	&inavVs);
-        GetDataFast(pDataPoolImu, "navVe", 	&inavVe);
+        GetDataFast(pDataPoolImu, "navVn", &inavVn);
+        GetDataFast(pDataPoolImu, "navVs", &inavVs);
+        GetDataFast(pDataPoolImu, "navVe", &inavVe);
         
         GetDataFast(pDataPoolImu, "navState", &navState);//
     }
@@ -459,7 +461,12 @@ OS_U8 CalcXYZ()
 
 	if(navState == 0x60 || navState == 0x64)//60组合导航，64惯性导航
 	{
-		DoCalcXYZ(luanchLon * 1e-7, luanchLat*1e-7, luanchHigh, luanchDir*1e-2, navlon, navlat, navhigh, navVn, navVs, navVe, &x, &y, &z, &vx, &vy, &vz);
+		DoCalcXYZ(	luanchLon * 1e-7, 
+					luanchLat*1e-7, 
+					luanchHigh, 
+					luanchDir*1e-2, 
+					navlon, navlat, navhigh, navVn, navVs, navVe, 
+					&x, &y, &z, &vx, &vy, &vz);
 	}
 
 	SETDATA(pDataPoolFly, "navX", x, OS_FLOAT);

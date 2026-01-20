@@ -13,7 +13,7 @@
 #include "../interface/interface_gpio.h"
 #include "../interface/interface_can.h"
 #include "../interface/interface_uart.h"
-#include "../interface/interface_pwm.h"  // 新增PWM接口
+#include "../Interface/interface_timer.h"  // 新增timer接口
 #include "../core/BusInteract.h"
 #include "../core/DataPool.h"
 #include "../flight/os_flight_io.h"
@@ -219,52 +219,23 @@ uint32_t angle_to_ccr(double angle_deg) {
     return ccr;
 }
 
-/**
- * @brief 设置PWM舵机角度
- * @param pwm_channel PWM通道号（5或6）
- * @param angle 目标角度
- * @return 0:成功, -1:失败
- */
-OS_U8 Servo_SetAngle_PWM(OS_U8 pwm_channel, double angle)
-{
-    uint32_t ccr = angle_to_ccr(angle);
-
-    switch (pwm_channel) {
-        case 5:
-            SETDATA(pDataPoolSrv, "Sr5Angle", angle, OS_U16);
-            // 设置PWM脉宽
-            __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_1, ccr);
-            break;
-        case 6:
-            SETDATA(pDataPoolSrv, "Sr6Angle", angle, OS_U16);
-            // 设置PWM脉宽
-            __HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_2, ccr);
-            break;
-        case 7:
-            SETDATA(pDataPoolSrv, "Sr7Angle", angle, OS_U16);
-            // 设置PWM脉宽
-            __HAL_TIM_SET_COMPARE(&htim4, TIM_CHANNEL_3, ccr);
-            break;
-        default:
-            return -1;
-    }
-    return 0;
-}
-
 /***********************************************************
  * 函数名称: MsgToSrv()
  * 函数功能: 伺服额外要求指令计数及发送帧计数，因此剥离一层控制数据，再发送
  * 作者:	未知
  ***********************************************************/
-OS_U8 MsgToSrv(OS_DOUBLE ctrlDeg[6], OS_U8 ctrlMode/*control = 0x02, 0x44=setZero*/)	
+OS_U8 MsgToSrv(OS_DOUBLE ctrlDeg[6], OS_U8 ctrlMode/*control = 0x02, 0x44=setZero*/)//04 存入数据池 控制舵机
 {
-	//MML舵机，只需看看函数内部有无问题
+	//MML舵机
     SETDATA(pDataPoolSrv, "Sr1Cmd", ctrlDeg[0] * 100, OS_S16); 
 	SETDATA(pDataPoolSrv, "Sr2Cmd", ctrlDeg[1] * 100, OS_S16);
     SETDATA(pDataPoolSrv, "Sr3Cmd", ctrlDeg[2] * 100, OS_S16);
     SETDATA(pDataPoolSrv, "Sr4Cmd", ctrlDeg[3] * 100, OS_S16);
     SETDATA(pDataPoolSrv, "Sr5Cmd", ctrlDeg[4] * 100, OS_S16);
     SETDATA(pDataPoolSrv, "Sr6Cmd", ctrlDeg[5] * 100, OS_S16);
+
+    SETDATA(pDataPoolSrv, "Sr5Angle", ctrlDeg[4], OS_U16);
+    SETDATA(pDataPoolSrv, "Sr6Angle", ctrlDeg[5], OS_S16);
 
 	if (ctrlMode == 0x02) 
 	{
@@ -276,8 +247,8 @@ OS_U8 MsgToSrv(OS_DOUBLE ctrlDeg[6], OS_U8 ctrlMode/*control = 0x02, 0x44=setZer
 		Servo_SetAngle_CAN(SERVO_NODE_4, ctrlDeg[3]);
 		
 		// 控制5-6号PWM舵机
-		Servo_SetAngle_PWM(5, ctrlDeg[4]);//MML舵机16
-		Servo_SetAngle_PWM(6, ctrlDeg[5]);//MML舵机16
+        AngleServo_SetAngle(SERVO_PWM1, (float)ctrlDeg[4]);
+        AngleServo_SetAngle(SERVO_PWM6, (float)ctrlDeg[5]);
     }
 	else if (ctrlMode == 0x44) 
 	{
@@ -290,8 +261,8 @@ OS_U8 MsgToSrv(OS_DOUBLE ctrlDeg[6], OS_U8 ctrlMode/*control = 0x02, 0x44=setZer
         
         // PWM舵机零点设置
         // PWM舵机通常需要机械调零，这里仅让舵机回归0°位置
-		Servo_SetAngle_PWM(5, 0);//MML舵机16
-		Servo_SetAngle_PWM(6, 0);//MML舵机16
+        AngleServo_SetAngle(SERVO_PWM1, 0.0f);
+        AngleServo_SetAngle(SERVO_PWM6, 0.0f);
     }
     return 0;
 }
@@ -338,7 +309,7 @@ OS_U8 Servo_SetTorqueZero_CAN(ServoNodeID node)
  * 作者:	未知
  ***********************************************************/
 OS_U8 ServoCtlOnce_6Rudder(double actDeg_1, double actDeg_2, double actDeg_3, 
-    double actDeg_4, double actDeg_5, double actDeg_6)
+    double actDeg_4, double actDeg_5, double actDeg_6)	//03 控制舵机
 {
     double deg[6];
     deg[0] = actDeg_1; 
@@ -353,37 +324,37 @@ OS_U8 ServoCtlOnce_6Rudder(double actDeg_1, double actDeg_2, double actDeg_3,
     return 0;
 }
 
-OS_U8 SaveSrvInDataPool(STRU_SRV_INFO *data);	//函数声明
+// OS_U8 SaveSrvInDataPool(STRU_SRV_INFO *data);	//函数声明
 
-/***********************************************************
- * 函数名称: ServoRtHandler()
- * 函数功能: 伺服总线处理函数，伺服的设定是不会定时给智能控制器发送内容的，仅在收到智能控制器的指令后回复。测发控阶段，均需下传地面
- * 			本型号智能控制器接收伺服发出的指令:
- * 			1.伺服自检回复0x11		: 地面已取消自检命令，因此也收不到这个回复了，协议中规定的格式与控制回复相同。
- * 			2.伺服控制回复0x22		: 存数据池，伺服的绝大多数内容来自控制回复，包括地面控制指令、小回路指令、发射后的控制指令。
- * 			3.伺服调零回复0x23		: 存数据池
- * 参考资料: <TXII-Y1 422箭上通信协议>
- * 作者:	成宏璟
- ***********************************************************/
-OS_U32 SrvRtHandler(STRU_422_MSG_INFO * srvMsg)	
-{
-	//MML舵机，这是280用的串口的回调函数，014项目不用
-	//首先判断是什么类型的指令
-	//对数据区前四字节进行判断
-	RECV_CMD_ID recvCmdId = srvMsg->u8MsgID;
-	//根据反馈指令做处理
-	switch(recvCmdId)
-	{
-		case 0x11:
-            SaveSrvInDataPool((STRU_SRV_INFO *)srvMsg->au8Data);
-			break;
+// /***********************************************************
+//  * 函数名称: ServoRtHandler()
+//  * 函数功能: 伺服总线处理函数，伺服的设定是不会定时给智能控制器发送内容的，仅在收到智能控制器的指令后回复。测发控阶段，均需下传地面
+//  * 			本型号智能控制器接收伺服发出的指令:
+//  * 			1.伺服自检回复0x11		: 地面已取消自检命令，因此也收不到这个回复了，协议中规定的格式与控制回复相同。
+//  * 			2.伺服控制回复0x22		: 存数据池，伺服的绝大多数内容来自控制回复，包括地面控制指令、小回路指令、发射后的控制指令。
+//  * 			3.伺服调零回复0x23		: 存数据池
+//  * 参考资料: <TXII-Y1 422箭上通信协议>
+//  * 作者:	成宏璟
+//  ***********************************************************/
+// OS_U32 SrvRtHandler(STRU_422_MSG_INFO * srvMsg)	
+// {
+// 	//MML舵机，这是280用的串口的回调函数，014项目不用
+// 	//首先判断是什么类型的指令
+// 	//对数据区前四字节进行判断
+// 	RECV_CMD_ID recvCmdId = srvMsg->u8MsgID;
+// 	//根据反馈指令做处理
+// 	switch(recvCmdId)
+// 	{
+// 		case 0x11:
+//             SaveSrvInDataPool((STRU_SRV_INFO *)srvMsg->au8Data);
+// 			break;
 	
-		default:
-			break;
-	}
-    g_DeviceState.srvCountDown = 200;
-	return 0;
-}
+// 		default:
+// 			break;
+// 	}
+//     g_DeviceState.srvCountDown = 200;
+// 	return 0;
+// }
 
 /**
  * @brief CAN舵机接收回调函数
@@ -414,16 +385,16 @@ OS_U8 CanRtServoHandler(OS_U32 id, OS_BOOL ext_id, const OS_U8* data, OS_U8 len)
                     // 保存到数据池
                     switch (node) {
                         case SERVO_NODE_1:
-                            SETDATA(pDataPoolSrv, "Sr1Read", (OS_S16)(angle * 10), OS_S16);//单位0.01°
+                            SETDATA(pDataPoolSrv, "Sr1Read", (OS_S16)(angle * 100), OS_S16);//单位0.01°
                             break;
                         case SERVO_NODE_2:
-                            SETDATA(pDataPoolSrv, "Sr2Read", (OS_S16)(angle * 10), OS_S16);
+                            SETDATA(pDataPoolSrv, "Sr2Read", (OS_S16)(angle * 100), OS_S16);
                             break;
                         case SERVO_NODE_3:
-                            SETDATA(pDataPoolSrv, "Sr3Read", (OS_S16)(angle * 10), OS_S16);
+                            SETDATA(pDataPoolSrv, "Sr3Read", (OS_S16)(angle * 100), OS_S16);
                             break;
                         case SERVO_NODE_4:
-                            SETDATA(pDataPoolSrv, "Sr4Read", (OS_S16)(angle * 10), OS_S16);
+                            SETDATA(pDataPoolSrv, "Sr4Read", (OS_S16)(angle * 100), OS_S16);
                             break;
                         default:
                             break;
@@ -440,16 +411,16 @@ OS_U8 CanRtServoHandler(OS_U32 id, OS_BOOL ext_id, const OS_U8* data, OS_U8 len)
                     // 保存到数据池
                     switch (node) {
                         case SERVO_NODE_1:
-                            SETDATA(pDataPoolSrv, "Sr1A", (OS_S16)(current_a * 10), OS_S16);//单位是mA
+                            SETDATA(pDataPoolSrv, "Sr1A", (OS_S16)(current_a * 1000), OS_S16);//单位是A
                             break;
                         case SERVO_NODE_2:
-                            SETDATA(pDataPoolSrv, "Sr2A", (OS_S16)(current_a * 10), OS_S16);
+                            SETDATA(pDataPoolSrv, "Sr2A", (OS_S16)(current_a * 1000), OS_S16);
                             break;
                         case SERVO_NODE_3:
-                            SETDATA(pDataPoolSrv, "Sr3A", (OS_S16)(current_a * 10), OS_S16);
+                            SETDATA(pDataPoolSrv, "Sr3A", (OS_S16)(current_a * 1000), OS_S16);
                             break;
                         case SERVO_NODE_4:
-                            SETDATA(pDataPoolSrv, "Sr4A", (OS_S16)(current_a * 10), OS_S16);
+                            SETDATA(pDataPoolSrv, "Sr4A", (OS_S16)(current_a * 1000), OS_S16);
                             break;
                         default:
                             break;
@@ -535,23 +506,23 @@ OS_U8 MiniLoopSimulation()	//MML舵机
 	return 0;
 }
 
-OS_U8 SaveSrvInDataPool(STRU_SRV_INFO *data)	//MML舵机
-{
-    SETDATA(pDataPoolSrv, "Sr1Read", data->srv1Read / 10,	OS_S16);
-	SETDATA(pDataPoolSrv, "Sr2Read", data->srv2Read / 10,	OS_S16);
-	SETDATA(pDataPoolSrv, "Sr3Read", data->srv3Read / 10,	OS_S16);
-	SETDATA(pDataPoolSrv, "Sr4Read", data->srv4Read / 10,	OS_S16);
-	SETDATA(pDataPoolSrv, "Sr5Read", data->srv5Read / 10,	OS_S16);
-	SETDATA(pDataPoolSrv, "Sr6Read", data->srv6Read / 10,	OS_S16);
+// OS_U8 SaveSrvInDataPool(STRU_SRV_INFO *data)	//280回调
+// {
+//     SETDATA(pDataPoolSrv, "Sr1Read", data->srv1Read / 10,	OS_S16);
+// 	SETDATA(pDataPoolSrv, "Sr2Read", data->srv2Read / 10,	OS_S16);
+// 	SETDATA(pDataPoolSrv, "Sr3Read", data->srv3Read / 10,	OS_S16);
+// 	SETDATA(pDataPoolSrv, "Sr4Read", data->srv4Read / 10,	OS_S16);
+// 	SETDATA(pDataPoolSrv, "Sr5Read", data->srv5Read / 10,	OS_S16);
+// 	SETDATA(pDataPoolSrv, "Sr6Read", data->srv6Read / 10,	OS_S16);
     
-    SETDATA(pDataPoolSrv, "Sr1A", data->srv1A,	OS_S16);
-	SETDATA(pDataPoolSrv, "Sr2A", data->srv2A,	OS_S16);
-	SETDATA(pDataPoolSrv, "Sr3A", data->srv3A,	OS_S16);
-	SETDATA(pDataPoolSrv, "Sr4A", data->srv4A,	OS_S16);
-	SETDATA(pDataPoolSrv, "Sr5A", data->srv5A,	OS_S16);
-	SETDATA(pDataPoolSrv, "Sr6A", data->srv6A,	OS_S16);
-    return 0;
-}
+//     SETDATA(pDataPoolSrv, "Sr1A", data->srv1A,	OS_S16);
+// 	SETDATA(pDataPoolSrv, "Sr2A", data->srv2A,	OS_S16);
+// 	SETDATA(pDataPoolSrv, "Sr3A", data->srv3A,	OS_S16);
+// 	SETDATA(pDataPoolSrv, "Sr4A", data->srv4A,	OS_S16);
+// 	SETDATA(pDataPoolSrv, "Sr5A", data->srv5A,	OS_S16);
+// 	SETDATA(pDataPoolSrv, "Sr6A", data->srv6A,	OS_S16);
+//     return 0;
+// }
 
 OS_U8 StartMiniLoop(float freq, float amp, float zero, OS_U8 enable[6])
 {
@@ -573,7 +544,7 @@ OS_U8 StartMiniLoop(float freq, float amp, float zero, OS_U8 enable[6])
  * 参考资料: <TXII-Y1 箭地通信协议>
  * 作者:	成宏璟
  ***********************************************************/
-OS_U32 ServoCmdHandler(STRU_422_MSG_INFO * frame)	//MML舵机
+OS_U32 ServoCmdHandler(STRU_422_MSG_INFO * frame)//03根据数据链过来的指令，具体干活	//MML舵机
 {
 	OS_U8 msgID = frame->u8MsgID;
 	switch(msgID)
@@ -658,7 +629,7 @@ OS_U8 SrvStatusUpdata()	//MML舵机
 	return 0;
 }
 
-OS_U8 DoSrvProtect()	//MML舵机
+OS_U8 DoSrvProtect()//03舵机角度控制为0	//MML舵机 （280目前不用）
 {
 	if(SrvProtect > 0)
 	{
@@ -670,7 +641,7 @@ OS_U8 DoSrvProtect()	//MML舵机
 
 OS_U16 AutoZeroCount = 0;
 
-OS_U8 AutoZero()	//MML舵机
+OS_U8 AutoZero()//03舵机角度控制为0	//MML舵机 （280目前不用）
 {
 	if(BookingMode == 1)
 		return 1;

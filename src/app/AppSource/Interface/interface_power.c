@@ -17,84 +17,70 @@
 //     return 0;
 // }
 
-OS_BOOL powerState[8];
-OS_BOOL seqState[6];
+OS_U8 currentPowerState = 0;
+
 OS_S8 PowerOn(POWER_DEVICE dev)
 {
-	powerState[dev-1] = TRUE;
-    OS_U32 powerCmd = 0;
-    OS_U8 battCmd = 0;
+    OS_U32 CANCmd_power = 0;
 	switch(dev)
 	{
     //MML 014协议
-    case DEVICE_IMU_28V:        //导引头
-        powerCmd = 0x10000000;
+    case DEVICE_SCOUT_E28V:        //导引头
+        CANCmd_power = 0x10000000;
         break;
-    case DEVICE_FUSE_2_ISO28V:	//引信可控电源
-        powerCmd = 0x40000000;
+    case DEVICE_FUSE28V:	      //引信可控电源
+        CANCmd_power = 0x40000000;
         break;
-    case DEVICE_FUSE_5V:        //引信5V信号
-        powerCmd = 0x00010000;
+    case DEVICE_FUSE_ISO5V:       //引信5V信号
+        CANCmd_power = 0x00010000;
         break;
-    case DEVICE_BATT_SRV:	    //舵机
-        powerCmd = 0x04000000;
+    case DEVICE_SRV_PWR28V:	      //舵机
+        CANCmd_power = 0x04000000;
+        break;
+    default:
         break;
 	}
-    if(powerCmd != 0)
-    {
-        SendCanFrame(CAN_RT_POWERSEQ, 0x242, 4, (OS_U8 *)&powerCmd);
+    if(CANCmd_power == 0){
+        return -1;  //can't find correct device
     }
-    if(battCmd != 0)
-    {
-        // SendCanFrame(CAN_RT_BATT, 0x241, 1, (OS_U8 *)&battCmd);
-    }
-    OS_U8 bytePowerState = 0;
-    for(int i=0;i<8;i++)
-    {
-        bytePowerState |= (powerState[i] << i);
-    }
-    SETDATA(pDataPoolPwr, "PwrCmd", bytePowerState,	OS_U8);
+    SendCanFrame(CAN_RT_POWERSEQ, 0x242, 4, (OS_U8 *)&CANCmd_power);
+
+    currentPowerState |= (1u << dev);
+    SETDATA(pDataPoolPwr, "PwrCmd", currentPowerState,	OS_U8);
 	return 0;
 }
 
 OS_S8 PowerOff(POWER_DEVICE dev)
 {
-	powerState[dev-1] = FALSE;
-	OS_U32 powerCmd = 0;
-    OS_U8 battCmd = 0;
+	OS_U32 CANCmd_power = 0;
 	switch(dev)
 	{
     //MML 014协议
-    case DEVICE_MAIN_BATT:	    //主电池
-        powerCmd = (0x01000000 << 1);
+    case DEVICE_MBAT:	          //主电池
+        CANCmd_power = (0x01000000 << 1);
         break;
-    case DEVICE_IMU_28V:        //导引头
-        powerCmd = (0x10000000 << 1);
+    case DEVICE_SCOUT_E28V:      //导引头
+        CANCmd_power = (0x10000000 << 1);
         break;
-    case DEVICE_FUSE_2_ISO28V:	//引信可控电源
-        powerCmd = (0x40000000 << 1);
+    case DEVICE_FUSE28V:	    //引信可控电源
+        CANCmd_power = (0x40000000 << 1);
         break;
-    case DEVICE_FUSE_5V:        //引信5V信号
-        powerCmd = (0x00010000 << 1);
+    case DEVICE_FUSE_ISO5V:     //引信5V信号
+        CANCmd_power = (0x00010000 << 1);
         break;
-    case DEVICE_BATT_SRV:	    //舵机
-        powerCmd = (0x04000000 << 1);
+    case DEVICE_SRV_PWR28V:	    //舵机
+        CANCmd_power = (0x04000000 << 1);
+        break;
+    default:
         break;
 	}
-    if(powerCmd != 0)
-    {
-        SendCanFrame(CAN_RT_POWERSEQ, 0x242, 4, (OS_U8 *)&powerCmd);
+    if(CANCmd_power == 0){
+        return -1;  //can't find correct device
     }
-    if(battCmd != 0)
-    {
-        // SendCanFrame(CAN_RT_BATT, 0x241, 1, (OS_U8 *)&battCmd);
-    }
-    OS_U8 bytePowerState = 0;
-    for(int i=0;i<8;i++)
-    {
-        bytePowerState |= (powerState[i] << i);
-    }
-    SETDATA(pDataPoolPwr, "PwrCmd", bytePowerState,	OS_U8);
+    SendCanFrame(CAN_RT_POWERSEQ, 0x242, 4, (OS_U8 *)&CANCmd_power);
+
+    currentPowerState |= (0u << dev);
+    SETDATA(pDataPoolPwr, "PwrCmd", currentPowerState,	OS_U8);
 	return 0;
 }
 

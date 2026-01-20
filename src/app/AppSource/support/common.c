@@ -104,7 +104,7 @@ const STRU_STANDARD_FRAME* PeekStandardMessage()
 		//可能会有多个帧
 		for(int i=0; i<MAX_SIMUL_FRAME; i++)
 		{
-			if(u16Length[i] > 0)
+			if((u16Length[i] > 0) && ( rtList[rtIndex].ptr_ChkFrameSum != NULL))
 			{
 				//先做帧校验检查，再压栈
 				//调整pmData[n]的内部排列，使其满足标准帧要求

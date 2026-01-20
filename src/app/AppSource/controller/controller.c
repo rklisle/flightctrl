@@ -20,7 +20,6 @@
 #include "../FlightSupport.h"
 #include "../modules/modNav.h"
 #include "../interface/interface_gpio.h"
-#include "../interface/interface_pwm.h"
 #include "../support/common.h"
 //#include "../comm/CommHandler.h"
 #include "../payload/MsnTime.h"
@@ -32,7 +31,7 @@ OS_U8 LunchDetective();
 float Read_CPU_Temperature(void) ;
 extern long calcTimeCpu0;
 extern int sd_card_fault;
-OS_U8 EngineStartCmd = 0;    //地面发动机启动按钮标志
+OS_U8 EngineStartCmd = 0;    //来自地面的控制参数， 1：启动发动机；0：停止发动机
 float System_GetCoreTemperature();
 extern void ReConnectUart();
 OS_DOUBLE AirSpdHistory[150];
@@ -79,9 +78,7 @@ OS_U8 CalcAirSpd()
  *			 流程完成后等待最终发射，其中过程无需任何人为干预
  * 作者:	成宏璟
  ***********************************************************/
-  
-int waitShangluosiTick = 0;
-OS_U8 AutoLuanchProcess()
+OS_U8 AutoLuanchProcess()  // 5ms运行一次
 {
 	if((g_DeviceState.workStage & DOM_AUTOMATIC) == DOM_AUTOMATIC)
 			return 0;    
@@ -98,7 +95,7 @@ OS_U8 AutoLuanchProcess()
 			static int powerSend = 0;
 			if(powerSend == 0)
 			{
-				PowerOn(DEVICE_IMU_28V);
+				PowerOn(DEVICE_SCOUT_E28V);
 				powerSend = 1;
 			}
 			else
@@ -120,8 +117,8 @@ OS_U8 AutoLuanchProcess()
 			static int sendFlag = 0;
 			if(sendFlag == 0)
 			{
-				PowerOn(DEVICE_FUSE_2_ISO28V);
-				PowerOn(DEVICE_FUSE_5V);
+				PowerOn(DEVICE_FUSE28V);
+				PowerOn(DEVICE_FUSE_ISO5V);
 				sendFlag = 1;
 			}
 			else{
@@ -142,7 +139,7 @@ OS_U8 AutoLuanchProcess()
 			static int powerSend1 = 0;
 			if(powerSend1 == 0)
 			{
-					PowerOn(DEVICE_BATT_SRV);
+					PowerOn(DEVICE_SRV_PWR28V);
 					powerSend1 = 1;
 			}
 			else
@@ -164,8 +161,8 @@ OS_U8 AutoLuanchProcess()
 			static int powerSend2 = 0;
 			if(powerSend2 == 0)
 			{
-					PowerOn(DEVICE_BATT_ENGINE);
-					PowerOn(DEVICE_BATT_BATT2);
+					// PowerOn(DEVICE_BATT_ENGINE);	//MML 发动机
+					// PowerOn(DEVICE_BATT_BATT2);
 					powerSend2 = 1;
 			}
 			else
@@ -198,8 +195,8 @@ OS_U8 AutoLuanchProcess()
 		msg.u8MsgID = CMD_NAV_INIT;
 		NavCmdHandler(&msg);
 		msg.u8MsgID = CMD_HOR_CALC_REQ;
-		NavCmdHandler(&msg);		
-		ImuCmdHandler(&msg);
+		NavCmdHandler(&msg);
+		ImuCmdHandler(&msg); //TODO:014这个应该是没有了。
 		AutoStep = 6;
 	}
 	//4.判断对准完成，完成后转导航
@@ -234,17 +231,15 @@ OS_U8 AutoLuanchProcess()
 	{
 		AutoStep = 8;;
 	}
-	//6.等待发动机起动指令发出
+	//6.等待发动机启动指令发出
 	if(AutoStep == 8)
 	{
 		if(EngineStartCmd == 1)
 		{
-			//留出口盖上螺丝时间,每tick20ms，2000 == 40秒
-			waitShangluosiTick = 0;
 			AutoStep = 9;
 		}
 	}
-	//6.发动机起动
+	//6.发动机启动
 	if(AutoStep == 9)
 	{
 		//AutoStep = 10; //test
@@ -253,46 +248,27 @@ OS_U8 AutoLuanchProcess()
 		{
 			//用户手动又发送了停机指令
 			StopEngine();
-			SendEngineRpm(0);
 			AutoStep = 8;
 		}
 		else
 		{
-			if(g_DeviceState.CurrTick % 4 == 0)
+			if(g_DeviceState.CurrTick % 4 == 0)// 每20ms，进if
 			{
 				//先判断发动机是否已进入运行状态
-				OS_U8 engineStatus;
-				GetDataFast(pDataPoolSelf, "ecuState", &engineStatus);
-				switch(engineStatus)//0停机，1启动中，2散热 3故障 4脱机 5运行
+				struct EngineStatus engineStatus = {0};
+				modECU_GetEngineStatus(&engineStatus);
+				switch(engineStatus.CntState)//0停机，1启动中，2散热 3故障 4脱机 5运行（这肯定是协议里的）
 				{
-					case 0://发送启动指令
-							StartEngine();
-							//SendEngineRpm(45000);
+					case ENGINE_STOPED://发送启动指令
+							StartEngine();//应该是启动流程
 							break;
-					case 1://等待启动
+					case ENGINE_WARMUP://等待启动
 							break;
-					case 2:
-					case 3:
-					case 4:
+					case ENGINE_SHUTTING_DOWN:
 							break;
-					case 5:
-					{								 
-						if(waitShangluosiTick > 0)
-						{
-							waitShangluosiTick--;
-						}
-						else
-						{
-							//判断转速是否达到怠速要求
-							SendEngineRpm(48000);
-							OS_U16 rpm;
-							GetDataFast(pDataPoolSelf, "ecuGetRp", &rpm);
-							if(rpm > 45000)//怠速正常为18000
-							{
-								AutoStep = 10;
-							}
-						}
-					}
+					case ENGINE_RUNNING:
+							AutoStep = 10;
+							break;
 				}
 			}
 		}
@@ -311,12 +287,11 @@ OS_U8 AutoLuanchProcess()
 		{
 			//用户手动又发送了停机指令         
 			StopEngine();
-			SendEngineRpm(0);
 			AutoStep = 8;
 			g_DeviceState.luanchStart = 0;
 			SETDATA(pDataPoolSelf,	"RecvLunc",	0x00,	OS_U8);
 		}
-		if(IgnitionMark == TRUE)
+		if(IgnitionMark == TRUE)//地面发送全部解锁指令
 		{
 			AutoStep = 12;
 		}
@@ -328,7 +303,6 @@ OS_U8 AutoLuanchProcess()
 		{
 			//用户手动又发送了停机指令
 			StopEngine();
-			SendEngineRpm(0);
 			AutoStep = 8;
 			IgnitionMark = FALSE;
 			g_DeviceState.luanchStart = 0;
@@ -336,7 +310,7 @@ OS_U8 AutoLuanchProcess()
 		}
 		OS_U8 startFly = 0;
 		GetDataFast(pDataPoolSelf,	"startFly",	&startFly);
-		if(startFly == 1)
+		if(startFly == 1)//DoIgnition函数将startFly置1
 		{
 			AutoStep = 13;
 		}
@@ -346,7 +320,7 @@ OS_U8 AutoLuanchProcess()
 	if(g_DeviceState.scoutCountDown != 0)
 	{
 		SETDATA(pDataPoolMsn,	"paylodtp",	3,	OS_U8);
-  }
+	}
 	else
 	{
 		SETDATA(pDataPoolMsn,	"paylodtp",	2,	OS_U8);
@@ -363,11 +337,12 @@ OS_U8 AutoLuanchProcess()
  * 	2.发射前给地面发送配电信息报告
  * 作者:	成宏璟
  ***********************************************************/
-OS_U8 ControllerStatusUpdata()
+OS_U8 ControllerStatusUpdata()	// 5ms运行一次
 {
-	SelfCheckCollpse();		//自检配置和回报
-	CalcAirSpd();
-	ReConnectUart();
+	//判断起飞条件，条件满足就起飞；检查各外设通信状态
+	SelfCheckCollpse();		//自检配置和回报	
+	CalcAirSpd();		// 计算空速
+	ReConnectUart();	// 重连串口
 	return 0;
 }
 
@@ -552,7 +527,7 @@ OS_U8 SeqCalc()
 	{
 		return -1;
 	}
-	if(flightTime >= 0.5)//
+	if(flightTime >= 0.5)// MML： 时间 > 500ms
 	{
 		flightSeq.luanched = 1;
 	}
@@ -564,7 +539,7 @@ OS_U8 SeqCalc()
 }
 
 
-OS_U8 DoIgnition()
+OS_U8 DoIgnition()// 地面软件点击“起飞”
 {
 	MsgToNAV(BUS_NAV_IGNATION,PTR_NULL,0);
 
@@ -579,13 +554,14 @@ OS_U8 DoIgnition()
 	return 0;
 }
 
+OS_U8 IgnitionMark = FALSE;  // 地面全部解锁按钮点击标志
+
 /***********************************************************
  * 函数名称:Ignition()
  * 函数功能: 发射指令，可被数据链、地面调用。接收到指令后设置整箭状态，重新初始化飞控算法
  * 输入，清除舵控积累数据
  * 作者:	成宏璟
  ***********************************************************/
-OS_U8 IgnitionMark = FALSE;
 OS_U8 Ignition()
 {
 	IgnitionMark = TRUE;
@@ -598,7 +574,7 @@ OS_U8 Ignition()
 	return 0;
 }
 
-OS_U8 LunchDetective()
+OS_U8 LunchDetective()	// 判断起飞条件，起飞
 {
 	if(IgnitionMark == TRUE && ((g_DeviceState.workStage & DOM_AUTOMATIC) != DOM_AUTOMATIC))
 	{

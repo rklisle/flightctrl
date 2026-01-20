@@ -64,17 +64,32 @@ void InitRts()
 		rtList[i].ptr_ChkFrameSum = ChkStandardFrame;//所有rt先初始化为标准校验函数
 		rtList[i].ptr_Init = PTR_NULL;//所有rt先定义为“无特殊初始化要求”
 	}
-	/***************************
+	/*************************** 
 	 * 快速遥测接2号口，序号1
 	 * 半实物接1号口，序号0
 	 * 箭地接6号口，序号5
 	 * 数据链接3号口，序号2
 	 * 组合导航接5号口，序号4
+	 * 	
+	 * /*************************************  280
+	 * 导引头 UART1
+	 ***** 火控/引信 UART2
+	 * IMU UART3********************
+	 ***** 数据链 UART4
+	 * 舵机 UART5
+	 ***** 发动机 UART6
+	 ***** 半实物 UART7
+	 * 导航版上的NAV UART8***********
 	 ********************** */
-
-
+	/***************************************** 014
+	 * 导引头——UART1/2，chIndex0/1
+	 ***** 数据链——UART3，chIndex2
+	 ***** 引信——UART4，chIndex3
+	 ***** 仿真口——UART6 / 网口，chIndex5
+	 ***** 发动机——UART7，chIndex6
+	 */
 	rtList[RT_SCOUT].ckIndex = 0;//0		//载荷1  任务机
-	rtList[RT_SCOUT].chIndex = 0;//0
+	rtList[RT_SCOUT].chIndex = 0;//	导引头 UART1 /***************** 目前不用了 ************/
 	rtList[RT_SCOUT].devID = 0x01;
 	rtList[RT_SCOUT].devBuad = 230400;
     rtList[RT_SCOUT].devStopLen = 1;
@@ -84,8 +99,38 @@ void InitRts()
     //rtList[RT_SCOUT].ptr_Init = InitScout;
     //rtList[RT_SCOUT].ptr_ChkFrameSum = ChkScoutStandardFrame;
 
+	// rtList[RT_SCOUT_CTL].ckIndex = 0;
+	// rtList[RT_SCOUT_CTL].chIndex = 0;// 导引头 控制信息	UART1
+	// rtList[RT_SCOUT_CTL].devID = 0x01;
+	// rtList[RT_SCOUT_CTL].devBuad = 230400;
+	// rtList[RT_SCOUT_CTL].devStopLen = 1;
+	// rtList[RT_SCOUT_CTL].oddCheckEnable = FALSE;
+    // rtList[RT_SCOUT_CTL].evenCheckEnable = FALSE;
+    // rtList[RT_SCOUT_CTL].ptr_ChkFrameSum = NULL;
+	// rtList[RT_SCOUT_CTL].ptr_RtHandler = ScoutRtHandler;
+
+	rtList[RT_SCOUT_ATTITUDE].ckIndex = 0;
+	rtList[RT_SCOUT_ATTITUDE].chIndex = 1;// 导引头 航姿信息	UART2
+	rtList[RT_SCOUT_ATTITUDE].devID = 0x01;
+	rtList[RT_SCOUT_ATTITUDE].devBuad = 230400;
+	rtList[RT_SCOUT_ATTITUDE].devStopLen = 1;
+	rtList[RT_SCOUT_ATTITUDE].oddCheckEnable = FALSE;
+    rtList[RT_SCOUT_ATTITUDE].evenCheckEnable = FALSE;
+    rtList[RT_SCOUT_ATTITUDE].ptr_ChkFrameSum = NULL;
+	rtList[RT_SCOUT_ATTITUDE].ptr_RtHandler = ScoutRtHandler;
+
+	rtList[RT_DATA_LINK].ckIndex = 0;//0
+	rtList[RT_DATA_LINK].chIndex = 2;// 数据链	UART3
+	rtList[RT_DATA_LINK].devID = 0x05;
+	rtList[RT_DATA_LINK].devBuad = 230400;	/**   280:  921600;*/
+	rtList[RT_DATA_LINK].devStopLen = 1;
+	rtList[RT_DATA_LINK].oddCheckEnable = FALSE;
+    rtList[RT_DATA_LINK].evenCheckEnable = FALSE;
+    rtList[RT_DATA_LINK].ptr_ChkFrameSum = ChkDataLinkFrame;
+	rtList[RT_DATA_LINK].ptr_RtHandler = CmdHandler;
+
 	rtList[RT_FUSE].ckIndex = 0;//0
-	rtList[RT_FUSE].chIndex = 1;//1 半实物
+	rtList[RT_FUSE].chIndex = 3;//引信——UART4
 	rtList[RT_FUSE].devID = 0x04;
 	rtList[RT_FUSE].devBuad = 115200;
 	rtList[RT_FUSE].devStopLen = 1;
@@ -95,26 +140,47 @@ void InitRts()
     rtList[RT_FUSE].ptr_Init = InitFuse;
     rtList[RT_FUSE].ptr_ChkFrameSum = ChkFuseStandardFrame;
 
-	rtList[RT_IMU].ckIndex = 0;//0		//链路  射后透传
-	rtList[RT_IMU].chIndex = 2;//2
-	rtList[RT_IMU].devID = 0x01;
-	rtList[RT_IMU].devBuad = 921600;
-	rtList[RT_IMU].devStopLen = 1;
-	rtList[RT_IMU].oddCheckEnable = FALSE;
-    rtList[RT_IMU].evenCheckEnable = FALSE;
-	rtList[RT_IMU].ptr_RtHandler = ImuRtHandler;
-    rtList[RT_IMU].ptr_Init = ImuInit;
-    rtList[RT_IMU].ptr_ChkFrameSum = ChkImuFrame;
-    
-	rtList[RT_DATA_LINK].ckIndex = 0;//0
-	rtList[RT_DATA_LINK].chIndex = 3;//3
-	rtList[RT_DATA_LINK].devID = 0x05;
-	rtList[RT_DATA_LINK].devBuad = 921600;
-	rtList[RT_DATA_LINK].devStopLen = 1;
-	rtList[RT_DATA_LINK].oddCheckEnable = FALSE;
-    rtList[RT_DATA_LINK].evenCheckEnable = FALSE;
-    rtList[RT_DATA_LINK].ptr_ChkFrameSum = ChkDataLinkFrame;
-	rtList[RT_DATA_LINK].ptr_RtHandler = CmdHandler;
+    rtList[RT_HIL].ckIndex = 0;//0
+	rtList[RT_HIL].chIndex = 5;//仿真口——UART6
+	rtList[RT_HIL].devID = 0x04;
+	rtList[RT_HIL].devBuad = 230400;	/** 	280:	921600; */  
+	rtList[RT_HIL].devStopLen = 1;
+	rtList[RT_HIL].oddCheckEnable = FALSE;
+    rtList[RT_HIL].evenCheckEnable = FALSE;
+	rtList[RT_HIL].ptr_RtHandler = HilRtHandler;
+
+    rtList[RT_ENGINE].ckIndex = 0;//0		//链路  射后透传
+	rtList[RT_ENGINE].chIndex = 6;/********** ***表明fd = 6************ *ECU——UART7 */
+	rtList[RT_ENGINE].devID = 0x01;
+	rtList[RT_ENGINE].flags = 0x01;
+	rtList[RT_ENGINE].devBuad = 115200;
+	rtList[RT_ENGINE].devStopLen = 1;
+	rtList[RT_ENGINE].oddCheckEnable = FALSE;
+    rtList[RT_ENGINE].evenCheckEnable = FALSE;
+	rtList[RT_ENGINE].ptr_RtHandler = EngineHandler;//解析数据：发动机 ——> 飞控
+    rtList[RT_ENGINE].ptr_Init = EngineInit;
+    rtList[RT_ENGINE].ptr_ChkFrameSum = NULL;//解析数据：发动机 ——> 飞控，查看校验CRC
+
+	rtList[RT_NAV].ckIndex = 0;//0		//链路  射后透传
+	rtList[RT_NAV].chIndex = 7;//导航板——UART8
+	rtList[RT_NAV].devID = 0x01;
+	rtList[RT_NAV].devBuad = 460800;
+	rtList[RT_NAV].devStopLen = 1;
+	rtList[RT_NAV].oddCheckEnable = FALSE;
+    rtList[RT_NAV].evenCheckEnable = FALSE;
+	rtList[RT_NAV].ptr_RtHandler = NavRtHandler;
+/** ******************************************************************************************* */
+
+// rtList[RT_IMU].ckIndex = 0;//0		//链路  射后透传
+	// rtList[RT_IMU].chIndex = 2;//2
+	// rtList[RT_IMU].devID = 0x01;
+	// rtList[RT_IMU].devBuad = 921600;
+	// rtList[RT_IMU].devStopLen = 1;
+	// rtList[RT_IMU].oddCheckEnable = FALSE;
+    // rtList[RT_IMU].evenCheckEnable = FALSE;
+	// rtList[RT_IMU].ptr_RtHandler = ImuRtHandler;
+    // rtList[RT_IMU].ptr_Init = ImuInit;
+    // rtList[RT_IMU].ptr_ChkFrameSum = ChkImuFrame;
     
     // rtList[RT_SRV].ckIndex = 0;//0		//链路  射后透传	//MML舵机
 	// rtList[RT_SRV].chIndex = 4;//4
@@ -126,45 +192,17 @@ void InitRts()
 	// rtList[RT_SRV].ptr_RtHandler = SrvRtHandler;
     // rtList[RT_SRV].ptr_Init = InitSrv;
 	// rtList[RT_SRV].ptr_ChkFrameSum = ChkSrvFrame;
-    
-    rtList[RT_ENGINE].ckIndex = 0;//0		//链路  射后透传
-	rtList[RT_ENGINE].chIndex = 5;//5
-	rtList[RT_ENGINE].devID = 0x01;
-	rtList[RT_ENGINE].devBuad = 19200;
-	rtList[RT_ENGINE].devStopLen = 1;
-	rtList[RT_ENGINE].oddCheckEnable = FALSE;
-    rtList[RT_ENGINE].evenCheckEnable = FALSE;
-	rtList[RT_ENGINE].ptr_RtHandler = EngineRtHandler;
-    rtList[RT_ENGINE].ptr_Init = EngineInit;
-    rtList[RT_ENGINE].ptr_ChkFrameSum = ChkEngineFrame;
-    
-    rtList[RT_HIL].ckIndex = 0;//0
-	rtList[RT_HIL].chIndex = 6;//6 半实物
-	rtList[RT_HIL].devID = 0x04;
-	rtList[RT_HIL].devBuad = 921600;
-	rtList[RT_HIL].devStopLen = 1;
-	rtList[RT_HIL].oddCheckEnable = FALSE;
-    rtList[RT_HIL].evenCheckEnable = FALSE;
-	rtList[RT_HIL].ptr_RtHandler = HilRtHandler;
-    
-    rtList[RT_NAV].ckIndex = 0;//0		//链路  射后透传
-	rtList[RT_NAV].chIndex = 7;//7
-	rtList[RT_NAV].devID = 0x01;
-	rtList[RT_NAV].devBuad = 460800;
-	rtList[RT_NAV].devStopLen = 1;
-	rtList[RT_NAV].oddCheckEnable = FALSE;
-    rtList[RT_NAV].evenCheckEnable = FALSE;
-	rtList[RT_NAV].ptr_RtHandler = NavRtHandler;
 
-    rtList[RT_P900].ckIndex = 0;//0		//链路  射后透传	MML目前没用
-	rtList[RT_P900].chIndex = 8;//2
-	rtList[RT_P900].devID = 0x01;
-	rtList[RT_P900].devBuad = 115200;
-	rtList[RT_P900].devStopLen = 1;
-	rtList[RT_P900].oddCheckEnable = FALSE;
-    rtList[RT_P900].evenCheckEnable = FALSE;
-	rtList[RT_P900].ptr_RtHandler = CmdHandler;
-    rtList[RT_P900].ptr_ChkFrameSum = ChkEngineFrame;
+
+    // rtList[RT_P900].ckIndex = 0;//0		//链路  射后透传	MML目前没用
+	// rtList[RT_P900].chIndex = 8;//2
+	// rtList[RT_P900].devID = 0x01;
+	// rtList[RT_P900].devBuad = 115200;
+	// rtList[RT_P900].devStopLen = 1;
+	// rtList[RT_P900].oddCheckEnable = FALSE;
+    // rtList[RT_P900].evenCheckEnable = FALSE;
+	// rtList[RT_P900].ptr_RtHandler = CmdHandler;
+    // rtList[RT_P900].ptr_ChkFrameSum = ChkEngineFrame;
     
 	for(int i=0;i<MODULE_COUNT;i++)
 	{
@@ -188,7 +226,7 @@ void InitRts()
  * 			对消息来源的判断依据不再依赖设备号，而是通过接收消息的串口号识别。
  * 作者:	成宏璟
  ***********************************************************/
-void BusDataHandle()
+void BusDataHandle()	// 1ms调用一次
 {
 	STRU_STANDARD_FRAME * frmPtr = NULL;
 	//每一次进到本函数，都需要处理目前所有422接口收到的所有数据
@@ -196,6 +234,15 @@ void BusDataHandle()
 	{
 		if(rtList[frmPtr->u8RtIndex].ptr_RtHandler != NULL)
 			rtList[frmPtr->u8RtIndex].ptr_RtHandler((STRU_422_MSG_INFO *)&(frmPtr->pStand422Data));
+	}
+
+	// check if regular poll required
+	for(int k=0;k<sizeof(rtList)/sizeof(rtList[0]);k++)
+	{
+		if((rtList[k].flags != 0)&&(rtList[k].ptr_RtHandler != NULL))
+		{
+			rtList[k].ptr_RtHandler(NULL);
+		}
 	}
 /*
 	STRU_CAN_MSG *msg = NULL;
