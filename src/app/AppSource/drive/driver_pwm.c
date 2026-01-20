@@ -5,7 +5,8 @@
 #include "driver_pwm.h"
 #include <string.h>
 
-#define MCU_MAIN_FREQ 240000000
+extern uint32_t SystemCoreClock;
+#define MCU_MAIN_FREQ SystemCoreClock//240000000
 
 TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim4;
@@ -14,6 +15,7 @@ TIM_HandleTypeDef htim17;
 /** 舵机和TIM的映射表 */
 typedef struct {
     TIM_HandleTypeDef* htim;     // TIM句柄
+    TIM_TypeDef* TIMx;
     uint32_t channel;           // TIM通道
     GPIO_TypeDef* gpio_port;    // GPIO端口
     uint16_t gpio_pin;          // GPIO引脚
@@ -22,10 +24,10 @@ typedef struct {
 
 /** 全局硬件映射表 */
 static const Servo_Hardware_Mapping_t hardware_map[PWM_CH_MAX] = {
-    [SERVO_PWM1] = {&htim3, TIM_CHANNEL_1, GPIOC, GPIO_PIN_6, GPIO_AF2_TIM3},
-    [SERVO_PWM6] = {&htim4, TIM_CHANNEL_2, GPIOD, GPIO_PIN_13, GPIO_AF2_TIM4},
-    [SERVO_PWM7] = {&htim4, TIM_CHANNEL_3, GPIOB, GPIO_PIN_8, GPIO_AF2_TIM4},
-    [ECU_PWM8]  = {&htim17, TIM_CHANNEL_1, GPIOB, GPIO_PIN_9, GPIO_AF1_TIM17},
+    [SERVO_PWM1] = {&htim3, TIM3, TIM_CHANNEL_1, GPIOC, GPIO_PIN_6, GPIO_AF2_TIM3},
+    [SERVO_PWM6] = {&htim4, TIM4, TIM_CHANNEL_2, GPIOD, GPIO_PIN_13, GPIO_AF2_TIM4},
+    [SERVO_PWM7] = {&htim4, TIM4, TIM_CHANNEL_3, GPIOB, GPIO_PIN_8, GPIO_AF2_TIM4},
+    [ECU_PWM8]  = {&htim17, TIM17, TIM_CHANNEL_1, GPIOB, GPIO_PIN_9, GPIO_AF1_TIM17},
 };
 
 /** PWM通道状态结构体，针对ST的专属配置 */
@@ -178,6 +180,7 @@ static bool prv_calculate_timer_psc_arr(Servo_ID_t servo_id)
 static void prv_MX_TIM_Init(Servo_ID_t servo_id, Servo_Hardware_Mapping_t* hw)
 {
   TIM_OC_InitTypeDef sConfigOC = {0};
+  hw->htim->Instance = hw->TIMx;    //MML
   hw->htim->Init.Prescaler = s_channel_states[servo_id].prescaler;
   hw->htim->Init.CounterMode = TIM_COUNTERMODE_UP;
   hw->htim->Init.Period = s_channel_states[servo_id].period;
