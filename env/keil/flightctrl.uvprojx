@@ -2937,16 +2937,6 @@
               <FileType>1</FileType>
               <FilePath>..\..\src\app\AppSource\drive\ffunicode.c</FilePath>
             </File>
-            <File>
-              <FileName>pwm_ctrl.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\src\app\AppSource\drive\pwm_ctrl.c</FilePath>
-            </File>
-            <File>
-              <FileName>pwm_ctrl.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\src\app\AppSource\drive\pwm_ctrl.h</FilePath>
-            </File>
           </Files>
         </Group>
         <Group>
@@ -3102,11 +3092,6 @@
               <FilePath>..\..\src\app\AppSource\Interface\interface_can.c</FilePath>
             </File>
             <File>
-              <FileName>interface_can.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\src\app\AppSource\Interface\interface_can.h</FilePath>
-            </File>
-            <File>
               <FileName>interface_flash.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\src\app\AppSource\Interface\interface_flash.c</FilePath>
@@ -3149,24 +3134,9 @@
               </FileOption>
             </File>
             <File>
-              <FileName>interface_flash.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\src\app\AppSource\Interface\interface_flash.h</FilePath>
-            </File>
-            <File>
               <FileName>interface_gpio.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\src\app\AppSource\Interface\interface_gpio.c</FilePath>
-            </File>
-            <File>
-              <FileName>interface_gpio.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\src\app\AppSource\Interface\interface_gpio.h</FilePath>
-            </File>
-            <File>
-              <FileName>interface_power.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\src\app\AppSource\Interface\interface_power.h</FilePath>
             </File>
             <File>
               <FileName>interface_power.c</FileName>
@@ -3174,29 +3144,9 @@
               <FilePath>..\..\src\app\AppSource\Interface\interface_power.c</FilePath>
             </File>
             <File>
-              <FileName>interface_pwm.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\src\app\AppSource\Interface\interface_pwm.c</FilePath>
-            </File>
-            <File>
-              <FileName>interface_pwm.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\src\app\AppSource\Interface\interface_pwm.h</FilePath>
-            </File>
-            <File>
               <FileName>interface_uart.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\src\app\AppSource\Interface\interface_uart.c</FilePath>
-            </File>
-            <File>
-              <FileName>interface_uart.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\src\app\AppSource\Interface\interface_uart.h</FilePath>
-            </File>
-            <File>
-              <FileName>interface_eth.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\src\app\AppSource\Interface\interface_eth.h</FilePath>
             </File>
             <File>
               <FileName>interface_eth.c</FileName>
@@ -3217,6 +3167,16 @@
               <FileName>servo_manager.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\src\app\AppSource\Interface\servo_manager.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>AppDrive</GroupName>
+          <Files>
+            <File>
+              <FileName>driver_pwm.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\src\app\AppSource\drive\driver_pwm.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -4266,16 +4226,6 @@
               <FileName>support.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\..\src\app\NavSource\support\support.h</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>AppDrive</GroupName>
-          <Files>
-            <File>
-              <FileName>driver_pwm.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\src\app\AppSource\drive\driver_pwm.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -7340,16 +7290,6 @@
               <FileType>1</FileType>
               <FilePath>..\..\src\app\AppSource\drive\ffunicode.c</FilePath>
             </File>
-            <File>
-              <FileName>pwm_ctrl.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\src\app\AppSource\drive\pwm_ctrl.c</FilePath>
-            </File>
-            <File>
-              <FileName>pwm_ctrl.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\src\app\AppSource\drive\pwm_ctrl.h</FilePath>
-            </File>
           </Files>
         </Group>
         <Group>
@@ -7690,11 +7630,6 @@
               </FileOption>
             </File>
             <File>
-              <FileName>interface_can.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\src\app\AppSource\Interface\interface_can.h</FilePath>
-            </File>
-            <File>
               <FileName>interface_flash.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\src\app\AppSource\Interface\interface_flash.c</FilePath>
@@ -7735,11 +7670,6 @@
                   </Carm>
                 </FileArm>
               </FileOption>
-            </File>
-            <File>
-              <FileName>interface_flash.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\src\app\AppSource\Interface\interface_flash.h</FilePath>
             </File>
             <File>
               <FileName>interface_gpio.c</FileName>
@@ -7784,16 +7714,6 @@
               </FileOption>
             </File>
             <File>
-              <FileName>interface_gpio.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\src\app\AppSource\Interface\interface_gpio.h</FilePath>
-            </File>
-            <File>
-              <FileName>interface_power.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\src\app\AppSource\Interface\interface_power.h</FilePath>
-            </File>
-            <File>
               <FileName>interface_power.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\src\app\AppSource\Interface\interface_power.c</FilePath>
@@ -7834,53 +7754,6 @@
                   </Carm>
                 </FileArm>
               </FileOption>
-            </File>
-            <File>
-              <FileName>interface_pwm.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\src\app\AppSource\Interface\interface_pwm.c</FilePath>
-              <FileOption>
-                <CommonProperty>
-                  <UseCPPCompiler>2</UseCPPCompiler>
-                  <RVCTCodeConst>0</RVCTCodeConst>
-                  <RVCTZI>0</RVCTZI>
-                  <RVCTOtherData>0</RVCTOtherData>
-                  <ModuleSelection>0</ModuleSelection>
-                  <IncludeInBuild>0</IncludeInBuild>
-                  <AlwaysBuild>2</AlwaysBuild>
-                  <GenerateAssemblyFile>2</GenerateAssemblyFile>
-                  <AssembleAssemblyFile>2</AssembleAssemblyFile>
-                  <PublicsOnly>2</PublicsOnly>
-                  <StopOnExitCode>11</StopOnExitCode>
-                  <CustomArgument></CustomArgument>
-                  <IncludeLibraryModules></IncludeLibraryModules>
-                  <ComprImg>1</ComprImg>
-                </CommonProperty>
-                <FileArm>
-                  <Carm>
-                    <arpcs>2</arpcs>
-                    <stkchk>2</stkchk>
-                    <reentr>2</reentr>
-                    <interw>2</interw>
-                    <bigend>2</bigend>
-                    <Strict>0</Strict>
-                    <Optim>0</Optim>
-                    <wLevel>0</wLevel>
-                    <uThumb>2</uThumb>
-                    <VariousControls>
-                      <MiscControls></MiscControls>
-                      <Define></Define>
-                      <Undefine></Undefine>
-                      <IncludePath></IncludePath>
-                    </VariousControls>
-                  </Carm>
-                </FileArm>
-              </FileOption>
-            </File>
-            <File>
-              <FileName>interface_pwm.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\src\app\AppSource\Interface\interface_pwm.h</FilePath>
             </File>
             <File>
               <FileName>interface_uart.c</FileName>
@@ -7925,16 +7798,6 @@
               </FileOption>
             </File>
             <File>
-              <FileName>interface_uart.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\src\app\AppSource\Interface\interface_uart.h</FilePath>
-            </File>
-            <File>
-              <FileName>interface_eth.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\src\app\AppSource\Interface\interface_eth.h</FilePath>
-            </File>
-            <File>
               <FileName>interface_eth.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\src\app\AppSource\Interface\interface_eth.c</FilePath>
@@ -7953,6 +7816,16 @@
               <FileName>servo_manager.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\src\app\AppSource\Interface\servo_manager.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>AppDrive</GroupName>
+          <Files>
+            <File>
+              <FileName>driver_pwm.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\src\app\AppSource\drive\driver_pwm.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -9228,16 +9101,6 @@
               <FileName>support.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\..\src\app\NavSource\support\support.h</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>AppDrive</GroupName>
-          <Files>
-            <File>
-              <FileName>driver_pwm.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\src\app\AppSource\drive\driver_pwm.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -11764,16 +11627,6 @@
               <FileType>1</FileType>
               <FilePath>..\..\src\app\AppSource\drive\ffunicode.c</FilePath>
             </File>
-            <File>
-              <FileName>pwm_ctrl.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\src\app\AppSource\drive\pwm_ctrl.c</FilePath>
-            </File>
-            <File>
-              <FileName>pwm_ctrl.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\src\app\AppSource\drive\pwm_ctrl.h</FilePath>
-            </File>
           </Files>
         </Group>
         <Group>
@@ -11835,19 +11688,9 @@
               <FilePath>..\..\src\app\AppSource\Interface\interface_can.c</FilePath>
             </File>
             <File>
-              <FileName>interface_can.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\src\app\AppSource\Interface\interface_can.h</FilePath>
-            </File>
-            <File>
               <FileName>interface_flash.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\src\app\AppSource\Interface\interface_flash.c</FilePath>
-            </File>
-            <File>
-              <FileName>interface_flash.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\src\app\AppSource\Interface\interface_flash.h</FilePath>
             </File>
             <File>
               <FileName>interface_gpio.c</FileName>
@@ -11855,44 +11698,14 @@
               <FilePath>..\..\src\app\AppSource\Interface\interface_gpio.c</FilePath>
             </File>
             <File>
-              <FileName>interface_gpio.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\src\app\AppSource\Interface\interface_gpio.h</FilePath>
-            </File>
-            <File>
-              <FileName>interface_power.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\src\app\AppSource\Interface\interface_power.h</FilePath>
-            </File>
-            <File>
               <FileName>interface_power.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\src\app\AppSource\Interface\interface_power.c</FilePath>
             </File>
             <File>
-              <FileName>interface_pwm.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\src\app\AppSource\Interface\interface_pwm.c</FilePath>
-            </File>
-            <File>
-              <FileName>interface_pwm.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\src\app\AppSource\Interface\interface_pwm.h</FilePath>
-            </File>
-            <File>
               <FileName>interface_uart.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\src\app\AppSource\Interface\interface_uart.c</FilePath>
-            </File>
-            <File>
-              <FileName>interface_uart.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\src\app\AppSource\Interface\interface_uart.h</FilePath>
-            </File>
-            <File>
-              <FileName>interface_eth.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\src\app\AppSource\Interface\interface_eth.h</FilePath>
             </File>
             <File>
               <FileName>interface_eth.c</FileName>
@@ -11913,6 +11726,16 @@
               <FileName>servo_manager.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\src\app\AppSource\Interface\servo_manager.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>AppDrive</GroupName>
+          <Files>
+            <File>
+              <FileName>driver_pwm.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\src\app\AppSource\drive\driver_pwm.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -12727,16 +12550,6 @@
               <FileName>support.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\..\src\app\NavSource\support\support.h</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>AppDrive</GroupName>
-          <Files>
-            <File>
-              <FileName>driver_pwm.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\src\app\AppSource\drive\driver_pwm.c</FilePath>
             </File>
           </Files>
         </Group>
