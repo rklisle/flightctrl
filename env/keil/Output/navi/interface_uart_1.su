@@ -1,3 +1,0 @@
-../../src/app/NavSource/interface/interface_uart.c:44:5:UART_Setting	40	static
-../../src/app/NavSource/interface/interface_uart.c:101:5:UART_PutBuff	24	static
-../../src/app/NavSource/interface/interface_uart.c:115:5:UART_GetFrame	528	static

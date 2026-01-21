@@ -1,7 +1,0 @@
-../../src/app/AppSource/payload/scout.c:26:7:ScoutCheckByte	16	static
-../../src/app/AppSource/payload/scout.c:31:7:InitScout	96	static
-../../src/app/AppSource/payload/scout.c:58:8:ChkScoutStandardFrame	136	static
-../../src/app/AppSource/payload/scout.c:94:8:ScoutRtHandler	128	static
-../../src/app/AppSource/payload/scout.c:145:6:ScoutGroundHandler	24	static
-../../src/app/AppSource/payload/scout.c:185:14:GenScoutBuf	112	static
-../../src/app/AppSource/payload/scout.c:285:7:ScoutAutoSend	224	static

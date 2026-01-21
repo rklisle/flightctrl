@@ -1,3 +1,0 @@
-../../src/bsp/fcs_cpu/system_stm32h750.c:177:13:prv_itcm_init	24	static
-../../src/bsp/fcs_cpu/system_stm32h750.c:200:6:SystemInit	8	static
-../../src/bsp/fcs_cpu/system_stm32h750.c:365:6:SystemCoreClockUpdate	48	static

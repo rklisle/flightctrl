@@ -1,8 +1,0 @@
-../../src/app/AppSource/flight/os_flight_io.c:17:6:FlightInit	8	static
-../../src/app/AppSource/flight/os_flight_io.c:23:6:FlightRun	16	static
-../../src/app/AppSource/flight/os_flight_io.c:140:6:UpdateMission	8	static
-../../src/app/AppSource/flight/os_flight_io.c:145:6:setFlightInput	8	static
-../../src/app/AppSource/flight/os_flight_io.c:150:6:getFlightOutput	16	static
-../../src/app/AppSource/flight/os_flight_io.c:155:6:updateRP	32	static
-../../src/app/AppSource/flight/os_flight_io.c:186:6:updateNewRP	40	static
-../../src/app/AppSource/flight/os_flight_io.c:248:6:getDubinsParam	16	static

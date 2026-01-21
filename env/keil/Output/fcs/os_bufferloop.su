@@ -1,3 +1,0 @@
-../../src/app/AppSource/support/os_bufferLoop.c:13:7:InitBuffLoop	16	static
-../../src/app/AppSource/support/os_bufferLoop.c:27:7:PushLoopMem	40	static
-../../src/app/AppSource/support/os_bufferLoop.c:52:8:PopFrameLoopMem	104	static

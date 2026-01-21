@@ -1,3 +1,0 @@
-../../src/app/control_algorithm.c:28:13:tmr_entry	24	static
-../../src/app/control_algorithm.c:37:6:app_control_algorithm_init	48	static
-../../src/app/control_algorithm.c:53:13:app_task	48	static

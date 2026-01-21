@@ -1,6 +1,0 @@
-../../src/app/NavSource/stmToZynq.c:6:6:InitNavCode	8	static
-../../src/app/NavSource/stmToZynq.c:13:6:periodic_nav_1ms	4	static
-../../src/app/NavSource/stmToZynq.c:21:6:periodic_nav_5ms	8	static
-../../src/app/NavSource/stmToZynq.c:30:8:GetCurTime	4	static
-../../src/app/NavSource/stmToZynq.c:35:6:SetCurTime	16	static
-../../src/app/NavSource/stmToZynq.c:40:6:ResetCurTime	4	static

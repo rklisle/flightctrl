@@ -1,3 +1,0 @@
-../../src/bsp/fcs_cpu/sdram.c:54:13:SDRAM_Initialization_Sequence	24	static
-../../src/bsp/fcs_cpu/sdram.c:109:6:sdram_test	32	static
-../../src/bsp/fcs_cpu/sdram.c:144:6:MX_FMC_Init	8	static

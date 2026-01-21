@@ -1,9 +1,0 @@
-../../src/app/pressure_sensor.c:25:13:prv_i2c_event_cb	16	static
-../../src/app/pressure_sensor.c:33:16:prv_i2c_read	48	static
-../../src/app/pressure_sensor.c:60:16:prv_i2c_write	48	static
-../../src/app/pressure_sensor.c:109:16:prv_ms4525_load_data	64	static
-../../src/app/pressure_sensor.c:166:16:prv_ms5611_load_calib_data	24	static
-../../src/app/pressure_sensor.c:192:16:prv_ms5611_load_data	32	static
-../../src/app/pressure_sensor.c:243:13:pressure_sensor_task	152	static
-../../src/app/pressure_sensor.c:336:9:pressure_get_status	16	static
-../../src/app/pressure_sensor.c:348:9:app_pressure_init	48	static

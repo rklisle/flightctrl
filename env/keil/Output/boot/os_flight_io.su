@@ -1,4 +1,0 @@
-../../src/app/AppSource/flight/os_flight_io.c:17:6:FlightInit	8	static
-../../src/app/AppSource/flight/os_flight_io.c:26:6:FlightRun	8	static
-../../src/app/AppSource/flight/os_flight_io.c:73:6:setFlightInput	8	static
-../../src/app/AppSource/flight/os_flight_io.c:78:6:getFlightOutput	16	static

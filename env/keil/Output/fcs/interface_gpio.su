@@ -1,3 +1,0 @@
-../../src/app/AppSource/Interface/interface_gpio.c:19:5:InitGPIO	4	static
-../../src/app/AppSource/Interface/interface_gpio.c:41:5:ADC_GetVoltage	4	static
-../../src/app/AppSource/Interface/interface_gpio.c:47:5:GetGpioOnOff	24	static

@@ -1,7 +1,0 @@
-../../src/app/AppSource/modules/modNav.c:32:7:MsgToNAV	16	static
-../../src/app/AppSource/modules/modNav.c:44:15:HorizontalCalc	176	static
-../../src/app/AppSource/modules/modNav.c:155:14:DoHorizonCalc	128	static
-../../src/app/AppSource/modules/modNav.c:210:8:NavCmdHandler	128	static
-../../src/app/AppSource/modules/modNav.c:269:8:NavRtHandler	2304	static
-../../src/app/AppSource/modules/modNav.c:302:7:SaveNavInDataPool	6456	static
-../../src/app/AppSource/modules/modNav.c:417:7:CalcXYZ	192	static

@@ -1,6 +1,0 @@
-../../src/app/AppSource/modules/modSD.c:30:7:DoWriteToSD	24	static
-../../src/app/AppSource/modules/modSD.c:39:7:JudgeWriteToSD	24	static
-../../src/app/AppSource/modules/modSD.c:60:7:WriteToSD	24	static
-../../src/app/AppSource/modules/modSD.c:81:7:InitSD	448	static
-../../src/app/AppSource/modules/modSD.c:140:6:sd_write_init	48	static
-../../src/app/AppSource/modules/modSD.c:156:13:sd_task	16	static

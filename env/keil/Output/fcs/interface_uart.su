@@ -1,3 +1,0 @@
-../../src/app/AppSource/Interface/interface_uart.c:157:5:UART_Setting	40	static
-../../src/app/AppSource/Interface/interface_uart.c:214:5:UART_PutBuff	24	static
-../../src/app/AppSource/Interface/interface_uart.c:228:5:UART_GetFrame	32	static

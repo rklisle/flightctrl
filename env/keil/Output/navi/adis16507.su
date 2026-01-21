@@ -1,6 +1,0 @@
-../../src/app/adis16507.c:36:6:GetImuOut	16	static
-../../src/app/adis16507.c:52:13:mySPI_callback	16	static
-../../src/app/adis16507.c:59:17:prv_check_sum	32	static
-../../src/app/adis16507.c:71:24:prv_scale_calc	16	static
-../../src/app/adis16507.c:77:13:adis16507_task	144	static
-../../src/app/adis16507.c:121:6:adis16507_Init	40	static

@@ -1,6 +1,0 @@
-../../src/app/AppSource/core/Telemetry.c:16:6:PushDefInDataPool	48	static
-../../src/app/AppSource/core/Telemetry.c:40:6:InitTelemetry	48	static
-../../src/app/AppSource/core/Telemetry.c:119:13:TelemetryCombine	72	static
-../../src/app/AppSource/core/Telemetry.c:164:15:GetTelemetryByTick	32	static
-../../src/app/AppSource/core/Telemetry.c:197:15:GetFlightTelemetryByTick	24	static
-../../src/app/AppSource/core/Telemetry.c:218:6:TelemetryFrameOut	1528	static

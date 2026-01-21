@@ -1,5 +1,0 @@
-../../src/app/NavSource/support/os_bufferLoop.c:14:7:InitBuffLoop	16	static
-../../src/app/NavSource/support/os_bufferLoop.c:28:7:PushLoopMem	40	static
-../../src/app/NavSource/support/os_bufferLoop.c:53:13:prv_is_gps_msg_hdr	16	static
-../../src/app/NavSource/support/os_bufferLoop.c:57:22:prv_idx_next	16	static
-../../src/app/NavSource/support/os_bufferLoop.c:62:8:PopFrameLoopMem	80	static

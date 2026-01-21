@@ -1,4 +1,0 @@
-../../src/app/AppSource/Interface/interface_power.c:9:7:PowerOn	16	static
-../../src/app/AppSource/Interface/interface_power.c:39:7:PowerOff	16	static
-../../src/app/AppSource/Interface/interface_power.c:69:7:SeqOn	16	static
-../../src/app/AppSource/Interface/interface_power.c:76:7:SeqOff	16	static

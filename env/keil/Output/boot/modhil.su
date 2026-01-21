@@ -1,4 +1,0 @@
-../../src/app/AppSource/modules/modHil.c:21:7:SaveHilInDataPool	24	static
-../../src/app/AppSource/modules/modHil.c:30:8:HilRtHandler	2256	static
-../../src/app/AppSource/modules/modHil.c:114:7:HilFlightStage	56	static
-../../src/app/AppSource/modules/modHil.c:174:6:StopHilTest	8	static

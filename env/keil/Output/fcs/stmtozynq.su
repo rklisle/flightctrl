@@ -1,6 +1,0 @@
-../../src/app/AppSource/stmToZynq.c:7:6:Init7020Code	8	static
-../../src/app/AppSource/stmToZynq.c:14:6:periodic_function_1ms	8	static
-../../src/app/AppSource/stmToZynq.c:20:6:periodic_function_5ms	8	static
-../../src/app/AppSource/stmToZynq.c:27:8:GetCurTime	4	static
-../../src/app/AppSource/stmToZynq.c:32:6:SetCurTime	16	static
-../../src/app/AppSource/stmToZynq.c:37:6:ResetCurTime	4	static

@@ -1,8 +1,0 @@
-../../src/bsp/navi_cpu/stm32h7xx_hal_msp.c:65:6:HAL_MspInit	16	static
-../../src/bsp/navi_cpu/stm32h7xx_hal_msp.c:87:6:HAL_SPI_MspInit	112	static
-../../src/bsp/navi_cpu/stm32h7xx_hal_msp.c:302:6:HAL_SPI_MspDeInit	16	static
-../../src/bsp/navi_cpu/stm32h7xx_hal_msp.c:429:6:HAL_TIM_PWM_MspInit	24	static
-../../src/bsp/navi_cpu/stm32h7xx_hal_msp.c:445:6:HAL_TIM_MspPostInit	40	static
-../../src/bsp/navi_cpu/stm32h7xx_hal_msp.c:477:6:HAL_TIM_PWM_MspDeInit	16	static
-../../src/bsp/navi_cpu/stm32h7xx_hal_msp.c:499:6:HAL_UART_MspInit	64	static
-../../src/bsp/navi_cpu/stm32h7xx_hal_msp.c:583:6:HAL_UART_MspDeInit	16	static

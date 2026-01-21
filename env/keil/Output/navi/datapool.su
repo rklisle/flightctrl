@@ -1,9 +1,0 @@
-../../src/app/AppSource/core/DataPool.c:26:6:InitDataPool	16	static
-../../src/app/AppSource/core/DataPool.c:49:13:GetPacketByKeys	72	static
-../../src/app/AppSource/core/DataPool.c:71:15:ResetItor	16	static
-../../src/app/AppSource/core/DataPool.c:81:15:GetCurData	24	static
-../../src/app/AppSource/core/DataPool.c:101:6:GetDataFast	192	static
-../../src/app/AppSource/core/DataPool.c:123:15:GetData	32	static
-../../src/app/AppSource/core/DataPool.c:157:6:SetDataFast	56	static
-../../src/app/AppSource/core/DataPool.c:168:15:SetData	48	static
-../../src/app/AppSource/core/DataPool.c:201:15:AddData	24	static

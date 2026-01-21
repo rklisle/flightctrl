@@ -1,7 +1,0 @@
-../../src/app/NavSource/modules/modGps.c:137:13:SaveGpsIntoPool	32	static
-../../src/app/NavSource/modules/modGps.c:150:8:GpsRtHandler	24	static
-../../src/app/NavSource/modules/modGps.c:210:8:ChkGpsFrame	24	static
-../../src/app/NavSource/modules/modGps.c:226:7:StartGPS	8	static
-../../src/app/NavSource/modules/modGps.c:242:12:splitString	40	static
-../../src/app/NavSource/modules/modGps.c:270:15:AnalysisGnssMsg	472	static
-../../src/app/NavSource/modules/modGps.c:346:6:calculate_utc_time	112	static

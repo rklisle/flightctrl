@@ -1,6 +1,0 @@
-../../src/libs/ringbuffer/ringbuffer.h:103:20:ring_buffer_is_empty	16	static
-../../src/libs/ringbuffer/ringbuffer.h:123:22:ring_buffer_num_items	16	static
-../../src/libs/ringbuffer/ringbuffer.c:10:6:ring_buffer_init	24	static
-../../src/libs/ringbuffer/ringbuffer.c:19:8:ring_buffer_write	48	static
-../../src/libs/ringbuffer/ringbuffer.c:50:8:ring_buffer_read	40	static
-../../src/libs/ringbuffer/ringbuffer.c:90:9:ring_buffer_peek	32	static

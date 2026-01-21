@@ -3203,6 +3203,21 @@
               <FileType>1</FileType>
               <FilePath>..\..\src\app\AppSource\Interface\interface_eth.c</FilePath>
             </File>
+            <File>
+              <FileName>servo_pulse.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\src\app\AppSource\Interface\servo_pulse.c</FilePath>
+            </File>
+            <File>
+              <FileName>servo_angle.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\src\app\AppSource\Interface\servo_angle.c</FilePath>
+            </File>
+            <File>
+              <FileName>servo_manager.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\src\app\AppSource\Interface\servo_manager.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -3498,6 +3513,11 @@
               <FileName>modEngine.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\..\src\app\AppSource\modules\modEngine.h</FilePath>
+            </File>
+            <File>
+              <FileName>modECUqueue.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\src\app\AppSource\modules\modECUqueue.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -4246,6 +4266,16 @@
               <FileName>support.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\..\src\app\NavSource\support\support.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>AppDrive</GroupName>
+          <Files>
+            <File>
+              <FileName>driver_pwm.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\src\app\AppSource\drive\driver_pwm.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -7909,6 +7939,21 @@
               <FileType>1</FileType>
               <FilePath>..\..\src\app\AppSource\Interface\interface_eth.c</FilePath>
             </File>
+            <File>
+              <FileName>servo_pulse.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\src\app\AppSource\Interface\servo_pulse.c</FilePath>
+            </File>
+            <File>
+              <FileName>servo_angle.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\src\app\AppSource\Interface\servo_angle.c</FilePath>
+            </File>
+            <File>
+              <FileName>servo_manager.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\src\app\AppSource\Interface\servo_manager.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -8575,6 +8620,11 @@
               <FileType>5</FileType>
               <FilePath>..\..\src\app\AppSource\modules\modEngine.h</FilePath>
             </File>
+            <File>
+              <FileName>modECUqueue.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\src\app\AppSource\modules\modECUqueue.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -9181,6 +9231,16 @@
             </File>
           </Files>
         </Group>
+        <Group>
+          <GroupName>AppDrive</GroupName>
+          <Files>
+            <File>
+              <FileName>driver_pwm.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\src\app\AppSource\drive\driver_pwm.c</FilePath>
+            </File>
+          </Files>
+        </Group>
       </Groups>
     </Target>
     <Target>
@@ -9421,7 +9481,7 @@
               <MiscControls>--specs=nano.specs -mcpu=cortex-m7 -mfpu=fpv5-d16 -mfloat-abi=hard -ffunction-sections -fdata-sections -fpack-struct=4 -fshort-enums -fstack-usage  -std=c99</MiscControls>
               <Define>TX_INCLUDE_USER_DEFINE_FILE, FCS_APP</Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\src\app;..\..\src\libs\cmsis\Core\Include;..\..\src\libs\cmsis\Driver\Include;..\..\src\libs\threadx\common\inc;..\..\src\libs\threadx\ports\cortex_m7\gnu\inc;..\..\src\libs\ringbuffer;..\..\src\libs\list;..\..\src\bsp;..\..\src\bsp\cmsis_drivers;..\..\src\bsp\stm32h7xx_hal\CMSIS\Device\ST\STM32H7xx\Include;..\..\src\bsp\stm32h7xx_hal\STM32H7xx_HAL_Driver\Inc;..\..\src\bsp\fcs_cpu</IncludePath>
+              <IncludePath>..\..\src\app;..\..\src\libs\cmsis\Core\Include;..\..\src\libs\cmsis\Driver\Include;..\..\src\libs\threadx\common\inc;..\..\src\libs\threadx\ports\cortex_m7\gnu\inc;..\..\src\libs\ringbuffer;..\..\src\libs\list;..\..\src\bsp;..\..\src\bsp\cmsis_drivers;..\..\src\bsp\stm32h7xx_hal\CMSIS\Device\ST\STM32H7xx\Include;..\..\src\bsp\stm32h7xx_hal\STM32H7xx_HAL_Driver\Inc;..\..\src\bsp\fcs_cpu;..\..\src\app\AppSource\Interface;..\..\src\app\AppSource\drive</IncludePath>
             </VariousControls>
           </Carm>
           <Aarm>
@@ -11839,6 +11899,21 @@
               <FileType>1</FileType>
               <FilePath>..\..\src\app\AppSource\Interface\interface_eth.c</FilePath>
             </File>
+            <File>
+              <FileName>servo_pulse.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\src\app\AppSource\Interface\servo_pulse.c</FilePath>
+            </File>
+            <File>
+              <FileName>servo_angle.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\src\app\AppSource\Interface\servo_angle.c</FilePath>
+            </File>
+            <File>
+              <FileName>servo_manager.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\src\app\AppSource\Interface\servo_manager.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -11993,6 +12068,11 @@
               <FileName>modEngine.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\..\src\app\AppSource\modules\modEngine.h</FilePath>
+            </File>
+            <File>
+              <FileName>modECUqueue.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\src\app\AppSource\modules\modECUqueue.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -12647,6 +12727,16 @@
               <FileName>support.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\..\src\app\NavSource\support\support.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>AppDrive</GroupName>
+          <Files>
+            <File>
+              <FileName>driver_pwm.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\src\app\AppSource\drive\driver_pwm.c</FilePath>
             </File>
           </Files>
         </Group>

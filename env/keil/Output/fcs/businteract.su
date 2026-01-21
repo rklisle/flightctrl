@@ -1,5 +1,0 @@
-../../src/app/AppSource/core/BusInteract.c:43:6:InitCanRts	8	static
-../../src/app/AppSource/core/BusInteract.c:59:6:InitRts	16	static
-../../src/app/AppSource/core/BusInteract.c:190:6:BusDataHandle	16	static
-../../src/app/AppSource/core/BusInteract.c:218:7:PrintDebug	24	static
-../../src/app/AppSource/core/BusInteract.c:230:7:MsgToDevice	2088	static

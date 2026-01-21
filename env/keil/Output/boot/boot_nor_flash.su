@@ -1,3 +1,0 @@
-../../src/boot/boot_nor_flash.c:11:6:Do_nor_flash_init	8	static
-../../src/boot/boot_nor_flash.c:16:5:NOR_CheckForNewFirmware	4	static
-../../src/boot/boot_nor_flash.c:21:6:NOR_ReadFirmwareAndWriteToInternalFlash	168	static

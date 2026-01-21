@@ -1,6 +1,0 @@
-../../src/boot/boot.c:29:5:main	16	static
-../../src/boot/boot.c:59:13:Error_Handler	4	static
-../../src/boot/boot.c:67:6:SystemClock_Config	128	static
-../../src/boot/boot.c:147:6:PeriphCommonClock_Config	200	static
-../../src/boot/boot.c:173:13:CPU_CACHE_Enable	24	static
-../../src/boot/boot.c:187:13:CPU_CACHE_Disable	24	static

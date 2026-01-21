@@ -1,4 +1,0 @@
-../../src/app/can_demo.c:20:6:CAN_SignalUnitEvent	16	static
-../../src/app/can_demo.c:22:6:CAN_SignalObjectEvent	24	static
-../../src/app/can_demo.c:39:6:app_can_demo	48	static
-../../src/app/can_demo.c:100:9:app_can_init	48	static

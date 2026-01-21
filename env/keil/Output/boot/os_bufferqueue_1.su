@@ -1,5 +1,0 @@
-../../src/app/NavSource/support/os_bufferQueue.c:43:8:BufferInit	8	static
-../../src/app/NavSource/support/os_bufferQueue.c:57:8:PushBuffer	24	static
-../../src/app/NavSource/support/os_bufferQueue.c:75:9:PopBuffer	24	static
-../../src/app/NavSource/support/os_bufferQueue.c:99:13:get_available_block	24	static
-../../src/app/NavSource/support/os_bufferQueue.c:118:8:write_block	24	static

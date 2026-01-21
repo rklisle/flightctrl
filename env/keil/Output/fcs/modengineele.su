@@ -1,4 +1,0 @@
-../../src/app/AppSource/modules/modEngineEle.c:46:7:EngineInit	8	static
-../../src/app/AppSource/modules/modEngineEle.c:52:5:SendEngineCmd	32	static
-../../src/app/AppSource/modules/modEngineEle.c:71:8:EngineCmdHandler	24	static
-../../src/app/AppSource/modules/modEngineEle.c:91:7:AutoDriveEnginePwm	40	static

@@ -1,3 +1,0 @@
-../../src/app/NavSource/interface/interface_flash.c:10:15:FlashInit	8	static
-../../src/app/NavSource/interface/interface_flash.c:16:15:QspiFlashProgram	32	static
-../../src/app/NavSource/interface/interface_flash.c:26:15:QspiFlashRead	32	static
