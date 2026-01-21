@@ -16,6 +16,7 @@ struct EngineStatus
 {
     uint16_t ambient_temp;      // 指令6 ，环境温度，整数，有符号实际数值，[0~9999]   TODO
     uint16_t air_pressure;      // 指令8 ，环境气压，无符号，单位mbar，[0~9999]
+    uint16_t fuel_pressure;     //*指令9 ，实际油压，单位mbar，[0~9999]
     uint16_t throttle_state;    //*指令35，风门状态，0001为关闭，0000未关闭
     uint16_t expect_rpm;        // 指令64，期望风门位置百分比*10倍，定速模式下期望的转速值，[0~9999]
     uint16_t rpm;               //*指令69，实际转速，[0~9999]

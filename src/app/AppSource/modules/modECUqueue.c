@@ -165,6 +165,7 @@ static void prv_engine_warmup_state_machine(int32_t fd)
         OUTPUT_PWM_1MS,//********* */
         SEND_CMD_PUMP_ON,
         SLEEP,
+        CHECK_FUEL_PRESSURE,
         SEND_CMD_IGNITION1_ON,
         SEND_CMD_IGNITION2_ON,
         SEND_CMD_CHOKE_ON,
@@ -189,7 +190,14 @@ static void prv_engine_warmup_state_machine(int32_t fd)
             s_startTime = tx_time_get();
             s_sleepTime = WAIT_50MS;
             s_current_state = SLEEP;
-            s_next_state = SEND_CMD_IGNITION1_ON;
+            s_next_state = CHECK_FUEL_PRESSURE;
+            break;
+        case CHECK_FUEL_PRESSURE:
+            if((s_engineStatus.fuel_pressure > 2800)
+            && (s_engineStatus.fuel_pressure < 3200))
+            {
+                s_current_state = SEND_CMD_IGNITION1_ON;
+            }
             break;
         case SEND_CMD_IGNITION1_ON:
             fcs_uart_send(fd, (const uint8_t *)&CMD_IGNITION1_ON, sizeof(CMD_IGNITION1_ON));
@@ -374,6 +382,9 @@ static void prv_analyse_data(uint8_t *pbuf)
         break;
     case 8:
         s_engineStatus.air_pressure     = (pbuf[1] << 8) + pbuf[2];
+        break;
+    case 9:
+        s_engineStatus.fuel_pressure    = (pbuf[1] << 8) + pbuf[2];
         break;
     case 35:
         s_engineStatus.throttle_state   = (pbuf[1] << 8) + pbuf[2];

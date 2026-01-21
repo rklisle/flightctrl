@@ -30,8 +30,8 @@
 
 # ====== 编译输出目录完全忽略 ======
 # 这些目录应该被完全忽略，即使有c/h文件
-env/keil/Output/
-env/keil/Listings/
+./env/keil/Output/*
+./env/keil/Listings/*
 
 # ====== 其他编译文件 ======
 # 忽略常见的编译输出文件
