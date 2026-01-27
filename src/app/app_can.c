@@ -152,7 +152,7 @@ static void prv_FDCAN_Init(FDCAN_HandleTypeDef* phdl, int32_t fd)
     phdl->Init.RxBufferSize = FDCAN_DATA_BYTES_8;
     phdl->Init.TxEventsNbr = 0;
     phdl->Init.TxBuffersNbr = 0;
-    phdl->Init.TxFifoQueueElmtsNbr = 3;
+    phdl->Init.TxFifoQueueElmtsNbr = 4; // 3 for classic CAN; FDCAN is used here
     phdl->Init.TxFifoQueueMode = FDCAN_TX_FIFO_OPERATION;
     phdl->Init.TxElmtSize = FDCAN_DATA_BYTES_8;
 

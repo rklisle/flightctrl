@@ -222,10 +222,10 @@ void FlightEngineOutputHandle()//02 在各种情况下（是否起飞？是否出安全区？）控制
 		{
 			//安全区内，正常飞行，听控制的
 			CurEngineRpm = (OS_U32)(pOutput->engineSet * 10.0f);
-			if(CurEngineRpm == 0)
-			{
-				int a = 0;
-			}
+			// if(CurEngineRpm == 0)
+			// {
+			// 	int a = 0;
+			// }
 			
 		}
 	}

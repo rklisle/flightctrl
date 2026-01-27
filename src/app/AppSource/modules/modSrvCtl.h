@@ -35,10 +35,10 @@
 
 // ~{6f;z=Z5c~}ID~{6(Re~}
 typedef enum {
-    SERVO_NODE_1 = 0x25,  // ~{6f;z~}1 CAN~{=Z5c:E~}
-    SERVO_NODE_2 = 0x26,  // ~{6f;z~}2 CAN~{=Z5c:E~}
-    SERVO_NODE_3 = 0x27,  // ~{6f;z~}3 CAN~{=Z5c:E~}
-    SERVO_NODE_4 = 0x28,  // ~{6f;z~}4 CAN~{=Z5c:E~}
+    SERVO_NODE_1 = 0x25,  // CAN舵机 0x25
+    SERVO_NODE_2 = 0x26,  // CAN舵机 0x26
+    SERVO_NODE_3 = 0x27,  // CAN舵机 0x27
+    SERVO_NODE_4 = 0x28,  // CAN舵机 0x28
 } ServoNodeID;
 
 // CAN~{C|An=a99~}

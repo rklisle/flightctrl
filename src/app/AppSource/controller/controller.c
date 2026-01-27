@@ -25,6 +25,8 @@
 #include "../payload/MsnTime.h"
 #include "../interface/interface_power.h"
 #include <math.h>
+// /******************** Test umbrella Servo & ECU(PWM)***************************/
+// #include "interface_timer.h"
 
 static OS_U8 SelfCheckCollpse();
 OS_U8 LunchDetective();
@@ -140,7 +142,26 @@ OS_U8 AutoLuanchProcess()  // 5ms运行一次
 			if(powerSend1 == 0)
 			{
 					PowerOn(DEVICE_SRV_PWR28V);
-					powerSend1 = 1;
+
+// /******************** Test Servo (CAN & PWM)***************************/
+// double step = 10.0;
+
+// for(double angle = -30.0; angle <= 30.0; angle += step) {
+// 	ServoCtlOnce_6Rudder(angle, angle, angle, angle, angle, angle);
+// 	tx_thread_sleep(1000);
+// }
+// for(double angle = 30.0; angle >= -30.0; angle -= step) {
+// 	ServoCtlOnce_6Rudder(angle, angle, angle, angle, angle, angle);
+// 	tx_thread_sleep(1000);
+// }
+// /******************** Test umbrella Servo (PWM)***************************/
+// AngleServo_SetAngle(SERVO_PWM7, 50.0f);
+// /******************** Test ECU(PWM)***************************/
+// PulseServo_Init(ECU_PWM8, 1.0f);
+// PulseServo_SetPulseWidth(ECU_PWM8, 2.0f);
+// /*****************************************************/
+
+				powerSend1 = 1;
 			}
 			else
 			{

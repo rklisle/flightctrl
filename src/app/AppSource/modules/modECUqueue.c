@@ -389,6 +389,9 @@ static void prv_analyse_data(uint8_t *pbuf)
     case 35:
         s_engineStatus.throttle_state   = (pbuf[1] << 8) + pbuf[2];
         break;
+    case 59:
+        s_engineStatus.maxTemp          = (pbuf[1] << 8) + pbuf[2];
+        break;
     case 64:
         s_engineStatus.expect_rpm       = (pbuf[1] << 8) + pbuf[2];
         break;
@@ -398,13 +401,27 @@ static void prv_analyse_data(uint8_t *pbuf)
     case 86:
         s_engineStatus.expect_throttle  = (pbuf[1] << 8) + pbuf[2];
         break;
+    case 91:
+        s_engineStatus.battA            = (pbuf[1] << 8) + pbuf[2];
+        break;
+    case 96:
+        s_engineStatus.battV            = (pbuf[1] << 8) + pbuf[2];
+        break;
     case 97:
         s_engineStatus.actual_throttle  = (pbuf[1] << 8) + pbuf[2];
         break;
     case 98:
         s_engineStatus.actual_air_choke = (pbuf[1] << 8) + pbuf[2];
         break;
-    
+    case 100:
+        s_engineStatus.version          = (pbuf[1] << 8) + pbuf[2];
+        break;
+    case 117:
+        s_engineStatus.totalMinite      = (pbuf[1] << 8) + pbuf[2];
+        break;
+    case 119:
+        s_engineStatus.runningMinite    = (pbuf[1] << 8) + pbuf[2];
+        break;
     default:
         break;
     }

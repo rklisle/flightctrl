@@ -16,7 +16,7 @@ OS_U32 EngineRpmCmd = 0;
 OS_U8 EngineStartStatus = 0;
 OS_U8 SyncToGround = 0;     //地面控制的：控制是否给地面传输数据
 
-OS_U8 EngineInit()
+void EngineInit()
 {
     modECU_EngineInit();
 }
@@ -30,13 +30,13 @@ void SetEngineThrot(float percent)
 }
 
 /** 启动发动机 */
-int StartEngine()
+void StartEngine()
 {
     modECU_startEngine();
 }
 
 /** 发动机停机 */
-int StopEngine()
+void StopEngine()
 {
     modECU_stopEngine();
 }
@@ -97,39 +97,44 @@ OS_U32 EngineCmdHandler(STRU_422_MSG_INFO * frame)
 	return 0;
 }
 
-/** 解析数据：发动机 ——> 飞控  存储数据 & 发给数据链 */
-OS_U32 EngineRtHandler(STRU_422_MSG_INFO * frame)   // MML发动机UART7 保存运行参数
-{
-    // switch(frame->u8MsgID)
-    // {
-    //     case 0x30:
-    //         SaveRunningInfo((STRU_RUNNING_INFO *)frame->au8Data);
-    //         break;
-    //     case 0x31:
-    //         SaveStartParam((STRU_START_PARAM_INFO *)frame->au8Data);
-    //         break;
-    //     case 0x32:
-    //         SaveRunningParam((STRU_RUNNING_PARAM_INFO *)frame->au8Data);
-    //         break;
-    // }
-    // g_DeviceState.ecuCountDown = 200;
-    // return 0;
-}
+// /** 解析数据：发动机 ——> 飞控  存储数据 & 发给数据链 */
+// OS_U32 EngineRtHandler(STRU_422_MSG_INFO * frame)   // MML发动机UART7 保存运行参数
+// {
+//     // switch(frame->u8MsgID)
+//     // {
+//     //     case 0x30:
+//     //         SaveRunningInfo((STRU_RUNNING_INFO *)frame->au8Data);
+//     //         break;
+//     //     case 0x31:
+//     //         SaveStartParam((STRU_START_PARAM_INFO *)frame->au8Data);
+//     //         break;
+//     //     case 0x32:
+//     //         SaveRunningParam((STRU_RUNNING_PARAM_INFO *)frame->au8Data);
+//     //         break;
+//     // }
+//     // g_DeviceState.ecuCountDown = 200;
+//     // return 0;
+// }
 
 /** 解析数据：发动机 ——> 飞控  存储数据 & 发给数据链 */
 void EngineHandler()   // MML发动机UART7 保存运行参数
 {
     g_DeviceState.ecuCountDown = 200;
 /** ****************014 新增******************* */
+    static STRU_RUNNING_INFO param30 = {0};
+    static STRU_START_PARAM_INFO param31 = {0};
+    static STRU_RUNNING_PARAM_INFO param32 = {0};
     struct EngineStatus engineStatus = {0};
     modECU_GetEngineStatus(&engineStatus);
 /** **************** 原先处理0x30需要用的参数 ******************* */
-    static STRU_RUNNING_INFO param30 = {0};
     param30.runningStatus = engineStatus.CntState;
     // param30.settingRpm = engineStatus.expect_rpm;
     param30.curRpm = engineStatus.rpm;
     param30.temp = engineStatus.ambient_temp;
     param30.Pa = engineStatus.air_pressure * 100;
+    param30.runningSecond = engineStatus.runningMinite * 60;
+    param30.battV = engineStatus.battV;
+    param30.battA = engineStatus.battA;
 
     SETDATA(pDataPoolSelf, "ecuSetRp",	engineStatus.expect_rpm,	OS_U16);
     SETDATA(pDataPoolSelf, "ecuGetRp",  engineStatus.rpm,              OS_U16);
@@ -137,19 +142,21 @@ void EngineHandler()   // MML发动机UART7 保存运行参数
     SETDATA(pDataPoolSelf, "ecuState",	engineStatus.CntState,	OS_U8);
     SETDATA(pDataPoolSelf, "ecuError",	0,	OS_U8);
     SETDATA(pDataPoolSelf, "fuelRate",	0,	OS_U16);
-    SETDATA(pDataPoolSelf, "ecu24V", 0,	OS_S16);
-    SETDATA(pDataPoolSelf, "ecu24A", 0,	OS_S16);
+    SETDATA(pDataPoolSelf, "ecu24V", engineStatus.battV,	OS_S16);
+    SETDATA(pDataPoolSelf, "ecu24A", engineStatus.battA,	OS_S16);
     
+    param32.maxTemp = engineStatus.maxTemp;
+    param32.totalMinite = engineStatus.totalMinite;
+    param32.version = engineStatus.version;
+
     if(SyncToGround)
     {
         MsgToDevice(RT_DATA_LINK, 0x30, sizeof(STRU_RUNNING_INFO), (OS_U8 *)&param30);
-    }
 /** **************** 原先处理0x31需要用的参数 ******************* */
-    static STRU_START_PARAM_INFO param31 = {0};
-    MsgToDevice(RT_DATA_LINK, 0x31, sizeof(STRU_START_PARAM_INFO), (OS_U8 *)&param31);
+        MsgToDevice(RT_DATA_LINK, 0x31, sizeof(STRU_START_PARAM_INFO), (OS_U8 *)&param31);
 /** **************** 原先处理0x32需要用的参数 ******************* */
-    static STRU_RUNNING_PARAM_INFO param32 = {0};
-    MsgToDevice(RT_DATA_LINK, 0x32, sizeof(STRU_RUNNING_PARAM_INFO), (OS_U8 *)&param32);
+        MsgToDevice(RT_DATA_LINK, 0x32, sizeof(STRU_RUNNING_PARAM_INFO), (OS_U8 *)&param32);
+    }
 }
 
 OS_U8 AutoDriveEnginePwm()//每100ms进来控制一次engine油门

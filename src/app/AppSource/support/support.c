@@ -35,7 +35,7 @@ OS_S32 BoardInit()
 
 	InitCanRts();
     
-    InitGPIO();
+    // InitGPIO();
     
     LAN9303_Init();
     

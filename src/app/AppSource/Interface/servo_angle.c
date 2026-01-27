@@ -116,10 +116,18 @@ Servo_ErrorCode_t AngleServo_SetAngle(Servo_ID_t servo_id, float angle_deg)
     }
     pcfg = (Angle_Servo_Config_t *)g_servo_state[servo_id].config;
     // 入参2检查
-    if((angle_deg < pcfg->min_angle_deg) ||
-       (angle_deg > pcfg->max_angle_deg)) 
+    // if((angle_deg < pcfg->min_angle_deg) ||
+    //    (angle_deg > pcfg->max_angle_deg)) 
+    // {
+    //     return SERVO_DEVICE_ERR_OUT_OF_RANGE;
+    // }
+    if(angle_deg < pcfg->min_angle_deg)
     {
-        return SERVO_DEVICE_ERR_OUT_OF_RANGE;
+        angle_deg = pcfg->min_angle_deg;
+    }
+    if(angle_deg > pcfg->max_angle_deg)
+    {
+        angle_deg = pcfg->max_angle_deg;
     }
     // 角度 -> 占空比
     duty_ratio = prv_deg_to_duty_ratio(angle_deg, (struct angle_servo_status *)g_servo_state[servo_id].ctx);

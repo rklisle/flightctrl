@@ -715,10 +715,10 @@ OS_U32 MsnCmdHandler(STRU_422_MSG_INFO * frame)
     OS_U8 msgID = frame->u8MsgID;
     switch (msgID)
     {
-    case CMD_MSN_UPDATE:
+    case CMD_MSN_UPDATE:	//TODO:任务航点（在任务文件里的）
         UpdatePredictMsnByGround(frame);
         break;
-    case CMD_MSN_NEWPT:
+    case CMD_MSN_NEWPT:	//TODO:新加航点（在航路规划里的）
     {
 			/*
         double lon, lat, high, track, speed, arriveTime;
@@ -750,7 +750,7 @@ OS_U32 MsnCmdHandler(STRU_422_MSG_INFO * frame)
 
 				for (int i = 0; i < count; i++)
 				{	
-					memcpy(&type,  nptBuffer + 49 * i, 1);
+					memcpy(&type,  nptBuffer + 49 * i, 1);		
 					memcpy(&lon,   nptBuffer + 49 * i + 1, 8);
 					memcpy(&lat,   nptBuffer + 49 * i + 9, 8);
 					memcpy(&alt,   nptBuffer + 49 * i + 17, 8);

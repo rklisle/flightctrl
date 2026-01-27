@@ -17,10 +17,8 @@ extern TX_BYTE_POOL byte_pool_0;
 //     pstatus->K1 = pcfg->frequency_hz / 1000.0f;
 // }
 
-static inline float prv_pulse_ms_to_duty_ratio(float pulse_ms, float K1)
-{
-    return pulse_ms * K1;
-}
+#define PULSE_MS_TO_DUTY_RATION( pulse_ms,  K1) (pulse_ms*K1)
+
 
 /** 初始化脉宽舵机 */
 Servo_ErrorCode_t PulseServo_Setup(Servo_ID_t servo_id, float init_pulse_ms)
@@ -47,9 +45,9 @@ Servo_ErrorCode_t PulseServo_Setup(Servo_ID_t servo_id, float init_pulse_ms)
     PWM_Config_t pwm_config = {
         .frequency_hz = pcfg->frequency_hz,              //50Hz
         .resolution_us = pcfg->resolution_ms * 1000,    //精度0.1ms对应100us
-        .init_duty_ratio = prv_pulse_ms_to_duty_ratio(init_pulse_ms, K1),
-        .min_duty_ratio = prv_pulse_ms_to_duty_ratio(pcfg->min_pulse_ms, K1),//0.8ms / 20ms = 0.04
-        .max_duty_ratio = prv_pulse_ms_to_duty_ratio(pcfg->max_pulse_ms, K1),//2.2ms / 20ms = 0.11
+        .init_duty_ratio = PULSE_MS_TO_DUTY_RATION(init_pulse_ms, K1),
+        .min_duty_ratio = PULSE_MS_TO_DUTY_RATION(pcfg->min_pulse_ms, K1),//0.8ms / 20ms = 0.04
+        .max_duty_ratio = PULSE_MS_TO_DUTY_RATION(pcfg->max_pulse_ms, K1),//2.2ms / 20ms = 0.11
     };
     // 调用驱动层接口
     if(!Driver_PWM_Init(servo_id, &pwm_config)) {
@@ -78,6 +76,7 @@ Servo_ErrorCode_t PulseServo_SetPulseWidth(Servo_ID_t servo_id, float pulse_ms)
 {
     Pulse_Servo_Config_t *pcfg;
     Servo_ErrorCode_t errCode;
+	  float target_pulse = pulse_ms;
     
     // 入参1检查
     errCode= check_servo_id(servo_id);
@@ -88,19 +87,28 @@ Servo_ErrorCode_t PulseServo_SetPulseWidth(Servo_ID_t servo_id, float pulse_ms)
     }
     pcfg = (Pulse_Servo_Config_t *)g_servo_state[servo_id].config;
     // 入参2检查
-    if((pulse_ms < pcfg->min_pulse_ms) ||
-       (pulse_ms > pcfg->max_pulse_ms)) {
-        return SERVO_DEVICE_ERR_OUT_OF_RANGE;
+    // if((pulse_ms < pcfg->min_pulse_ms) ||
+    //    (pulse_ms > pcfg->max_pulse_ms)) {
+    //     return SERVO_DEVICE_ERR_OUT_OF_RANGE;
+    // }
+    if(target_pulse < pcfg->min_pulse_ms)
+    {
+        target_pulse = pcfg->min_pulse_ms;
     }
+    if(target_pulse > pcfg->max_pulse_ms)
+    {
+        target_pulse = pcfg->max_pulse_ms;
+    }
+
     // 脉宽 -> 占空比
-    uint32_t ctx_int;
-    memcpy(&ctx_int, g_servo_state[servo_id].ctx, sizeof(g_servo_state[servo_id].ctx));
-    float duty_ratio = prv_pulse_ms_to_duty_ratio(pulse_ms, (float)ctx_int);
+    float ctx_int;
+    memcpy(&ctx_int, &g_servo_state[servo_id].ctx, sizeof(g_servo_state[servo_id].ctx));
+    float duty_ratio = PULSE_MS_TO_DUTY_RATION(target_pulse, (float)ctx_int);
     if (!Driver_PWM_SetDutyRatio(servo_id, duty_ratio)) {
         return SERVO_DEVICE_ERR_HARDWARE;
     }
     // 更新状态
-    g_servo_state[servo_id].current_value = pulse_ms;
+    g_servo_state[servo_id].current_value = target_pulse;
     return SERVO_DEVICE_OK;
 }
 

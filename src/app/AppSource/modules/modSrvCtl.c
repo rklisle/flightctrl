@@ -308,8 +308,12 @@ OS_U8 Servo_SetTorqueZero_CAN(ServoNodeID node)
  * 函数功能: 单次计算及伺服控制，由飞控代码调用，传入为6个舵的偏转角度
  * 作者:	未知
  ***********************************************************/
-OS_U8 ServoCtlOnce_6Rudder(double actDeg_1, double actDeg_2, double actDeg_3, 
-    double actDeg_4, double actDeg_5, double actDeg_6)	//03 控制舵机
+OS_U8 ServoCtlOnce_6Rudder( double actDeg_1,
+                            double actDeg_2,
+                            double actDeg_3,
+                            double actDeg_4,
+                            double actDeg_5,
+                            double actDeg_6)	//03 控制舵机
 {
     double deg[6];
     deg[0] = actDeg_1; 
@@ -427,7 +431,7 @@ OS_U8 CanRtServoHandler(OS_U32 id, OS_BOOL ext_id, const OS_U8* data, OS_U8 len)
                     }
                     
                     // 温度：X3表示工作温度，补码表示
-                    int8_t temp_c = (int8_t)data[6];
+                    // int8_t temp_c = (int8_t)data[6];
                     
                     // 保存到数据池
                     // 这里可以根据需要保存电流和温度
@@ -454,7 +458,10 @@ OS_U8 CanRtServoHandler(OS_U32 id, OS_BOOL ext_id, const OS_U8* data, OS_U8 len)
 int InsertServoTestData(
 	double* actuator_I,
 	double* actuator_II,
-	double* actuator_III,double* actuator_IV,double* actuator_V,double* actuator_VI)
+	double* actuator_III,
+    double* actuator_IV,
+    double* actuator_V,
+    double* actuator_VI)
 {
 	static unsigned int tickOffset=0;
 	//static unsigned int freqIndex = 0;

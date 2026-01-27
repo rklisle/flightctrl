@@ -181,7 +181,6 @@ extern uint32_t _eram;  // symbo from linker description
 extern uint32_t _sram;  // symbo from linker description
 void tx_application_define(void *first_unused_memory)
 {
-    
     uint32_t left_ram_size = (uint32_t)(&_eram) - (uint32_t)(&_sram);
     int32_t fd = -1;
     tx_byte_pool_create(&byte_pool_0, 
@@ -212,7 +211,7 @@ void tx_application_define(void *first_unused_memory)
                         TX_AUTO_START);
        //drv_test_init(&byte_pool_0);
        //return;
-       
+
 #ifdef FCS_APP
         app_pressure_init(&byte_pool_0);
 		app_data_collector_init(&byte_pool_0);

@@ -5,6 +5,7 @@
 #include "driver_pwm.h"
 #include <string.h>
 
+extern void Error_Handler(void);
 extern uint32_t SystemCoreClock;
 #define MCU_MAIN_FREQ SystemCoreClock//240000000
 
@@ -34,6 +35,7 @@ static const Servo_Hardware_Mapping_t hardware_map[PWM_CH_MAX] = {
 typedef struct {
     bool initialized;
     PWM_Config_t config;
+    uint32_t timer_input_clock_hz;
     uint32_t timer_clock_hz;     // 定时器时钟频率(Hz)
     uint32_t prescaler;          // 预分频值
     uint32_t period;             // 自动重载值(ARR)
@@ -44,6 +46,7 @@ typedef struct {
 static PWM_Channel_State_t s_channel_states[PWM_CH_MAX] = {0};
 
 /** 函数声明 */
+
 static void prv_MX_GPIO_Init(Servo_ID_t servo_id);
 static bool prv_calculate_timer_psc_arr(Servo_ID_t servo_id);
 static void prv_MX_TIM_Init(Servo_ID_t servo_id, Servo_Hardware_Mapping_t* hw);
@@ -82,10 +85,10 @@ bool Driver_PWM_Init(Servo_ID_t servo_id, PWM_Config_t* pconfig)
     // 获取定时器时钟频率
     if (servo_id == ECU_PWM8) {
         // TIM17挂载在APB2上
-        pchn->timer_clock_hz = MCU_MAIN_FREQ;
+        s_channel_states[servo_id].timer_input_clock_hz = HAL_RCC_GetPCLK2Freq() * 2;
     } else {
         // TIM3/TIM4挂载在APB1上
-        pchn->timer_clock_hz = MCU_MAIN_FREQ;
+        s_channel_states[servo_id].timer_input_clock_hz = HAL_RCC_GetPCLK1Freq() * 2;
     }
 
     // 计算定时器参数
@@ -146,7 +149,7 @@ bool Driver_PWM_Deinit(Servo_ID_t servo_id)
     return true;
 }
 
-/** 开启时钟 */
+/** 开启GPIO时钟 */
 static void prv_MX_GPIO_Init(Servo_ID_t servo_id)
 {
     switch (servo_id)
@@ -171,29 +174,42 @@ static void prv_MX_GPIO_Init(Servo_ID_t servo_id)
 /** 计算PSC和ARR */
 static bool prv_calculate_timer_psc_arr(Servo_ID_t servo_id)
 {
-    s_channel_states[servo_id].prescaler = MCU_MAIN_FREQ * s_channel_states[servo_id].config.resolution_us / 1000000 - 1;//240-1 = 239
-    s_channel_states[servo_id].period = (MCU_MAIN_FREQ / (s_channel_states[servo_id].prescaler + 1) )/ s_channel_states[servo_id].config.frequency_hz - 1;//240Mhz/240/333 = 3003 so ARR=3002
+    s_channel_states[servo_id].prescaler = s_channel_states[servo_id].timer_input_clock_hz * s_channel_states[servo_id].config.resolution_us / 1000000 - 1;//240-1 = 239
+    s_channel_states[servo_id].period = (s_channel_states[servo_id].timer_input_clock_hz / (s_channel_states[servo_id].prescaler + 1) )/ s_channel_states[servo_id].config.frequency_hz - 1;//240Mhz/240/333 = 3003 so ARR=3002
     return true;
 }
 
 /** 配置定时器参数 */
 static void prv_MX_TIM_Init(Servo_ID_t servo_id, Servo_Hardware_Mapping_t* hw)
 {
+    TIM_ClockConfigTypeDef sClockSourceConfig = {0};
   TIM_OC_InitTypeDef sConfigOC = {0};
-  hw->htim->Instance = hw->TIMx;    //MML
+  hw->htim->Instance = hw->TIMx;
   hw->htim->Init.Prescaler = s_channel_states[servo_id].prescaler;
   hw->htim->Init.CounterMode = TIM_COUNTERMODE_UP;
   hw->htim->Init.Period = s_channel_states[servo_id].period;
   hw->htim->Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   hw->htim->Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
+  if (HAL_TIM_Base_Init(hw->htim) != HAL_OK)
+  {
+    Error_Handler();
+  }
+    if(hw->htim != &htim17)
+    {
+        sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+        if (HAL_TIM_ConfigClockSource(hw->htim, &sClockSourceConfig) != HAL_OK)
+        {
+            Error_Handler();
+        }
+    }
   if (HAL_TIM_PWM_Init(hw->htim) != HAL_OK)
   {
     Error_Handler();
   }
-  sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = s_channel_states[servo_id].config.init_duty_ratio;
-  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
-  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+    sConfigOC.OCMode = TIM_OCMODE_PWM1;
+    sConfigOC.Pulse = (uint32_t)(s_channel_states[servo_id].config.init_duty_ratio * (s_channel_states[servo_id].period + 1));
+    sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+    sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
   if (HAL_TIM_PWM_ConfigChannel(hw->htim, &sConfigOC, hw->channel) != HAL_OK)
   {
     Error_Handler();
@@ -202,11 +218,39 @@ static void prv_MX_TIM_Init(Servo_ID_t servo_id, Servo_Hardware_Mapping_t* hw)
   prv_HAL_TIM_MspPostInit(hw);
 }
 
+// void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* tim_baseHandle)
+// {
+//   if(tim_baseHandle->Instance==TIM3)
+//   {
+//     __HAL_RCC_TIM3_CLK_ENABLE();
+//   }
+//   else if(tim_baseHandle->Instance==TIM4)
+//   {
+//     __HAL_RCC_TIM4_CLK_ENABLE();
+//   }
+//   else if(tim_baseHandle->Instance==TIM17)
+//   {
+//     __HAL_RCC_TIM17_CLK_ENABLE();
+//   }
+// }
+
 /** 配置管脚 */
 static void prv_HAL_TIM_MspPostInit(Servo_Hardware_Mapping_t* hw)
 {
   GPIO_InitTypeDef GPIO_InitStruct = {0};
 
+    switch (hw->gpio_pin)
+    {
+    case GPIO_PIN_6:
+        __HAL_RCC_GPIOC_CLK_ENABLE();
+        break;
+    case GPIO_PIN_13:
+        __HAL_RCC_GPIOD_CLK_ENABLE();
+        break;
+    default:
+        __HAL_RCC_GPIOB_CLK_ENABLE();   // PIN8 AND PIN9
+        break;
+    }
     GPIO_InitStruct.Pin = hw->gpio_pin;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;

@@ -20,7 +20,7 @@ typedef struct
 extern VA_VALUE vas[16];
 
 
-int InitGPIO();
+// int InitGPIO();
 //AD²É¼¯º¯Êý
 int ADC_GetVoltage();
 //ÍÏ²å¼ì²â

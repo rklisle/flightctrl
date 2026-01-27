@@ -71,7 +71,7 @@ void InitRts()
 	 * 数据链接3号口，序号2
 	 * 组合导航接5号口，序号4
 	 * 	
-	 * /*************************************  280
+	 * *************************************  280
 	 * 导引头 UART1
 	 ***** 火控/引信 UART2
 	 * IMU UART3********************
@@ -122,7 +122,7 @@ void InitRts()
 	rtList[RT_DATA_LINK].ckIndex = 0;//0
 	rtList[RT_DATA_LINK].chIndex = 2;// 数据链	UART3
 	rtList[RT_DATA_LINK].devID = 0x05;
-	rtList[RT_DATA_LINK].devBuad = 230400;	/**   280:  921600;*/
+	rtList[RT_DATA_LINK].devBuad = 921600;	/**   280:  921600;*/
 	rtList[RT_DATA_LINK].devStopLen = 1;
 	rtList[RT_DATA_LINK].oddCheckEnable = FALSE;
     rtList[RT_DATA_LINK].evenCheckEnable = FALSE;

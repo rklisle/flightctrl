@@ -11,22 +11,27 @@
 #include "../support/os_framework.h"
 #include "modECUqueue.h"
 
-extern OS_U8 EngineInit();
-
-extern OS_U32 EngineCmdHandler(STRU_422_MSG_INFO * frame);
-extern OS_U32 EngineRtHandler(STRU_422_MSG_INFO * frame);
-void EngineHandler();
-extern OS_U16 ChkEngineFrame(OS_MEM* pmData);
-extern OS_U8 AutoDriveEnginePwm();
-
-extern OS_U32 CurEngineRpm;
-extern OS_U32 EngineRpmCmd;
-extern OS_U8 EngineStartStatus;
-
-extern int SendEngineRpm();
-extern int StartEngine();
-extern int StopEngine();
+void EngineInit();
+void StartEngine();
+void StopEngine();
 void SetEngineThrot(float percent);
+
+/** 处理数据链传来的命令，也就是地面的遥控指令
+ * 控制转速指令：存数据池、控发动机转速
+ * 获取启动参数：发送相应命令
+ * 获取运行参数：
+ */
+OS_U32 EngineCmdHandler(STRU_422_MSG_INFO * frame);
+// extern OS_U32 EngineRtHandler(STRU_422_MSG_INFO * frame);
+void EngineHandler();//解析数据：发动机 ——> 飞控
+// extern OS_U16 ChkEngineFrame(OS_MEM* pmData);
+OS_U8 AutoDriveEnginePwm();//每100ms进来控制一次engine油门
+
+extern OS_U32 CurEngineRpm;    //014 油门百分比*10 取值[0~1000]；  280 转速
+// extern OS_U32 EngineRpmCmd;
+// extern OS_U8 EngineStartStatus;
+
+// extern int SendEngineRpm();
 
 #pragma pack(1)
 typedef struct
@@ -39,9 +44,9 @@ typedef struct
     OS_U32 settingRpm;      // 设定转速     **280程序没用**         **014 cmd64**
     OS_U32 curRpm;          // 当前转速     **280程序有用**         **014 cmd69**
     OS_FLOAT temp;          // 温度         **280程序有用**         **014 cmd6 **
-    OS_U32 runningSecond;   // 运行秒数     **280程序没用**
-    OS_FLOAT battV;         // 电池电压     **280程序没用**
-    OS_FLOAT battA;         // 电池电流     **280程序没用**
+    OS_U32 runningSecond;   // 运行秒数     **280程序没用**   **014 cmd119 **
+    OS_FLOAT battV;         // 电池电压     **280程序没用**   **014 cmd96 **
+    OS_FLOAT battA;         // 电池电流     **280程序没用**   **014 cmd91 **
     OS_FLOAT pumpV;         // 油泵电压     **280程序没用**
     OS_FLOAT Pa;            // 压力         **280程序没用**         **014 cmd8 **
     OS_U16 pumpRpm;         // 油泵转速     **280程序没用**
@@ -61,11 +66,11 @@ typedef struct
     OS_U16 deAccRecord;
     OS_FLOAT pumpMaxV;
     OS_FLOAT battLowV;
-    OS_U16 maxTemp;
+    OS_U16 maxTemp;         // **014 cmd59 **
     OS_U16 pumpSpd;
     OS_U16 flutCliab;
-    OS_U16 totalMinite;
-    OS_FLOAT version;
+    OS_U16 totalMinite;     // **014 cmd117 **
+    OS_FLOAT version;       // **014 cmd100 **
     OS_U32 maxRpm;
     OS_U32 startCount;
 }STRU_RUNNING_PARAM_INFO;   // 0x32

@@ -48,9 +48,17 @@ Servo_ErrorCode_t AngleServo_Init(Servo_ID_t servo_id, float init_angle_deg)  //
         return errCode;
     }
 
-    if((init_angle_deg < pcfg->min_angle_deg)||
-       (init_angle_deg > pcfg->max_angle_deg)) {
-        return SERVO_DEVICE_ERR_OUT_OF_RANGE;
+    // if((init_angle_deg < pcfg->min_angle_deg)||
+    //    (init_angle_deg > pcfg->max_angle_deg)) {
+    //     return SERVO_DEVICE_ERR_OUT_OF_RANGE;
+    // }
+    if(init_angle_deg < pcfg->min_angle_deg)
+    {
+        init_angle_deg = pcfg->min_angle_deg;
+    }
+    if(init_angle_deg > pcfg->max_angle_deg)
+    {
+        init_angle_deg = pcfg->max_angle_deg;
     }
 
     if(g_servo_state[servo_id].initialized == true)
@@ -93,9 +101,17 @@ Servo_ErrorCode_t PulseServo_Init(Servo_ID_t servo_id, float init_pulse_ms)
         return errCode;
     }
     
-    if((init_pulse_ms < pcfg->min_pulse_ms)||
-       (init_pulse_ms > pcfg->max_pulse_ms)) {
-        return SERVO_DEVICE_ERR_OUT_OF_RANGE;
+    // if((init_pulse_ms < pcfg->min_pulse_ms)||
+    //    (init_pulse_ms > pcfg->max_pulse_ms)) {
+    //     return SERVO_DEVICE_ERR_OUT_OF_RANGE;
+    // }
+    if(init_pulse_ms < pcfg->min_pulse_ms)
+    {
+        init_pulse_ms = pcfg->min_pulse_ms;
+    }
+    if(init_pulse_ms > pcfg->max_pulse_ms)
+    {
+        init_pulse_ms = pcfg->max_pulse_ms;
     }
 
     if(g_servo_state[servo_id].initialized == true)

@@ -215,7 +215,7 @@ static OS_U16 GetFlightTelemetryByTick(OS_U32 tick, OS_U8* buf)
  * 作者:	成宏璟
  ***********************************************************/
 extern OS_BOOL FlashProgramming;
-void TelemetryFrameOut()
+void TelemetryFrameOut()	// 遥测数据发送给数据链
 {
 	OS_U32 tick = g_DeviceState.CurrTick;
 
