@@ -64,23 +64,6 @@ void InitRts()
 		rtList[i].ptr_ChkFrameSum = ChkStandardFrame;//所有rt先初始化为标准校验函数
 		rtList[i].ptr_Init = PTR_NULL;//所有rt先定义为“无特殊初始化要求”
 	}
-	/*************************** 
-	 * 快速遥测接2号口，序号1
-	 * 半实物接1号口，序号0
-	 * 箭地接6号口，序号5
-	 * 数据链接3号口，序号2
-	 * 组合导航接5号口，序号4
-	 * 	
-	 * *************************************  280
-	 * 导引头 UART1
-	 ***** 火控/引信 UART2
-	 * IMU UART3********************
-	 ***** 数据链 UART4
-	 * 舵机 UART5
-	 ***** 发动机 UART6
-	 ***** 半实物 UART7
-	 * 导航版上的NAV UART8***********
-	 ********************** */
 	/***************************************** 014
 	 * 导引头——UART1/2，chIndex0/1
 	 ***** 数据链——UART3，chIndex2
@@ -89,7 +72,7 @@ void InitRts()
 	 ***** 发动机——UART7，chIndex6
 	 */
 	rtList[RT_SCOUT].ckIndex = 0;//0		//载荷1  任务机
-	rtList[RT_SCOUT].chIndex = 0;//	导引头 UART1 /***************** 目前不用了 ************/
+	rtList[RT_SCOUT].chIndex = 0;// 导引头 控制信息	UART1
 	rtList[RT_SCOUT].devID = 0x01;
 	rtList[RT_SCOUT].devBuad = 230400;
     rtList[RT_SCOUT].devStopLen = 1;
@@ -98,16 +81,6 @@ void InitRts()
 	rtList[RT_SCOUT].ptr_RtHandler = ScoutRtHandler;
     //rtList[RT_SCOUT].ptr_Init = InitScout;
     //rtList[RT_SCOUT].ptr_ChkFrameSum = ChkScoutStandardFrame;
-
-	// rtList[RT_SCOUT_CTL].ckIndex = 0;
-	// rtList[RT_SCOUT_CTL].chIndex = 0;// 导引头 控制信息	UART1
-	// rtList[RT_SCOUT_CTL].devID = 0x01;
-	// rtList[RT_SCOUT_CTL].devBuad = 230400;
-	// rtList[RT_SCOUT_CTL].devStopLen = 1;
-	// rtList[RT_SCOUT_CTL].oddCheckEnable = FALSE;
-    // rtList[RT_SCOUT_CTL].evenCheckEnable = FALSE;
-    // rtList[RT_SCOUT_CTL].ptr_ChkFrameSum = NULL;
-	// rtList[RT_SCOUT_CTL].ptr_RtHandler = ScoutRtHandler;
 
 	rtList[RT_SCOUT_ATTITUDE].ckIndex = 0;
 	rtList[RT_SCOUT_ATTITUDE].chIndex = 1;// 导引头 航姿信息	UART2
@@ -140,7 +113,19 @@ void InitRts()
     rtList[RT_FUSE].ptr_Init = InitFuse;
     rtList[RT_FUSE].ptr_ChkFrameSum = ChkFuseStandardFrame;
 
-    rtList[RT_HIL].ckIndex = 0;//0
+	// rtList[NOT_USED].ckIndex = 0;
+	rtList[NOT_USED].chIndex = 4;
+	// rtList[NOT_USED].devID = 0;
+	// rtList[NOT_USED].flags = 0;
+	// rtList[NOT_USED].oddCheckEnable = 0;
+	// rtList[NOT_USED].evenCheckEnable = 0;
+	// rtList[NOT_USED].devStopLen = 0;
+	// rtList[NOT_USED].devBuad = 0;
+	// rtList[NOT_USED].ptr_RtHandler = NULL;
+	// rtList[NOT_USED].ptr_ChkFrameSum = NULL;
+	// rtList[NOT_USED].ptr_Init = NULL;
+
+	rtList[RT_HIL].ckIndex = 0;//0
 	rtList[RT_HIL].chIndex = 5;//仿真口——UART6
 	rtList[RT_HIL].devID = 0x04;
 	rtList[RT_HIL].devBuad = 230400;	/** 	280:	921600; */  

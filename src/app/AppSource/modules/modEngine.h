@@ -38,22 +38,22 @@ typedef struct
 {
 	OS_U8 head;	            // 0xFF
     OS_U8 head1;            // 0x00
-    OS_U8 runningStatus;    // 运行状态     **280程序有用**         **014 状态机的状态**
-    OS_U8 error;            // 错误码       **280程序没用**
-    OS_U32 id;              // 设备ID       **280程序没用**
-    OS_U32 settingRpm;      // 设定转速     **280程序没用**         **014 cmd64**
-    OS_U32 curRpm;          // 当前转速     **280程序有用**         **014 cmd69**
-    OS_FLOAT temp;          // 温度         **280程序有用**         **014 cmd6 **
-    OS_U32 runningSecond;   // 运行秒数     **280程序没用**   **014 cmd119 **
-    OS_FLOAT battV;         // 电池电压     **280程序没用**   **014 cmd96 **
-    OS_FLOAT battA;         // 电池电流     **280程序没用**   **014 cmd91 **
-    OS_FLOAT pumpV;         // 油泵电压     **280程序没用**
-    OS_FLOAT Pa;            // 压力         **280程序没用**         **014 cmd8 **
-    OS_U16 pumpRpm;         // 油泵转速     **280程序没用**
-    OS_U16 fuelConsum;      // 油量消耗     **280程序有用**         **014 //TODO 协议里没有，给0**
-    OS_FLOAT ouputV;        // 发电电压     **280程序没用**
-    OS_U32 outputW;         // 发电功率     **280程序没用**
-}STRU_RUNNING_INFO; // 0x30
+    OS_U8 runningStatus;    // 运行状态         // CntState
+    OS_U8 error;            // 错误码           //  
+    OS_U32 fuel_pressure;   // 实际油压         // fuel_pressure 
+    OS_U32 jet1_duty;       // 实际喷油1脉宽    // jet1_duty *         **014 cmd64**
+    OS_U32 curRpm;          // 实际转速         // rpm      **014 cmd69**
+    OS_FLOAT ambient_temp;  // 温度             // ambient_temp      **014 cmd6 **
+    OS_U32 jet2_duty;       // 实际喷油2脉宽    // jet2_duty *   **014 cmd119 **
+    OS_FLOAT battV;         // 电池电压         // battV *014 cmd96 **
+    OS_FLOAT battA;         // 电池电流         // battA *014 cmd91 **
+    OS_FLOAT actual_throttle;// 风门开度97       // actual_throttle 
+    OS_FLOAT ch1_temp;       // 通道1实际温度    // ch1_temp
+    OS_U16 ch2_temp;         // 通道2实际温度    // ch2_temp
+    OS_U16 ch3_temp;         // 通道3实际温度    // ch3_temp
+    OS_FLOAT ch4_temp;       // 通道4实际温度    // ch4_temp
+    OS_U32 outputW;          // 发电功率         //  
+}STRU_RUNNING_INFO; // HACK: TEST ECU    param30 0x30
 
 typedef struct
 {

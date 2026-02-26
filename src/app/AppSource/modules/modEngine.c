@@ -21,11 +21,13 @@ void EngineInit()
     modECU_EngineInit();
 }
 
-/** 设置油门 */
+/** 设置油门
+ * 入参：油门百分比 取值0~100.0
+ */
 void SetEngineThrot(float percent)
 {
-    unsigned int rpm = percent * 10.0f;//为了用上遥测表，我们将数据类型转化一下
-    SETDATA(pDataPoolSelf,	"engSetRp",	rpm,  OS_U16);
+    // unsigned int rpm = percent * 10.0f;//为了用上遥测表，我们将数据类型转化一下
+    // SETDATA(pDataPoolSelf,	"engSetRp",	rpm,  OS_U16);
     modECU_setThrottle_percent(percent);
 }
 
@@ -52,18 +54,22 @@ OS_U32 EngineCmdHandler(STRU_422_MSG_INFO * frame)
 	{
         case CMD_ECU_RPM_SETTING:
         {
-            OS_U32 rpm;   //014 油门百分比*10 取值[0~1000]；  280 转速
-            memcpy(&rpm, frame->au8Data, 4);
-            SETDATA(pDataPoolFly, "EngineRp", rpm,  OS_U16);
-			SetEngineThrot(rpm / 10.0f);// TODO: 油门设置需要再调整，目前是写软件时的临时设置
+            OS_U32 thro;   //014 油门百分比*10 取值[0~1000]；  280 转速
+            memcpy(&thro, frame->au8Data, 4);
+            if(thro < 0) {thro = 0;}
+            if(thro > 1000) {thro = 1000;}
+            SETDATA(pDataPoolFly, "EngineRp", thro,  OS_U16);
+			SetEngineThrot(thro / 10.0f);
             break;
         }
-        case CMD_GET_START_PARAM: // 280发动机协议，获取发动机启动参数
+        case CMD_GET_START_PARAM: // 油泵停止
         {
+            modECU_pumpOff();
             break;
         }
-        case CMD_GET_RUNNING_PARAM: // 280发动机协议，获取发动机运行参数
+        case CMD_GET_RUNNING_PARAM: // 油泵开启
         {
+            modECU_pumpOn();
             break;
         }
         case CMD_GET_RUNNING_INFO://地面控制的：控制是否给地面传输数据
@@ -97,65 +103,59 @@ OS_U32 EngineCmdHandler(STRU_422_MSG_INFO * frame)
 	return 0;
 }
 
-// /** 解析数据：发动机 ——> 飞控  存储数据 & 发给数据链 */
-// OS_U32 EngineRtHandler(STRU_422_MSG_INFO * frame)   // MML发动机UART7 保存运行参数
-// {
-//     // switch(frame->u8MsgID)
-//     // {
-//     //     case 0x30:
-//     //         SaveRunningInfo((STRU_RUNNING_INFO *)frame->au8Data);
-//     //         break;
-//     //     case 0x31:
-//     //         SaveStartParam((STRU_START_PARAM_INFO *)frame->au8Data);
-//     //         break;
-//     //     case 0x32:
-//     //         SaveRunningParam((STRU_RUNNING_PARAM_INFO *)frame->au8Data);
-//     //         break;
-//     // }
-//     // g_DeviceState.ecuCountDown = 200;
-//     // return 0;
-// }
-
 /** 解析数据：发动机 ——> 飞控  存储数据 & 发给数据链 */
-void EngineHandler()   // MML发动机UART7 保存运行参数
+void EngineHandler()   // HACK: TEST ECU restore & display
 {
     g_DeviceState.ecuCountDown = 200;
 /** ****************014 新增******************* */
     static STRU_RUNNING_INFO param30 = {0};
-    static STRU_START_PARAM_INFO param31 = {0};
-    static STRU_RUNNING_PARAM_INFO param32 = {0};
+    // static STRU_START_PARAM_INFO param31 = {0};
+    // static STRU_RUNNING_PARAM_INFO param32 = {0};
     struct EngineStatus engineStatus = {0};
-    modECU_GetEngineStatus(&engineStatus);
-/** **************** 原先处理0x30需要用的参数 ******************* */
-    param30.runningStatus = engineStatus.CntState;
-    // param30.settingRpm = engineStatus.expect_rpm;
-    param30.curRpm = engineStatus.rpm;
-    param30.temp = engineStatus.ambient_temp;
-    param30.Pa = engineStatus.air_pressure * 100;
-    param30.runningSecond = engineStatus.runningMinite * 60;
-    param30.battV = engineStatus.battV;
-    param30.battA = engineStatus.battA;
 
-    SETDATA(pDataPoolSelf, "ecuSetRp",	engineStatus.expect_rpm,	OS_U16);
-    SETDATA(pDataPoolSelf, "ecuGetRp",  engineStatus.rpm,              OS_U16);
-    SETDATA(pDataPoolSelf, "ecuTemp",   engineStatus.ambient_temp * 10,OS_U16);
-    SETDATA(pDataPoolSelf, "ecuState",	engineStatus.CntState,	OS_U8);
-    SETDATA(pDataPoolSelf, "ecuError",	0,	OS_U8);
-    SETDATA(pDataPoolSelf, "fuelRate",	0,	OS_U16);
-    SETDATA(pDataPoolSelf, "ecu24V", engineStatus.battV,	OS_S16);
-    SETDATA(pDataPoolSelf, "ecu24A", engineStatus.battA,	OS_S16);
-    
-    param32.maxTemp = engineStatus.maxTemp;
-    param32.totalMinite = engineStatus.totalMinite;
-    param32.version = engineStatus.version;
-
-    if(SyncToGround)
+    if((g_DeviceState.CurrTick) % 20 == 0)  // 每100ms保存一次数据
     {
-        MsgToDevice(RT_DATA_LINK, 0x30, sizeof(STRU_RUNNING_INFO), (OS_U8 *)&param30);
-/** **************** 原先处理0x31需要用的参数 ******************* */
-        MsgToDevice(RT_DATA_LINK, 0x31, sizeof(STRU_START_PARAM_INFO), (OS_U8 *)&param31);
-/** **************** 原先处理0x32需要用的参数 ******************* */
-        MsgToDevice(RT_DATA_LINK, 0x32, sizeof(STRU_RUNNING_PARAM_INFO), (OS_U8 *)&param32);
+        modECU_GetEngineStatus(&engineStatus);
+    /** **************** 存数据池 ******************* */
+        SETDATA(pDataPoolSelf, "engSetRp",	engineStatus.fuel_pressure,	OS_U16);
+        // SETDATA(pDataPoolSelf, "ecuSetRp",	engineStatus.actual_throttle,	OS_U16);//97
+        SETDATA(pDataPoolSelf, "ecuSetRp",	engineStatus.expect_throttle,	OS_U16);//86
+
+        SETDATA(pDataPoolSelf, "ecuGetRp",  engineStatus.rpm,              OS_U16);
+        SETDATA(pDataPoolSelf, "ecu24V", engineStatus.jet1_duty,	OS_S16);
+        SETDATA(pDataPoolSelf, "ecu24A", engineStatus.jet2_duty,	OS_S16);
+
+        SETDATA(pDataPoolSelf, "scout1", engineStatus.ch1_temp,	OS_S16);
+        SETDATA(pDataPoolSelf, "scout2", engineStatus.ch2_temp,	OS_S16);
+        SETDATA(pDataPoolSelf, "scout3", engineStatus.ch3_temp,	OS_S16);
+        SETDATA(pDataPoolSelf, "scout4", engineStatus.ch4_temp,	OS_S16);
+
+        SETDATA(pDataPoolSelf, "ecuState",	engineStatus.CntState,	OS_U8);
+        SETDATA(pDataPoolSelf, "ecuError",	engineStatus.ecuError,	OS_U8);
+
+    /** **************** 发数据链，显示 ******************* */
+        param30.runningStatus = engineStatus.CntState;
+        param30.fuel_pressure = engineStatus.fuel_pressure;
+        param30.jet1_duty = engineStatus.jet1_duty;
+        param30.curRpm = engineStatus.rpm;
+        param30.ambient_temp = engineStatus.ambient_temp;
+        param30.jet2_duty = engineStatus.jet2_duty;
+        param30.battV = engineStatus.battV * 0.01;
+        param30.battA = engineStatus.battA * 0.1;
+        // param30.actual_throttle = engineStatus.actual_throttle;//97
+        param30.actual_throttle = engineStatus.expect_throttle;//86
+        param30.ch1_temp = engineStatus.ch1_temp;
+        param30.ch2_temp = engineStatus.ch2_temp;
+        param30.ch3_temp = engineStatus.ch3_temp;
+        param30.ch4_temp = engineStatus.ch4_temp;
+        param30.error = engineStatus.ecuError;
+
+        if(SyncToGround)
+        {
+            MsgToDevice(RT_DATA_LINK, 0x30, sizeof(STRU_RUNNING_INFO), (OS_U8 *)&param30);
+    //         MsgToDevice(RT_DATA_LINK, 0x31, sizeof(STRU_START_PARAM_INFO), (OS_U8 *)&param31);
+    //         MsgToDevice(RT_DATA_LINK, 0x32, sizeof(STRU_RUNNING_PARAM_INFO), (OS_U8 *)&param32);
+        }
     }
 }
 

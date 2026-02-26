@@ -4,15 +4,21 @@
 #include "../../uart_agent.h"
 #include "../Interface/interface_timer.h"
 #include <assert.h>
+// #include "../support/os_framework.h"
 
-/************      宏定义    ***********/
+/************      宏定义    ***********/ //FIXME: 宏定义
 #define TASK_STACK_SIZE 2048
-#define TASK_PRIORITY   16
+#define TASK_PRIORITY   (TX_MAX_PRIORITIES-4)
 #define WAIT_50MS 50
-#define WAIT_5S 5000
-#define WAIT_5MIN 300000
-#define MAX_START_RETRY 3
-#define MAX_STOP_RETRY 3
+#define WAIT_1S 1000
+#define WAIT_1MIN 60000
+
+#define MAX_START_RETRY 3   // 启动流程，最大重试次数
+#define MAX_STOP_RETRY 3    // 关机流程，最大重试次数
+#define PWM_1MS_DURATION   (2 * WAIT_1S) //  启动流程，输出1ms的PWM波形时间
+#define TIMEOUT_FUEL_PRESSURE   WAIT_1MIN //  启动流程，判油压的最大等待时间
+#define TIMEOUT_CHECK_RPM   (10 * WAIT_1S)  // 启动流程，判转速的最大等待时间
+#define TIMEOUT_CHECK_THO   (10 * WAIT_1S)  // 关机流程，判风门的最大等待时间
 
 /******************************** 发动机命令 ************************************** */
 /* 格式：地址 + 数据高 + 数据低 + 校验和 + 0x0D + 0x0A */
@@ -43,6 +49,8 @@ enum ecu_cmd_type
     ECU_CMD_ENGIN_START = 1,
     ECU_CMD_ENGIN_STOP = 2,
     ECU_CMD_ENGIN_THO = 3,
+    ECU_CMD_PUMP_ON = 4,
+    ECU_CMD_PUMP_OFF = 5,
 };
 
 struct ecu_cmd
@@ -78,12 +86,11 @@ static void prv_Set_Throttle_Percent(int32_t fd, float percent);
 static TX_THREAD engine_task_tcb;
 static UCHAR engine_task_stack[TASK_STACK_SIZE];
 
-
 static void prv_engine_task(ULONG thread_input)
 {
     // 如果不使用参数，可以添加这行避免编译警告
     (void)thread_input;
-    uint8_t msg_buf[16];
+    uint8_t msg_buf[128];
     int32_t wt_idx = 0;
     int32_t rxlen = 0;
     struct ecu_cmd cmd;
@@ -96,7 +103,7 @@ static void prv_engine_task(ULONG thread_input)
                         ARM_USART_STOP_BITS_1);
     while(1)
     {
-        if(TX_SUCCESS == tx_queue_receive(&s_ecu_cmd_queue, &cmd, 1))
+        if(TX_SUCCESS == tx_queue_receive(&s_ecu_cmd_queue, &cmd, 5))
         {
             pcmd = &cmd;
         }
@@ -117,7 +124,7 @@ static void prv_engine_task(ULONG thread_input)
 }
 
 /** 发动机状态机
- * 处理发动机启动、停机指令
+ * 处理发动机启动、停机、油泵启动、油泵停止、设置油门指令
  * */
 static void prv_engine_state_machine(int32_t fd, struct ecu_cmd *pcmd)
 {
@@ -129,6 +136,14 @@ static void prv_engine_state_machine(int32_t fd, struct ecu_cmd *pcmd)
                 if((pcmd != NULL) && (pcmd->cmd == ECU_CMD_ENGIN_START))
                 {
                     s_engineStatus.CntState = ENGINE_WARMUP;
+                }
+                if((pcmd != NULL) && (pcmd->cmd == ECU_CMD_PUMP_ON))
+                {
+                    fcs_uart_send(fd, (const uint8_t *)&CMD_PUMP_ON, sizeof(CMD_PUMP_ON));
+                }
+                if((pcmd != NULL) && (pcmd->cmd == ECU_CMD_PUMP_OFF))
+                {
+                    fcs_uart_send(fd, (const uint8_t *)&CMD_PUMP_OFF, sizeof(CMD_PUMP_OFF));
                 }
             }
             break;
@@ -159,6 +174,11 @@ static void prv_engine_warmup_state_machine(int32_t fd)
     static uint8_t s_StartEngineRetryCnt = 0;
     static uint32_t s_startTime = 0;
     static uint32_t s_sleepTime = 0;
+    static bool isfirstFail_fuel_pressure = true;
+    static uint32_t s_firstFail_fuel_pressure = 0;
+    static bool isfirstFail_rpm = true;
+    static uint32_t s_firstFail_rpm = 0;
+
     /** 启动状态机的状态定义 */
     typedef enum {
         INIT_PWM = 0,
@@ -182,21 +202,51 @@ static void prv_engine_warmup_state_machine(int32_t fd)
     switch (s_current_state)
     {
         case INIT_PWM:
+            s_engineStatus.ecuError = NO_ERROR;
             PulseServo_Init(ECU_PWM8, 1);
         case OUTPUT_PWM_1MS:
             PulseServo_SetPulseWidth(ECU_PWM8, 1);
+            s_startTime = tx_time_get();
+            s_sleepTime = PWM_1MS_DURATION;
+            s_current_state = SLEEP;
+            s_next_state = SEND_CMD_PUMP_ON;
+            break;
         case SEND_CMD_PUMP_ON:
             fcs_uart_send(fd, (const uint8_t *)&CMD_PUMP_ON, sizeof(CMD_PUMP_ON));
             s_startTime = tx_time_get();
             s_sleepTime = WAIT_50MS;
             s_current_state = SLEEP;
-            s_next_state = CHECK_FUEL_PRESSURE;
+            s_next_state = CHECK_FUEL_PRESSURE; // 正式代码（试车用）
+            // s_next_state = SEND_CMD_IGNITION1_ON;   // FIXME: 桌面测试代码
             break;
         case CHECK_FUEL_PRESSURE:
-            if((s_engineStatus.fuel_pressure > 2800)
-            && (s_engineStatus.fuel_pressure < 3200))
+            if(s_engineStatus.fuel_pressure > 2800)
+            // && (s_engineStatus.fuel_pressure < 3200))   // 指令9：实际油压
             {
                 s_current_state = SEND_CMD_IGNITION1_ON;
+                isfirstFail_fuel_pressure = true;
+            }
+            else    // 油压异常
+            {
+                // 加一个超时判断
+                // 如果是第一次进入else分支，记录时间
+                if(isfirstFail_fuel_pressure)
+                {
+                    s_firstFail_fuel_pressure = tx_time_get();
+                    isfirstFail_fuel_pressure = false;
+                }
+
+                // 检查是否超时，最多等待1分钟
+                if((tx_time_get() - s_firstFail_fuel_pressure) > TIMEOUT_FUEL_PRESSURE)
+                {
+                    // 上报油压异常
+                    s_engineStatus.ecuError = ERROR_FUEL_PRESSURE;
+                    fcs_uart_send(fd, (const uint8_t *)&CMD_PUMP_OFF, sizeof(CMD_PUMP_OFF));
+                    // 确认超时，进入失败状态
+                    s_current_state = START_FAILED;
+                    // 重置标志，为下一次启动做准备
+                    isfirstFail_fuel_pressure = true;
+                }
             }
             break;
         case SEND_CMD_IGNITION1_ON:
@@ -227,37 +277,48 @@ static void prv_engine_warmup_state_machine(int32_t fd)
             s_current_state = SLEEP;
             s_next_state = SEND_CMD_Throttle_Percent;
             break;
-        case SEND_CMD_Throttle_Percent:// 油门开到20%
-            prv_Set_Throttle_Percent(fd, 20.0);
+        case SEND_CMD_Throttle_Percent://FIXME 启动油门25%
+            prv_Set_Throttle_Percent(fd, 25.0f);
             s_current_state = OUTPUT_PWM_2MS;
             break;
         case OUTPUT_PWM_2MS:
             PulseServo_SetPulseWidth(ECU_PWM8, 2);
             s_startTime = tx_time_get();
-            s_sleepTime = WAIT_5S;
+            s_sleepTime = WAIT_50MS;
             s_current_state = SLEEP;
-            s_next_state = CHECK_RPM;
+            s_next_state = CHECK_RPM; // 正式代码（试车用）
+            // s_next_state = START_SUCCESS;   // FIXME: 桌面测试代码
             break;
         case CHECK_RPM:
             if(s_engineStatus.rpm > 2000)// 检查转速是否2000以上
             {
                 s_current_state = START_SUCCESS;
+                isfirstFail_rpm = true;
             }
-            else
+            else    // 转速异常
             {
-                if(s_StartEngineRetryCnt < MAX_START_RETRY)
+                if(isfirstFail_rpm)
                 {
-                    s_StartEngineRetryCnt++;
-                    s_current_state = OUTPUT_PWM_1MS;
+                    s_firstFail_rpm = tx_time_get();
+                    isfirstFail_rpm = false;
                 }
-                else
+
+                if((tx_time_get() - s_firstFail_rpm) > TIMEOUT_CHECK_RPM)
                 {
-                    //失败次数过多，进入5min冷却时间
-                    PulseServo_Deinit(ECU_PWM8);
-                    s_startTime = tx_time_get();
-                    s_sleepTime = WAIT_5MIN;
-                    s_current_state = SLEEP;
-                    s_next_state = START_FAILED;
+                    if(s_StartEngineRetryCnt < (MAX_START_RETRY - 1))
+                    {
+                        s_StartEngineRetryCnt++;
+                        s_current_state = OUTPUT_PWM_1MS;
+                    }
+                    else
+                    {
+                        //失败次数过多，进入5min冷却时间(20260204会议记录：人工控制下次启动按钮，by刘强)
+                        // s_startTime = tx_time_get();
+                        // s_sleepTime = WAIT_1MIN * 5;
+                        s_current_state = START_FAILED; //SLEEP;
+                        // s_next_state = START_FAILED;
+                    }
+                    isfirstFail_rpm = true;
                 }
             }
             break;
@@ -269,10 +330,14 @@ static void prv_engine_warmup_state_machine(int32_t fd)
         case START_SUCCESS:
             PulseServo_Deinit(ECU_PWM8);
             s_current_state = INIT_PWM;//为下次做准备
+            s_StartEngineRetryCnt = 0;
             s_engineStatus.CntState = ENGINE_RUNNING;
+            prv_Set_Throttle_Percent(fd, 0.0f);//FIXME 启动成功，油门0%
             break;
         case START_FAILED://发动机状态置为stoped
+            PulseServo_Deinit(ECU_PWM8);
             s_current_state = INIT_PWM;//为下次做准备
+            s_StartEngineRetryCnt = 0;
             s_engineStatus.CntState = ENGINE_STOPED;
             break;
     }
@@ -284,12 +349,13 @@ static void prv_engine_shutdown_state_machine(int32_t fd)
     static uint8_t s_StopEngineRetryCnt = 0;
     static uint32_t s_startTime = 0;
     static uint32_t s_sleepTime = 0;
+    static bool isfirstFail = true;
+    static uint32_t s_firstFail = 0;
 
     /** 停机状态机的状态定义 */
     typedef enum {
         SEND_CMD_STOP_ENGINE,//********* */
         CHECK_THROTTLE,
-        SLEEP,//*********** */
         STOP_SUCCESS,
         STOP_FAILED,
     } SM_StopEngine_t;
@@ -299,40 +365,46 @@ static void prv_engine_shutdown_state_machine(int32_t fd)
     {
         case SEND_CMD_STOP_ENGINE:
             fcs_uart_send(fd, (const uint8_t *)&CMD_STOP_ENGINE, sizeof(CMD_STOP_ENGINE));
-            s_startTime = tx_time_get();
             s_current_state = CHECK_THROTTLE;
             break;
         case CHECK_THROTTLE:
             if(s_engineStatus.throttle_state == 1)// 检查风门是否关闭 35号指令，1为关闭，0未关闭
             {
                 s_current_state = STOP_SUCCESS;
+                isfirstFail = true;
             }
-            else
+            else    // 关闭异常
             {
-                if(s_StopEngineRetryCnt < MAX_STOP_RETRY)
+                if(isfirstFail)
                 {
-                    s_StopEngineRetryCnt++;
-                    s_sleepTime = WAIT_50MS;
-                    s_current_state = SLEEP;
+                    s_firstFail = tx_time_get();
+                    isfirstFail = false;
                 }
-                else
+
+                if((tx_time_get() - s_firstFail) > TIMEOUT_CHECK_THO)
                 {
-                    // 启动失败次数太多。
-                    s_current_state = STOP_FAILED;
+                    if(s_StopEngineRetryCnt < (MAX_STOP_RETRY-1))
+                    {
+                        s_StopEngineRetryCnt++;
+                        s_current_state = SEND_CMD_STOP_ENGINE;
+                    }
+                    else
+                    {
+                        // 启动失败次数太多。
+                        s_current_state = STOP_FAILED;
+                    }
+                    isfirstFail = true;
                 }
-            }
-            break;
-        case SLEEP:
-            if((tx_time_get() - s_startTime) > s_sleepTime) {
-                s_current_state = SEND_CMD_STOP_ENGINE;
             }
             break;
         case STOP_SUCCESS:
             s_current_state = SEND_CMD_STOP_ENGINE;//为下次做准备
+            s_StopEngineRetryCnt = 0;
             s_engineStatus.CntState = ENGINE_STOPED;
             break;
         case STOP_FAILED:
             s_current_state = SEND_CMD_STOP_ENGINE;//为下次做准备
+            s_StopEngineRetryCnt = 0;
             s_engineStatus.CntState = ENGINE_RUNNING;
             break;
     }
@@ -359,17 +431,21 @@ static void prv_Generate_Throttle_Cmd(float percent, uint8_t *buffer) {
 }
 
 /** 根据发动机协议，检查校验和 */
+// static bool prv_check_sum(uint8_t *pbuf)
+// {
+//     uint8_t sum = pbuf[0] + pbuf[1] + pbuf[2];
+//     if(pbuf[3] == sum)
+//     {
+//         return true;
+//     }
+//     else
+//     {
+//         return false;
+//     }
+// }
 static bool prv_check_sum(uint8_t *pbuf)
 {
-    uint8_t sum = pbuf[0] + pbuf[1] + pbuf[2];
-    if(pbuf[3] == sum)
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    return (pbuf[3] == (pbuf[0] + pbuf[1] + pbuf[2])) ? true : false;
 }
 
 /** 根据发动机协议，数据解析，存入发动机状态参数结构体 */
@@ -386,8 +462,14 @@ static void prv_analyse_data(uint8_t *pbuf)
     case 9:
         s_engineStatus.fuel_pressure    = (pbuf[1] << 8) + pbuf[2];
         break;
+    case 19:
+        s_engineStatus.jet1_duty        = (pbuf[1] << 8) + pbuf[2];
+        break;
     case 35:
         s_engineStatus.throttle_state   = (pbuf[1] << 8) + pbuf[2];
+        break;
+    case 39:
+        s_engineStatus.jet2_duty        = (pbuf[1] << 8) + pbuf[2];
         break;
     case 59:
         s_engineStatus.maxTemp          = (pbuf[1] << 8) + pbuf[2];
@@ -400,6 +482,18 @@ static void prv_analyse_data(uint8_t *pbuf)
         break;
     case 86:
         s_engineStatus.expect_throttle  = (pbuf[1] << 8) + pbuf[2];
+        break;
+    case 87:
+        s_engineStatus.ch1_temp         = (pbuf[1] << 8) + pbuf[2];
+        break;
+    case 88:
+        s_engineStatus.ch2_temp         = (pbuf[1] << 8) + pbuf[2];
+        break;
+    case 89:
+        s_engineStatus.ch3_temp         = (pbuf[1] << 8) + pbuf[2];
+        break;
+    case 90:
+        s_engineStatus.ch4_temp         = (pbuf[1] << 8) + pbuf[2];
         break;
     case 91:
         s_engineStatus.battA            = (pbuf[1] << 8) + pbuf[2];
@@ -434,38 +528,45 @@ static void prv_analyse_data(uint8_t *pbuf)
 */
 static int32_t prv_analyse(uint8_t *pbuf, int32_t len)
 {
-    int32_t wt_idx = len;
+    uint16_t unprocess_bytes = 0;
+    uint16_t end_key = 0;
+	  uint8_t *pfrm;
     int i;
-    while(len >= 6)
+    if(len < 6)
     {
-        for(i = 0; i < len; i++)
+        return len;
+    }
+    
+    for(i = 0; i < len-1; i++)
+    {
+        unprocess_bytes++;
+        end_key = (end_key<<8) + pbuf[i];       // 0x00 0D  --> 0x0D 0A
+
+        if(end_key == 0x0D0A)
         {
-            if((0x0D == pbuf[i]) && (0x0A == pbuf[i+1]))
-            {
-                if(i >= 4)
-                {
-                    if(prv_check_sum(&pbuf[i-4]))
-                    {
-                        if(pbuf[i-4] <= 245)
-                        {
-                            prv_analyse_data(&pbuf[i-4]);
-                        }
-                    }
-                }
-                if((len - i) > 2)
-                {
-                    memmove(pbuf, &pbuf[i+2], (len-i-2));
-                }
-                wt_idx = len-i-2;
-                len = len-i-2;
-                break;
+            if(unprocess_bytes <6)
+            {   //broken frame, restart again
+                unprocess_bytes = 0;
+                continue;
             }
+            // lenght pass, now check sum
+            pfrm = &pbuf[i-5];
+            if((prv_check_sum(pfrm) == true) && ((*pfrm <= 245)))
+            {
+                prv_analyse_data(pfrm);
+            }
+            unprocess_bytes = 0;
         }
     }
-    return wt_idx;
+    memmove(pbuf, &pbuf[len - unprocess_bytes - 1], (unprocess_bytes));
+    
+    return unprocess_bytes;
 }
 
-/**从queue中取到3号命令时，去设置油门 */
+/** @brief 从queue中取到3号命令时，去设置油门
+ * @param fd 串口
+ * @param percent 油门百分比（0-100.0，支持一位小数）
+ */
 static void prv_Set_Throttle_Percent(int32_t fd, float percent)
 {
     uint8_t throttle_cmd[6];
@@ -478,6 +579,20 @@ static void prv_Set_Throttle_Percent(int32_t fd, float percent)
 }
 
 /************************************* 对外接口部分 ******************************************** */
+void modECU_pumpOn(void)
+{
+    struct ecu_cmd cmd;
+    cmd.cmd = ECU_CMD_PUMP_ON;
+    tx_queue_send(&s_ecu_cmd_queue, &cmd, TX_NO_WAIT);
+}
+
+void modECU_pumpOff(void)
+{
+    struct ecu_cmd cmd;
+    cmd.cmd = ECU_CMD_PUMP_OFF;
+    tx_queue_send(&s_ecu_cmd_queue, &cmd, TX_NO_WAIT);
+}
+
 void modECU_startEngine(void)
 {
     struct ecu_cmd cmd;
@@ -492,6 +607,9 @@ void modECU_stopEngine(void)
     tx_queue_send(&s_ecu_cmd_queue, &cmd, TX_NO_WAIT);
 }
 
+/** @brief 发油门设置的信号
+ * @param percent 油门百分比（0-100.0，支持一位小数）
+ */
 void modECU_setThrottle_percent(float percent)
 {
     struct ecu_cmd cmd;

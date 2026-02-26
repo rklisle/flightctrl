@@ -232,7 +232,7 @@ void FlightEngineOutputHandle()//02 тз╦ВжжгИ©Жобё╗йг╥ЯфП╥иё©йг╥ЯЁЖ╟╡х╚гЬё©ё╘©ьжф
     else if(flightSeq.luanched == 0 && ((g_DeviceState.workStage & DOM_AUTOMATIC) == DOM_AUTOMATIC))
     {
 		//╢кй╠ё╛бМио╬мр╙╥иакё╛смцес╕╦ц╨э╢С╡е╤т
-        CurEngineRpm = 800;	// TODO: смцеиХжцпХр╙ты╣ВуШё╛д©г╟йгп╢хМ╪Чй╠╣даый╠иХжц║ё смцетщгриХжц80.0%	//50500;
+        CurEngineRpm = 800;	// TODO: ECU смцеиХжцпХр╙ты╣ВуШё╛д©г╟йгп╢хМ╪Чй╠╣даый╠иХжц║ё смцетщгриХжц80.0%	//50500;
     }
 
 	SETDATA(pDataPoolFly, "EngineRp", CurEngineRpm,	OS_U16);
@@ -490,7 +490,7 @@ OS_U8 JudgeHomeward()	//02 фП╥и2s╨Сё╛ц©1sеп╤ор╩╢нё╛©╢йг╥ЯЁЖак╟╡х╚гЬё©йг╥ЯпХр╙и║╫
 				if(OutSafeArea == false)
 					OutSafeCount = 35;
 				OutSafeArea = true;
-				CurEngineRpm = 200;	// TODO: смцеиХжцпХр╙ты╣ВуШё╛д©г╟йгп╢хМ╪Чй╠╣даый╠иХжц║ё смцетщгриХжц20.0%	//18000;
+				CurEngineRpm = 200;	// TODO: ECU смцеиХжцпХр╙ты╣ВуШё╛д©г╟йгп╢хМ╪Чй╠╣даый╠иХжц║ё смцетщгриХжц20.0%	//18000;
 			}
 			else
 			{

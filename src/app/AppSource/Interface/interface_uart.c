@@ -186,20 +186,22 @@ int UART_Setting(int channel, unsigned int Baud, char check, int stopLen)
  			fd[3] = fcs_uart_init(&byte_pool_0, &Driver_USART4, Baud, mode, ARM_USART_STOP_BITS_1);
 			break;
 	case 4:
-			fd[4] = fcs_uart_init(&byte_pool_0, &Driver_USART5, Baud, mode, ARM_USART_STOP_BITS_1);
+//			fd[4] = fcs_uart_init(&byte_pool_0, &Driver_USART5, Baud, mode, ARM_USART_STOP_BITS_1);
 			break;
 	case 5:
 			fd[5] = fcs_uart_init(&byte_pool_0, &Driver_USART6, Baud, mode, ARM_USART_STOP_BITS_1);
 			break;
-	// case 6:
-	// 		fd[6] = fcs_uart_init(&byte_pool_0, &Driver_USART7, Baud, mode, ARM_USART_STOP_BITS_1);
-	// 		break;
+	case 6:
+//			fd[6] = fcs_uart_init(&byte_pool_0, &Driver_USART7, Baud, mode, ARM_USART_STOP_BITS_1);
+			break;
 	case 7:
 			fd[7] = fcs_uart_init(&byte_pool_0, &Driver_USART8, Baud, mode, ARM_USART_STOP_BITS_1);
 			break;
-    case 8:
-			fd[8] = fcs_uart_init(&byte_pool_0, &Driver_USART21, Baud, mode, ARM_USART_STOP_BITS_1);
-			break;
+    // case 8:
+	// 		fd[8] = fcs_uart_init(&byte_pool_0, &Driver_USART21, Baud, mode, ARM_USART_STOP_BITS_1);
+	// 		break;
+    default:
+        break;
 	}
 	return 0;
 }

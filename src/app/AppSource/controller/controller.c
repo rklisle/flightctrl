@@ -201,6 +201,8 @@ OS_U8 AutoLuanchProcess()  // 5ms运行一次
 	{
 		OS_U8 msnID;
 		GetDataFast(pDataPoolMsn, "msnDevID", &msnID);
+		InitSD();	// HACK: TEST ECU 试车用 临时调整，正式运行需要去掉
+
 		if(msnID != 0xFF)
 		{
 			// InitPwrSeq();	//MML 开火工品4
@@ -217,7 +219,7 @@ OS_U8 AutoLuanchProcess()  // 5ms运行一次
 		NavCmdHandler(&msg);
 		msg.u8MsgID = CMD_HOR_CALC_REQ;
 		NavCmdHandler(&msg);
-		ImuCmdHandler(&msg); //TODO:014这个应该是没有了。
+		ImuCmdHandler(&msg); //TODO: IMU 014这个应该是没有了。
 		AutoStep = 6;
 	}
 	//4.判断对准完成，完成后转导航

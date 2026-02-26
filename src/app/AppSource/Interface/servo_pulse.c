@@ -45,7 +45,7 @@ Servo_ErrorCode_t PulseServo_Setup(Servo_ID_t servo_id, float init_pulse_ms)
     PWM_Config_t pwm_config = {
         .frequency_hz = pcfg->frequency_hz,              //50Hz
         .resolution_us = pcfg->resolution_ms * 1000,    //精度0.1ms对应100us
-        .init_duty_ratio = PULSE_MS_TO_DUTY_RATION(init_pulse_ms, K1),
+        .init_duty_ratio = PULSE_MS_TO_DUTY_RATION(init_pulse_ms, K1),  //1ms / 20ms = 0.05
         .min_duty_ratio = PULSE_MS_TO_DUTY_RATION(pcfg->min_pulse_ms, K1),//0.8ms / 20ms = 0.04
         .max_duty_ratio = PULSE_MS_TO_DUTY_RATION(pcfg->max_pulse_ms, K1),//2.2ms / 20ms = 0.11
     };

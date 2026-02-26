@@ -14,11 +14,12 @@
 #define MODULE_COUNT	(8)//MML 总共多少个串口设备
 #define CAN_COUNT		(2)
 
-#define RT_SCOUT    	(0)	//280原先的	//014 RT_SCOUT_CTL
+#define RT_SCOUT    	(0)	//014 RT_SCOUT_CTL
 // #define RT_SCOUT_CTL    	(0)	//MML 新增
 #define RT_SCOUT_ATTITUDE  	(1)	//MML 新增
-#define RT_DATA_LINK	(2)	//
-#define RT_FUSE			(3)	//
+#define RT_DATA_LINK	(2)
+#define RT_FUSE			(3)
+#define NOT_USED		(4)
 #define RT_HIL          (5)
 #define RT_ENGINE       (6)
 #define RT_NAV  		(7)//	UART8
