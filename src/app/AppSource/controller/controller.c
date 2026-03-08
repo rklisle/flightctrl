@@ -201,12 +201,20 @@ OS_U8 AutoLuanchProcess()  // 5ms运行一次
 	{
 		OS_U8 msnID;
 		GetDataFast(pDataPoolMsn, "msnDevID", &msnID);
-		InitSD();	// HACK: TEST ECU 试车用 临时调整，正式运行需要去掉
 
+		OS_U16 DLcmd;
+		GetDataFast(pDataPoolSelf, "ecuTemp", &DLcmd);
+		if(DLcmd != 0x00FF)
+		{
+			InitSD();
+		}
+
+		// InitSD();	// HACK: TEST ECU 试车用 临时调整，正式运行需要去掉
+		
 		if(msnID != 0xFF)
 		{
 			// InitPwrSeq();	//MML 开火工品4
-			InitSD();
+			// InitSD();
 			AutoStep = 5;
 		}
 	}
@@ -431,6 +439,9 @@ OS_U8 InitReportParam()
 	SETDATA(pDataPoolSelf,	"tcCmd",	 0xAA,		OS_U8);
     
     SETDATA(pDataPoolSelf,	"flyError",	 0xFF,		OS_U8);
+
+SETDATA(pDataPoolSelf,  "ecuTemp", 0x00FF,	OS_U16);
+
 	return 0;
 }
 

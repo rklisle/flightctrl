@@ -251,7 +251,7 @@
 /* GPIO Configuration */
 
 /* Pin PA1 */
-#define MX_ETH_REF_CLK_GPIO_Speed               GPIO_SPEED_FREQ_LOW
+#define MX_ETH_REF_CLK_GPIO_Speed               GPIO_SPEED_FREQ_VERY_HIGH
 #define MX_ETH_REF_CLK_Pin                      PA1
 #define MX_ETH_REF_CLK_GPIOx                    GPIOA
 #define MX_ETH_REF_CLK_GPIO_PuPd                GPIO_NOPULL
@@ -261,7 +261,7 @@
 #define MX_ETH_REF_CLK_PinAttribute             Free
 
 /* Pin PA7 */
-#define MX_ETH_CRS_DV_GPIO_Speed                GPIO_SPEED_FREQ_LOW
+#define MX_ETH_CRS_DV_GPIO_Speed                GPIO_SPEED_FREQ_VERY_HIGH
 #define MX_ETH_CRS_DV_Pin                       PA7
 #define MX_ETH_CRS_DV_GPIOx                     GPIOA
 #define MX_ETH_CRS_DV_GPIO_PuPd                 GPIO_NOPULL
@@ -271,7 +271,7 @@
 #define MX_ETH_CRS_DV_PinAttribute              Free
 
 /* Pin PC4 */
-#define MX_ETH_RXD0_GPIO_Speed                  GPIO_SPEED_FREQ_LOW
+#define MX_ETH_RXD0_GPIO_Speed                  GPIO_SPEED_FREQ_VERY_HIGH
 #define MX_ETH_RXD0_Pin                         PC4
 #define MX_ETH_RXD0_GPIOx                       GPIOC
 #define MX_ETH_RXD0_GPIO_PuPd                   GPIO_NOPULL
@@ -281,7 +281,7 @@
 #define MX_ETH_RXD0_PinAttribute                Free
 
 /* Pin PC5 */
-#define MX_ETH_RXD1_GPIO_Speed                  GPIO_SPEED_FREQ_LOW
+#define MX_ETH_RXD1_GPIO_Speed                  GPIO_SPEED_FREQ_VERY_HIGH
 #define MX_ETH_RXD1_Pin                         PC5
 #define MX_ETH_RXD1_GPIOx                       GPIOC
 #define MX_ETH_RXD1_GPIO_PuPd                   GPIO_NOPULL
@@ -291,7 +291,7 @@
 #define MX_ETH_RXD1_PinAttribute                Free
 
 /* Pin PG11 */
-#define MX_ETH_TX_EN_GPIO_Speed                 GPIO_SPEED_FREQ_LOW
+#define MX_ETH_TX_EN_GPIO_Speed                 GPIO_SPEED_FREQ_VERY_HIGH
 #define MX_ETH_TX_EN_Pin                        PG11
 #define MX_ETH_TX_EN_GPIOx                      GPIOG
 #define MX_ETH_TX_EN_GPIO_PuPd                  GPIO_NOPULL
@@ -301,7 +301,7 @@
 #define MX_ETH_TX_EN_PinAttribute               Free
 
 /* Pin PA2 */
-#define MX_ETH_MDIO_GPIO_Speed                  GPIO_SPEED_FREQ_LOW
+#define MX_ETH_MDIO_GPIO_Speed                  GPIO_SPEED_FREQ_VERY_HIGH
 #define MX_ETH_MDIO_Pin                         PA2
 #define MX_ETH_MDIO_GPIOx                       GPIOA
 #define MX_ETH_MDIO_GPIO_PuPd                   GPIO_NOPULL
@@ -311,7 +311,7 @@
 #define MX_ETH_MDIO_PinAttribute                Free
 
 /* Pin PG12 */
-#define MX_ETH_TXD1_GPIO_Speed                  GPIO_SPEED_FREQ_LOW
+#define MX_ETH_TXD1_GPIO_Speed                  GPIO_SPEED_FREQ_VERY_HIGH
 #define MX_ETH_TXD1_Pin                         PG12
 #define MX_ETH_TXD1_GPIOx                       GPIOG
 #define MX_ETH_TXD1_GPIO_PuPd                   GPIO_NOPULL
@@ -321,7 +321,7 @@
 #define MX_ETH_TXD1_PinAttribute                Free
 
 /* Pin PG13 */
-#define MX_ETH_TXD0_GPIO_Speed                  GPIO_SPEED_FREQ_LOW
+#define MX_ETH_TXD0_GPIO_Speed                  GPIO_SPEED_FREQ_VERY_HIGH
 #define MX_ETH_TXD0_Pin                         PG13
 #define MX_ETH_TXD0_GPIOx                       GPIOG
 #define MX_ETH_TXD0_GPIO_PuPd                   GPIO_NOPULL
@@ -330,7 +330,7 @@
 #define MX_ETH_TXD0_GPIO_Mode                   GPIO_MODE_AF_PP
 
 /* Pin PC1 */
-#define MX_ETH_MDC_GPIO_Speed                   GPIO_SPEED_FREQ_LOW
+#define MX_ETH_MDC_GPIO_Speed                   GPIO_SPEED_FREQ_VERY_HIGH
 #define MX_ETH_MDC_Pin                          PC1
 #define MX_ETH_MDC_GPIOx                        GPIOC
 #define MX_ETH_MDC_GPIO_PuPd                    GPIO_NOPULL

@@ -22,6 +22,8 @@ OS_U32 CmdHandler(STRU_422_MSG_INFO * frame)//02 //	RT_DATA_LINK
 {
 	OS_U8 msgId = frame->u8MsgID;
 	SETDATA(pDataPoolSelf,	"gmsgId",	msgId,		OS_U8);
+SETDATA(pDataPoolSelf,  "ecuTemp", 0x0001,	OS_U16);
+
 	//非交互模式时，不处理地面指令
 	// MML 非交互模式时，只能处理“紧急伞降”、“紧急返航”、“开关发动机”...等指令
 	if((g_DeviceState.workStage & DOM_INTERACTIVE) !=  DOM_INTERACTIVE)

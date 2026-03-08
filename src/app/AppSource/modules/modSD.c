@@ -20,6 +20,7 @@ typedef struct
     OS_U8 fileBuffer[0x8000];
 }SD_FILE;
 
+unsigned char SD_MountOK = FALSE;    // TRUE：SD卡已挂载（延迟挂载）；FALSE：SD卡未挂载
 unsigned char SD_Enable = FALSE;    // TRUE：SD卡初始化成功；FALSE：SD卡初始化失败
 
 SD_FILE sdFile[FILE_COUNT];
@@ -80,6 +81,17 @@ OS_U8 WriteToSD(OS_U8 fileIndex, OS_U8 *buf, OS_U32 length)
 	return 1;
 }
 
+void MountSD()
+{
+    if(SD_MountOK == TRUE)
+        return;
+    if(sd_flash_init(NULL) == 0)
+    {
+        SD_MountOK = TRUE;
+    }
+    return;
+}
+
 /** 初始化SD卡存储系统，包括：
  * 初始化SD卡硬件
  * 创建多个数据文件并写入CSV表头
@@ -90,10 +102,11 @@ OS_U8 InitSD()
     if(SD_Enable == TRUE)
 		return 0xAA;
 	OS_U32 sdInitState = FR_DISK_ERR;
-	if(sd_flash_init(NULL) == FR_OK)
-	{
+	// if(sd_flash_init(NULL) == FR_OK)
+    if(SD_MountOK == TRUE)
+    {
 		SD_Enable = TRUE;
-		sdInitState = FR_OK;
+        sdInitState = FR_OK;
         sd_card_fault = 0;
         
         

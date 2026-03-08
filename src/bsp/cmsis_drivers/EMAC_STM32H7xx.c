@@ -680,8 +680,9 @@ static int32_t SendFrame (const uint8_t *frame, uint32_t len, uint32_t flags) {
 */
 void HAL_ETH_RxAllocateCallback(uint8_t **buff) {
   /* Allocate one of the RX-DMA buffers sequentially */
-  *buff = &Rx_Buff[Emac.alloc_idx][ETH_MAX_PACKET_SIZE];
-  if (++Emac.alloc_idx >= ETH_RX_DESC_CNT) {
+  // *buff = &Rx_Buff[Emac.alloc_idx][ETH_MAX_PACKET_SIZE];
+  *buff = &Rx_Buff[Emac.alloc_idx][0];  // fixed by MML
+    if (++Emac.alloc_idx >= ETH_RX_DESC_CNT) {
     Emac.alloc_idx = 0;
   }
 }

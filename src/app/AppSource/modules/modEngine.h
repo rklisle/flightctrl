@@ -21,7 +21,7 @@ void SetEngineThrot(float percent);
  * 获取启动参数：发送相应命令
  * 获取运行参数：
  */
-OS_U32 EngineCmdHandler(STRU_422_MSG_INFO * frame);
+OS_U32 EngineCmdHandler(STRU_422_MSG_INFO * frame);//数据链 ——> 飞控
 // extern OS_U32 EngineRtHandler(STRU_422_MSG_INFO * frame);
 void EngineHandler();//解析数据：发动机 ——> 飞控
 // extern OS_U16 ChkEngineFrame(OS_MEM* pmData);

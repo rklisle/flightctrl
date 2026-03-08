@@ -10,7 +10,7 @@
 #include    "UART_STM32H7xx.h"
 #include    "stm32h7xx_hal.h"
 #include    "pressure_sensor.h"
-#include    "./AppSource/modules/modSD.h"
+#include "modSD.h"
 
 /**
  * ****************************************************
@@ -160,6 +160,7 @@ int main(int argc, char **argv)
 {
     /* Setup the hardware. */
     board_setup();
+    MountSD();
 
     /* Enter the ThreadX kernel.  */
     tx_kernel_enter();
@@ -227,5 +228,6 @@ void tx_application_define(void *first_unused_memory)
     nav_1ms_init(&byte_pool_0);
 #endif
 
+    net_init();
 }
 

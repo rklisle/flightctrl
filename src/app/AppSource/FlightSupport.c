@@ -125,13 +125,13 @@ static void FlightSeqOutputHandle()	//02 Èç¹ûÊÕµ½É¡½µÃüÁî£¬¹Ø·¢¶¯»ú¡¢¿ªÉ¡¡¢¿Ø¶æ»
 		{
 			waitOneSec++;
 		}
-		OS_U16 ecuTemp;
-		GetDataFast(pDataPoolSelf,  "ecuTemp", 	&ecuTemp);
-		if(ecuTemp * 0.1 < 65)
-		{
-				//¶Ï·¢¶¯»ú24v¹©µç
-				// PowerOff(DEVICE_BATT_ENGINE);	//MML ·¢¶¯»ú
-		}
+		// OS_U16 ecuTemp;
+		// GetDataFast(pDataPoolSelf,  "ecuTemp", 	&ecuTemp);
+		// if(ecuTemp * 0.1 < 65)
+		// {
+		// 		//¶Ï·¢¶¯»ú24v¹©µç
+		// 		// PowerOff(DEVICE_BATT_ENGINE);	//MML ·¢¶¯»ú
+		// }
 	}
 }
 

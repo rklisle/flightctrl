@@ -3,7 +3,6 @@
 #include "../Interface/interface_uart.h"
 #include "../Interface/interface_gpio.h"
 #include "interface_timer.h"
-#include "../Interface/interface_eth.h"
 #include "../../sd_flash.h"
 
 void uart_mode_init(void)
@@ -34,11 +33,7 @@ OS_S32 BoardInit()
 	InitRts();
 
 	InitCanRts();
-    
-    // InitGPIO();
-    
-    LAN9303_Init();
-    
+
     AngleServo_Init(SERVO_PWM1, 0.0f); //左翅膀舵机初始化
     AngleServo_Init(SERVO_PWM6, 0.0f); //右翅膀舵机初始化
     AngleServo_Init(SERVO_PWM7, 0.0f); //开伞舵机初始化

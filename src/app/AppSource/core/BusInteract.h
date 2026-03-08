@@ -19,7 +19,8 @@
 #define RT_SCOUT_ATTITUDE  	(1)	//MML ÐÂÔö
 #define RT_DATA_LINK	(2)
 #define RT_FUSE			(3)
-#define NOT_USED		(4)
+// #define NOT_USED		(4)
+#define PRINTF_UART_CHANNEL		(4)
 #define RT_HIL          (5)
 #define RT_ENGINE       (6)
 #define RT_NAV  		(7)//	UART8

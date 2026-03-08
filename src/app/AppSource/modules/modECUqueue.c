@@ -3,6 +3,7 @@
 #include "tx_api.h"
 #include "../../uart_agent.h"
 #include "../Interface/interface_timer.h"
+#include "BusInteract.h"
 #include <assert.h>
 // #include "../support/os_framework.h"
 
@@ -72,15 +73,15 @@ extern TX_BYTE_POOL byte_pool_0;
 
 /************************************** 私有函数声明 ******************************************* */
 
-static void prv_engine_state_machine(int32_t fd, struct ecu_cmd *pcmd);
-static void prv_engine_warmup_state_machine(int32_t fd);
-static void prv_engine_shutdown_state_machine(int32_t fd);
+static void prv_engine_state_machine(struct ecu_cmd *pcmd);
+static void prv_engine_warmup_state_machine();
+static void prv_engine_shutdown_state_machine();
 static void prv_Generate_Throttle_Cmd(float percent, uint8_t *buffer);
 static bool prv_check_sum(uint8_t *pbuf);
 static void prv_analyse_data(uint8_t *pbuf);
 static int32_t prv_analyse(uint8_t *pbuf, int32_t len);
 static void prv_engine_task(ULONG thread_input);
-static void prv_Set_Throttle_Percent(int32_t fd, float percent);
+static void prv_Set_Throttle_Percent(float percent);
 
 /************************************** 私有函数 ******************************************* */
 static TX_THREAD engine_task_tcb;
@@ -95,12 +96,12 @@ static void prv_engine_task(ULONG thread_input)
     int32_t rxlen = 0;
     struct ecu_cmd cmd;
     struct ecu_cmd * pcmd;
-    int32_t fd;
-    fd = fcs_uart_init( &byte_pool_0,
-                        &Driver_USART7,
-                        115200,
-                        ARM_USART_PARITY_NONE,
-                        ARM_USART_STOP_BITS_1);
+    // int32_t fd;
+    // fd = fcs_uart_init( &byte_pool_0,
+    //                     &Driver_USART7,
+    //                     115200,
+    //                     ARM_USART_PARITY_NONE,
+    //                     ARM_USART_STOP_BITS_1);
     while(1)
     {
         if(TX_SUCCESS == tx_queue_receive(&s_ecu_cmd_queue, &cmd, 5))
@@ -111,9 +112,11 @@ static void prv_engine_task(ULONG thread_input)
         {
             pcmd = NULL;
         }
-        prv_engine_state_machine(fd, pcmd);
+        // prv_engine_state_machine(fd, pcmd);
+        prv_engine_state_machine(pcmd);
 
-        rxlen = fcs_uart_recv(fd, &msg_buf[wt_idx], sizeof(msg_buf) - wt_idx);
+        // rxlen = fcs_uart_recv(fd, &msg_buf[wt_idx], sizeof(msg_buf) - wt_idx);
+        rxlen = fcs_uart_recv(RT_ENGINE, &msg_buf[wt_idx], sizeof(msg_buf) - wt_idx);
 
         if(rxlen > 0)
         {
@@ -126,7 +129,8 @@ static void prv_engine_task(ULONG thread_input)
 /** 发动机状态机
  * 处理发动机启动、停机、油泵启动、油泵停止、设置油门指令
  * */
-static void prv_engine_state_machine(int32_t fd, struct ecu_cmd *pcmd)
+// static void prv_engine_state_machine(int32_t fd, struct ecu_cmd *pcmd)
+static void prv_engine_state_machine(struct ecu_cmd *pcmd)
 {
     /*********** 发动机状态机 ***************** */
     switch(s_engineStatus.CntState)
@@ -139,16 +143,16 @@ static void prv_engine_state_machine(int32_t fd, struct ecu_cmd *pcmd)
                 }
                 if((pcmd != NULL) && (pcmd->cmd == ECU_CMD_PUMP_ON))
                 {
-                    fcs_uart_send(fd, (const uint8_t *)&CMD_PUMP_ON, sizeof(CMD_PUMP_ON));
+                    fcs_uart_send(RT_ENGINE, (const uint8_t *)&CMD_PUMP_ON, sizeof(CMD_PUMP_ON));
                 }
                 if((pcmd != NULL) && (pcmd->cmd == ECU_CMD_PUMP_OFF))
                 {
-                    fcs_uart_send(fd, (const uint8_t *)&CMD_PUMP_OFF, sizeof(CMD_PUMP_OFF));
+                    fcs_uart_send(RT_ENGINE, (const uint8_t *)&CMD_PUMP_OFF, sizeof(CMD_PUMP_OFF));
                 }
             }
             break;
         case ENGINE_WARMUP:
-            prv_engine_warmup_state_machine(fd);
+            prv_engine_warmup_state_machine();
             break;
         case ENGINE_RUNNING:
             {
@@ -158,18 +162,18 @@ static void prv_engine_state_machine(int32_t fd, struct ecu_cmd *pcmd)
                 }
                 if((pcmd != NULL) && (pcmd->cmd == ECU_CMD_ENGIN_THO))
                 {
-                    prv_Set_Throttle_Percent(fd, pcmd->cmd_para.tho_val);
+                    prv_Set_Throttle_Percent(pcmd->cmd_para.tho_val);
                 }
             }
             break;
         case ENGINE_SHUTTING_DOWN:
-            prv_engine_shutdown_state_machine(fd);
+            prv_engine_shutdown_state_machine();
             break;
     }
 }
 
 /*********** 启动状态机 ***************** */
-static void prv_engine_warmup_state_machine(int32_t fd)
+static void prv_engine_warmup_state_machine()
 {
     static uint8_t s_StartEngineRetryCnt = 0;
     static uint32_t s_startTime = 0;
@@ -212,7 +216,9 @@ static void prv_engine_warmup_state_machine(int32_t fd)
             s_next_state = SEND_CMD_PUMP_ON;
             break;
         case SEND_CMD_PUMP_ON:
-            fcs_uart_send(fd, (const uint8_t *)&CMD_PUMP_ON, sizeof(CMD_PUMP_ON));
+            // fcs_uart_send(fd, (const uint8_t *)&CMD_PUMP_ON, sizeof(CMD_PUMP_ON));
+            fcs_uart_send(RT_ENGINE, (const uint8_t *)&CMD_PUMP_ON, sizeof(CMD_PUMP_ON));
+            
             s_startTime = tx_time_get();
             s_sleepTime = WAIT_50MS;
             s_current_state = SLEEP;
@@ -241,7 +247,7 @@ static void prv_engine_warmup_state_machine(int32_t fd)
                 {
                     // 上报油压异常
                     s_engineStatus.ecuError = ERROR_FUEL_PRESSURE;
-                    fcs_uart_send(fd, (const uint8_t *)&CMD_PUMP_OFF, sizeof(CMD_PUMP_OFF));
+                    fcs_uart_send(RT_ENGINE, (const uint8_t *)&CMD_PUMP_OFF, sizeof(CMD_PUMP_OFF));
                     // 确认超时，进入失败状态
                     s_current_state = START_FAILED;
                     // 重置标志，为下一次启动做准备
@@ -250,35 +256,43 @@ static void prv_engine_warmup_state_machine(int32_t fd)
             }
             break;
         case SEND_CMD_IGNITION1_ON:
-            fcs_uart_send(fd, (const uint8_t *)&CMD_IGNITION1_ON, sizeof(CMD_IGNITION1_ON));
+            // fcs_uart_send(fd, (const uint8_t *)&CMD_IGNITION1_ON, sizeof(CMD_IGNITION1_ON));
+            fcs_uart_send(RT_ENGINE, (const uint8_t *)&CMD_IGNITION1_ON, sizeof(CMD_IGNITION1_ON));
+
             s_startTime = tx_time_get();
             s_sleepTime = WAIT_50MS;
             s_current_state = SLEEP;
             s_next_state = SEND_CMD_IGNITION2_ON;
             break;
         case SEND_CMD_IGNITION2_ON:
-            fcs_uart_send(fd, (const uint8_t *)&CMD_IGNITION2_ON, sizeof(CMD_IGNITION2_ON));
+            // fcs_uart_send(fd, (const uint8_t *)&CMD_IGNITION2_ON, sizeof(CMD_IGNITION2_ON));
+            fcs_uart_send(RT_ENGINE, (const uint8_t *)&CMD_IGNITION2_ON, sizeof(CMD_IGNITION2_ON));
+
             s_startTime = tx_time_get();
             s_sleepTime = WAIT_50MS;
             s_current_state = SLEEP;
             s_next_state = SEND_CMD_CHOKE_ON;
             break;
         case SEND_CMD_CHOKE_ON:
-            fcs_uart_send(fd, (const uint8_t *)&CMD_CHOKE_ON, sizeof(CMD_CHOKE_ON));
+            // fcs_uart_send(fd, (const uint8_t *)&CMD_CHOKE_ON, sizeof(CMD_CHOKE_ON));
+            fcs_uart_send(RT_ENGINE, (const uint8_t *)&CMD_CHOKE_ON, sizeof(CMD_CHOKE_ON));
+
             s_startTime = tx_time_get();
             s_sleepTime = WAIT_50MS;
             s_current_state = SLEEP;
             s_next_state = SEND_CMD_RPM_MODE_OFF;
             break;
         case SEND_CMD_RPM_MODE_OFF:
-            fcs_uart_send(fd, (const uint8_t *)&CMD_RPM_MODE_OFF, sizeof(CMD_RPM_MODE_OFF));
+            // fcs_uart_send(fd, (const uint8_t *)&CMD_RPM_MODE_OFF, sizeof(CMD_RPM_MODE_OFF));
+            fcs_uart_send(RT_ENGINE, (const uint8_t *)&CMD_RPM_MODE_OFF, sizeof(CMD_RPM_MODE_OFF));
+
             s_startTime = tx_time_get();
             s_sleepTime = WAIT_50MS;
             s_current_state = SLEEP;
             s_next_state = SEND_CMD_Throttle_Percent;
             break;
-        case SEND_CMD_Throttle_Percent://FIXME 启动油门25%
-            prv_Set_Throttle_Percent(fd, 25.0f);
+        case SEND_CMD_Throttle_Percent:// 油门开到25%
+            prv_Set_Throttle_Percent(25.0);
             s_current_state = OUTPUT_PWM_2MS;
             break;
         case OUTPUT_PWM_2MS:
@@ -332,7 +346,7 @@ static void prv_engine_warmup_state_machine(int32_t fd)
             s_current_state = INIT_PWM;//为下次做准备
             s_StartEngineRetryCnt = 0;
             s_engineStatus.CntState = ENGINE_RUNNING;
-            prv_Set_Throttle_Percent(fd, 0.0f);//FIXME 启动成功，油门0%
+            prv_Set_Throttle_Percent(0.0f);//FIXME 启动成功，油门0%
             break;
         case START_FAILED://发动机状态置为stoped
             PulseServo_Deinit(ECU_PWM8);
@@ -344,7 +358,7 @@ static void prv_engine_warmup_state_machine(int32_t fd)
 }
 
 /*********** 停机状态机 ***************** */
-static void prv_engine_shutdown_state_machine(int32_t fd)
+static void prv_engine_shutdown_state_machine()
 {
     static uint8_t s_StopEngineRetryCnt = 0;
     static uint32_t s_startTime = 0;
@@ -364,7 +378,10 @@ static void prv_engine_shutdown_state_machine(int32_t fd)
     switch (s_current_state)
     {
         case SEND_CMD_STOP_ENGINE:
-            fcs_uart_send(fd, (const uint8_t *)&CMD_STOP_ENGINE, sizeof(CMD_STOP_ENGINE));
+            // fcs_uart_send(fd, (const uint8_t *)&CMD_STOP_ENGINE, sizeof(CMD_STOP_ENGINE));
+            fcs_uart_send(RT_ENGINE, (const uint8_t *)&CMD_STOP_ENGINE, sizeof(CMD_STOP_ENGINE));
+
+            s_startTime = tx_time_get();
             s_current_state = CHECK_THROTTLE;
             break;
         case CHECK_THROTTLE:
@@ -564,10 +581,9 @@ static int32_t prv_analyse(uint8_t *pbuf, int32_t len)
 }
 
 /** @brief 从queue中取到3号命令时，去设置油门
- * @param fd 串口
  * @param percent 油门百分比（0-100.0，支持一位小数）
  */
-static void prv_Set_Throttle_Percent(int32_t fd, float percent)
+static void prv_Set_Throttle_Percent(float percent)
 {
     uint8_t throttle_cmd[6];
     
@@ -575,7 +591,8 @@ static void prv_Set_Throttle_Percent(int32_t fd, float percent)
     prv_Generate_Throttle_Cmd(percent, throttle_cmd);
     
     /* 发送命令 */
-    fcs_uart_send(fd, (const uint8_t *)&throttle_cmd, sizeof(throttle_cmd));
+    // fcs_uart_send(fd, (const uint8_t *)&throttle_cmd, sizeof(throttle_cmd));
+    fcs_uart_send(RT_ENGINE, (const uint8_t *)&throttle_cmd, sizeof(throttle_cmd));
 }
 
 /************************************* 对外接口部分 ******************************************** */

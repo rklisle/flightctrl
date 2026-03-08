@@ -26,6 +26,8 @@
 #include "Telecontrol.h"
 //#include "../support/os_bufferLoop.h"
 #include <string.h>
+#include <stdio.h>
+#include <unistd.h>  // 需要包含此头文件
 
 RT rtList[MODULE_COUNT];
 RT_CAN rtCan[CAN_COUNT];
@@ -100,7 +102,7 @@ void InitRts()
 	rtList[RT_DATA_LINK].oddCheckEnable = FALSE;
     rtList[RT_DATA_LINK].evenCheckEnable = FALSE;
     rtList[RT_DATA_LINK].ptr_ChkFrameSum = ChkDataLinkFrame;
-	rtList[RT_DATA_LINK].ptr_RtHandler = CmdHandler;
+	rtList[RT_DATA_LINK].ptr_RtHandler = CmdHandler;//解析数据：数据链 ——> 飞控
 
 	rtList[RT_FUSE].ckIndex = 0;//0
 	rtList[RT_FUSE].chIndex = 3;//引信——UART4
@@ -113,17 +115,17 @@ void InitRts()
     rtList[RT_FUSE].ptr_Init = InitFuse;
     rtList[RT_FUSE].ptr_ChkFrameSum = ChkFuseStandardFrame;
 
-	// rtList[NOT_USED].ckIndex = 0;
-	rtList[NOT_USED].chIndex = 4;
-	// rtList[NOT_USED].devID = 0;
-	// rtList[NOT_USED].flags = 0;
-	// rtList[NOT_USED].oddCheckEnable = 0;
-	// rtList[NOT_USED].evenCheckEnable = 0;
-	// rtList[NOT_USED].devStopLen = 0;
-	// rtList[NOT_USED].devBuad = 0;
-	// rtList[NOT_USED].ptr_RtHandler = NULL;
-	// rtList[NOT_USED].ptr_ChkFrameSum = NULL;
-	// rtList[NOT_USED].ptr_Init = NULL;
+	rtList[PRINTF_UART_CHANNEL].ckIndex = 0;
+	rtList[PRINTF_UART_CHANNEL].chIndex = 4;	// UART5 —— 输出log信息
+	rtList[PRINTF_UART_CHANNEL].devID = 0;
+	rtList[PRINTF_UART_CHANNEL].flags = 0;
+	rtList[PRINTF_UART_CHANNEL].oddCheckEnable = 0;
+	rtList[PRINTF_UART_CHANNEL].evenCheckEnable = 0;
+	rtList[PRINTF_UART_CHANNEL].devStopLen = 0;
+	rtList[PRINTF_UART_CHANNEL].devBuad = 115200;
+	rtList[PRINTF_UART_CHANNEL].ptr_RtHandler = NULL;
+	rtList[PRINTF_UART_CHANNEL].ptr_ChkFrameSum = NULL;
+	rtList[PRINTF_UART_CHANNEL].ptr_Init = NULL;
 
 	rtList[RT_HIL].ckIndex = 0;//0
 	rtList[RT_HIL].chIndex = 5;//仿真口——UART6
@@ -251,8 +253,37 @@ void BusDataHandle()	// 1ms调用一次
 OS_U8 PrintDebug(char *str)
 {
 	OS_U16 strLen = strlen(str);
-	UART_PutBuff((int)rtList[RT_HIL].chIndex, (OS_U8*)str, strLen);
+	// UART_PutBuff((int)rtList[RT_HIL].chIndex, (OS_U8*)str, strLen);
+	UART_PutBuff(PRINTF_UART_CHANNEL, (OS_U8*)str, strLen);
 	return 0;
+}
+
+/***********************************************************
+ * 函数功能: 串口重定向，用于输出log，可在磨砂卡中查看打印内容.
+ * 使用示例:
+ *  int count = 0;
+    uint32_t timestamp = HAL_GetTick(); // 获取系统运行毫秒数
+    float temperature = 25.5f;          // 浮点数示例
+
+    printf("========== Variable Test Start ==========\r\n");
+    printf("Timestamp: %lu ms\r\n", timestamp);          // 输出无符号长整型
+    printf("Temperature: %.2f C\r\n", temperature);      // 输出浮点数，保留两位小数
+
+    while (1)
+    {
+        count++;  // 计数器递增
+        printf("Count: %d, Time: %lu ms\r\n", count, HAL_GetTick());
+        HAL_Delay(1000); // 延时 1 秒
+    }
+ ***********************************************************/
+int _write(int fd, char *ptr, int len)
+{
+	// 忽略文件描述符fd
+    // 一次性将整个字符串写入环形缓冲区
+    // 注意：UART_PutBuff 的第三个参数是 unsigned short，需要强制转换
+    UART_PutBuff(PRINTF_UART_CHANNEL, (unsigned char*)ptr, (unsigned short)len);
+    
+    return len;  // 必须返回实际写入的字节数
 }
 
 /***********************************************************

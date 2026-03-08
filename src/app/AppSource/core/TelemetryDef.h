@@ -248,19 +248,27 @@ telemetryParam tm_200hz[] =
 //0x60组合导航模式       0x64纯惯性导航模式  
 	{&DataPoolALL[NAV_DATAPOOL_INDEX],	"navState",	1},
 // HACK: TEST ECU dataPool Define
-//280：转速	014：这里将设置的油门百分比*10，记录在此变量中	试车改了，参看param30
+//280：转速
+//014：发动机指令9：实际油压，单位mbar
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"engSetRp",	2},
-// 发动机设置转速(not used)	// 014:指令64，期望风门位置百分比*10倍，定速模式下期望的转速值，[0~9999]
+// 发动机设置转速(not used)
+//014：发动机指令86：期望的油门位置
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"ecuSetRp",	2},
-// 发动机实际转速	// 014:*指令69，实际转速，[0~9999]	
+//014：指令69，实际转速，[0~9999]	
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"ecuGetRp",	2},
-// 发动机温度 * 10	//014:指令6 ，环境温度，整数，有符号实际数值，[0~9999]
+//280：发动机温度 * 10	
+//014：用于启动SD卡文件写入。初始化时设置为0x00FF，收到数据链传来数据时设置为0x0001
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"ecuTemp",	2},
-	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"ecu24V",	2},// 发动机电池电压 * 10
-	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"ecu24A",	2},// 发动机电池电流 * 10
-// 发动机状态：0停机，1启动中，2散热 3故障 4脱机 5运行
+//280：发动机电池电压 * 10
+//014：指令19，实际喷油1脉宽，单位us
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"ecu24V",	2},
+//280：发动机电池电流 * 10
+//014：指令39，实际喷油2脉宽，单位us
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"ecu24A",	2},
+//280：发动机状态：0停机，1启动中，2散热 3故障 4脱机 5运行
+//014：发动机状态：0停机，1启动中，2停机中 5运行
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"ecuState",	1},
-// 发动机错误码定义：0无异常 1油压异常 
+//014：发动机错误码定义：0无异常 1油压异常 
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"ecuError",	1},
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuelRate",	2},//
 // 0正常飞行，3距离伞降点<150，4正常开伞，0xCC出安全区

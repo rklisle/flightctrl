@@ -197,14 +197,14 @@ static OS_U16 GetTelemetryByTick(OS_U32 tick, OS_U8* buf)
 static OS_U16 GetFlightTelemetryByTick(OS_U32 tick, OS_U8* buf)
 {
 	//OS_U8 groupId = tick % 20;
-	unsigned char *p = buf + TELE_PARAM_FIRSTDATA_POS;	//数据区第7字节开始为第一个参数
+	unsigned char *p = buf + TELE_PARAM_FIRSTDATA_POS;	//数据区第5字节开始为第一个参数
 	OS_U16 len;
 	TelemetryCombine(TELEMETRY_GROUP_COUNT, p, &len);
 
 	//数据区第0字节为group编号
 	*(OS_U8*)(buf + TELE_PARAM_GROUPID_POS) = 0x82;
 	//数据区第1~4字节为时间
-	*(OS_U32*)(buf + TELE_PARAM_CURTIME_POS) = g_DeviceState.currTime * 1e4;//1e4为c语言科学计数法，表示10000;
+	*(OS_U32*)(buf + TELE_PARAM_CURTIME_POS) = g_DeviceState.currTime * 1e4;//1e4为c语言科学计数法，表示10000;	// BUG
 	return len + TELE_PARAM_FIRSTDATA_POS;
 }
 /***********************************************************
