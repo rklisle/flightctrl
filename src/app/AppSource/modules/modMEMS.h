@@ -13,13 +13,14 @@
 #pragma pack(1)
 typedef struct
 {
-	OS_U8 dataEffective;
+	OS_U8 dataEffective;	// "navState"		//0x00准备       0x20对准中     0x3F对准完成      0x2F对准失败（奇异角、或对准过程中出现较大幅度晃动）
+												//0x60组合导航模式       0x64纯惯性导航模式     
 //	OS_U8 state;
 //	OS_U8 errorLevel;
 //	OS_U8 errorCode;
-	OS_DOUBLE lon;
-	OS_DOUBLE lat;
-	OS_FLOAT alt;	
+	OS_DOUBLE lon;	//else中	//SETDATA(pDataPoolImu, "navLon", lon * 1e7,	OS_S32);
+	OS_DOUBLE lat;				//SETDATA(pDataPoolImu, "navLat", lat * 1e7,	OS_S32);
+	OS_FLOAT alt;				//SETDATA(pDataPoolImu, "navHigh", alt,	    OS_FLOAT);
 	OS_FLOAT vn;	
 	OS_FLOAT vs;
 	OS_FLOAT ve;	

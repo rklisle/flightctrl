@@ -15,6 +15,7 @@
 #include <math.h>
 #include "modNav.h"
 #include "../support/common.h"
+#include "modHil.h"
 
 STRU_NAV_INPUT navInput;
 #define PI (3.1415926)
@@ -308,6 +309,7 @@ OS_U32 NavRtHandler(STRU_422_MSG_INFO * frame)	// RT_NAV
 	return 0;
 }
 
+// BUG改这里 NAV传过来的数据，现在我们需要把这些数据赋值给IMU的数据池
 OS_U8 SaveNavInDataPool(STRU_NAV_INFO *navInfo)
 {
 	SETDATA(pDataPoolNav, "gpsMod", navInfo->GPSstate,	OS_U8);//GPS状态
@@ -336,7 +338,64 @@ OS_U8 SaveNavInDataPool(STRU_NAV_INFO *navInfo)
 	SETDATA(pDataPoolNav, "gpsDir", navInfo->gpsDir,	OS_U16);//GPS航向角
 	SETDATA(pDataPoolNav, "gpsDirOK", navInfo->gpsDirEffect,	OS_U8);//GPS航向有效标志
 
-	SETDATA(pDataPoolNav, "navLon", navInfo->s32navLon,	OS_S32);//导航经度
+
+SETDATA(pDataPoolImu, "gpsLon", navInfo->GPSlon,			OS_S32);//GPS经度
+SETDATA(pDataPoolImu, "gpsLat", navInfo->GPSlat,			OS_S32);//GPS纬度
+SETDATA(pDataPoolImu, "gpsAlt", navInfo->GPShigh * 1e-3,	OS_S16);//GPS高度
+SETDATA(pDataPoolImu, "gpsVn", navInfo->GPSVn,	OS_S16);//GPS北速
+SETDATA(pDataPoolImu, "gpsVs", navInfo->GPSVs,	OS_S16);//GPS天速
+SETDATA(pDataPoolImu, "gpsVe", navInfo->GPSVe,	OS_S16);//GPS东速
+SETDATA(pDataPoolImu, "dirEffec",	navInfo->gpsDirEffect,	OS_U8);//GPS航向有效标志
+
+SETDATA(pDataPoolImu, "gpsYear",  navInfo->year,   OS_U8);	//GPS年
+SETDATA(pDataPoolImu, "gpsMonth", navInfo->month,  OS_U8);	//GPS月
+SETDATA(pDataPoolImu, "gpsDay",   navInfo->day,    OS_U8);	//GPS日
+SETDATA(pDataPoolImu, "gpsHour",  navInfo->hour,   OS_U8);	//GPS时
+SETDATA(pDataPoolImu, "gpsMinit", navInfo->minite, OS_U8);	//GPS分
+SETDATA(pDataPoolImu, "gpsSec",   navInfo->second, OS_U8);	//GPS秒
+SETDATA(pDataPoolImu, "gpsMSec",  navInfo->ms,     OS_U8);	//GPS毫秒
+SETDATA(pDataPoolImu, "gpsDir", navInfo->gpsDir,  OS_U16);
+
+if(g_DeviceState.hilCountDown > 0 && hilInput.useNav == 0)
+{
+}
+else
+{
+SETDATA(pDataPoolImu, "imuWx", navInfo->imuWx16507,	OS_FLOAT);
+SETDATA(pDataPoolImu, "imuWy", navInfo->imuWy16507,	OS_FLOAT);
+SETDATA(pDataPoolImu, "imuWz", navInfo->imuWz16507,	OS_FLOAT);
+SETDATA(pDataPoolImu, "imuAx", navInfo->imuAx16507,	OS_FLOAT);
+SETDATA(pDataPoolImu, "imuAy", navInfo->imuAy16507,	OS_FLOAT);
+SETDATA(pDataPoolImu, "imuAz", navInfo->imuAz16507,	OS_FLOAT);
+
+SETDATA(pDataPoolImu, "navLon",  navInfo->s32navLon,			OS_S32	);
+SETDATA(pDataPoolImu, "navLat",  navInfo->s32navLat,			OS_S32	);
+SETDATA(pDataPoolImu, "navHigh", navInfo->s32navHigh * 1e-3,	OS_FLOAT);
+
+SETDATA(pDataPoolImu, "navVn", navInfo->s32navVn * 1e-1,	OS_S16);
+SETDATA(pDataPoolImu, "navVs", navInfo->s32navVs * 1e-1,	OS_S16);
+SETDATA(pDataPoolImu, "navVe", navInfo->s32navVe * 1e-1,	OS_S16);
+
+SETDATA(pDataPoolImu, "navPitch", navInfo->s16pitch,	OS_S16);	
+SETDATA(pDataPoolImu, "navRoll", navInfo->s16roll,	OS_S16);  
+SETDATA(pDataPoolImu, "navState", navInfo->navStatus,	OS_U8);
+SETDATA(pDataPoolImu, "navDir", navInfo->s16dir,	OS_U16);
+
+//新增判断导航状态准备中且航向有效标志有效
+if((navInfo->navStatus == 0) && (navInfo->gpsDirEffect == 1))
+{
+	float navdirmid;
+	navdirmid = navInfo->gpsDir / 100 + 180;
+	if(navdirmid > 360)
+		navdirmid = navdirmid - 360;
+	SETDATA(pDataPoolImu, "navDir", navdirmid * 1e2,	OS_U16);
+	SETDATA(pDataPoolImu, "navLon", navInfo->GPSlon,	OS_S32);
+	SETDATA(pDataPoolImu, "navLat", navInfo->GPSlat,	OS_S32);
+	SETDATA(pDataPoolImu, "navHigh", navInfo->GPShigh * 1e-3,	OS_FLOAT);
+}
+}
+
+SETDATA(pDataPoolNav, "navLon", navInfo->s32navLon,	OS_S32);//导航经度
 	SETDATA(pDataPoolNav, "navLat", navInfo->s32navLat,	OS_S32);//导航纬度
 	SETDATA(pDataPoolNav, "navHigh", navInfo->s32navHigh * 1e-3,OS_FLOAT);//导航高度
 	SETDATA(pDataPoolNav, "navVn", navInfo->s32navVn * 1e-1,	OS_S16);//导航北速
@@ -353,7 +412,8 @@ OS_U8 SaveNavInDataPool(STRU_NAV_INFO *navInfo)
 	SETDATA(pDataPoolNav, "navAx", navInfo->imuAx16507,	OS_FLOAT);//原始加速度X
 	SETDATA(pDataPoolNav, "navAy", navInfo->imuAy16507,	OS_FLOAT);//原始加速度Y
 	SETDATA(pDataPoolNav, "navAz", navInfo->imuAz16507,	OS_FLOAT);//原始加速度Z
-    
+
+
 //  SETDATA(pDataPoolNav, "navWx2", navInfo->imuWx20689,	OS_FLOAT);//原始角速度X
 //	SETDATA(pDataPoolNav, "navWy2", navInfo->imuWy20689,	OS_FLOAT);//原始角速度Y
 //	SETDATA(pDataPoolNav, "navWz2", navInfo->imuWz20689,	OS_FLOAT);//原始角速度Z
@@ -361,7 +421,7 @@ OS_U8 SaveNavInDataPool(STRU_NAV_INFO *navInfo)
 	SETDATA(pDataPoolNav, "navAy2", navInfo->imuAy20689,	OS_FLOAT);//原始加速度Y
 	SETDATA(pDataPoolNav, "navAz2", navInfo->imuAz20689,	OS_FLOAT);//原始加速度Z
     
-  SETDATA(pDataPoolNav, "navWx3", navInfo->imuWx42688,	OS_FLOAT);//原始角速度X
+	SETDATA(pDataPoolNav, "navWx3", navInfo->imuWx42688,	OS_FLOAT);//原始角速度X
 	SETDATA(pDataPoolNav, "navWy3", navInfo->imuWy42688,	OS_FLOAT);//原始角速度Y
 	SETDATA(pDataPoolNav, "navWz3", navInfo->imuWz42688,	OS_FLOAT);//原始角速度Z
 	SETDATA(pDataPoolNav, "navAx3", navInfo->imuAx42688,	OS_FLOAT);//原始加速度X
@@ -374,8 +434,8 @@ OS_U8 SaveNavInDataPool(STRU_NAV_INFO *navInfo)
 	SETDATA(pDataPoolNav, "navUsKa", navInfo->navUsKa,	OS_U16);
     SETDATA(pDataPoolSelf, "cpuTemp2", navInfo->cpuTemp,	OS_S16);
     
+
 //	CalcXYZ();
-    return 0;
 /*
 	char sdRow[2000] = {0};
 	sprintf(sdRow, "%.3f,%.7f,%.7f,%.2f,%.2f,%.2f,%.2f,%d,%d,%.2f,%.2f,%c%c,%d,%d,%.2f\n", g_DeviceState.currTime,

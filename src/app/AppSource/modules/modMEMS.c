@@ -205,7 +205,7 @@ static OS_U8 SaveImuInDataPool(STRU_IMU_INFO* buf)
     SETDATA(pDataPoolImu, "gpsVn", gpsvn * 1e2,	OS_S16);
     SETDATA(pDataPoolImu, "gpsVs", gpsvs * 1e2,	OS_S16);
     SETDATA(pDataPoolImu, "gpsVe", gpsve * 1e2,	OS_S16);
-    SETDATA(pDataPoolImu,	"dirEffec",	DirMar,	OS_U8);
+    SETDATA(pDataPoolImu,	"dirEffec",	DirMar,	OS_U8);//GPS航向有效标志
     year = year - 2000;
     SETDATA(pDataPoolImu, "gpsYear", year,	 OS_U8);
     SETDATA(pDataPoolImu, "gpsMonth", month, OS_U8);
@@ -215,8 +215,9 @@ static OS_U8 SaveImuInDataPool(STRU_IMU_INFO* buf)
     SETDATA(pDataPoolImu, "gpsSec", second,	 OS_U8);
     SETDATA(pDataPoolImu, "gpsMSec", ms*0.1, OS_U8);
     SETDATA(pDataPoolImu, "gpsDir", gpsdir * 100,  OS_U16);
-    SETDATA(pDataPoolImu, "gpsScCnt", satCount,  OS_U8);
-    
+// 这个数据NAV没有,然而整个程序也没用到"gpsScCnt"，所以忽略它
+    SETDATA(pDataPoolImu, "gpsScCnt", satCount,  OS_U8); 
+
     if(g_DeviceState.hilCountDown > 0 && hilInput.useNav == 0)
     {
     }
