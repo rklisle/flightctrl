@@ -234,7 +234,7 @@ OS_U8 MsgToSrv(OS_DOUBLE ctrlDeg[6], OS_U8 ctrlMode/*control = 0x02, 0x44=setZer
     SETDATA(pDataPoolSrv, "Sr2Cmd", ctrlDeg[4] * 100, OS_S16);
     SETDATA(pDataPoolSrv, "Sr6Cmd", ctrlDeg[5] * 100, OS_S16);
 
-    SETDATA(pDataPoolSrv, "Sr1Angle", ctrlDeg[4], OS_U16);
+    SETDATA(pDataPoolSrv, "Sr2Angle", ctrlDeg[4], OS_U16);
     SETDATA(pDataPoolSrv, "Sr6Angle", ctrlDeg[5], OS_S16);
 
 	if (ctrlMode == 0x02) 
@@ -242,9 +242,9 @@ OS_U8 MsgToSrv(OS_DOUBLE ctrlDeg[6], OS_U8 ctrlMode/*control = 0x02, 0x44=setZer
 		// 正常控制模式
 		// 控制1-4号CAN舵机(地面站上的顺序)
 		Servo_SetAngle_CAN(SERVO_NODE_1, ctrlDeg[1]);	// 左副翼舵，设计要求2
-		Servo_SetAngle_CAN(SERVO_NODE_2, ctrlDeg[2]);	// 右副翼舵，设计要求5
-		Servo_SetAngle_CAN(SERVO_NODE_3, ctrlDeg[3]);	// 左俯仰舵，设计要求3
-		Servo_SetAngle_CAN(SERVO_NODE_4, ctrlDeg[4]);	// 右俯仰舵，设计要求4
+		Servo_SetAngle_CAN(SERVO_NODE_2, ctrlDeg[2]);	// 左俯仰舵，设计要求3
+		Servo_SetAngle_CAN(SERVO_NODE_3, ctrlDeg[3]);	// 右俯仰舵，设计要求4
+		Servo_SetAngle_CAN(SERVO_NODE_4, ctrlDeg[4]);	// 右副翼舵，设计要求5
 		
 		// 控制5-6号PWM舵机(地面站上的顺序)
         AngleServo_SetAngle(SERVO_PWM1, (float)ctrlDeg[0]);	// 左航向舵，设计要求1
