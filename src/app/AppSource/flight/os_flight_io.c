@@ -170,16 +170,6 @@ void updateRP(RoutePointIn* inrp, int num)
 		rp[i].outTrack = inrp[i].outTrack;
 		rp[i].if_airspeed_used = inrp[i].if_airspeed_used;
 		//rp[i].if_GuideFlight = inrp[i].if_GuideFlight;
-		rp[i].hover_radis = 0.0;
-		rp[i].AttackAngle = 0.0;
-		if(rp[i].w == 3 ||rp[i].w == 4)
-		{
-			rp[i].AttackAngle = -50.0;
-		}
-		if(rp[i].w == 2)
-		{
-			rp[i].hover_radis = 0.0;
-		}
 	}
 }
 
@@ -202,16 +192,6 @@ void updateNewRP(RoutePointIn* newinrp, int num, OS_U16 curPtNo, int pt)
 			rp[i].outTrack = newinrp[i].outTrack;
 			rp[i].if_airspeed_used = newinrp[i].if_airspeed_used;
 			//rp[i].if_GuideFlight = newinrp[i].if_GuideFlight;
-			rp[i].hover_radis = 0.0;
-			rp[i].AttackAngle = 0.0;
-			if(rp[i].w == 3 ||rp[i].w == 4)
-			{
-				rp[i].AttackAngle = 0.0;
-			}
-			if(rp[i].w == 2)
-			{
-				rp[i].hover_radis = 0.0;
-			}
 		}
 	}
 	else
@@ -229,16 +209,6 @@ void updateNewRP(RoutePointIn* newinrp, int num, OS_U16 curPtNo, int pt)
 			rp[i].outTrack = newinrp[i].outTrack;
 			rp[i].if_airspeed_used = newinrp[i].if_airspeed_used;
 			//rp[i].if_GuideFlight = newinrp[i].if_GuideFlight;
-			rp[i].hover_radis = 0.0;
-			rp[i].AttackAngle = 0.0;
-			if(rp[i].w == 3 ||rp[i].w == 4)
-			{
-				rp[i].AttackAngle = 0.0;
-			}
-			if(rp[i].w == 2)
-			{
-				rp[i].hover_radis = 0.0;
-			}
 		}
 	}
   RP_NUMBER = curPtNo + 1;

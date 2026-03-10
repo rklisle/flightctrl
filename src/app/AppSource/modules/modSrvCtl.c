@@ -240,13 +240,13 @@ OS_U8 MsgToSrv(OS_DOUBLE ctrlDeg[6], OS_U8 ctrlMode/*control = 0x02, 0x44=setZer
 	if (ctrlMode == 0x02) 
 	{
 		// 正常控制模式
-		// 控制1-4号CAN舵机
+		// 控制2-5号CAN舵机
 		Servo_SetAngle_CAN(SERVO_NODE_1, ctrlDeg[0]);
 		Servo_SetAngle_CAN(SERVO_NODE_2, ctrlDeg[1]);
 		Servo_SetAngle_CAN(SERVO_NODE_3, ctrlDeg[2]);
 		Servo_SetAngle_CAN(SERVO_NODE_4, ctrlDeg[3]);
 		
-		// 控制5-6号PWM舵机
+		// 控制1\6号PWM舵机
         AngleServo_SetAngle(SERVO_PWM1, (float)ctrlDeg[4]);
         AngleServo_SetAngle(SERVO_PWM6, (float)ctrlDeg[5]);
     }
