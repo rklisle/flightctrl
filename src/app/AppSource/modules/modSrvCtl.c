@@ -227,28 +227,28 @@ uint32_t angle_to_ccr(double angle_deg) {
 OS_U8 MsgToSrv(OS_DOUBLE ctrlDeg[6], OS_U8 ctrlMode/*control = 0x02, 0x44=setZero*/)//04 存入数据池 控制舵机
 {
 	//MML舵机
-    SETDATA(pDataPoolSrv, "Sr1Cmd", ctrlDeg[0] * 100, OS_S16); 
-	SETDATA(pDataPoolSrv, "Sr2Cmd", ctrlDeg[1] * 100, OS_S16);
+    SETDATA(pDataPoolSrv, "Sr5Cmd", ctrlDeg[0] * 100, OS_S16); 
+	SETDATA(pDataPoolSrv, "Sr1Cmd", ctrlDeg[1] * 100, OS_S16);
     SETDATA(pDataPoolSrv, "Sr3Cmd", ctrlDeg[2] * 100, OS_S16);
     SETDATA(pDataPoolSrv, "Sr4Cmd", ctrlDeg[3] * 100, OS_S16);
-    SETDATA(pDataPoolSrv, "Sr5Cmd", ctrlDeg[4] * 100, OS_S16);
+    SETDATA(pDataPoolSrv, "Sr2Cmd", ctrlDeg[4] * 100, OS_S16);
     SETDATA(pDataPoolSrv, "Sr6Cmd", ctrlDeg[5] * 100, OS_S16);
 
-    SETDATA(pDataPoolSrv, "Sr5Angle", ctrlDeg[4], OS_U16);
+    SETDATA(pDataPoolSrv, "Sr1Angle", ctrlDeg[4], OS_U16);
     SETDATA(pDataPoolSrv, "Sr6Angle", ctrlDeg[5], OS_S16);
 
 	if (ctrlMode == 0x02) 
 	{
 		// 正常控制模式
-		// 控制2-5号CAN舵机
-		Servo_SetAngle_CAN(SERVO_NODE_1, ctrlDeg[0]);
-		Servo_SetAngle_CAN(SERVO_NODE_2, ctrlDeg[1]);
-		Servo_SetAngle_CAN(SERVO_NODE_3, ctrlDeg[2]);
-		Servo_SetAngle_CAN(SERVO_NODE_4, ctrlDeg[3]);
+		// 控制1-4号CAN舵机(地面站上的顺序)
+		Servo_SetAngle_CAN(SERVO_NODE_1, ctrlDeg[1]);	// 左副翼舵，设计要求2
+		Servo_SetAngle_CAN(SERVO_NODE_2, ctrlDeg[2]);	// 右副翼舵，设计要求5
+		Servo_SetAngle_CAN(SERVO_NODE_3, ctrlDeg[3]);	// 左俯仰舵，设计要求3
+		Servo_SetAngle_CAN(SERVO_NODE_4, ctrlDeg[4]);	// 右俯仰舵，设计要求4
 		
-		// 控制1\6号PWM舵机
-        AngleServo_SetAngle(SERVO_PWM1, (float)ctrlDeg[4]);
-        AngleServo_SetAngle(SERVO_PWM6, (float)ctrlDeg[5]);
+		// 控制5-6号PWM舵机(地面站上的顺序)
+        AngleServo_SetAngle(SERVO_PWM1, (float)ctrlDeg[0]);	// 左航向舵，设计要求1
+        AngleServo_SetAngle(SERVO_PWM6, (float)ctrlDeg[5]);	// 右航向舵，设计要求6
     }
 	else if (ctrlMode == 0x44) 
 	{

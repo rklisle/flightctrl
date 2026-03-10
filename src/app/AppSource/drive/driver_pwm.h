@@ -7,8 +7,8 @@
 
 /** 舵机编号定义 */
 typedef enum {
-    SERVO_PWM1 = 0, //左翅膀
-    SERVO_PWM6,     //右翅膀
+    SERVO_PWM1 = 0, //左翅膀，左航向舵
+    SERVO_PWM6,     //右翅膀，右航向舵
     SERVO_PWM7,     //开伞舵机
     ECU_PWM8,       //发动机启动信号
     PWM_CH_MAX,
