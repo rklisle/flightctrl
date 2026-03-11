@@ -25,9 +25,9 @@ OS_U32 CmdHandler(STRU_422_MSG_INFO * frame)//02 //	RT_DATA_LINK
 SETDATA(pDataPoolSelf,  "ecuTemp", 0x0001,	OS_U16);
 
 	//非交互模式时，不处理地面指令
-	// MML 非交互模式时，只能处理“紧急伞降”、“紧急返航”、“开关发动机”...等指令
 	if((g_DeviceState.workStage & DOM_INTERACTIVE) !=  DOM_INTERACTIVE)
 	{
+		// MML 运行到这里，说明地面软件点击“起飞”，此时只能处理“紧急伞降”、“紧急返航”、“开关发动机”...等指令
 		if(msgId != CMD_URGENT_LAND && msgId != CMD_URGENT_RETURN && msgId != CMD_START_STOP_ENGINE && msgId != CMD_MSN_NEWPT && msgId != CMD_USER_SETTARGET && msgId != CMD_SET_IMAGEMODE)
 		{
 			return -1;

@@ -47,7 +47,9 @@ void InitCanRts()
     hfdcan1.Instance = FDCAN1;
     hfdcan2.Instance = FDCAN2;
     // fdCan[0] = app_can_init(NULL, &hfdcan1, CanRtBattHandler);	//MML舵机
+#ifdef SERVO_CAN
 	fdCan[0] = app_can_init(NULL, &hfdcan1, CanRtServoHandler);  // 改为舵机处理函数
+#endif
     fdCan[1] = app_can_init(NULL, &hfdcan2, CanRtPwrSeqHandler);	//MML配电板
 
 }

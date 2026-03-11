@@ -38,6 +38,13 @@ OS_S32 BoardInit()
     AngleServo_Init(SERVO_PWM6, 0.0f); //ÓÒ³á°ò¶æ»ú³õÊ¼»¯
     AngleServo_Init(SERVO_PWM7, 0.0f); //¿ªÉ¡¶æ»ú³õÊ¼»¯
 
+#ifdef SERVO_PWM
+    AngleServo_Init(SERVO_PWM2, 0.0f);	// ×ó¸±Òí¶æ
+    AngleServo_Init(SERVO_PWM3, 0.0f);	// ×ó¸©Ñö¶æ
+    AngleServo_Init(SERVO_PWM4, 0.0f);	// ÓÒ¸©Ñö¶æ
+    AngleServo_Init(SERVO_PWM5, 0.0f);	// ÓÒ¸±Òí¶æ
+#endif
+
     return OS_SUCCESS;
 }
 

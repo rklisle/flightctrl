@@ -240,13 +240,20 @@ OS_U8 MsgToSrv(OS_DOUBLE ctrlDeg[6], OS_U8 ctrlMode/*control = 0x02, 0x44=setZer
 	if (ctrlMode == 0x02) 
 	{
 		// 正常控制模式
-		// 控制1-4号CAN舵机(地面站上的顺序)
-		Servo_SetAngle_CAN(SERVO_NODE_1, ctrlDeg[1]);	// 左副翼舵，设计要求2
-		Servo_SetAngle_CAN(SERVO_NODE_2, ctrlDeg[2]);	// 左俯仰舵，设计要求3
-		Servo_SetAngle_CAN(SERVO_NODE_3, ctrlDeg[3]);	// 右俯仰舵，设计要求4
-		Servo_SetAngle_CAN(SERVO_NODE_4, ctrlDeg[4]);	// 右副翼舵，设计要求5
-		
-		// 控制5-6号PWM舵机(地面站上的顺序)
+#ifdef SERVO_CAN
+		Servo_SetAngle_CAN(SERVO_NODE_1, ctrlDeg[1]);       // 左副翼舵，设计要求2
+		Servo_SetAngle_CAN(SERVO_NODE_3, ctrlDeg[2]);       // 左俯仰舵，设计要求3
+		Servo_SetAngle_CAN(SERVO_NODE_4, ctrlDeg[3]);       // 右俯仰舵，设计要求4
+		Servo_SetAngle_CAN(SERVO_NODE_2, ctrlDeg[4]);       // 右副翼舵，设计要求5
+#endif
+
+#ifdef SERVO_PWM
+        AngleServo_SetAngle(SERVO_PWM2, (float)ctrlDeg[1]);	// 左副翼舵，设计要求2
+        AngleServo_SetAngle(SERVO_PWM3, (float)ctrlDeg[2]);	// 左俯仰舵，设计要求3
+        AngleServo_SetAngle(SERVO_PWM4, (float)ctrlDeg[3]);	// 右俯仰舵，设计要求4
+        AngleServo_SetAngle(SERVO_PWM5, (float)ctrlDeg[4]);	// 右副翼舵，设计要求5
+#endif
+
         AngleServo_SetAngle(SERVO_PWM1, (float)ctrlDeg[0]);	// 左航向舵，设计要求1
         AngleServo_SetAngle(SERVO_PWM6, (float)ctrlDeg[5]);	// 右航向舵，设计要求6
     }
@@ -254,11 +261,19 @@ OS_U8 MsgToSrv(OS_DOUBLE ctrlDeg[6], OS_U8 ctrlMode/*control = 0x02, 0x44=setZer
 	{
 		// 设置零点模式
         // 对于CAN舵机，发送设置中点命令
+#ifdef SERVO_CAN
         Servo_SetMidpoint_CAN(SERVO_NODE_1);
         Servo_SetMidpoint_CAN(SERVO_NODE_2);
         Servo_SetMidpoint_CAN(SERVO_NODE_3);
         Servo_SetMidpoint_CAN(SERVO_NODE_4);
-        
+#endif
+
+#ifdef SERVO_PWM
+        AngleServo_SetAngle(SERVO_PWM2, 0.0f);
+        AngleServo_SetAngle(SERVO_PWM3, 0.0f);
+        AngleServo_SetAngle(SERVO_PWM4, 0.0f);
+        AngleServo_SetAngle(SERVO_PWM5, 0.0f);
+#endif
         // PWM舵机零点设置
         // PWM舵机通常需要机械调零，这里仅让舵机回归0°位置
         AngleServo_SetAngle(SERVO_PWM1, 0.0f);

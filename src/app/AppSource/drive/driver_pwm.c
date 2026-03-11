@@ -24,12 +24,29 @@ typedef struct {
 } Servo_Hardware_Mapping_t;
 
 /** 全局硬件映射表 */
+#ifdef SERVO_CAN
+// 只需要定义2个翅膀的舵机，1个开伞舵机，1个驱动发动机用的PWM
 static const Servo_Hardware_Mapping_t hardware_map[PWM_CH_MAX] = {
     [SERVO_PWM1] = {&htim3, TIM3, TIM_CHANNEL_1, GPIOC, GPIO_PIN_6, GPIO_AF2_TIM3},
     [SERVO_PWM6] = {&htim4, TIM4, TIM_CHANNEL_2, GPIOD, GPIO_PIN_13, GPIO_AF2_TIM4},
     [SERVO_PWM7] = {&htim4, TIM4, TIM_CHANNEL_3, GPIOB, GPIO_PIN_8, GPIO_AF2_TIM4},
     [ECU_PWM8]  = {&htim17, TIM17, TIM_CHANNEL_1, GPIOB, GPIO_PIN_9, GPIO_AF1_TIM17},
 };
+#endif
+
+#ifdef SERVO_PWM
+// 需要定义全部6个舵机，1个开伞舵机，1个驱动发动机用的PWM
+static const Servo_Hardware_Mapping_t hardware_map[PWM_CH_MAX] = {
+    [SERVO_PWM1] = {&htim3, TIM3,  TIM_CHANNEL_1, GPIOC, GPIO_PIN_6,  GPIO_AF2_TIM3},
+    [SERVO_PWM2] = {&htim3, TIM3,  TIM_CHANNEL_2, GPIOC, GPIO_PIN_7,  GPIO_AF2_TIM3},
+    [SERVO_PWM3] = {&htim3, TIM3,  TIM_CHANNEL_3, GPIOB, GPIO_PIN_0,  GPIO_AF2_TIM3},
+    [SERVO_PWM4] = {&htim3, TIM3,  TIM_CHANNEL_4, GPIOB, GPIO_PIN_1,  GPIO_AF2_TIM3},
+    [SERVO_PWM5] = {&htim4, TIM4,  TIM_CHANNEL_1, GPIOD, GPIO_PIN_12, GPIO_AF2_TIM4},
+    [SERVO_PWM6] = {&htim4, TIM4,  TIM_CHANNEL_2, GPIOD, GPIO_PIN_13, GPIO_AF2_TIM4},
+    [SERVO_PWM7] = {&htim4, TIM4,  TIM_CHANNEL_3, GPIOB, GPIO_PIN_8,  GPIO_AF2_TIM4},
+    [ECU_PWM8]  = {&htim17, TIM17, TIM_CHANNEL_1, GPIOB, GPIO_PIN_9,  GPIO_AF1_TIM17},
+};
+#endif
 
 /** PWM通道状态结构体，针对ST的专属配置 */
 typedef struct {
@@ -152,6 +169,7 @@ bool Driver_PWM_Deinit(Servo_ID_t servo_id)
 /** 开启GPIO时钟 */
 static void prv_MX_GPIO_Init(Servo_ID_t servo_id)
 {
+#ifdef SERVO_CAN
     switch (servo_id)
     {
     case SERVO_PWM1:
@@ -169,6 +187,40 @@ static void prv_MX_GPIO_Init(Servo_ID_t servo_id)
     default:
         break;
     }
+#endif
+
+#ifdef SERVO_PWM
+    switch (servo_id)
+    {
+    case SERVO_PWM1:
+        __HAL_RCC_GPIOC_CLK_ENABLE();
+        break;
+    case SERVO_PWM2:
+        __HAL_RCC_GPIOC_CLK_ENABLE();
+        break;
+    case SERVO_PWM3:
+        __HAL_RCC_GPIOB_CLK_ENABLE();
+        break;
+    case SERVO_PWM4:
+        __HAL_RCC_GPIOB_CLK_ENABLE();
+        break;
+    case SERVO_PWM5:
+        __HAL_RCC_GPIOD_CLK_ENABLE();
+        break;
+    case SERVO_PWM6:
+        __HAL_RCC_GPIOD_CLK_ENABLE();
+        break;
+    case SERVO_PWM7:
+        __HAL_RCC_GPIOB_CLK_ENABLE();
+        break;
+    case ECU_PWM8:
+        __HAL_RCC_GPIOB_CLK_ENABLE();
+        break;
+    default:
+        break;
+    }
+#endif
+
 }
 
 /** 计算PSC和ARR */

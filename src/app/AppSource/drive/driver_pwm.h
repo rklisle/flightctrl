@@ -6,6 +6,7 @@
 #include <stdbool.h>
 
 /** 舵机编号定义 */
+#ifdef SERVO_CAN
 typedef enum {
     SERVO_PWM1 = 0, //左翅膀，左航向舵
     SERVO_PWM6,     //右翅膀，右航向舵
@@ -13,6 +14,21 @@ typedef enum {
     ECU_PWM8,       //发动机启动信号
     PWM_CH_MAX,
 } Servo_ID_t;
+#endif
+
+#ifdef SERVO_PWM
+typedef enum {
+    SERVO_PWM1 = 0, //左翅膀，左航向舵
+    SERVO_PWM2,     //左副翼
+    SERVO_PWM3,     //左俯仰
+    SERVO_PWM4,     //右俯仰
+    SERVO_PWM5,     //右副翼
+    SERVO_PWM6,     //右翅膀，右航向舵
+    SERVO_PWM7,     //开伞舵机
+    ECU_PWM8,       //发动机启动信号
+    PWM_CH_MAX,
+} Servo_ID_t;
+#endif
 
 /** PWM配置结构体 */
 typedef struct {
