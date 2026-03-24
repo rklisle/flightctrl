@@ -13,6 +13,7 @@ SD_HandleTypeDef hsd1;
 
 static TX_MUTEX                 s_mutex;   
 static TX_EVENT_FLAGS_GROUP     s_events;
+extern TX_MUTEX    mutex_rwSD;   
 
 #define     SD_EVENT_RX_DONE        0x01
 #define     SD_EVENT_TX_DONE        0x02
@@ -285,11 +286,13 @@ int fatFsFileWrite(int adcId, char *dataBuf, int dataLen)
 	FRESULT res;
 	unsigned int br;
 
+    tx_mutex_get(&mutex_rwSD, TX_WAIT_FOREVER);
 	res = f_write(&fil[adcId], dataBuf, dataLen, &br) ;
 	if(res != FR_OK)
 	{
 		return 1;
 	}
 	f_sync(&fil[adcId]);
+    tx_mutex_put(&mutex_rwSD);
 	return 0;
 }

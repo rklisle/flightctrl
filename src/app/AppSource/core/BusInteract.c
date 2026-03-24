@@ -75,26 +75,29 @@ void InitRts()
 	 ***** 仿真口——UART6 / 网口，chIndex5
 	 ***** 发动机——UART7，chIndex6
 	 */
-	rtList[RT_SCOUT].ckIndex = 0;//0		//载荷1  任务机
+	rtList[RT_SCOUT].ckIndex = 0;
 	rtList[RT_SCOUT].chIndex = 0;// 导引头 控制信息	UART1
-	rtList[RT_SCOUT].devID = 0x01;
-	rtList[RT_SCOUT].devBuad = 230400;
-    rtList[RT_SCOUT].devStopLen = 1;
+	rtList[RT_SCOUT].devID = 0;
+	rtList[RT_SCOUT].flags = 0;
 	rtList[RT_SCOUT].oddCheckEnable = FALSE;
-    rtList[RT_SCOUT].evenCheckEnable = FALSE;
+	rtList[RT_SCOUT].evenCheckEnable = FALSE;
+	rtList[RT_SCOUT].devStopLen = 1;
+	rtList[RT_SCOUT].devBuad = 230400;
 	rtList[RT_SCOUT].ptr_RtHandler = ScoutRtHandler;
-    //rtList[RT_SCOUT].ptr_Init = InitScout;
-    //rtList[RT_SCOUT].ptr_ChkFrameSum = ChkScoutStandardFrame;
+	rtList[RT_SCOUT].ptr_ChkFrameSum = ChkScoutStandardFrame;
+	rtList[RT_SCOUT].ptr_Init = InitScout;
 
 	rtList[RT_SCOUT_ATTITUDE].ckIndex = 0;
 	rtList[RT_SCOUT_ATTITUDE].chIndex = 1;// 导引头 航姿信息	UART2
-	rtList[RT_SCOUT_ATTITUDE].devID = 0x01;
-	rtList[RT_SCOUT_ATTITUDE].devBuad = 230400;
-	rtList[RT_SCOUT_ATTITUDE].devStopLen = 1;
+	rtList[RT_SCOUT_ATTITUDE].devID = 0;
+	rtList[RT_SCOUT_ATTITUDE].flags = 0;
 	rtList[RT_SCOUT_ATTITUDE].oddCheckEnable = FALSE;
-    rtList[RT_SCOUT_ATTITUDE].evenCheckEnable = FALSE;
-    rtList[RT_SCOUT_ATTITUDE].ptr_ChkFrameSum = NULL;
-	rtList[RT_SCOUT_ATTITUDE].ptr_RtHandler = ScoutRtHandler;
+	rtList[RT_SCOUT_ATTITUDE].evenCheckEnable = FALSE;
+	rtList[RT_SCOUT_ATTITUDE].devStopLen = 1;
+	rtList[RT_SCOUT_ATTITUDE].devBuad = 230400;
+	rtList[RT_SCOUT_ATTITUDE].ptr_RtHandler = NULL;
+	rtList[RT_SCOUT_ATTITUDE].ptr_ChkFrameSum = NULL;
+	rtList[RT_SCOUT_ATTITUDE].ptr_Init = NULL;
 
 	rtList[RT_DATA_LINK].ckIndex = 0;//0
 	rtList[RT_DATA_LINK].chIndex = 2;// 数据链	UART3
@@ -192,7 +195,7 @@ void InitRts()
     // rtList[RT_P900].evenCheckEnable = FALSE;
 	// rtList[RT_P900].ptr_RtHandler = CmdHandler;
     // rtList[RT_P900].ptr_ChkFrameSum = ChkEngineFrame;
-    
+
 	for(int i=0;i<MODULE_COUNT;i++)
 	{
 

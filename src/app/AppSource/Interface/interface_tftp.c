@@ -11,6 +11,7 @@
 static TFTP_Handler tftp_handler = {0};      // 初始化
 static FIL tftp_file;                        // 单个文件句柄
 static char current_filename[64] = {0};      // 当前文件名
+extern TX_MUTEX    mutex_rwSD;   
 
 // ==================== TFTP 文件操作函数 ====================
 /**
@@ -115,12 +116,14 @@ int TFTP_Read(void* handle, void* buf, int bytes)
     }
     
     // 读取文件数据
+    tx_mutex_get(&mutex_rwSD, TX_WAIT_FOREVER);
     res = f_read(&tftp_file, buf, bytes, &bytes_read);
     if (res != FR_OK) {
         // printf("[TFTP] Read error: %d\r\n", res);
         return -1;
     }
-    
+    tx_mutex_put(&mutex_rwSD);
+
     // 调试信息（可选，频繁传输时建议关闭）
     // printf("[TFTP] Read %u bytes (requested %d)\r\n", bytes_read, bytes);
     

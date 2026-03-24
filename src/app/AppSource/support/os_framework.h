@@ -39,7 +39,7 @@ typedef struct
 	OS_U8 u8HeadB;//90
 	OS_U16 u16Len;//au8Data长度
 	OS_U8 u8Seq;//
-	OS_U8 u8MsgID;
+	OS_U8 u8MsgID;	// 地面站和机载之间规定好的命令
 	OS_U8 au8Data[2048];
 	OS_U8 u8CRCA;
 	OS_U8 u8CRCB;
@@ -116,12 +116,12 @@ typedef struct
 #define DEV_CODE_SX							(0x0B)  //设备号：DEV     ID  配电设备
 
 //MSG-指令-发射
-#define CMD_ENGINE_START					(0xF6)	//
-#define CMD_ENGINE_STOP                     (0xF7)	//
-#define CMD_FORE_LAUNCH_REQ					(0xF8)	//发射预起控指令
+#define CMD_ENGINE_START					(0xF6)	//				   // 0xF6 首页 - 发动机启动
+#define CMD_ENGINE_STOP                     (0xF7)	//				   // 0xF7 首页 - 发动机停机
+#define CMD_FORE_LAUNCH_REQ					(0xF8)	//发射预起控指令	//预发射（未使用）
 #define CMD_FORE_LAUNCH_RSP					(0xF9)	//发射预起控指令结果
-#define CMD_LAUNCH_REQ						(0xFA)	//发射点火指令
-#define CMD_LUANCH_FORCE					(0xFB)	//强制发射指令
+#define CMD_LAUNCH_REQ						(0xFA)	//发射点火指令		//0xFA 首页 - 全部解锁
+#define CMD_LUANCH_FORCE					(0xFB)	//强制发射指令		// 0xFB 首页 - 起飞
 
 //MSG-指令-智能控制器状态
 #define CMD_MODULE_SET_REQ				(0x01)	//智能控制器模式设置
@@ -133,26 +133,26 @@ typedef struct
 #define CMD_DATA_RSP					(0x04)	//诸元列表上传
 
 #define CMD_DATA_SET					(0x21)	//诸元列表上传
-#define CMD_URGENT_LAND					(0x22)	//紧急伞降   zhang 20230608
-#define CMD_URGENT_RETURN				(0x23)	//紧急返航   zhang 20230608
+#define CMD_URGENT_LAND					(0x22)						// 0x22 摄像头视频 - 紧急伞降
+#define CMD_URGENT_RETURN				(0x23)						// 0x23 摄像头视频 - 紧急返航
 #define CMD_INSTANT_RECOVER				(0x24)	//紧急回收   zhang 20230608
 
 //MSG_指令_ECU
-#define	CMD_START_STOP_ENGINE			(0xC1)	
-#define	CMD_GET_RUNNING_INFO			(0xC2)	
+#define	CMD_START_STOP_ENGINE			(0xC1)						// 0xC1 伺服时序 - 启动停止发动机 - 根据带的参数不同区分启停：0x11启动 0x22停止
+#define	CMD_GET_RUNNING_INFO			(0xC2)						// 0xC2 伺服时序 - 左右滑块
 
-#define	CMD_GET_RUNNING_PARAM			(0xC3)	
-#define	CMD_GET_START_PARAM				(0xC4)	
-#define	CMD_ECU_RPM_SETTING				(0xC5)	//转速设置
+#define	CMD_GET_RUNNING_PARAM			(0xC3)						// 0xC3 伺服时序 - 获取运行参数
+#define	CMD_GET_START_PARAM				(0xC4)						// 0xC4 伺服时序 - 获取启动参数
+#define	CMD_ECU_RPM_SETTING				(0xC5)	//转速设置			 // 0xC5 伺服时序 - 油门设定
 //MSG-指令-配电
-#define CMD_POWER_REQ					(0x05)	//单机配电请求
+#define CMD_POWER_REQ					(0x05)	//单机配电请求		  // 0x05 伺服时序 - 单通道时序测试 - 发送/开/关
 #define CMD_SEQ_POWER_REQ				(0xEF)	//时序配电请求
 
 //MSG-指令-惯组
 #define CMD_NAV_INIT					(0xE4)	//发射点诸元送导航板
-#define CMD_HOR_CALC_REQ				(0xE0)	//水平计算（对准）请求
-#define CMD_TO_NAV_REQ					(0xE2)	//转导航请求
-#define CMD_TO_AFTER_LUANCH				(0xE3)	//转导航请求
+#define CMD_HOR_CALC_REQ				(0xE0)	//水平计算（对准）请求	 // 0xE0 伺服时序 - 对准
+#define CMD_TO_NAV_REQ					(0xE2)	//转导航请求			// 0xE2 伺服时序 - 转导航
+#define CMD_TO_AFTER_LUANCH				(0xE3)	//转导航请求			// 0xE3 伺服时序 - 转射后
 #define CMD_POLAR_TEST_REQ				(0x3A)	//极性测试
 
 //MSG 指令-星历
@@ -167,9 +167,9 @@ typedef struct
 
 //MSG-指令-伺服
 #define CMD_SRV_ZERO_ENCAP_REQ			(0x40)	//伺服零位装订请求
-#define CMD_SRV_CTRL_REQ				(0x42)	//伺服控制请求
-#define CMD_SRV_MINLOOP_REQ				(0x44)	//伺服小回路测量请求
-#define CMD_SRV_BOOKMODE				(0x48)	//伺服装订模式使能
+#define CMD_SRV_CTRL_REQ				(0x42)	//伺服控制请求			// 0x42 伺服时序 - 设定
+#define CMD_SRV_MINLOOP_REQ				(0x44)	//伺服小回路测量请求	// 0x44 伺服时序 - 小回路测试 - 开始
+#define CMD_SRV_BOOKMODE				(0x48)	//伺服装订模式使能		// 0x48 伺服时序 - 零位装订
 #define CMD_SRV_GET_ID					(0x4A)
 #define CMD_SRV_SAVE					(0x4C)
 #define CMD_SRV_SET_ID					(0x4E)
@@ -191,8 +191,8 @@ typedef struct
 #define CMD_FLASH_CLEAR_REQ				(0x6A)	//诸元数据清除
 #define CMD_FLASH_CLEAR_RSP				(0x6B)	//清除回复
 
-#define CMD_MSN_UPDATE                  (0x13)
-#define CMD_MSN_NEWPT                   (0x21)
+#define CMD_MSN_UPDATE                  (0x13)							// 0x13 首页 - 加载任务
+#define CMD_MSN_NEWPT                   (0x21)							// 0x21 可能是 任务编辑 - 飞行航点
 //---------------------总线---------------------------------------------
 #define BUS_SLAVER_REPORT				(0x9F)
 #define BUS_SLAVER_CMD					(0x9E)

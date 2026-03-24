@@ -355,6 +355,7 @@ SETDATA(pDataPoolImu, "gpsMinit", navInfo->minite, OS_U8);	//GPS分
 SETDATA(pDataPoolImu, "gpsSec",   navInfo->second, OS_U8);	//GPS秒
 SETDATA(pDataPoolImu, "gpsMSec",  navInfo->ms,     OS_U8);	//GPS毫秒
 SETDATA(pDataPoolImu, "gpsDir", navInfo->gpsDir,  OS_U16);
+SETDATA(pDataPoolImu, "gpsScCnt", navInfo->StanumberMaster>navInfo->StanumberSlave?navInfo->StanumberMaster:navInfo->StanumberSlave,	OS_U8);//GPS定位星数
 
 if(g_DeviceState.hilCountDown > 0 && hilInput.useNav == 0)
 {

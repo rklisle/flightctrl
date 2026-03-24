@@ -233,29 +233,38 @@ OS_U8 AutoLuanchProcess()  // 5ms运行一次
 	//4.判断对准完成，完成后转导航
 	if(AutoStep == 6)
 	{
+		STRU_422_MSG_INFO msg;
+
     //AutoStep = 7;
 		//对准完成
 		//ToImu();
 		OS_U8 imuStatus, navStatus;
 		GetDataFast(pDataPoolImu, "navState", &imuStatus);
-    GetDataFast(pDataPoolNav, "navState", &navStatus);
+		GetDataFast(pDataPoolNav, "navState", &navStatus);
 		//中科导控自己转导航，所以判断导航状态
 		//if((imuStatus == 0x3F)&&(navStatus == 0x3F))
-		if(imuStatus == 0x3F)
+		// if(imuStatus == 0x3F)
+		// {
+		// 	STRU_422_MSG_INFO msg;
+		// 	msg.u8MsgID = CMD_TO_NAV_REQ;
+		// 	//NavCmdHandler(&msg);
+		// 	ImuCmdHandler(&msg);
+		// 	AutoStep = 7;
+		// }
+		if(navStatus == 0x3F)
 		{
-			STRU_422_MSG_INFO msg;
+			// 自动转导航
 			msg.u8MsgID = CMD_TO_NAV_REQ;
-			//NavCmdHandler(&msg);
-			ImuCmdHandler(&msg);
+			NavCmdHandler(&msg);
+			// AutoStep = 7;
+		}
+		if(navStatus == 0x64)
+		{
+			// 自动转射后
+			msg.u8MsgID = CMD_TO_AFTER_LUANCH;
+			NavCmdHandler(&msg);
 			AutoStep = 7;
 		}
-//		if(navStatus == 0x3F)
-//		{
-//			STRU_422_MSG_INFO msg;
-//			msg.u8MsgID = CMD_TO_NAV_REQ;
-//			NavCmdHandler(&msg);
-//			//AutoStep = 7;
-//		}
 	}
 	//5.星历装订(空缺)
 	if(AutoStep == 7)
@@ -341,7 +350,7 @@ OS_U8 AutoLuanchProcess()  // 5ms运行一次
 		}
 		OS_U8 startFly = 0;
 		GetDataFast(pDataPoolSelf,	"startFly",	&startFly);
-		if(startFly == 1)//DoIgnition函数将startFly置1
+		if(startFly == 1)//DoIgnition函数将startFly置1，地面 发控首页 - 起飞
 		{
 			AutoStep = 13;
 		}
@@ -450,7 +459,7 @@ SETDATA(pDataPoolSelf,  "ecuTemp", 0x00FF,	OS_U16);
  * 函数功能: 需要智能控制器处理的指令内容
  * 作者:	成宏璟
  ***********************************************************/
-OS_U32 ControllerCmdHandler(STRU_422_MSG_INFO * frame)
+OS_U32 ControllerCmdHandler(STRU_422_MSG_INFO * frame)	// 数据链或仿真过来的指令
 {
 	OS_U8 msgId = frame->u8MsgID;
 	switch(msgId)
@@ -480,26 +489,26 @@ OS_U32 ControllerCmdHandler(STRU_422_MSG_INFO * frame)
 		FlightControlCmd(cmd);
 		break;
 	}*/
-	case CMD_URGENT_LAND:	//紧急伞降   zhang 20230608
+	case CMD_URGENT_LAND:	// 0x22 摄像头视频 - 紧急伞降
 	{
 		SETDATA(pDataPoolSelf,  "flyError", 1,	OS_U8);
 		SETDATA(pDataPoolSelf, "tcCmd", 0xC0,	OS_U8);
 		DoOpenUm();
 		break;
 	}
-	case CMD_URGENT_RETURN:	//紧急返航   zhang 20230608
+	case CMD_URGENT_RETURN:	// 0x23 摄像头视频 - 紧急返航
 	{
 		SETDATA(pDataPoolSelf,  "flyError", 2,	OS_U8);
 		SETDATA(pDataPoolSelf, "tcCmd", 0xC1,	OS_U8);
 		DoReturnHomeward();
 		break;
 	}
-	case CMD_ENGINE_START:
+	case CMD_ENGINE_START:	// 0xF6 首页 - 发动机启动
 	{
 		EngineStartCmd = 1;
 		break;
 	}
-	case CMD_ENGINE_STOP:
+	case CMD_ENGINE_STOP:	// 0xF7 首页 - 发动机停机
 	{
 		EngineStartCmd = 0;
 		break;
@@ -519,7 +528,7 @@ OS_U32 ControllerCmdHandler(STRU_422_MSG_INFO * frame)
 		}
 	}
 		break;
-	case CMD_LAUNCH_REQ:	//0xFA 全部解指令
+	case CMD_LAUNCH_REQ:	//0xFA 首页 - 全部解锁
 	{
 		if( 0xAA == frame->au8Data[0]
 		 && 0xBB == frame->au8Data[1]
@@ -532,7 +541,7 @@ OS_U32 ControllerCmdHandler(STRU_422_MSG_INFO * frame)
 		}
 	}
 		break;
-	case CMD_LUANCH_FORCE:
+	case CMD_LUANCH_FORCE:	// 0xFB 首页 - 起飞
 		if( 0xAA == frame->au8Data[0]
 		 && 0xBB == frame->au8Data[1]
 		 && 0xCC == frame->au8Data[2]
@@ -542,7 +551,7 @@ OS_U32 ControllerCmdHandler(STRU_422_MSG_INFO * frame)
 			if(IgnitionMark == TRUE && ((g_DeviceState.workStage & DOM_AUTOMATIC) != DOM_AUTOMATIC))
 			{
 				MsgToNAV(BUS_NAV_IGNATION, PTR_NULL, 0);
-				SETDATA(pDataPoolSelf,	"luanMode",	2,	OS_U8); //起飞模式地面点击起飞的方式
+				SETDATA(pDataPoolSelf,	"luanMode",	2,	OS_U8); //起飞模式地面点击起飞的方式 0 单发 1 连发 2 齐发
 				IgnitionMark = FALSE;
 				DoIgnition();
 			}

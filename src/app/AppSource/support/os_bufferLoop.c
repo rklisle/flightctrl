@@ -67,12 +67,13 @@ OS_S32 PopFrameLoopMem(OS_U8 rtIndex, OS_U8 *memFrame, OS_U16* u16len)
     
     if(rtIndex == RT_ENGINE)
     {
+		// 014应该不会进入这里
         while(len > 28)
         {
             OS_U16 msgLen = 0;
-            if((buffLoop[rtIndex].BUFFER[buffLoop[rtIndex].head] == 0xFF))
+            if((buffLoop[rtIndex].BUFFER[buffLoop[rtIndex].head] == 0xFF))	// 数据帧头
             {
-                msgLen = 53;
+                msgLen = 53;	// 协议中对应此数据帧头的数据长度
             }
             else if((buffLoop[rtIndex].BUFFER[buffLoop[rtIndex].head] == 0xFE))
             {
@@ -82,12 +83,14 @@ OS_S32 PopFrameLoopMem(OS_U8 rtIndex, OS_U8 *memFrame, OS_U16* u16len)
             {
                 msgLen = 41;
             }
-            if(len < msgLen)
+            if(len < msgLen)	// ringbuffer中数据少于一帧数据
             {
                 return ERROR_LENGTH_LESS_ZERO;//head，tail指针保留位置不动，等待下一帧
             }
             if(msgLen > 0)
             {
+				// 找到了数据帧头
+				// 将完整的一帧数据从ringbuffer中拷贝出来，memFrame，长度 u16len
                 for(int idx = 0; idx < msgLen; idx++)
                 {
                     memFrame[idx] = buffLoop[rtIndex].BUFFER[buffLoop[rtIndex].head++];
@@ -101,6 +104,8 @@ OS_S32 PopFrameLoopMem(OS_U8 rtIndex, OS_U8 *memFrame, OS_U16* u16len)
             }
             else
             {
+				// 没有找到数据帧头
+				// 待处理长度len减去1，head指向下一字节
                 len--;
                 buffLoop[rtIndex].head = (buffLoop[rtIndex].head + 1) % BUFFER_LOOP_POOL_MAX;
             }

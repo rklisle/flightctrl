@@ -215,7 +215,6 @@ static OS_U8 SaveImuInDataPool(STRU_IMU_INFO* buf)
     SETDATA(pDataPoolImu, "gpsSec", second,	 OS_U8);
     SETDATA(pDataPoolImu, "gpsMSec", ms*0.1, OS_U8);
     SETDATA(pDataPoolImu, "gpsDir", gpsdir * 100,  OS_U16);
-// 这个数据NAV没有,然而整个程序也没用到"gpsScCnt"，所以忽略它
     SETDATA(pDataPoolImu, "gpsScCnt", satCount,  OS_U8); 
 
     if(g_DeviceState.hilCountDown > 0 && hilInput.useNav == 0)

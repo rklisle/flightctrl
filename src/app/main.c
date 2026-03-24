@@ -177,6 +177,7 @@ extern void app_control_algorithm_init(TX_BYTE_POOL* pheap);
 extern void drv_test_init(TX_BYTE_POOL *pmem);
 
 /* Define what the initial system looks like.  */
+TX_MUTEX    mutex_rwSD;   
 TX_BYTE_POOL byte_pool_0;
 extern uint32_t _eram;  // symbo from linker description
 extern uint32_t _sram;  // symbo from linker description
@@ -212,6 +213,8 @@ void tx_application_define(void *first_unused_memory)
                         TX_AUTO_START);
        //drv_test_init(&byte_pool_0);
        //return;
+
+    tx_mutex_create(&mutex_rwSD, "rw_SD_mutex", TX_INHERIT);
 
 #ifdef FCS_APP
         app_pressure_init(&byte_pool_0);

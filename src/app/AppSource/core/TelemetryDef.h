@@ -55,7 +55,7 @@ telemetryParam tm_flight[] =
 	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"gpsMSec",	1},
 	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"dirEffec",	1},
 	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"gpsDir",	2},
-	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"gpsScCnt",	1},
+	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"gpsScCnt",	1},	// ¶¨Î»ÐÇÊý
 	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"navLon",	4},
 	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"navLat",	4},
 	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"navHigh",	4},

@@ -45,7 +45,7 @@ void InitDataPool()
 	pDataPoolSrv = &(DataPoolALL[SRV_DATAPOOL_INDEX]);
 	pDataPoolPwr = &(DataPoolALL[PWR_DATAPOOL_INDEX]);
 	pDataPoolSelf= &(DataPoolALL[SELF_DATAPOOL_INDEX]);
-	pDataPoolSD= &(DataPoolALL[SD_DATAPOOL_INDEX]);
+	pDataPoolSD	 = &(DataPoolALL[SD_DATAPOOL_INDEX]);
 	pDataPoolMsn = &(DataPoolALL[MSN_DATAPOOL_INDEX]);
     pDataPoolImu = &(DataPoolALL[IMU_DATAPOOL_INDEX]);
 }
