@@ -16,6 +16,8 @@
 #include "modNav.h"
 #include "../support/common.h"
 #include "modHil.h"
+#include "../interface/interface_power.h"
+#include "../payload/fuse.h"
 
 STRU_NAV_INPUT navInput;
 #define PI (3.1415926)
@@ -309,7 +311,7 @@ OS_U32 NavRtHandler(STRU_422_MSG_INFO * frame)	// RT_NAV
 	return 0;
 }
 
-// BUG改这里 NAV传过来的数据，现在我们需要把这些数据赋值给IMU的数据池
+// NAV传过来的数据，现在我们需要把这些数据赋值给IMU的数据池
 OS_U8 SaveNavInDataPool(STRU_NAV_INFO *navInfo)
 {
 	SETDATA(pDataPoolNav, "gpsMod", navInfo->GPSstate,	OS_U8);//GPS状态
@@ -536,5 +538,26 @@ OS_U8 CalcXYZ()
 	SETDATA(pDataPoolFly, "navVx", vx * 10, OS_S16);
 	SETDATA(pDataPoolFly, "navVy", vy * 10, OS_S16);
 	SETDATA(pDataPoolFly, "navVz", vz * 10, OS_S16);
+
+	// static uint8_t FzOnFlag = 0;
+	// if(FzOnFlag == 1)
+	// {
+	// 	// 引信-引爆电源已经上电
+	// 	// 延时10s
+	// 	g_DeviceStatus.curTime = GetCurTime() - g_DeviceStatus.FzOnTime;
+	// 	if(g_DeviceStatus.curTime > 10)	// 10*1000
+	// 	{
+	// 		// 进行二次激活， 发10次指令
+	// 		FuseSend(0x6B);	// 执行电激活
+	// 	}
+	// 	return 0;
+	// }
+	// if(sqrt(x*x + y*y +z*z) > 2000)	// 距离发射点2km
+	// {
+	// 	// 打开引信可控电源
+	// 	PowerOn(DEVICE_FUSE28V);
+	// 	g_DeviceStatus.FzOnTime = GetCurTime();	// tx_time_get();
+	// 	FzOnFlag = 1;
+	// }
 	return 0;
 }

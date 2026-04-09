@@ -12,6 +12,7 @@
 extern OS_U8 InitFuse();
 extern OS_U32 FuseRtHandler(STRU_422_MSG_INFO *data);
 extern OS_U16 ChkFuseStandardFrame(OS_MEM* pmData);
+extern OS_U8 FuseSend(OS_U8 msgID);
 
 #pragma pack(1)
 typedef struct

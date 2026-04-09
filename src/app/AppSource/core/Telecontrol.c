@@ -22,8 +22,7 @@ OS_U32 CmdHandler(STRU_422_MSG_INFO * frame)//02 //	RT_DATA_LINK
 {
 	OS_U8 msgId = frame->u8MsgID;
 	SETDATA(pDataPoolSelf,	"gmsgId",	msgId,		OS_U8);
-SETDATA(pDataPoolSelf,  "ecuTemp", 0x0001,	OS_U16);
-
+	g_DeviceStatus.msgFromGCS = 0x01;
 	//非交互模式时，不处理地面指令
 	if((g_DeviceState.workStage & DOM_INTERACTIVE) !=  DOM_INTERACTIVE)
 	{

@@ -280,7 +280,15 @@ typedef struct
 	OS_U64 BJTimeSecond;
 	OS_U16 BJTimeMS;
 }DeviceState;
+
+typedef struct
+{
+	OS_DOUBLE FzOnTime;	// fuse power-on time
+	OS_DOUBLE curTime;
+	OS_U8 msgFromGCS;	// message from Ground Control Station // 用于启动SD卡文件写入。初始化时设置为0x00，收到数据链传来数据时设置为0x01
+}DeviceStatus;
 #pragma pack()
 extern DeviceState g_DeviceState;
+extern DeviceStatus g_DeviceStatus;
 
 #endif

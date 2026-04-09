@@ -24,6 +24,13 @@ OS_U8 InitBuffLoop(OS_U8 rtIndex)
 
 }
 
+/**函数功能：
+ * 串口数据压入循环缓冲的内存池
+ * 参数1：哪一串口号，对应哪个内存池
+ * 参数2：数据指针
+ * 参数3：数据长度
+ * 返回值：0成功 -1失败
+ */
 OS_U8 PushLoopMem(OS_U8 rtIndex, OS_U8 *mem, OS_U16 len)
 {
 	if(buffLoop[rtIndex].inited == FALSE)
@@ -49,6 +56,13 @@ OS_U8 PushLoopMem(OS_U8 rtIndex, OS_U8 *mem, OS_U16 len)
 	return 0;
 }
 
+/**函数功能：
+ * 从内存池中弹出一帧数据
+ * 参数1：哪个内存池
+ * 参数2：数据存到哪里
+ * 参数3：数据长度
+ * 返回值：0成功 负值：各种失败
+ */
 OS_S32 PopFrameLoopMem(OS_U8 rtIndex, OS_U8 *memFrame, OS_U16* u16len)
 {
 	//在地面测发控过程中，如果使用了无线方式，则测控前端与测控后端之间使用无线数据通信
@@ -119,9 +133,9 @@ OS_S32 PopFrameLoopMem(OS_U8 rtIndex, OS_U8 *memFrame, OS_U16* u16len)
             int head_1 = (buffLoop[rtIndex].head + 1) % BUFFER_LOOP_POOL_MAX;
             int temp_len_low = (buffLoop[rtIndex].head + 2 + buffLoop[rtIndex].lenPos) % BUFFER_LOOP_POOL_MAX;
   
-            if((buffLoop[rtIndex].BUFFER[buffLoop[rtIndex].head] == buffLoop[rtIndex].syncHead_A) && (buffLoop[rtIndex].BUFFER[head_1] == buffLoop[rtIndex].syncHead_B))//0x55AA
+            if((buffLoop[rtIndex].BUFFER[buffLoop[rtIndex].head] == buffLoop[rtIndex].syncHead_A) && (buffLoop[rtIndex].BUFFER[head_1] == buffLoop[rtIndex].syncHead_B))//0xAA55
             {
-                OS_U16 msgLen = buffLoop[rtIndex].BUFFER[temp_len_low];
+                OS_U16 msgLen = 4 + buffLoop[rtIndex].BUFFER[temp_len_low];	// 4 + (0x0B = 11 Byte) = 总共15Byte
                 if(len < msgLen)//return NULL的重要标志，说明本次接收仍未接收够整包数
                 {
                     return ERROR_LENGTH_LESS_ZERO;//head，tail指针保留位置不动，等待下一帧

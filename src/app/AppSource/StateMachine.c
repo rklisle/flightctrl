@@ -27,6 +27,7 @@
 #include    "stm32h7xx_hal.h"
 
 DeviceState g_DeviceState={0};
+DeviceStatus g_DeviceStatus = {0};
 
 void RunInitialInit()   // MML 初始化调用一次
 {          	 

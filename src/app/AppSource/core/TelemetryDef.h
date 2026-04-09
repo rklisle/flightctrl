@@ -257,7 +257,6 @@ telemetryParam tm_200hz[] =
 //014：指令69，实际转速，[0~9999]	
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"ecuGetRp",	2},
 //280：发动机温度 * 10	
-//014：用于启动SD卡文件写入。初始化时设置为0x00FF，收到数据链传来数据时设置为0x0001
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"ecuTemp",	2},
 //280：发动机电池电压 * 10
 //014：指令19，实际喷油1脉宽，单位us

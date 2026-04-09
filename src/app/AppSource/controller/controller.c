@@ -82,9 +82,11 @@ OS_U8 CalcAirSpd()
  ***********************************************************/
 OS_U8 AutoLuanchProcess()  // 5ms运行一次
 {
-	if((g_DeviceState.workStage & DOM_AUTOMATIC) == DOM_AUTOMATIC)
-			return 0;    
-   static int AutoStep = 0;//0
+	static int AutoStep = 0;//0
+	if(AutoStep == 14)
+	return 0;
+	// if((g_DeviceState.workStage & DOM_AUTOMATIC) == DOM_AUTOMATIC)
+	// 		return 0;    
 	//EngineStartCmd = 1;
 	//IgnitionMark = TRUE;
 	//1.对各设备上电
@@ -119,7 +121,7 @@ OS_U8 AutoLuanchProcess()  // 5ms运行一次
 			static int sendFlag = 0;
 			if(sendFlag == 0)
 			{
-				PowerOn(DEVICE_FUSE28V);
+				// PowerOn(DEVICE_FUSE28V);	// 改在modNav.c Line 536
 				PowerOn(DEVICE_FUSE_ISO5V);
 				sendFlag = 1;
 			}
@@ -202,15 +204,11 @@ OS_U8 AutoLuanchProcess()  // 5ms运行一次
 		OS_U8 msnID;
 		GetDataFast(pDataPoolMsn, "msnDevID", &msnID);
 
-		OS_U16 DLcmd;
-		GetDataFast(pDataPoolSelf, "ecuTemp", &DLcmd);
-		if(DLcmd != 0x00FF)
+		if(g_DeviceStatus.msgFromGCS != 0x00)
 		{
 			InitSD();
 		}
 
-		// InitSD();	// HACK: TEST ECU 试车用 临时调整，正式运行需要去掉
-		
 		if(msnID != 0xFF)
 		{
 			// InitPwrSeq();	//MML 开火工品4
@@ -233,8 +231,6 @@ OS_U8 AutoLuanchProcess()  // 5ms运行一次
 	//4.判断对准完成，完成后转导航
 	if(AutoStep == 6)
 	{
-		STRU_422_MSG_INFO msg;
-
     //AutoStep = 7;
 		//对准完成
 		//ToImu();
@@ -254,22 +250,26 @@ OS_U8 AutoLuanchProcess()  // 5ms运行一次
 		if(navStatus == 0x3F)
 		{
 			// 自动转导航
+			STRU_422_MSG_INFO msg;
 			msg.u8MsgID = CMD_TO_NAV_REQ;
-			NavCmdHandler(&msg);
-			// AutoStep = 7;
-		}
-		if(navStatus == 0x64)
-		{
-			// 自动转射后
-			msg.u8MsgID = CMD_TO_AFTER_LUANCH;
 			NavCmdHandler(&msg);
 			AutoStep = 7;
 		}
 	}
-	//5.星历装订(空缺)
+	//5.星历装订(空缺)/ 自动转射后
 	if(AutoStep == 7)
 	{
-		AutoStep = 8;;
+		// AutoStep = 8;
+		OS_U8 navStatus;
+		GetDataFast(pDataPoolNav, "navState", &navStatus);
+		if(navStatus == 0x64)
+		{
+			// 自动转射后
+			STRU_422_MSG_INFO msg;
+			msg.u8MsgID = CMD_TO_AFTER_LUANCH;
+			NavCmdHandler(&msg);
+			AutoStep = 8;
+		}
 	}
 	//6.等待发动机启动指令发出
 	if(AutoStep == 8)
@@ -355,6 +355,61 @@ OS_U8 AutoLuanchProcess()  // 5ms运行一次
 			AutoStep = 13;
 		}
 	}    
+	//10.起飞之后，飞出2km后给引信的引爆电源上电
+	if(AutoStep == 13)
+	{
+		static uint8_t FzOnFlag = 0;
+		if (0 == FzOnFlag)
+		{
+			OS_S32 launchLon,launchLat,curLon,curLat;
+			OS_S16 launchHigh;
+			OS_FLOAT curHigh;
+		
+			GetDataFast(pDataPoolFly, "DataLon", &launchLon);//起飞位置的经纬高
+			GetDataFast(pDataPoolFly, "DataLat", &launchLat);//
+			GetDataFast(pDataPoolFly, "DataHigh", &launchHigh);//
+
+			launchLon = launchLon * 1e-7;
+			launchLat = launchLat * 1e-7;
+
+			GetDataFast(pDataPoolImu, "navLon", &curLon);//当前位置的经纬高
+			GetDataFast(pDataPoolImu, "navLat", &curLat);//
+			GetDataFast(pDataPoolImu, "navHigh", &curHigh);//
+
+			curLon = curLon * 1e-7;
+			curLat = curLat * 1e-7;
+
+double lat_m = (curLat - launchLat) * 111320.0;
+
+// 经度方向：需要乘以 cos(纬度)
+double mid_lat_rad = (launchLat + curLat) / 2.0 * 3.1415926535 / 180.0;
+double lon_m = (curLon - launchLon) * 111320.0 * cos(mid_lat_rad);
+
+double h_m = curHigh - launchHigh;
+
+double dist = sqrt(lat_m*lat_m + lon_m*lon_m + h_m*h_m);
+
+
+			if(dist > 2000)
+			{
+				PowerOn(DEVICE_FUSE28V);
+				g_DeviceStatus.FzOnTime = GetCurTime();	// tx_time_get();
+				FzOnFlag = 1;
+			}
+		}
+		else
+		{
+			// 引信-引爆电源已经上电
+			// 延时10s
+			g_DeviceStatus.curTime = GetCurTime() - g_DeviceStatus.FzOnTime;
+			if(g_DeviceStatus.curTime > 10)	// 10*1000
+			{
+				// 进行二次激活， 发10次指令
+				FuseSend(0x6B);	// 执行电激活
+				AutoStep = 14;
+			}
+		}
+	}
 	SETDATA(pDataPoolMsn,	"autoStep",	AutoStep,	OS_U8);	
 	//判断导引头是否连接，如果连接则类型为0b11 = 3，如果未连接类型为0b10 = 2
 	if(g_DeviceState.scoutCountDown != 0)
@@ -448,8 +503,6 @@ OS_U8 InitReportParam()
 	SETDATA(pDataPoolSelf,	"tcCmd",	 0xAA,		OS_U8);
     
     SETDATA(pDataPoolSelf,	"flyError",	 0xFF,		OS_U8);
-
-SETDATA(pDataPoolSelf,  "ecuTemp", 0x00FF,	OS_U16);
 
 	return 0;
 }
