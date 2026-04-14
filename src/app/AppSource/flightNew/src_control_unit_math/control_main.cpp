@@ -15,7 +15,7 @@ CMathControlMain::CMathControlMain()
 	//p_st_data_controller_to_datalink = NULL;
 	p_st_data_controller_to_engine = NULL;
 	p_st_data_controller_to_actuator = NULL;
-	p_st_data_controller_to_switch_output = NULL;
+//	p_st_data_controller_to_switch_output = NULL;
 	p_st_route_data_preflight = NULL;
 	p_st_initial_data = NULL;
 	// p_st_debug_monitor = NULL;
@@ -338,7 +338,7 @@ void CMathControlMain::Update_Output_Data()
 	p_st_data_controller_to_actuator->control_voltage_IV  = m_st_control_out_output.u4;
 	
 	//输出开关量数据
-	p_st_data_controller_to_switch_output->flag_engine_start = m_st_flight_basic_output.st_command.flag_engine_start;//发动机开机
-	p_st_data_controller_to_switch_output->flag_launch_missile_wing = m_st_flight_basic_output.st_command.flag_launch_missile_wing;//弹翼展开
-	p_st_data_controller_to_switch_output->flag_separate_booster = m_st_flight_basic_output.st_command.flag_separate_booster;//助推器分离
+//	p_st_data_controller_to_switch_output->flag_engine_start = m_st_flight_basic_output.st_command.flag_engine_start;//发动机开机
+//	p_st_data_controller_to_switch_output->flag_launch_missile_wing = m_st_flight_basic_output.st_command.flag_launch_missile_wing;//弹翼展开
+//	p_st_data_controller_to_switch_output->flag_separate_booster = m_st_flight_basic_output.st_command.flag_separate_booster;//助推器分离
 }

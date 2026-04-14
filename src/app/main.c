@@ -183,7 +183,7 @@ extern uint32_t _eram;  // symbo from linker description
 extern uint32_t _sram;  // symbo from linker description
 void tx_application_define(void *first_unused_memory)
 {
-    uint32_t left_ram_size = (uint32_t)(&_eram) - (uint32_t)(&_sram);
+    uint32_t left_ram_size = (uint32_t)(&_eram) - (uint32_t)(&_sram);   // left_ram_size = 288KB    sram = 0x3000003C
     int32_t fd = -1;
     tx_byte_pool_create(&byte_pool_0, 
                         "byte pool 0", 

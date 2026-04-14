@@ -10,11 +10,11 @@ Stru_Data_Engine_To_Controller     g_engine_data = {0};
 Stru_Data_Baro_To_Controller       g_baro_data = {0};
 Stru_Data_RadioAlt_To_Controller   g_radioalt_data = {0};
 
-Stru_Data_Controller_To_Seeker      g_controller_to_seeker = {0};
-//Stru_Data_Controller_To_Datalink    g_controller_to_datalink = {0};
-Stru_Data_Controller_To_Engine      g_controller_to_engine = {0};
-Stru_Data_Controller_To_Actuator    g_controller_to_actuator = {0};
-Stru_Data_Controller_To_Switch_Output g_controller_to_switch = {0};
+Stru_Data_Controller_To_Seeker        g_controller_to_seeker = {0};
+//Stru_Data_Controller_To_Datalink      g_controller_to_datalink = {0};
+Stru_Data_Controller_To_Engine        g_controller_to_engine = {0};
+Stru_Data_Controller_To_Actuator      g_controller_to_actuator = {0};
+// Stru_Data_Controller_To_Switch_Output g_controller_to_switch = {0};
 
 Stru_Route_Data     g_route_data = {0};
 Stru_Initial_Data   g_initial_data = {0};
@@ -44,7 +44,7 @@ extern "C"{
 //        p->p_st_data_controller_to_datalink = &g_controller_to_datalink;
         p->p_st_data_controller_to_engine = &g_controller_to_engine;
         p->p_st_data_controller_to_actuator = &g_controller_to_actuator;
-        p->p_st_data_controller_to_switch_output = &g_controller_to_switch;
+        // p->p_st_data_controller_to_switch_output = &g_controller_to_switch;
         
         // 航路和初始数据也需要实例化
         p->p_st_route_data_preflight = &g_route_data;

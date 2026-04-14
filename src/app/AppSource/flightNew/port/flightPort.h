@@ -20,11 +20,14 @@ extern Stru_Data_Baro_To_Controller       g_baro_data;
 extern Stru_Data_RadioAlt_To_Controller   g_radioalt_data;
 
 // Êä³ö
-extern Stru_Data_Controller_To_Seeker      g_controller_to_seeker;
-// extern Stru_Data_Controller_To_Datalink    g_controller_to_datalink;
-extern Stru_Data_Controller_To_Engine      g_controller_to_engine;
-extern Stru_Data_Controller_To_Actuator    g_controller_to_actuator;
-extern Stru_Data_Controller_To_Switch_Output g_controller_to_switch;
+extern Stru_Data_Controller_To_Seeker           g_controller_to_seeker;
+// extern Stru_Data_Controller_To_Datalink         g_controller_to_datalink;
+extern Stru_Data_Controller_To_Engine           g_controller_to_engine;
+extern Stru_Data_Controller_To_Actuator         g_controller_to_actuator;
+// extern Stru_Data_Controller_To_Switch_Output    g_controller_to_switch;
+
+extern Stru_Route_Data     g_route_data;
+extern Stru_Initial_Data   g_initial_data;
 
 // º¯ÊýÉùÃ÷
 typedef struct CMathControlMain CMathControlMain;

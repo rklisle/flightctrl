@@ -51,7 +51,7 @@ public:
 	//Stru_Data_Controller_To_Datalink	* p_st_data_controller_to_datalink;
 	Stru_Data_Controller_To_Engine		* p_st_data_controller_to_engine;//发动机
 	Stru_Data_Controller_To_Actuator	* p_st_data_controller_to_actuator;//舵机
-	Stru_Data_Controller_To_Switch_Output	* p_st_data_controller_to_switch_output;//电气、开关量
+	// Stru_Data_Controller_To_Switch_Output	* p_st_data_controller_to_switch_output;//电气、开关量
 	
 	Stru_Route_Data                       	* p_st_route_data_preflight;	//航迹装订
 	Stru_Initial_Data                     		* p_st_initial_data;			//初始数据
