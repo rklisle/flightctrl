@@ -54,7 +54,7 @@ private:
 	void Get_Data();
 	void Calc_Data();
 	void Send_Data();
-	void Monitor_Data();
+	// void Monitor_Data();
 	void Calc_Control_Gain();
 	void Calc_Control_Commond();
 	double m_k5h;

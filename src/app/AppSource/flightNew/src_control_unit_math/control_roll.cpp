@@ -86,7 +86,7 @@ void CMathControlRoll::Run()
 	Get_Data();
 	Calc_Data();
 	Send_Data();
-	Monitor_Data();
+	// Monitor_Data();
 }
 void CMathControlRoll::Get_Data()
 {
@@ -139,13 +139,13 @@ void CMathControlRoll::Calc_Data()
 		if (flight_time > m_time_turn_in_start 
 			&& flight_time <= m_time_turn_out_end)
 		{
-			//����ת�����ǰ
+			//����ת������?
 			if (m_flag_launch_turn)
 			{
 				delta_sz = 0.0;
 				delta_vz = 0.0;
 			}
-			//����ת����ɣ�ת��������
+			//����ת����ɣ��?��������
 			else
 			{
 				delta_sz = - (m_sz - m_turn_radius) * CFlightGlobalFun::FSign(m_turn_angle);		
@@ -192,16 +192,16 @@ void CMathControlRoll::Calc_Data()
 		m_uz1 = CFlightGlobalFun::Range(m_uz1, 0.85);
 	}
 
-	//��ͬ�׶Σ�m_uz1->uz_temp ���������ִ�й���
+	//��ͬ�׶Σ�m_uz1->uz_temp ���������ִ�й���?
 	double uz_temp = 0.0;
 	if(m_flag_launch_turn)
 	{
-		//����ת�����
+		//����ת�����?
 		if (flight_time <= m_time_turn_out_end)
 		{
 			uz_temp = 0.0;
 		}
-		//����ת����ɵ���ƫ����
+		//����ת����ɵ����?����
 		else if(flight_time < (m_time_turn_out_end + 1.0))
 		{
 			uz_temp = m_uz1 * (flight_time - m_time_turn_out_end);
@@ -214,7 +214,7 @@ void CMathControlRoll::Calc_Data()
 	}
 	else
 	{
-		//�롢������ת�����
+		//�롢������ת�����?
 		if (flight_time <= m_time_turn_in_start)
 		{
 			m_uz1_record = m_uz1;
@@ -261,7 +261,7 @@ void CMathControlRoll::Calc_Data()
 	m_u2g = m_k2g * (m_gama - m_gama_command);
 	m_u5g = m_k5g * (m_wx - m_wx_command);
 	
-	//�ڻ�·: ����������󣬽����Ƶ�ǰ��PD+I����
+	//�ڻ�·: �����������?�����Ƶ�ǰ��PD+I����
 	if(flight_time >= m_time_separate_booster + 1.0) 
 	{
 		m_u4g += m_k4g * (m_gama - m_gama_command) * STEP_5ms;
@@ -350,7 +350,7 @@ void CMathControlRoll::Calc_Control_Commond()
 	//ս��ָ��ǰ�������Ρ�Ѳ����
 	else if(flight_time <= m_time_combat_status)
 	{
-		//����������̣�����ת��򺽼�ת��
+		//����������̣������?��򺽼��?��
 		if (flight_time <= m_time_turn_in_start)	
 		{    
 			//����ʱ�̹�ת�ǹ�����0deg������ʱ��Լ7s
@@ -367,7 +367,7 @@ void CMathControlRoll::Calc_Control_Commond()
 			m_gama_command_compensate = m_gama_command;
 
 		}
-		//BTTת�����
+		//BTTת�����?
 		else if (flight_time <= m_time_turn_out_start)
 		{
 			m_gama_command_compensate = m_gama_turn_nominal * CFlightGlobalFun::FSign(m_turn_angle);
@@ -381,14 +381,14 @@ void CMathControlRoll::Calc_Control_Commond()
 			m_gama_command = CFlightGlobalFun::Range(m_gama_command, fabs(m_gama_turn_nominal) + 5.0);
 			m_gama_command_compensate = m_gama_command;
 		}
-		//ת�����
+		//ת�����?
 		else if(flight_time <= m_time_turn_out_end + 1.0)//ת�������ָ�����
 		{
 			m_gama_command = - m_uz / m_k2g * (flight_time - m_time_turn_out_end) * (flight_time - m_time_turn_out_end);
 			m_gama_command = CFlightGlobalFun::Range(m_gama_command, ROLL_COMMAND_STATIC_LIMIT);
 			m_gama_command_compensate = 0.0;
 		}
-		//�޺����������ƫ����
+		//�޺�����������?����
 		else
 		{
 			m_gama_command = - m_uz / m_k2g;
@@ -399,7 +399,7 @@ void CMathControlRoll::Calc_Control_Commond()
 		if(m_time_combat_delay > 2.0) m_time_combat_delay = 2.0;
 		m_time_BTT_guidance_in = flight_time;
 	}
-	//ս��ָ���
+	//ս��ָ���?
 	else
 	{
 		//BTT�Ƶ�???...
@@ -425,7 +425,7 @@ void CMathControlRoll::Calc_Control_Commond()
 //		}
 	}
 
- 	double temp_gama_command_range = 35.0 + 25.0/3000.0 * flight_time;		//��ת�������Χ
+ 	double temp_gama_command_range = 35.0 + 25.0/3000.0 * flight_time;		//��ת��������?
  	m_gama_command_compensate = CFlightGlobalFun::Range(m_gama_command_compensate, temp_gama_command_range);
  	//m_gama_command = CFlightGlobalFun::Range(m_gama_command, temp_gama_command_range);
 

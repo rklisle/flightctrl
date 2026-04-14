@@ -25,12 +25,16 @@
 #include    "tx_api.h"
 #include    "UART_STM32H7xx.h"
 #include    "stm32h7xx_hal.h"
+#include "flightPort.h"
 
 DeviceState g_DeviceState={0};
 DeviceStatus g_DeviceStatus = {0};
+CMathControlMain *g_pControl = NULL;
 
 void RunInitialInit()   // MML 初始化调用一次
-{          	 
+{
+    g_pControl = newCMathControlMain();
+
 	//根据箭上协议，配置422串口对应的设备，设置422串口校验方式，比特率
 	BoardInit();        //初始化buffer，数据池，串口，CAN, 两个PWM333Hz
 
@@ -40,7 +44,9 @@ void RunInitialInit()   // MML 初始化调用一次
     InitTelemetry();    //各种遥测参数
      
     //控制初始化函数
-    FlightInit();       //飞行航点描述
+    // FlightInit();       //飞行航点描述
+    //TODO
+ControlInitial(g_pControl);
 
     FlashInit();        //把NorFlash准备好，读了一遍JEDEC
 

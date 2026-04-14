@@ -52,7 +52,7 @@ void CMathControlYaw::Run()
 	Get_Data();
 	Calc_Data();
 	Send_Data();
-	Monitor_Data();
+	// Monitor_Data();
 };
 void CMathControlYaw::Get_Data()
 {

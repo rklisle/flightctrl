@@ -54,7 +54,7 @@ private:
 	void Get_Data();
 	void Calc_Data();
 	void Send_Data();
-	void Monitor_Data();
+	// void Monitor_Data();
 	double m_gama;
 	double m_u_control[6];
 	double m_urg;

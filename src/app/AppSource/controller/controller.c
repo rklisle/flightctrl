@@ -25,6 +25,8 @@
 #include "../payload/MsnTime.h"
 #include "../interface/interface_power.h"
 #include <math.h>
+#include "fuse.h"
+
 // /******************** Test umbrella Servo & ECU(PWM)***************************/
 // #include "interface_timer.h"
 

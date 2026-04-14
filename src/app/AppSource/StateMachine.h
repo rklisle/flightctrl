@@ -8,6 +8,11 @@
 #ifndef SRC_STATEMACHINE_H_
 #define SRC_STATEMACHINE_H_
 
+#include "flightPort.h"
+
+extern CMathControlMain *pControl;
+
 extern void RunInitialInit();
 extern void RunStageMachineStep();
+
 #endif /* SRC_STATEMACHINE_H_ */

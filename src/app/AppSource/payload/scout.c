@@ -251,10 +251,11 @@ static OS_U8 GenScoutBuf(OS_U8 *inData)
 	//目标高度（可不准确）
 	GetDataFast(pDataPoolMsn, "tarAlt",&temps16);
 	cmd.targetHigh = temps16 * 1;
+/* *********************************************** MML 20260413*****************************************************
 
 	cmd.scoutPitchSet = pOutput->Pitch_Preset_Angle / 0.002;//预装俯仰框架角
 	cmd.scoutyawSet = pOutput->Yaw_Preset_Angle / 0.002;//预装偏航框架角
-
+*/
 	cmd.offsety = userSetY;//图像俯仰方向（上下）像素值，手选攻击目标时使用（左上0，0）
 	cmd.offsetx = userSetX;//图像偏航方向（左右）像素值，手选攻击目标时使用（左上0，0）
 	cmd.useOffsetFrameCount = userSetFrame;//上面两个参数的来源对应的帧号，需要一个不采用时的值

@@ -12,6 +12,7 @@
 #include "../interface/interface_power.h"
 #include "../flight/os_flight_io.h"
 #include "./modNav.h"
+#include "../StateMachine.h"
 #include <math.h>
 #define d2r		(57.29577951308402)
 STRU_HIL_INPUT hilInput;
@@ -122,7 +123,7 @@ OS_U32 HilRtHandler(STRU_422_MSG_INFO * frame)// RT_HIL
 			msn.targetHigh = high;
 			msn.speed = speed;
 			msn.outTrack = track;
-			UpdateMission(msn);
+			// UpdateMission(msn);	// MML 20260413 临时注销
 		}
 		break;
 	case 0x20:	// MML: 仿真已经起飞了
@@ -159,6 +160,8 @@ OS_U32 HilRtHandler(STRU_422_MSG_INFO * frame)// RT_HIL
 
 OS_U8 HilFlightStage()
 {
+/* *********************************************** MML 20260413*****************************************************
+
 		pInput->Luanched = flightSeq.luanched;
 		pInput->ax = hilInput.ax;
 		pInput->ay = hilInput.ay;
@@ -278,14 +281,19 @@ OS_U8 HilFlightStage()
 //		pInput->scoutLocked = 1;
 //		pInput->scoutPitchSpd = pitchspd / 57.3;
 //		pInput->scoutYawSpd = yawspd /57.3;
+*/
 		return 0;
 }
+
+extern CMathControlMain *g_pControl;
 
 void StopHilTest()
 {
 	g_DeviceState.workStage &= ~((unsigned int)DOM_AUTOMATIC);
 	g_DeviceState.workStage &= ~((unsigned int)DOM_NAVON);
 	g_DeviceState.workStage |= DOM_INTERACTIVE;
-	FlightInit();
+	// FlightInit();
+ControlInitial(g_pControl);
+
 	return;
 }

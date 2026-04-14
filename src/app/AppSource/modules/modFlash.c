@@ -616,10 +616,11 @@ void LoadLunchFile()
     navInput.InitLat = luanchLat;
     navInput.InitHigh = luanchHeight;
     navInput.InitYaw = luanchDirc;
+/* *********************************************** MML 20260413*****************************************************
 
     pInput->initHigh = luanchHeight;
     pInput->initDir = luanchDirc;
     pInput->initLon = luanchLon;
     pInput->initLat = luanchLat;
-
+*/
 }

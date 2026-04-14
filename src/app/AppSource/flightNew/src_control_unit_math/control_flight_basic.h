@@ -180,7 +180,7 @@ private:
 	void Get_Data();
 	void Calc_Data();
 	void Send_Data();
-	void Monitor_Data();
+	// void Monitor_Data();
 	void Calc_Command();	
 	void Calc_Flight_Data();
 	void Calc_Mass_Data();
@@ -192,7 +192,7 @@ private:
 	void Control_Altitude_Change();
 	void Coord_Rebuild();
 	void Update_Task_Info();
-	void Change_Task_Info_Online();
+	//void Change_Task_Info_Online();
 	bool Judge_Turn_Error();
 	
 	int m_missile_ID;
@@ -217,7 +217,7 @@ private:
 	int count_sd_in;	//小于提前转弯距离
 	int count_turn_out;//转弯转出，进入直航
 	int count_turn_error;//转弯角度过大，异常
-	int count_update;	//数据链或任务机，航点更新
+	//int count_update;	//数据链或任务机，航点更新
 	double m_ground_temperature;
 	Stru_Way_Point m_st_way_point[MAX_ROUTE_NUMBER];//航点，发射点不是第0航点；航点号为0，表征第一个(目标)航点
 	Stru_Way_Point m_st_target;//目标信息，位置、转弯半径、角度(正航向或转弯角度等)、速度、航点类型及信息类型

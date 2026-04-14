@@ -7,12 +7,12 @@ CMathControlMain::CMathControlMain()
 	m_target_attack_ID = 0;
 	p_st_data_seeker_to_controller = NULL;
 	p_st_data_ins_to_controller = NULL;
-	p_st_data_datalink_to_controller = NULL;
+	//p_st_data_datalink_to_controller = NULL;
 	p_st_data_engine_to_controller = NULL;
 	p_st_data_baro_to_controller = NULL;
 	p_st_data_radioalt_to_controller = NULL;
 	p_st_data_controller_to_seeker = NULL;
-	p_st_data_controller_to_datalink = NULL;
+	//p_st_data_controller_to_datalink = NULL;
 	p_st_data_controller_to_engine = NULL;
 	p_st_data_controller_to_actuator = NULL;
 	p_st_data_controller_to_switch_output = NULL;
@@ -102,7 +102,7 @@ void CMathControlMain::Update_Input_Data(MODULE_TYPE MODULE_NAME)
 	{
 	case ENUM_FLIGHT_BASIC:			//更新基本信息计算模块输入
 		m_st_flight_basic_input.missile_ID = missile_ID;
-		m_target_attack_ID = p_st_data_datalink_to_controller->st_mission_update_data[missile_ID].target_ID;
+		//m_target_attack_ID = p_st_data_datalink_to_controller->st_mission_update_data[missile_ID].target_ID;
 		m_math_control_flight_basic.flight_time = flight_time;
 		m_math_control_flight_basic.time_tick = time_tick;
 		
@@ -131,9 +131,9 @@ void CMathControlMain::Update_Input_Data(MODULE_TYPE MODULE_NAME)
 			&p_st_data_seeker_to_controller[m_target_attack_ID],
 			sizeof(Stru_Data_Seeker_To_Controller));
 
-		memcpy(&m_st_flight_basic_input.st_datalink_data,
-			p_st_data_datalink_to_controller,
-			sizeof(Stru_Data_Datalink_To_Controller));
+		//memcpy(&m_st_flight_basic_input.st_datalink_data,
+		//	p_st_data_datalink_to_controller,
+		//	sizeof(Stru_Data_Datalink_To_Controller));
 		break;
 	case ENUM_CONTROL_ROLL:			//更新滚动控制模块输入
 		m_math_control_roll.flight_time = flight_time;
@@ -304,7 +304,7 @@ void CMathControlMain::Update_Output_Data()
 	p_st_data_controller_to_seeker->flag_lock_on_permit = m_st_flight_basic_output.st_command.flag_lock_on_permit;
 	p_st_data_controller_to_seeker->pitch_gimbal_angle_calc = m_st_flight_basic_output.phif;
 	p_st_data_controller_to_seeker->yaw_gimbal_angle_calc = m_st_flight_basic_output.phih;
-	//输出数据链数据
+	/*输出数据链数据
 	p_st_data_controller_to_datalink->st_missile_state_data.missile_ID = p_st_initial_data->missile_ID;
 	p_st_data_controller_to_datalink->st_missile_state_data.flag_missile_launched = true;
 	p_st_data_controller_to_datalink->st_missile_state_data.gama = p_st_data_ins_to_controller->gama;
@@ -326,7 +326,7 @@ void CMathControlMain::Update_Output_Data()
 	p_st_data_controller_to_datalink->st_missile_state_data.pitch_LOS = m_st_flight_basic_output.qf;
 	p_st_data_controller_to_datalink->st_missile_state_data.yaw_LOS = m_st_flight_basic_output.qh;
 	p_st_data_controller_to_datalink->st_missile_state_data.time_to_go = m_st_flight_basic_output.time_to_go;
-
+	*/
 	//输出发动机数据
 	p_st_data_controller_to_engine->control_rpm = m_st_engine_control_output.control_rpm;
 	p_st_data_controller_to_engine->ECU_work_cmd = m_st_flight_basic_output.ECU_work_cmd;

@@ -23,6 +23,9 @@
 #include "math.h"
 #include <stdlib.h>
 #include "interface_timer.h"
+#include "fuse.h"
+#include "StateMachine.h"
+
 
 //#include "flight_data.h"
 Point safePoints[20];
@@ -143,6 +146,8 @@ static void FlightSeqOutputHandle()	//02 Èç¹ûÊÕµ½É¡½µÃüÁî£¬¹Ø·¢¶¯»ú¡¢¿ªÉ¡¡¢¿Ø¶æ»
   ***********************************************************/
 void FlightTMOutputHandle()	//02 ¿ØÖÆÊä³ö¡ª¡ª>´æÈëÊý¾Ý³Ø
 {
+/* *********************************************** MML 20260413*****************************************************
+
 	SETDATA(pDataPoolFly,	"pitchCmd",	pOutput->rudderPitchCmd * 100,	OS_S16);	//Æð¿Ø±êÖ¾
 	SETDATA(pDataPoolFly,	"rollCmd",	pOutput->rudderRollCmd* 100,	OS_S16);	//ÖÆµ¼¼¶Êý
 	SETDATA(pDataPoolFly,	"yawCmd",	pOutput->rudderYawCmd* 100,		OS_S16);	//¿ØÖÆ¼¶Êý
@@ -194,12 +199,15 @@ void FlightTMOutputHandle()	//02 ¿ØÖÆÊä³ö¡ª¡ª>´æÈëÊý¾Ý³Ø
 	{
 			SETDATA(pDataPoolSelf,	"RecvLunc",	0xEE , OS_U8 );//ËÙ¶ÈÖ¸Áî
 	}
+*/
 }
 
 void FlightSrvOutputHandle()	//02 ¿ØÖÆÊä³ö½Ç¶È¡ª¡ª>²Ù×÷¶æ»ú
 {
 	if((DOM_AUTOMATIC & g_DeviceState.workStage) && flightSeq.luanched == 1)
 	{
+		/* *********************************************** MML 20260413*****************************************************
+
 		ServoCtlOnce_6Rudder(	pOutput->rudder1Cmd,
 								pOutput->rudder2Cmd,
 								pOutput->rudder3Cmd,
@@ -207,6 +215,7 @@ void FlightSrvOutputHandle()	//02 ¿ØÖÆÊä³ö½Ç¶È¡ª¡ª>²Ù×÷¶æ»ú
 								pOutput->rudder5Cmd,
 								pOutput->rudder6Cmd
 								);
+								*/
 	}
 }
 OS_U8 OutSafeCount = 0;
@@ -223,7 +232,10 @@ void FlightEngineOutputHandle()//02 ÔÚ¸÷ÖÖÇé¿öÏÂ£¨ÊÇ·ñÆð·É£¿ÊÇ·ñ³ö°²È«Çø£¿£©¿ØÖÆ
 		else
 		{
 			//°²È«ÇøÄÚ£¬Õý³£·ÉÐÐ£¬Ìý¿ØÖÆµÄ
+			/* *********************************************** MML 20260413*****************************************************
+
 			CurEngineRpm = (OS_U32)(pOutput->engineSet * 10.0f);
+			*/
 			// if(CurEngineRpm == 0)
 			// {
 			// 	int a = 0;
@@ -280,26 +292,38 @@ void FlightInputGenerate()
 		{
 			g_DeviceState.currTime = GetCurTime()-g_DeviceState.flightStartTime;        
 			float tempf;
-			GetDataFast(pDataPoolImu, "imuWx",	&tempf); pInput->wx = tempf;
-			GetDataFast(pDataPoolImu, "imuWy",	&tempf); pInput->wy = tempf;
-			GetDataFast(pDataPoolImu, "imuWz", 	&tempf); pInput->wz = tempf;
-			GetDataFast(pDataPoolImu, "imuAx", 	&tempf); pInput->ax = tempf;
-			GetDataFast(pDataPoolImu, "imuAy", 	&tempf); pInput->ay = tempf;
-			GetDataFast(pDataPoolImu, "imuAz", 	&tempf); pInput->az = tempf;
+			// GetDataFast(pDataPoolImu, "imuWx",	&tempf); pInput->wx = tempf;
+			// GetDataFast(pDataPoolImu, "imuWy",	&tempf); pInput->wy = tempf;
+			// GetDataFast(pDataPoolImu, "imuWz", 	&tempf); pInput->wz = tempf;
+			// GetDataFast(pDataPoolImu, "imuAx", 	&tempf); pInput->ax = tempf;
+			// GetDataFast(pDataPoolImu, "imuAy", 	&tempf); pInput->ay = tempf;
+			// GetDataFast(pDataPoolImu, "imuAz", 	&tempf); pInput->az = tempf;
+
+			GetDataFast(pDataPoolImu, "imuWx",	&tempf); g_ins_data.wx = tempf;
+			GetDataFast(pDataPoolImu, "imuWy",	&tempf); g_ins_data.wy = tempf;
+			GetDataFast(pDataPoolImu, "imuWz", 	&tempf); g_ins_data.wz = tempf;
+			GetDataFast(pDataPoolImu, "imuAx", 	&tempf); g_ins_data.ax = tempf;
+			GetDataFast(pDataPoolImu, "imuAy", 	&tempf); g_ins_data.ay = tempf;
+			GetDataFast(pDataPoolImu, "imuAz", 	&tempf); g_ins_data.az = tempf;
 
 			OS_S32 temps32;
 			OS_S16 temps16;
-			GetDataFast(pDataPoolImu, "navLon", 	&temps32);pInput->navLon = temps32 * 1e-7;
-			GetDataFast(pDataPoolImu, "navLat", 	&temps32);pInput->navLat = temps32 * 1e-7;
-			GetDataFast(pDataPoolImu, "navHigh", 	&tempf);pInput->navHigh = tempf;
-					
+			// GetDataFast(pDataPoolImu, "navLon", 	&temps32);pInput->navLon = temps32 * 1e-7;
+			// GetDataFast(pDataPoolImu, "navLat", 	&temps32);pInput->navLat = temps32 * 1e-7;
+			// GetDataFast(pDataPoolImu, "navHigh", 	&tempf);pInput->navHigh = tempf;
+
+			GetDataFast(pDataPoolImu, "navLon", 	&temps32);	g_ins_data.longitude = temps32 * 1e-7;
+			GetDataFast(pDataPoolImu, "navLat", 	&temps32);	g_ins_data.latitude = temps32 * 1e-7;
+			GetDataFast(pDataPoolImu, "navHigh", 	&tempf);	g_ins_data.height = tempf;
+			
 					//test
 					//SETDATA(pDataPoolImu, "abc", tempf * 10,	OS_U16);
 					//OS_S16 temp16Alt;
 					//GetDataFast(pDataPoolImu, "abc", 	&temp16Alt);
 					//pInput->navHigh = temp16Alt * 0.1;
 					//test end
-					
+
+/* *********************************************** MML 20260413*****************************************************
 			GetDataFast(pDataPoolImu, "navVn", &temps16);pInput->navVn = temps16 * 0.01;
 			GetDataFast(pDataPoolImu, "navVs", &temps16);pInput->navVs = temps16 * 0.01;
 			GetDataFast(pDataPoolImu, "navVe", &temps16);pInput->navVe = temps16 * 0.01;
@@ -345,6 +369,8 @@ void FlightInputGenerate()
 		OS_U16 fuel_n;
 		GetDataFast(pDataPoolSelf,	"fuelRate",	 &fuel_n);
 		pInput->mass_fuel = (double)fuel_n;
+*/
+		}
 }
 #define d2r		(57.29577951308402)
 
@@ -352,13 +378,18 @@ void FlightInputGenerate()
  * º¯ÊýÃû³Æ:DoFlightRun()
  * º¯Êý¹¦ÄÜ:µ÷ÓÃ·É¿ØÖ÷ÔËËãº¯Êý£¬½öµ±·¢Éäºó½øÈëµ÷ÓÃ
   ***********************************************************/
+extern CMathControlMain *g_pControl;
 void DoFlightRun()
 {
 	if((DOM_AUTOMATIC ) & g_DeviceState.workStage)
 	{
+		ControlRun(g_pControl);
+/* *********************************************** MML 20260413*****************************************************
+
 		FlightRun(pInput, pOutput);
+
 		pInput->Msn_updatesig = 0;
-		
+*/		
 	}
 }
 
@@ -521,7 +552,7 @@ OS_U8 JudgeHomeward()	//02 Æð·É2sºó£¬Ã¿1sÅÐ¶ÏÒ»´Î£¬¿´ÊÇ·ñ³öÁË°²È«Çø£¿ÊÇ·ñÐèÒªÉ¡½
 }
 
 //extern RoutePoint rp[RP_MAX_NUMBER];
-extern int RP_NUMBER;
+// extern int RP_NUMBER;
 
 
 

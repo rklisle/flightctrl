@@ -14,7 +14,147 @@
 //#include "..\load_data.h"
 //#include "..\datalink_sim_main.h"
 //#include "..\target_sim_main.h"
-#include "port/flightPort.h"
+#include <stdbool.h>
+// #include "port/flightPort.h"
+//==================================================================================
+//
+//						补充定义
+//
+//==================================================================================
+
+#define E_CONST		(1.0/298.257)
+#define RE			(6378137.0)
+
+// 将原来的 const int 定义改为宏
+#define MAX_ROUTE_NUMBER 64      // 数据链给综控机最大航路点个数
+#define MAX_CONNECT_NUMBER 16    // 数据链最大连接导弹数量
+#define MAX_TARGET_NUMBER 16     // 每个弹，最多16个目标
+#define MAX_TIME 9999.0
+#define STEP_5ms 0.005
+
+// const int MAX_ROUTE_NUMBER = 64;	//数据链给综控机最大航路点个数
+// const int MAX_CONNECT_NUMBER = 16;	//数据链最大连接导弹数量
+// const int MAX_TARGET_NUMBER = 16;	//每个弹，最多16个目标
+// const double MAX_TIME = 9999.0;
+// const double STEP_5ms = 0.005;
+
+typedef struct _Stru_Initial_Data
+{
+	int	missile_ID;			//弹编号
+	double longitude_launch;	//发射点
+	double latitude_launch;	
+	double height_launch;
+	double launch_time;		//发射时间
+	double initial_parameter1;//预留初始参数1，例如发射点温度等，可估算 声速、大气等模型
+	double initial_parameter2;//预留初始参数2
+}Stru_Initial_Data;	//导弹初始状态装订数据
+
+typedef struct _Stru_Route_Data
+{
+	int num_rows;
+	int num_columns;
+	char ** p_str_title; 
+	double * p_route_data;		//行为不同航点编号，列为航点特征: 编号、经度、纬度、转弯半径、角度、速度、航点类型、信息、高度
+	double longitude_target;
+	double latitude_target;
+	double height_target;
+}Stru_Route_Data;	//导弹飞行航路数据
+
+typedef struct _Stru_Mission_Update_Data
+{
+	int missile_ID;
+	int	target_ID;
+	int	update_count;//更新次数
+	int	num_waypoint_updated;	//当前跟新，有效的航迹点数目
+	double longitude  [MAX_ROUTE_NUMBER];
+	double latitude   [MAX_ROUTE_NUMBER];
+	double height     [MAX_ROUTE_NUMBER];
+	double turn_radius[MAX_ROUTE_NUMBER];
+	double turn_angle [MAX_ROUTE_NUMBER];
+	double velocity   [MAX_ROUTE_NUMBER];
+	int    route_mode [MAX_ROUTE_NUMBER];
+	int    formation_mode[MAX_ROUTE_NUMBER];
+}Stru_Mission_Update_Data;		//在线航迹装订数据(可根据任务规划算法生成，待补充)
+
+typedef struct _Stru_Missile_State_Data
+{
+	int missile_ID;
+	bool flag_missile_launched;
+	double gama;
+	double psi;
+	double zeta;
+	double wx;
+	double wy;
+	double wz;
+	double ax;
+	double ay;
+	double az;
+	double au;
+	double vtx;
+	double vty;
+	double vtz;
+	double longitude;
+	double latitude;
+	double height;
+	double pitch_LOS;
+	double yaw_LOS;
+	double time_to_go;
+}Stru_Missile_State_Data;		//导弹向外部发送的飞行状态信息
+
+typedef struct _Stru_Target_State_Data
+{
+	int target_ID;
+	bool   flag_target_distinguished;
+	double pitch_LOS_angle_target;
+	double yaw_LOS_angle_target;
+	double distance_target;
+	double longitude_target;
+	double latitude_target;
+	double rcs_target;
+}Stru_Target_State_Data;		//导弹向外部发送的飞行状态信息
+
+/*
+typedef struct _Stru_Data_Send_To_Missile
+{
+	Stru_Mission_Update_Data	st_mission_update_data[MAX_CONNECT_NUMBER];	//任务
+	Stru_Missile_State_Data		st_missile_state_data[MAX_CONNECT_NUMBER];		//导弹
+	Stru_Target_State_Data		st_target_state_data[MAX_TARGET_NUMBER];		//目标
+}Stru_Data_Send_To_Missile;		//导弹向外部发送的飞行状态信息 内容应与Stru_Data_Datalink_To_Controller保持一致，同步更新
+
+typedef struct _Stru_Target_Initial_Data_In
+{
+	double longitude_target;	//目标初始经度
+	double latitude_target;		//目标初始纬度
+	double height_target;		//目标初始高度
+	int target_type;			//目标类型
+	double time_run;			//目标开始运动时间
+	double velocity_target;		//目标运动速度
+	double theta_target;		//目标运动倾角
+	double psi_target;			//目标运动方位角
+	double radius_target;		//目标运动半径	
+}Stru_Target_Initial_Data_In;	//目标设置数据
+
+typedef struct _Stru_Target_Status
+{
+	int target_ID;
+	double longitude_target;	
+	double latitude_target;		
+	double height_target;		
+	double vtx_target;
+	double vty_target;
+	double vtz_target;
+}Stru_Target_Status;	//目标实时数据
+
+typedef enum _TARGET_TYPE
+{
+	ENUM_FIXED_POSITION = 0,			//固定目标		
+	ENUM_LINEAR_MOTION = 1,			//直线运动
+	ENUM_CIRCULAR_MOTION = 2,			//圆形运动
+	ENUM_LINEAR_ACCELERATE = 3,		//直线加速
+	ENUM_SNAKE_MOTION = 4			//蛇形机动
+}TARGET_TYPE;
+
+*/
 
 //***************** 外部仿真控制给导弹输入数据 ********************//
 typedef struct _Stru_Jamming_Data_In

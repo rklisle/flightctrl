@@ -138,7 +138,7 @@ CMathControlFlightBasic::CMathControlFlightBasic()
 	count_away = 0;
 	count_sd_in = 0;
 	count_turn_out = 0;
-	count_update = 0;
+	//count_update = 0;
 	m_num_way_point = 0;
 	m_num_way_point_target = 0;
 	m_engine_start_result = 0xBB;
@@ -230,7 +230,7 @@ void CMathControlFlightBasic::Update_Task_Info()
 		m_total_distance += distance_delta;
 	}
 }
-
+/*
 void CMathControlFlightBasic::Change_Task_Info_Online()
 {
 	//在航迹点索引表后，加入数据链发动的航迹序列
@@ -332,7 +332,7 @@ void CMathControlFlightBasic::Change_Task_Info_Online()
 	m_st_control_time.time_arrive_minimum = flight_time + min_time;
 	m_st_control_flag.flag_waypoint_turn = false;
 }
-
+*/
 void CMathControlFlightBasic::Initial()
 {
 	//射前导弹任务参数装订
@@ -362,7 +362,7 @@ void CMathControlFlightBasic::Initial()
 	m_target_height = m_st_way_point[0].height;
 	
 	m_missile_ID = p_st_flight_basic_input->missile_ID;
-	count_update = p_st_flight_basic_input->st_datalink_data.st_mission_update_data[m_missile_ID].update_count;
+	//count_update = p_st_flight_basic_input->st_datalink_data.st_mission_update_data[m_missile_ID].update_count;
 
 }
 
@@ -371,7 +371,7 @@ void CMathControlFlightBasic::Run()
 	Get_Data();
 	Calc_Data();
 	Send_Data();
-	Monitor_Data();
+	// Monitor_Data();
 }
 
 void CMathControlFlightBasic::Get_Data()
@@ -415,12 +415,12 @@ void CMathControlFlightBasic::Get_Data()
 void CMathControlFlightBasic::Calc_Data()
 {
 	//数据链在线更新航迹点、任务，有新航迹点，转弯过程中不更新
-	if ((count_update != p_st_flight_basic_input->st_datalink_data.st_mission_update_data[m_missile_ID].update_count)
-		&&(!m_st_control_flag.flag_waypoint_turn))
-	{
-		Change_Task_Info_Online();
-		count_update = p_st_flight_basic_input->st_datalink_data.st_mission_update_data[m_missile_ID].update_count;
-	}
+	//if ((count_update != p_st_flight_basic_input->st_datalink_data.st_mission_update_data[m_missile_ID].update_count)
+	//	&&(!m_st_control_flag.flag_waypoint_turn))
+	//{
+	//	Change_Task_Info_Online();
+	//	count_update = p_st_flight_basic_input->st_datalink_data.st_mission_update_data[m_missile_ID].update_count;
+	//}
 		
 	//飞行计算
 	Calc_Flight_Data();

@@ -566,6 +566,8 @@ OS_U8 DoReturnHomeward()
         }
     }
     //重新计算当前点与回收点的连线，设置方位角
+	/* *********************************************** MML 20260413*****************************************************
+
 		OS_U16 curpoint;
 		curpoint = pOutput->curPtNo;
     double curLon = selfStatus.lon * 1e-7;
@@ -577,6 +579,7 @@ OS_U8 DoReturnHomeward()
     groundCmd.sn = curpoint + 1;
 		groundCmd.outTrack = dir;
 		updateNewRP(&groundCmd, 1, curpoint + 1, ptCount);
+		*/
     return 0;
 }
 
@@ -593,6 +596,8 @@ static void GenerateTeamMsn()
 		// 起飞未完成
 			return;
 	}
+	/* *********************************************** MML 20260413*****************************************************
+
 	// 起飞完成
 	if(pOutput->enginge_off == 1)
 	{
@@ -608,6 +613,7 @@ static void GenerateTeamMsn()
 		pOutput->open_umbrella = 0;
 		return;
 	}  
+	*/
 	/*
 	//立刻发出第一个点
 	static int curNavPt = 0;
@@ -745,6 +751,8 @@ OS_U32 MsnCmdHandler(STRU_422_MSG_INFO * frame)
 				//新获取指令存入nptBuffer
 				memset(nptBuffer, 0, sizeof(nptBuffer));
 				memcpy(nptBuffer, frame->au8Data + 1, count * 49);
+				/* *********************************************** MML 20260413*****************************************************
+
 				OS_U16 curpoint;
 				curpoint = pOutput->curPtNo;
 
@@ -768,7 +776,7 @@ OS_U32 MsnCmdHandler(STRU_422_MSG_INFO * frame)
 					//nrp[i].if_airspeed_used = 0;							
 				}
 				updateNewRP(nrp, count, curpoint + 1, ptCount); 
-				
+				*/
        }
      }
 			break;
@@ -833,7 +841,10 @@ void UpdatePredictMsnByGround(STRU_422_MSG_INFO * frame)
 						Arp[i].V_cmd = speed;                                                         
 						Arp[i].if_airspeed_used = 0;
 					}
+					/* *********************************************** MML 20260413*****************************************************
+
 					updateRP(Arp, ptCount);
+					*/
 /*				
 					memcpy(autoMsnPt, &tempPt[1], sizeof(tempPt) - sizeof(MSN_CMD));
 					RoutePointIn rp[2];
@@ -872,6 +883,7 @@ void UpdatePredictMsnByGround(STRU_422_MSG_INFO * frame)
 					navInput.InitLat = Arp[0].lat;
 					navInput.InitHigh =Arp[0].h;
 					navInput.InitYaw = Arp[0].outTrack;
+/* *********************************************** MML 20260413*****************************************************
 
 					pInput->initLon = Arp[0].lon;
 					pInput->initLat = Arp[0].lat;
@@ -882,7 +894,7 @@ void UpdatePredictMsnByGround(STRU_422_MSG_INFO * frame)
 					SETDATA(pDataPoolFly, "DataLat",  pInput->initLat / 0.0000001, OS_S32); //
 					SETDATA(pDataPoolFly, "DataHigh", pInput->initHigh, OS_S16);//
 					SETDATA(pDataPoolFly, "DataDir", pInput->initDir / 0.01, OS_U16); //
-
+*/
 					SETDATA(pDataPoolMsn,   "msnDevID", selfID, OS_U8);
 					SETDATA(pDataPoolMsn,   "msnGrpID", groupID, OS_U8);
         }
