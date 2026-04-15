@@ -142,12 +142,12 @@ void UpdateMission(MISSION msn)// 014²»ÓÃ
 	//Update_Mission(msn);
 }
 
-void setFlightInput(FLIGHT_INPUT input1)
+void setFlightInput(FLIGHT_INPUT input1)	// not used
 {
 	memcpy(pInput, &input1, sizeof(FLIGHT_INPUT));
 }
 
-void getFlightOutput(FLIGHT_OUTPUT* output1) 
+void getFlightOutput(FLIGHT_OUTPUT* output1) 	// not used
 {
 	memcpy(output1, pOutput, sizeof(FLIGHT_OUTPUT));
 }
@@ -215,7 +215,7 @@ void updateNewRP(RoutePointIn* newinrp, int num, OS_U16 curPtNo, int pt)
 	pInput->Msn_updatesig = 1;
 }
 
-void getDubinsParam(DubinsStrucIn* paramss)
+void getDubinsParam(DubinsStrucIn* paramss)	// not used
 {
 	memcpy(paramss , &Dubins_para,  sizeof(DubinsStrucIn));
 }

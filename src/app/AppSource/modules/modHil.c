@@ -107,23 +107,23 @@ OS_U32 HilRtHandler(STRU_422_MSG_INFO * frame)// RT_HIL
 	case 0x23://紧急返航
 		ControllerCmdHandler(frame);
 		break;
-	case CMD_MSN_NEWPT://仿真上注任务指令	// 280 该命令不用
+	case CMD_MSN_NEWPT://仿真上注任务指令	// 280 该命令不用 注释掉 by MML
 		{
-			double lon,lat,high,track,speed,arriveTime;
-			memcpy(&lon, frame->au8Data + 1, 8);
-			memcpy(&lat, frame->au8Data + 9, 8);
-			memcpy(&high, frame->au8Data + 17, 8);
-			memcpy(&track, frame->au8Data + 25, 8);
-			memcpy(&speed, frame->au8Data + 33, 8);
-			memcpy(&arriveTime, frame->au8Data + 41, 8);
-			MISSION msn;
-			msn.MsnCmdType = frame->au8Data[0];
-			msn.targetLon = lon;
-			msn.targetLat = lat;
-			msn.targetHigh = high;
-			msn.speed = speed;
-			msn.outTrack = track;
-			UpdateMission(msn);
+			// double lon,lat,high,track,speed,arriveTime;
+			// memcpy(&lon, frame->au8Data + 1, 8);
+			// memcpy(&lat, frame->au8Data + 9, 8);
+			// memcpy(&high, frame->au8Data + 17, 8);
+			// memcpy(&track, frame->au8Data + 25, 8);
+			// memcpy(&speed, frame->au8Data + 33, 8);
+			// memcpy(&arriveTime, frame->au8Data + 41, 8);
+			// MISSION msn;
+			// msn.MsnCmdType = frame->au8Data[0];
+			// msn.targetLon = lon;
+			// msn.targetLat = lat;
+			// msn.targetHigh = high;
+			// msn.speed = speed;
+			// msn.outTrack = track;
+			// UpdateMission(msn);
 		}
 		break;
 	case 0x20:	// MML: 仿真已经起飞了
