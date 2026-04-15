@@ -378,7 +378,7 @@ void FlightInputGenerate()
  * 函数名称:DoFlightRun()
  * 函数功能:调用飞控主运算函数，仅当发射后进入调用
   ***********************************************************/
-extern CMathControlMain *g_pControl;
+extern void *g_pControl;
 void DoFlightRun()
 {
 	if((DOM_AUTOMATIC ) & g_DeviceState.workStage)

@@ -29,11 +29,11 @@
 
 DeviceState g_DeviceState={0};
 DeviceStatus g_DeviceStatus = {0};
-CMathControlMain *g_pControl = NULL;
+void *g_pControl = NULL;
 
 void RunInitialInit()   // MML 初始化调用一次
 {
-    g_pControl = newCMathControlMain();
+    //g_pControl = newCMathControlMain();
 
 	//根据箭上协议，配置422串口对应的设备，设置422串口校验方式，比特率
 	BoardInit();        //初始化buffer，数据池，串口，CAN, 两个PWM333Hz
@@ -45,10 +45,10 @@ void RunInitialInit()   // MML 初始化调用一次
      
     //控制初始化函数
     // FlightInit();       //飞行航点描述
-    //TODO
-ControlInitial(g_pControl);
+//    g_pControl = ControlInitial(prepare_input_for_ctrl_run,process_output_after_ctrl_run);
+    g_pControl = ControlInitial();
 
-    FlashInit();        //把NorFlash准备好，读了一遍JEDEC
+	FlashInit();        //把NorFlash准备好，读了一遍JEDEC
 
     //初始化载荷数据池
     PayloadInit();      //目前没东西
@@ -76,13 +76,45 @@ ControlInitial(g_pControl);
  ***********************************************************/
 float calcTimeCpu0;
 float maxCalcTime = 0;
+
+extern TX_BYTE_POOL byte_pool_0;
+
 void RunStageMachineStep()  // 5ms运行一次
 {
 	g_DeviceState.CurrTick++;
    // unsigned long current_time0 = tx_time_get();
-			
-            
-	// 1.智能控制器状态更新
+/***********************************************************
+ * 统计内存池使用情况
+/***********************************************************/
+
+CHAR *name;
+ULONG available;
+ULONG fragments;
+TX_THREAD *first_suspended;
+ULONG suspended_count;
+TX_BYTE_POOL *next_pool;
+UINT status;
+
+status = tx_byte_pool_info_get( &byte_pool_0, 
+                                &name,          // 内存池状态
+                                &available,     // 剩余可用字节
+                                &fragments,     // 内存碎片数量
+                                &first_suspended,
+                                &suspended_count,
+                                &next_pool);
+
+if(TX_SUCCESS != status)
+{
+    while (1)
+    {
+        ;
+    }
+
+}                               
+
+/***********************************************************/
+
+// 1.智能控制器状态更新
 	ControllerStatusUpdata();
     
 	// 3.准备给飞控的数据

@@ -10,7 +10,7 @@
 
 #include "flightPort.h"
 
-extern CMathControlMain *pControl;
+extern void *pControl;
 
 extern void RunInitialInit();
 extern void RunStageMachineStep();

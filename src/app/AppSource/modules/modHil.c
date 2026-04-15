@@ -107,7 +107,7 @@ OS_U32 HilRtHandler(STRU_422_MSG_INFO * frame)// RT_HIL
 	case 0x23://紧急返航
 		ControllerCmdHandler(frame);
 		break;
-	case CMD_MSN_NEWPT://仿真上注任务指令
+	case CMD_MSN_NEWPT://仿真上注任务指令	// 280 该命令不用
 		{
 			double lon,lat,high,track,speed,arriveTime;
 			memcpy(&lon, frame->au8Data + 1, 8);
@@ -123,7 +123,7 @@ OS_U32 HilRtHandler(STRU_422_MSG_INFO * frame)// RT_HIL
 			msn.targetHigh = high;
 			msn.speed = speed;
 			msn.outTrack = track;
-			// UpdateMission(msn);	// MML 20260413 临时注销
+			UpdateMission(msn);
 		}
 		break;
 	case 0x20:	// MML: 仿真已经起飞了
@@ -285,7 +285,7 @@ OS_U8 HilFlightStage()
 		return 0;
 }
 
-extern CMathControlMain *g_pControl;
+extern void *g_pControl;
 
 void StopHilTest()
 {
@@ -293,7 +293,7 @@ void StopHilTest()
 	g_DeviceState.workStage &= ~((unsigned int)DOM_NAVON);
 	g_DeviceState.workStage |= DOM_INTERACTIVE;
 	// FlightInit();
-ControlInitial(g_pControl);
+  g_pControl = ControlInitial();
 
 	return;
 }

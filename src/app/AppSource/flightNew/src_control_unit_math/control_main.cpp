@@ -5,13 +5,13 @@ CMathControlMain::CMathControlMain()
 {
 	missile_ID = 0;
 	m_target_attack_ID = 0;
-	p_st_data_seeker_to_controller = NULL;
+//	p_st_data_seeker_to_controller = NULL;
 	p_st_data_ins_to_controller = NULL;
 	//p_st_data_datalink_to_controller = NULL;
 	p_st_data_engine_to_controller = NULL;
 	p_st_data_baro_to_controller = NULL;
-	p_st_data_radioalt_to_controller = NULL;
-	p_st_data_controller_to_seeker = NULL;
+//	p_st_data_radioalt_to_controller = NULL;
+//	p_st_data_controller_to_seeker = NULL;
 	//p_st_data_controller_to_datalink = NULL;
 	p_st_data_controller_to_engine = NULL;
 	p_st_data_controller_to_actuator = NULL;
@@ -114,10 +114,10 @@ void CMathControlMain::Update_Input_Data(MODULE_TYPE MODULE_NAME)
 		memcpy(&m_st_flight_basic_input.st_baro_data,
 			p_st_data_baro_to_controller,
 			sizeof(Stru_Data_Baro_To_Controller));
-		
-		memcpy(&m_st_flight_basic_input.st_radioalt_data,
-			p_st_data_radioalt_to_controller,
-			sizeof(Stru_Data_RadioAlt_To_Controller));
+
+//		memcpy(&m_st_flight_basic_input.st_radioalt_data,
+//			p_st_data_radioalt_to_controller,
+//			sizeof(Stru_Data_RadioAlt_To_Controller));
 		
 		memcpy(&m_st_flight_basic_input.st_engine_data,
 			p_st_data_engine_to_controller,
@@ -127,9 +127,9 @@ void CMathControlMain::Update_Input_Data(MODULE_TYPE MODULE_NAME)
 			p_st_data_ins_to_controller,
 			sizeof(Stru_Data_INS_To_Controller));
 
-		memcpy(&m_st_flight_basic_input.st_seeker_data,
-			&p_st_data_seeker_to_controller[m_target_attack_ID],
-			sizeof(Stru_Data_Seeker_To_Controller));
+//		memcpy(&m_st_flight_basic_input.st_seeker_data,
+//			&p_st_data_seeker_to_controller[m_target_attack_ID],
+//			sizeof(Stru_Data_Seeker_To_Controller));
 
 		//memcpy(&m_st_flight_basic_input.st_datalink_data,
 		//	p_st_data_datalink_to_controller,
@@ -145,12 +145,13 @@ void CMathControlMain::Update_Input_Data(MODULE_TYPE MODULE_NAME)
 		m_st_roll_control_input.v	 = m_st_flight_basic_output.v;
 		m_st_roll_control_input.vnz	 = m_st_flight_basic_output.vnz;
 		m_st_roll_control_input.g	 = m_st_flight_basic_output.g;
-		if (p_st_data_seeker_to_controller[m_target_attack_ID].flag_combat_status
-			/*&&(m_st_flight_basic_output.num_way_point_target == (p_st_route_data_preflight->num_rows - 1))*/)
-		{
-			m_st_roll_control_input.dqh	= p_st_data_seeker_to_controller[m_target_attack_ID].yaw_LOS_rate;
-		} 
-		else
+// MML 20260415 seeker does NOT used in first flight, whenever used, add codes below
+//		if (p_st_data_seeker_to_controller[m_target_attack_ID].flag_combat_status
+//			/*&&(m_st_flight_basic_output.num_way_point_target == (p_st_route_data_preflight->num_rows - 1))*/)
+//		{
+//			m_st_roll_control_input.dqh	= p_st_data_seeker_to_controller[m_target_attack_ID].yaw_LOS_rate;
+//		} 
+//		else
 		{
 			m_st_roll_control_input.dqh	= m_st_flight_basic_output.dqh;
 		}
@@ -187,12 +188,13 @@ void CMathControlMain::Update_Input_Data(MODULE_TYPE MODULE_NAME)
 		m_st_yaw_control_input.g	= m_st_flight_basic_output.g;
 		m_st_yaw_control_input.qh	= m_st_flight_basic_output.qh;
 		m_st_yaw_control_input.tgo	= m_st_flight_basic_output.time_to_go;
-		if (p_st_data_seeker_to_controller[m_target_attack_ID].flag_combat_status
-			/*&&(m_st_flight_basic_output.num_way_point_target == (p_st_route_data_preflight->num_rows - 1))*/)
-		{
-			m_st_yaw_control_input.dqh	= p_st_data_seeker_to_controller[m_target_attack_ID].yaw_LOS_rate;
-		} 
-		else
+// MML 20260415 seeker does NOT used in first flight, whenever used, add codes below
+//		if (p_st_data_seeker_to_controller[m_target_attack_ID].flag_combat_status
+//			/*&&(m_st_flight_basic_output.num_way_point_target == (p_st_route_data_preflight->num_rows - 1))*/)
+//		{
+//			m_st_yaw_control_input.dqh	= p_st_data_seeker_to_controller[m_target_attack_ID].yaw_LOS_rate;
+//		} 
+//		else
 		{
 			m_st_yaw_control_input.dqh	= m_st_flight_basic_output.dqh;
 		}
@@ -219,12 +221,13 @@ void CMathControlMain::Update_Input_Data(MODULE_TYPE MODULE_NAME)
 		m_st_pitch_control_input.vs   = m_st_flight_basic_output.vs;
 		m_st_pitch_control_input.g    = m_st_flight_basic_output.g;
 		//m_st_pitch_control_input.mass = m_st_flight_basic_output.
-		if (p_st_data_seeker_to_controller[m_target_attack_ID].flag_combat_status
-			/*&&(m_st_flight_basic_output.num_way_point_target == (p_st_route_data_preflight->num_rows - 1))*/)
-		{
-			m_st_pitch_control_input.dqf = p_st_data_seeker_to_controller[m_target_attack_ID].pitch_LOS_rate;
-		} 
-		else
+// MML 20260415 seeker does NOT used in first flight, whenever used, add codes below
+//		if (p_st_data_seeker_to_controller[m_target_attack_ID].flag_combat_status
+//			/*&&(m_st_flight_basic_output.num_way_point_target == (p_st_route_data_preflight->num_rows - 1))*/)
+//		{
+//			m_st_pitch_control_input.dqf = p_st_data_seeker_to_controller[m_target_attack_ID].pitch_LOS_rate;
+//		} 
+//		else
 		{
 			m_st_pitch_control_input.dqf = m_st_flight_basic_output.dqf;
 		}
@@ -300,10 +303,10 @@ void CMathControlMain::Update_Input_Data(MODULE_TYPE MODULE_NAME)
 void CMathControlMain::Update_Output_Data()
 {
 	//输出导引头数据
-	p_st_data_controller_to_seeker->flag_seeker_on = m_st_flight_basic_output.st_command.flag_seeker_on;
-	p_st_data_controller_to_seeker->flag_lock_on_permit = m_st_flight_basic_output.st_command.flag_lock_on_permit;
-	p_st_data_controller_to_seeker->pitch_gimbal_angle_calc = m_st_flight_basic_output.phif;
-	p_st_data_controller_to_seeker->yaw_gimbal_angle_calc = m_st_flight_basic_output.phih;
+//	p_st_data_controller_to_seeker->flag_seeker_on = m_st_flight_basic_output.st_command.flag_seeker_on;
+//	p_st_data_controller_to_seeker->flag_lock_on_permit = m_st_flight_basic_output.st_command.flag_lock_on_permit;
+//	p_st_data_controller_to_seeker->pitch_gimbal_angle_calc = m_st_flight_basic_output.phif;
+//	p_st_data_controller_to_seeker->yaw_gimbal_angle_calc = m_st_flight_basic_output.phih;
 	/*输出数据链数据
 	p_st_data_controller_to_datalink->st_missile_state_data.missile_ID = p_st_initial_data->missile_ID;
 	p_st_data_controller_to_datalink->st_missile_state_data.flag_missile_launched = true;

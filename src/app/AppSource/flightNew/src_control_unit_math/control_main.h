@@ -40,14 +40,14 @@ public:
 	int missile_ID;
 	//Stru_Debug_Monitor				* p_st_debug_monitor;//调试/监控接口
 	//输入
-	Stru_Data_Seeker_To_Controller		* p_st_data_seeker_to_controller;//协议接口数据
+	// Stru_Data_Seeker_To_Controller		* p_st_data_seeker_to_controller;//协议接口数据
 	Stru_Data_INS_To_Controller			* p_st_data_ins_to_controller;
 	//Stru_Data_Datalink_To_Controller	* p_st_data_datalink_to_controller;
 	Stru_Data_Engine_To_Controller		* p_st_data_engine_to_controller;
 	Stru_Data_Baro_To_Controller		* p_st_data_baro_to_controller;
-	Stru_Data_RadioAlt_To_Controller	* p_st_data_radioalt_to_controller;
+	// Stru_Data_RadioAlt_To_Controller	* p_st_data_radioalt_to_controller;
 	//输出
-	Stru_Data_Controller_To_Seeker		* p_st_data_controller_to_seeker;
+	// Stru_Data_Controller_To_Seeker		* p_st_data_controller_to_seeker;
 	//Stru_Data_Controller_To_Datalink	* p_st_data_controller_to_datalink;
 	Stru_Data_Controller_To_Engine		* p_st_data_controller_to_engine;//发动机
 	Stru_Data_Controller_To_Actuator	* p_st_data_controller_to_actuator;//舵机

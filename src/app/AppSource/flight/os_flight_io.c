@@ -137,7 +137,7 @@ void FlightRun()
 	}*/
 }
 
-void UpdateMission(MISSION msn)
+void UpdateMission(MISSION msn)// 014≤ª”√
 {
 	//Update_Mission(msn);
 }
