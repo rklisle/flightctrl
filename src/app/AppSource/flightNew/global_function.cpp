@@ -636,13 +636,13 @@ double CFlightGlobalFun::LAQL1fd(int n,
 }
 
 
-double CFlightGlobalFun::LAQL2fd(int n, 		//温度数
-								 int m, 		//时间数
-								 double *a, 	//温度向量
-								 double *b, 	//时间向量
+double CFlightGlobalFun::LAQL2fd(int n, 	//行数
+								 int m, 		//列数
+								 double *a, 	//行向量
+								 double *b, 	//列向量
 								 double *c, 	//推力二维表
-								 double x,	//温度
-								 double y)	//时间
+								 double x,	//行变量
+								 double y)	//列变量
 {
 	int i;
 	double v=0;//,v1,v2;

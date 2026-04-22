@@ -2,15 +2,16 @@
 #include "StateMachine.h"
 #include "./core/BusInteract.h"
 
-double curTime;
-double step = 0.005;
+double curTime;	// ≥ı ºªØ ± ÷√0£ª√ø5ms£¨+0.005	// œµÕ≥ ±º‰£¨µ•Œª s
+// double step = 0.005;
+#define TIME_STEP 0.005
 void Init7020Code()
 {
 	 RunInitialInit();
 	 ResetCurTime();
 }
 
-// ÁöÑ
+// Áö?
 void periodic_function_1ms()
 {
     BusDataHandle();
@@ -19,21 +20,23 @@ void periodic_function_1ms()
 
 void periodic_function_5ms()
 {
-    curTime += step;
+    curTime += TIME_STEP;
     RunStageMachineStep();
 }
 
-
+// ªÒ»° ±º‰£¨≤Œ’’∂‘œÛ «£∫≥Ã–Ú≥ı ºªØŒ™0 ±£¨√ø5ms£¨+0.005
 double GetCurTime()
 {
 	return curTime;
 }
 
+// Œ¥ π”√
 void SetCurTime(double time)
 {
 	curTime = time;
 }
 
+// ≥ı ºªØµ˜”√“ª¥Œ
 void ResetCurTime()
 {
 	curTime = 0;

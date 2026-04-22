@@ -100,8 +100,9 @@ const STRU_STANDARD_FRAME* PeekStandardMessage()
 		if(result != ERROR_NOERROR)
 			continue;
 
-		//到此处时，pmData中存储的是首字节为rt号，后续为422整帧的数据
+		//到此处时，pmData数据格式：首字节rt号，后续为422整帧的数据(按各个外设协议的整帧数据)
 		//可能会有多个帧
+		// 以下这个for是对pmData中数据进行整形。整形后为标准帧。
 		for(int i=0; i<MAX_SIMUL_FRAME; i++)
 		{
 			if((u16Length[i] > 0) && ( rtList[rtIndex].ptr_ChkFrameSum != NULL))

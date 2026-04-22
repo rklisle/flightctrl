@@ -24,7 +24,7 @@ OS_S8 PowerOn(POWER_DEVICE dev)
     OS_U32 CANCmd_power = 0;
 	switch(dev)
 	{
-    //MML 014协议
+    // 014协议
     case DEVICE_SCOUT_E28V:        //导引头
         CANCmd_power = 0x10000000;
         break;
@@ -55,7 +55,7 @@ OS_S8 PowerOff(POWER_DEVICE dev)
 	OS_U32 CANCmd_power = 0;
 	switch(dev)
 	{
-    //MML 014协议
+    // 014协议
     case DEVICE_MBAT:	          //主电池
         CANCmd_power = (0x01000000 << 1);
         break;
@@ -95,16 +95,16 @@ OS_S8 SeqOn(OS_U8 channel)
     switch(channel)
     {
     case 0:
-        SETDATA(pDataPoolSelf, "seqDrop", 1,	OS_U8); //MML 时序抛伞
+        SETDATA(pDataPoolSelf, "seqDrop", 1,	OS_U8); // 时序抛伞
         break;
     case 1:
-        SETDATA(pDataPoolSelf, "seqUmb", 1,	OS_U8);     //MML 时序开伞
+        SETDATA(pDataPoolSelf, "seqUmb", 1,	OS_U8);     // 时序开伞
         break;
     case 2:
-        SETDATA(pDataPoolSelf, "seqSac1", 1,	OS_U8); //MML 时序前气囊
+        SETDATA(pDataPoolSelf, "seqSac1", 1,	OS_U8); // 时序前气囊
         break;
     case 3:
-        SETDATA(pDataPoolSelf, "seqSac2", 1,	OS_U8); //MML 时序后气囊
+        SETDATA(pDataPoolSelf, "seqSac2", 1,	OS_U8); // 时序后气囊
         break;
     }
 

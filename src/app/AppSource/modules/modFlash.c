@@ -5,12 +5,13 @@
  *      Author: Admin
  */
 #include "modFlash.h"
-#include "../flight/os_flight_io.h"
+// #include "../flight/os_flight_io.h"
 #include "../core/Telecontrol.h"
 #include "../core/DataPool.h"
 #include "../Interface/interface_flash.h"
 #include "../support/common.h"
 #include "modNav.h"
+#include "flightPort.h"
 
 #define BURNING	(0x11)
 #define UNBURN	(0x22)
@@ -27,6 +28,7 @@ static OS_U32 tempFilePacket = 0;
 OS_BOOL FlashProgramming = FALSE;
 
 OS_U8 ephRecvReadyFlag = 0;
+extern Stru_Initial_Data   g_initial_data;
 
 FLASHFILE flashFiles[FLASHFILE_COUNT]={
 	//  MagicCode 			 fileID    baseAddr             		fileLen 	CRC 	ptrOffset 	fileName
@@ -616,11 +618,22 @@ void LoadLunchFile()
     navInput.InitLat = luanchLat;
     navInput.InitHigh = luanchHeight;
     navInput.InitYaw = luanchDirc;
-/* *********************************************** MML 20260413*****************************************************
+/* *********************************************** CTRL 20260413*****************************************************
 
     pInput->initHigh = luanchHeight;
     pInput->initDir = luanchDirc;
     pInput->initLon = luanchLon;
     pInput->initLat = luanchLat;
 */
+	g_initial_data.missile_ID		= 0;
+	g_initial_data.longitude_launch = luanchLon;
+	g_initial_data.latitude_launch  = luanchLat;
+	g_initial_data.height_launch    = luanchHeight;
+	g_initial_data.initial_parameter1 = 20;
+	g_initial_data.initial_parameter2 = 0;
+	g_initial_data.launch_time		= 0;
+	g_initial_data.lauch_azimuth	= luanchDirc;
+	g_initial_data.lauch_pitch		= 12;
+	g_initial_data.lauch_booster_pitch = 20;
+
 }

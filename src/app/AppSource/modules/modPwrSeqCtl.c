@@ -332,7 +332,7 @@ void SavePwrSeq()
 
 OS_U8 CanRtPwrSeqHandler(OS_U32 id, OS_BOOL ext_id, const OS_U8* pdata, OS_U8 datalen)
 {
-    if(id == 0x183)//V	//MML 协议解析
+    if(id == 0x183)//V	// 协议解析
     {
 		//e.g. unsigned long long data = 0x0001D63AAF164000ULL;(实际CAN抓来的数据是小端序，这里存入内存，反了一下字节序)
 		//得到
@@ -349,7 +349,7 @@ OS_U8 CanRtPwrSeqHandler(OS_U32 id, OS_BOOL ext_id, const OS_U8* pdata, OS_U8 da
 		canRecvVa.engineV = (pdata[3] << 4) | (pdata[4] >> 4);    //0.01	// 在上面例子中，解析得到0xAF3
 		canRecvVa.mainV = ((pdata[4] & 0x0F) << 8) | pdata[5];    //0.01	// 在上面例子中，解析得到0xAD6
     }
-    else if(id == 0x184)//A	//MML 协议解析
+    else if(id == 0x184)//A	// 协议解析
     {
         canRecvVa.battA = pdata[0];  	//0.1
         canRecvVa.groundA = pdata[1];	//0.1
@@ -360,7 +360,7 @@ OS_U8 CanRtPwrSeqHandler(OS_U32 id, OS_BOOL ext_id, const OS_U8* pdata, OS_U8 da
 	else{
 		return -1;
 	}
-    g_DeviceState.powerCountDown = 200;	//MML 如果超过200*5ms还没有重置此值，说明CAN2，也就是配电板一直没有上报数据
+    g_DeviceState.powerCountDown = 200;	// 如果超过200*5ms还没有重置此值，说明CAN2，也就是配电板一直没有上报数据
     return 0;
 }
 

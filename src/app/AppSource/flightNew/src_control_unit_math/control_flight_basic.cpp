@@ -138,7 +138,7 @@ CMathControlFlightBasic::CMathControlFlightBasic()
 	count_away = 0;
 	count_sd_in = 0;
 	count_turn_out = 0;
-	//count_update = 0;
+	count_update = 0;
 	m_num_way_point = 0;
 	m_num_way_point_target = 0;
 	m_engine_start_result = 0xBB;
@@ -193,19 +193,79 @@ void CMathControlFlightBasic::Update_Task_Info()
 	m_num_way_point = p_st_route_data_preflight->num_rows;
 	for (int count_num=0; count_num<m_num_way_point; count_num++)
 	{
+		//原始数据
+		m_st_way_point[count_num].num	= count_num;
 		m_st_way_point[count_num].longitude		= p_st_route_data_preflight->p_route_data[count_num * num_column + 1];
 		m_st_way_point[count_num].latitude		= p_st_route_data_preflight->p_route_data[count_num * num_column + 2];
-		m_st_way_point[count_num].turn_radius	= p_st_route_data_preflight->p_route_data[count_num * num_column + 3];
-		m_st_way_point[count_num].turn_angle	= p_st_route_data_preflight->p_route_data[count_num * num_column + 4];
-		m_st_way_point[count_num].velocity		= p_st_route_data_preflight->p_route_data[count_num * num_column + 5];
-		m_st_way_point[count_num].route_mode	= (int)p_st_route_data_preflight->p_route_data[count_num * num_column + 6];
-		m_st_way_point[count_num].formation_mode= (int)p_st_route_data_preflight->p_route_data[count_num * num_column + 7];
-		m_st_way_point[count_num].height		= p_st_route_data_preflight->p_route_data[count_num * num_column + 8];
+		m_st_way_point[count_num].height		= p_st_route_data_preflight->p_route_data[count_num * num_column + 3];
+		m_st_way_point[count_num].route_mode	= (int)p_st_route_data_preflight->p_route_data[count_num * num_column + 4];
+		m_st_way_point[count_num].formation_mode= (int)p_st_route_data_preflight->p_route_data[count_num * num_column + 5];
+		m_st_way_point[count_num].dltTime		= p_st_route_data_preflight->p_route_data[count_num * num_column + 6];
+		m_st_way_point[count_num].turn_angle	= p_st_route_data_preflight->p_route_data[count_num * num_column + 7];
+		m_st_way_point[count_num].turn_radius	= p_st_route_data_preflight->p_route_data[count_num * num_column + 8];
+		m_st_way_point[count_num].velocity		= p_st_route_data_preflight->p_route_data[count_num * num_column + 9];
+		m_st_way_point[count_num].accept_radius	= p_st_route_data_preflight->p_route_data[count_num * num_column + 10];
+		//处理后数据:标识
+		/*[到达时间标识；1有效，0无效；]*/		
+		if(m_st_way_point[count_num].dltTime > 0)
+			m_st_way_point[count_num].if_flightime_ctrl = 1;
+		else
+			m_st_way_point[count_num].if_flightime_ctrl = 0;	
+		/*[相对高度（或真高度）控制标识：1有效，0无效]*/     		
+		if(m_st_way_point[count_num].height < 0)
+			m_st_way_point[count_num].if_relativehigh_ctrl = 1;
+		else
+			m_st_way_point[count_num].if_relativehigh_ctrl = 0;	
+		/*[指点飞行标识：1有效，0无效；]*/
+		if(m_st_way_point[count_num].route_mode == 2)
+		{
+			m_st_way_point[count_num].if_heading_hold = 1;
+			m_st_way_point[count_num].outtrack_angle = m_st_way_point[count_num].turn_angle;
+		}
+		else
+		{
+			m_st_way_point[count_num].if_heading_hold = 0;	
+			m_st_way_point[count_num].outtrack_angle = 0.0;
+		}
+		/*[地速控制标识：1地速，0空速；]*/
+		if(m_st_way_point[count_num].velocity < 0)
+			m_st_way_point[count_num].if_groundspeed_ctrl = 1;
+		else
+			m_st_way_point[count_num].if_groundspeed_ctrl = 0;	
+		/*[打击落角标识：1指定落角，0无约束；]*/	
+		if(((m_st_way_point[count_num].route_mode == 4) || (m_st_way_point[count_num].route_mode == 5))&&(m_st_way_point[count_num].turn_angle < 0.0))
+		{
+			m_st_way_point[count_num].if_attackangle_ctrl = 1;//复用为打击落角
+			m_st_way_point[count_num].attack_angle = - m_st_way_point[count_num].turn_angle;
+		}
+		else
+		{
+			m_st_way_point[count_num].if_attackangle_ctrl = 0;	
+			m_st_way_point[count_num].attack_angle = 0.0;
+		}
+		
+		if(m_st_way_point[count_num].route_mode == 3)
+		{	
+			/*[预盘旋标识：1有效，0无效；]*/
+			m_st_way_point[count_num].if_prepare_hover = 1;
+			m_st_way_point[count_num].hover_round = (int)m_st_way_point[count_num].turn_angle;
+			/*[盘旋转弯方向标识：左转1、右转0；]*/	
+			if(m_st_way_point[count_num].hover_round > 0)
+				m_st_way_point[count_num].if_turndir_set = 1;
+			else
+				m_st_way_point[count_num].if_turndir_set = 0;	
+		}
+		else
+		{
+			m_st_way_point[count_num].if_prepare_hover = 0;
+			m_st_way_point[count_num].hover_round = 0;
+		}
 	}
+	
 	//载入目标点数据
 	m_st_target.longitude	= p_st_route_data_preflight->p_route_data[(m_num_way_point - 1) * num_column + 1];
 	m_st_target.latitude	= p_st_route_data_preflight->p_route_data[(m_num_way_point - 1) * num_column + 2];
-	m_st_target.height		= p_st_route_data_preflight->p_route_data[(m_num_way_point - 1) * num_column + 8];
+	m_st_target.height		= p_st_route_data_preflight->p_route_data[(m_num_way_point - 1) * num_column + 3];
 
 	//计算转弯角及总航程
 	double distance_BC = 0.0;
@@ -233,25 +293,246 @@ void CMathControlFlightBasic::Update_Task_Info()
 /*
 void CMathControlFlightBasic::Change_Task_Info_Online()
 {
-	//在航迹点索引表后，加入数据链发动的航迹序列
+	//在航迹点索引表后，加入数据链发送的航迹序列，覆盖原航迹、总航点更新，计算总航程
 	m_num_way_point = m_num_way_point_target 
-		+ p_st_flight_basic_input->st_datalink_data.st_mission_update_data[m_missile_ID].num_waypoint_updated;
+		+ p_st_flight_basic_input->st_datalink_data.st_mission_update_data[m_missile_ID].num_waypoint_updated;//当前航点 加 新增航点数
 	for (int count_num=m_num_way_point_target; count_num<m_num_way_point; count_num++)
 	{
+		m_st_way_point[count_num].num = count_num;
 		m_st_way_point[count_num].longitude		= 
 			p_st_flight_basic_input->st_datalink_data.st_mission_update_data[m_missile_ID].longitude[count_num - m_num_way_point_target];
 		m_st_way_point[count_num].latitude		= 
 			p_st_flight_basic_input->st_datalink_data.st_mission_update_data[m_missile_ID].latitude[count_num - m_num_way_point_target];
+		m_st_way_point[count_num].height		= 
+			p_st_flight_basic_input->st_datalink_data.st_mission_update_data[m_missile_ID].height[count_num - m_num_way_point_target];
+		m_st_way_point[count_num].route_mode	= 
+			p_st_flight_basic_input->st_datalink_data.st_mission_update_data[m_missile_ID].route_mode[count_num - m_num_way_point_target];
+		m_st_way_point[count_num].formation_mode	= 
+			p_st_flight_basic_input->st_datalink_data.st_mission_update_data[m_missile_ID].formation_mode[count_num - m_num_way_point_target];
+		m_st_way_point[count_num].dltTime	= 
+			p_st_flight_basic_input->st_datalink_data.st_mission_update_data[m_missile_ID].dltTime[count_num - m_num_way_point_target];
+		m_st_way_point[count_num].turn_angle	= 
+			p_st_flight_basic_input->st_datalink_data.st_mission_update_data[m_missile_ID].turn_angle[count_num - m_num_way_point_target];
 		m_st_way_point[count_num].turn_radius	= 
 			p_st_flight_basic_input->st_datalink_data.st_mission_update_data[m_missile_ID].turn_radius[count_num - m_num_way_point_target];
-		m_st_way_point[count_num].turn_angle	= p_st_route_data_preflight->p_route_data[4];
-		m_st_way_point[count_num].velocity		= p_st_route_data_preflight->p_route_data[5];
-		m_st_way_point[count_num].route_mode	= (int)p_st_route_data_preflight->p_route_data[6];
-		m_st_way_point[count_num].formation_mode= (int)p_st_route_data_preflight->p_route_data[7];
-		m_st_way_point[count_num].height		= p_st_route_data_preflight->p_route_data[8];
+		m_st_way_point[count_num].velocity	= 
+			p_st_flight_basic_input->st_datalink_data.st_mission_update_data[m_missile_ID].velocity[count_num - m_num_way_point_target];
+		m_st_way_point[count_num].accept_radius	= 
+			p_st_flight_basic_input->st_datalink_data.st_mission_update_data[m_missile_ID].accept_radius[count_num - m_num_way_point_target];		
+		
+		//处理后数据:标识
+		//[到达时间标识；1有效，0无效；]
+		if(m_st_way_point[count_num].dltTime > 0)
+			m_st_way_point[count_num].if_flightime_ctrl = 1;
+		else
+			m_st_way_point[count_num].if_flightime_ctrl = 0;	
+		//[相对高度（或真高度）控制标识：1有效，0无效]
+		if(m_st_way_point[count_num].height < 0)
+			m_st_way_point[count_num].if_relativehigh_ctrl = 1;
+		else
+			m_st_way_point[count_num].if_relativehigh_ctrl = 0;	
+		//[指点飞行标识：1有效，0无效；]
+		if(m_st_way_point[count_num].route_mode == 2)
+			m_st_way_point[count_num].if_heading_hold = 1;
+		else
+			m_st_way_point[count_num].if_heading_hold = 0;	
+		//[地速控制标识：1地速，0空速；]
+		if(m_st_way_point[count_num].velocity < 0)
+			m_st_way_point[count_num].if_groundspeed_ctrl = 1;
+		else
+			m_st_way_point[count_num].if_groundspeed_ctrl = 0;	
+		//[打击落角标识：1指定落角，0无约束；]
+		if(((m_st_way_point[count_num].route_mode == 4) || (m_st_way_point[count_num].route_mode == 5))&&(m_st_way_point[count_num].turn_angle < 0.0))
+		{
+			m_st_way_point[count_num].if_attackangle_ctrl = 1;//复用为打击落角
+			m_st_way_point[count_num].attack_angle = -m_st_way_point[count_num].turn_angle;
+		}
+		else
+		{
+			m_st_way_point[count_num].if_attackangle_ctrl = 0;	
+			m_st_way_point[count_num].attack_angle = 0.0;
+		}
+		
+		if(m_st_way_point[count_num].route_mode == 3)
+		{	
+			//[预盘旋标识：1有效，0无效；]
+			m_st_way_point[count_num].if_prepare_hover = 1;
+			m_st_way_point[count_num].hover_round = (int)m_st_way_point[count_num].turn_angle;
+			//[盘旋转弯方向标识：左转1、右转0；]	
+			if(m_st_way_point[count_num].hover_round > 0)
+				m_st_way_point[count_num].if_turndir_set = 1;
+			else
+				m_st_way_point[count_num].if_turndir_set = 0;	
+		}
+		else
+		{
+			m_st_way_point[count_num].if_prepare_hover = 0;
+			m_st_way_point[count_num].hover_round = 0;
+		}
 	}
 	//最后航迹点高度，设置为目标点高度
-	m_st_way_point[m_num_way_point - 1].height = m_st_target.height;//???...更新为更新后高度
+	m_st_way_point[m_num_way_point - 1].height = m_st_target.height;
+	//更新目标点经度、维度
+	m_st_target.longitude	= m_st_way_point[m_num_way_point - 1].longitude;
+	m_st_target.latitude	= m_st_way_point[m_num_way_point - 1].latitude;
+
+	//初始航线: 发射点到第一个航迹点，距离、方位
+	CFlightGlobalFun::Tomas(p_st_initial_data->longitude_launch, p_st_initial_data->latitude_launch,
+		m_st_way_point[0].longitude, m_st_way_point[0].latitude,
+		&m_total_distance, &m_alpha_AB);
+	
+	//计算转弯角及总航程
+	double distance_BC = 0.0;
+	double distance_delta = 0.0;
+	double alpha_BC = 0.0;
+	for(int i=0; i<(m_num_way_point - 1); i++)
+	{
+		CFlightGlobalFun::Tomas(m_st_way_point[i].longitude, m_st_way_point[i].latitude,
+			m_st_way_point[i + 1].longitude, m_st_way_point[i + 1].latitude,
+			&distance_BC, &alpha_BC);		
+		m_st_way_point[i].turn_angle = alpha_BC - m_alpha_AB;
+		m_st_way_point[i].turn_angle = CFlightGlobalFun::Adjust(m_st_way_point[i].turn_angle, 180.0);
+		m_alpha_AB = alpha_BC;
+		m_total_distance += distance_BC;
+		distance_delta = 2 * m_st_way_point[i].turn_radius 
+			* (PI * fabs(m_st_way_point[i].turn_angle) / 360.0 
+			- tan((fabs(m_st_way_point[i].turn_angle) / 2.0) / RTOA));
+		m_total_distance += distance_delta;
+	}
+
+	//更新当前目标点转弯角度
+	////////目标点到下一点距离、方位
+	CFlightGlobalFun::Tomas(m_st_way_point[m_num_way_point_target].longitude, m_st_way_point[m_num_way_point_target].latitude,
+		m_st_way_point[m_num_way_point_target + 1].longitude, m_st_way_point[m_num_way_point_target + 1].latitude,
+		&distance_BC, &alpha_BC);
+	////////当前点到目标点距离、方位
+	CFlightGlobalFun::Tomas(m_longitude, m_latitude,
+		m_st_way_point[m_num_way_point_target].longitude, m_st_way_point[m_num_way_point_target].latitude,
+		&distance_BC, &m_alpha_AB);
+	////////两航线偏差，作为目标点转弯角
+	m_st_way_point[m_num_way_point_target].turn_angle = alpha_BC - m_alpha_AB;
+	m_st_way_point[m_num_way_point_target].turn_angle = CFlightGlobalFun::Adjust(m_st_way_point[m_num_way_point_target].turn_angle, 180.0);
+
+	//更新当前飞行状态
+	////////当前点、目标点及下一点，即数据链每次至少发送两个点
+	m_longitude_A = m_longitude;
+	m_latitude_A = m_latitude;
+	m_longitude_B = m_st_way_point[m_num_way_point_target].longitude;
+	m_latitude_B = m_st_way_point[m_num_way_point_target].latitude;
+	m_longitude_C = m_st_way_point[m_num_way_point_target + 1].longitude;
+	m_latitude_C = m_st_way_point[m_num_way_point_target + 1].latitude;
+	////////转弯信息更新
+	m_turn_angle = m_st_way_point[m_num_way_point_target].turn_angle;
+	m_turn_radius = m_st_way_point[m_num_way_point_target].turn_radius;
+	m_target_velocity = m_st_way_point[m_num_way_point_target].velocity;
+	////////重建航线，计算距离、方位角
+	double distance_AB = 0.0;
+	CFlightGlobalFun::Tomas(m_longitude_A, m_latitude_A, 
+		m_longitude_B, m_latitude_B, 
+		&distance_AB, &m_A);
+	m_A = - m_A;
+	m_A = CFlightGlobalFun::Adjust(m_A, 180.0);
+
+	////////计算最小可能到达时间，转弯标识设置为无效
+	double angle_PB = 0.0;
+	CFlightGlobalFun::Tomas(m_longitude, m_latitude,
+		m_longitude_B, m_latitude_B,
+		&m_distance_BP, &angle_PB);
+	double temp_v = m_v_average_10s + 20.0;
+	if(temp_v >=  VEL_COMMAND_MAX_LIMIT)
+	{
+		temp_v = VEL_COMMAND_MAX_LIMIT; 
+	}
+	else if(temp_v <= VEL_COMMAND_MIN_LIMIT)
+	{
+		temp_v = VEL_COMMAND_MIN_LIMIT;
+	}
+	double distance_to_go = fabs(m_distance_BP - m_turn_radius * tan(fabs(m_turn_angle / RTOA) / 2.0));
+	double min_time = distance_to_go / temp_v;
+	m_st_control_time.time_arrive_minimum = flight_time + min_time;
+	m_st_control_flag.flag_waypoint_turn = false;
+}*/
+void CMathControlFlightBasic::Change_Task_Info_Online()
+{
+	//在航迹点索引表后，加入数据链发送的航迹序列，覆盖原航迹、总航点更新，计算总航程
+	m_num_way_point = m_num_way_point_target 
+		+ p_st_flight_basic_input->st_datalink_datasig.num_waypoint_updated;//当前航点 加 新增航点数
+	for (int count_num=m_num_way_point_target; count_num<m_num_way_point; count_num++)
+	{
+		m_st_way_point[count_num].num = count_num;
+		m_st_way_point[count_num].longitude		= 
+			p_st_flight_basic_input->st_datalink_datasig.longitude[count_num - m_num_way_point_target];
+		m_st_way_point[count_num].latitude		= 
+			p_st_flight_basic_input->st_datalink_datasig.latitude[count_num - m_num_way_point_target];
+		m_st_way_point[count_num].height		= 
+			p_st_flight_basic_input->st_datalink_datasig.height[count_num - m_num_way_point_target];
+		m_st_way_point[count_num].route_mode	= 
+			p_st_flight_basic_input->st_datalink_datasig.route_mode[count_num - m_num_way_point_target];
+		m_st_way_point[count_num].formation_mode	= 
+			p_st_flight_basic_input->st_datalink_datasig.formation_mode[count_num - m_num_way_point_target];
+		m_st_way_point[count_num].dltTime	= 
+			p_st_flight_basic_input->st_datalink_datasig.dltTime[count_num - m_num_way_point_target];
+		m_st_way_point[count_num].turn_angle	= 
+			p_st_flight_basic_input->st_datalink_datasig.turn_angle[count_num - m_num_way_point_target];
+		m_st_way_point[count_num].turn_radius	= 
+			p_st_flight_basic_input->st_datalink_datasig.turn_radius[count_num - m_num_way_point_target];
+		m_st_way_point[count_num].velocity	= 
+			p_st_flight_basic_input->st_datalink_datasig.velocity[count_num - m_num_way_point_target];
+		m_st_way_point[count_num].accept_radius	= 
+			p_st_flight_basic_input->st_datalink_datasig.accept_radius[count_num - m_num_way_point_target];		
+		
+		//处理后数据:标识
+		//[到达时间标识；1有效，0无效；]
+		if(m_st_way_point[count_num].dltTime > 0)
+			m_st_way_point[count_num].if_flightime_ctrl = 1;
+		else
+			m_st_way_point[count_num].if_flightime_ctrl = 0;	
+		//[相对高度（或真高度）控制标识：1有效，0无效]
+		if(m_st_way_point[count_num].height < 0)
+			m_st_way_point[count_num].if_relativehigh_ctrl = 1;
+		else
+			m_st_way_point[count_num].if_relativehigh_ctrl = 0;	
+		//[指点飞行标识：1有效，0无效；]
+		if(m_st_way_point[count_num].route_mode == 2)
+			m_st_way_point[count_num].if_heading_hold = 1;
+		else
+			m_st_way_point[count_num].if_heading_hold = 0;	
+		//[地速控制标识：1地速，0空速；]
+		if(m_st_way_point[count_num].velocity < 0)
+			m_st_way_point[count_num].if_groundspeed_ctrl = 1;
+		else
+			m_st_way_point[count_num].if_groundspeed_ctrl = 0;	
+		//[打击落角标识：1指定落角，0无约束；]
+		if(((m_st_way_point[count_num].route_mode == 4) || (m_st_way_point[count_num].route_mode == 5))&&(m_st_way_point[count_num].turn_angle < 0.0))
+		{
+			m_st_way_point[count_num].if_attackangle_ctrl = 1;//复用为打击落角
+			m_st_way_point[count_num].attack_angle = -m_st_way_point[count_num].turn_angle;
+		}
+		else
+		{
+			m_st_way_point[count_num].if_attackangle_ctrl = 0;	
+			m_st_way_point[count_num].attack_angle = 0.0;
+		}
+		
+		if(m_st_way_point[count_num].route_mode == 3)
+		{	
+			//[预盘旋标识：1有效，0无效；]
+			m_st_way_point[count_num].if_prepare_hover = 1;
+			m_st_way_point[count_num].hover_round = (int)m_st_way_point[count_num].turn_angle;
+			//[盘旋转弯方向标识：左转1、右转0；]	
+			if(m_st_way_point[count_num].hover_round > 0)
+				m_st_way_point[count_num].if_turndir_set = 1;
+			else
+				m_st_way_point[count_num].if_turndir_set = 0;	
+		}
+		else
+		{
+			m_st_way_point[count_num].if_prepare_hover = 0;
+			m_st_way_point[count_num].hover_round = 0;
+		}
+	}
+	//最后航迹点高度，设置为目标点高度
+	m_st_way_point[m_num_way_point - 1].height = m_st_target.height;
 	//更新目标点经度、维度
 	m_st_target.longitude	= m_st_way_point[m_num_way_point - 1].longitude;
 	m_st_target.latitude	= m_st_way_point[m_num_way_point - 1].latitude;
@@ -332,7 +613,6 @@ void CMathControlFlightBasic::Change_Task_Info_Online()
 	m_st_control_time.time_arrive_minimum = flight_time + min_time;
 	m_st_control_flag.flag_waypoint_turn = false;
 }
-*/
 void CMathControlFlightBasic::Initial()
 {
 	//射前导弹任务参数装订
@@ -363,7 +643,7 @@ void CMathControlFlightBasic::Initial()
 	
 	m_missile_ID = p_st_flight_basic_input->missile_ID;
 	//count_update = p_st_flight_basic_input->st_datalink_data.st_mission_update_data[m_missile_ID].update_count;
-
+	count_update = p_st_flight_basic_input->st_datalink_datasig.update_count;
 }
 
 void CMathControlFlightBasic::Run()
@@ -416,11 +696,13 @@ void CMathControlFlightBasic::Calc_Data()
 {
 	//数据链在线更新航迹点、任务，有新航迹点，转弯过程中不更新
 	//if ((count_update != p_st_flight_basic_input->st_datalink_data.st_mission_update_data[m_missile_ID].update_count)
-	//	&&(!m_st_control_flag.flag_waypoint_turn))
-	//{
-	//	Change_Task_Info_Online();
-	//	count_update = p_st_flight_basic_input->st_datalink_data.st_mission_update_data[m_missile_ID].update_count;
-	//}
+	if ((count_update != p_st_flight_basic_input->st_datalink_datasig.update_count)
+		&&(!m_st_control_flag.flag_waypoint_turn))
+	{
+		Change_Task_Info_Online();
+		//count_update = p_st_flight_basic_input->st_datalink_data.st_mission_update_data[m_missile_ID].update_count;
+		count_update = p_st_flight_basic_input->st_datalink_datasig.update_count;
+	}
 		
 	//飞行计算
 	Calc_Flight_Data();
@@ -449,6 +731,7 @@ void CMathControlFlightBasic::Send_Data()
 	p_st_flight_basic_output->vnz = m_vnz;
 	p_st_flight_basic_output->mach = m_mach;
 	p_st_flight_basic_output->sz = m_sz;
+	p_st_flight_basic_output->dynamic_pressure = m_dynamic_pressure;//新增
 	p_st_flight_basic_output->zeta = m_zeta;
 	p_st_flight_basic_output->gama = m_gama;
 	p_st_flight_basic_output->wx = p_st_flight_basic_input->st_ins_data.wx;
@@ -466,6 +749,8 @@ void CMathControlFlightBasic::Send_Data()
 	p_st_flight_basic_output->radius_zw = m_turn_radius;
 	p_st_flight_basic_output->target_velocity = m_target_velocity;
 	p_st_flight_basic_output->target_height = m_target_height;	
+	p_st_flight_basic_output->target_long = m_longitude_B;//新增
+	p_st_flight_basic_output->target_lat = m_latitude_B;//新增
 	p_st_flight_basic_output->ground_temperature = m_ground_temperature;
 	p_st_flight_basic_output->count_altitude_change = count_altitude_change;//待计算	
 	p_st_flight_basic_output->num_way_point_target = m_num_way_point_target;
@@ -475,6 +760,14 @@ void CMathControlFlightBasic::Send_Data()
 	p_st_flight_basic_output->distance_target_t_combat = m_distance_target_t_combat;
 	p_st_flight_basic_output->velocity_average_10s = m_v_average_10s;
 	p_st_flight_basic_output->ECU_work_cmd = m_ECU_work_cmd;
+
+	p_st_flight_basic_output->token_long = 0x00;//纵向，未使用
+	p_st_flight_basic_output->token_lat = 0x00;;//侧向，未使用
+	p_st_flight_basic_output->dlt_psic = 0.0;;//航迹角偏差，未使用
+	p_st_flight_basic_output->sz_circle = 0.0;//圆轨迹侧偏距，未使用
+	p_st_flight_basic_output->theta = 0.0;//弹道倾角，未使用
+	p_st_flight_basic_output->alpha_vg = 0.0;//地速攻角，未使用
+	p_st_flight_basic_output->beita_vg = 0.0;//地速侧滑角，未使用
 	
 	p_st_flight_basic_output->flag_launch_turn = m_st_control_flag.flag_launch_turn;
 	p_st_flight_basic_output->flag_altitude_change = m_st_control_flag.flag_alltitude_change;
@@ -488,6 +781,12 @@ void CMathControlFlightBasic::Send_Data()
 	p_st_flight_basic_output->st_command.flag_seeker_on = m_st_control_flag.flag_seeker_on;
 	p_st_flight_basic_output->st_command.flag_lock_on_permit = m_st_control_flag.flag_lock_on_permit;
 	p_st_flight_basic_output->st_command.flag_combat_status = m_st_control_flag.flag_combat_status;
+
+	//框架用
+	p_st_flight_basic_output->st_command.flag_missile_takeoff = m_st_control_flag.flag_missile_takeoff;
+	p_st_flight_basic_output->st_command.flag_engine_shutdown = m_st_control_flag.flag_engine_shutdown;
+	p_st_flight_basic_output->st_command.flag_open_umbrella = m_st_control_flag.flag_open_umbrella;
+		
 	memcpy(&p_st_flight_basic_output->st_control_time,&m_st_control_time,sizeof(Stru_Control_Time));
 	if (0x11 == m_st_way_point[m_num_way_point_target].route_mode)
 	{
@@ -614,6 +913,11 @@ void CMathControlFlightBasic::Calc_Command()
 	{
 		m_st_control_flag.flag_altitude_control_set = true;
 		m_st_control_time.time_altitude_control = flight_time + 1.0;
+
+		//认为起飞完成
+		m_st_control_flag.flag_missile_takeoff = true;
+		m_st_control_time.time_missile_takeoff = flight_time;
+
 	}
 	//保护条件
 	if((flight_time >= 30.0)
@@ -621,6 +925,10 @@ void CMathControlFlightBasic::Calc_Command()
 	{
 		m_st_control_flag.flag_altitude_control_set = true;
 		m_st_control_time.time_altitude_control = flight_time;
+
+		//认为起飞完成
+		m_st_control_flag.flag_missile_takeoff = true;
+		m_st_control_time.time_missile_takeoff = flight_time;
 	}
 
 	//计算协同攻击编队调整时刻,弹目距离小于10km
@@ -750,6 +1058,7 @@ void CMathControlFlightBasic::Calc_Command()
 		   &&(!m_st_control_flag.flag_combat_status))
 		{
 			m_st_control_flag.flag_combat_status = true;
+			m_st_control_flag.flag_engine_shutdown = true;//发动机关机
 			m_ECU_work_cmd = 0x44;				//发动机关机
 		}
 	}
@@ -765,8 +1074,14 @@ void CMathControlFlightBasic::Calc_Command()
 		//开伞及开始回收: 已经失速速度，发出开伞指令DO
 
 		//切割伞：落地冲击、速度小于某阈值，发出切割伞指令DO
+
+
+		//如果目标开伞点距离小于300m，待补充强哥新判据???...
 		
-		//
+		m_st_control_flag.flag_engine_shutdown = true;//发动机关机
+		m_st_control_time.time_engine_shutdown = flight_time;
+		m_st_control_flag.flag_open_umbrella = true;//开伞回收
+		m_st_control_time.time_open_umbrella = flight_time;
 	}
 }
 void CMathControlFlightBasic::Calc_Flight_Data()
@@ -1142,6 +1457,8 @@ void CMathControlFlightBasic::Calc_BaroSpd()
 		//起飞前，使用实际测量值
 		m_v_air = m_Vbaro;
 	}
+
+	m_dynamic_pressure = 0.5 * temp_rho_ratio * 1.225 * m_v_air * m_v_air;
 }
 
 

@@ -6,8 +6,9 @@
 #include <string.h>
 #include "tx_api.h"
 #include "stm32h7xx_hal.h"
+#include "AppSource/support/os_types.h"
 
-#include "AppSource/flight/Ctrl_Law_Typedef.h"
+// #include "AppSource/flight/Ctrl_Law_Typedef.h"
 
 extern int fdCan[2];
 

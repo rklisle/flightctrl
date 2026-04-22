@@ -30,8 +30,8 @@ typedef struct
 	double vn;
 	double vs;
 	double ve;
-	double DD1;
-	double DD2;
+	double DD1;	// 014 空速管 静压
+	double DD2;	// 014 空速管 总压
 } STRU_HIL_INPUT;
 typedef struct NAV_INPUT_SIMU
 {

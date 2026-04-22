@@ -39,6 +39,7 @@ OS_U8 EngineStartCmd = 0;    //来自地面的控制参数， 1：启动发动机；0：停止发动机
 float System_GetCoreTemperature();
 extern void ReConnectUart();
 OS_DOUBLE AirSpdHistory[150];
+extern void *g_pControl;
 
 OS_DOUBLE Average(OS_DOUBLE array[], int len)
 {
@@ -55,6 +56,9 @@ OS_U8 CalcAirSpd()
 {
     pressure_status_t pressData;
     pressure_get_status(&pressData);
+	g_baro_data.static_pressure = pressData.abs_pressure;
+	g_baro_data.total_pressure = pressData.abs_pressure + pressData.diff_pressure;
+
     float curAirSpdPa = fabs(fabs(pressData.diff_pressure));// - calibrationValue);
     float curPress = pressData.abs_pressure;
     float ru;
@@ -148,13 +152,13 @@ OS_U8 AutoLuanchProcess()  // 5ms运行一次
 					PowerOn(DEVICE_SRV_PWR28V);
 
 // /******************** Test Servo (CAN & PWM)***************************/
-// double step = 10.0;
+// double angleStep = 10.0;
 
-// for(double angle = -30.0; angle <= 30.0; angle += step) {
+// for(double angle = -30.0; angle <= 30.0; angle += angleStep) {
 // 	ServoCtlOnce_6Rudder(angle, angle, angle, angle, angle, angle);
 // 	tx_thread_sleep(1000);
 // }
-// for(double angle = 30.0; angle >= -30.0; angle -= step) {
+// for(double angle = 30.0; angle >= -30.0; angle -= angleStep) {
 // 	ServoCtlOnce_6Rudder(angle, angle, angle, angle, angle, angle);
 // 	tx_thread_sleep(1000);
 // }
@@ -186,7 +190,7 @@ OS_U8 AutoLuanchProcess()  // 5ms运行一次
 			static int powerSend2 = 0;
 			if(powerSend2 == 0)
 			{
-					// PowerOn(DEVICE_BATT_ENGINE);	//MML 发动机
+					// PowerOn(DEVICE_BATT_ENGINE);	// 发动机
 					// PowerOn(DEVICE_BATT_BATT2);
 					powerSend2 = 1;
 			}
@@ -213,6 +217,9 @@ OS_U8 AutoLuanchProcess()  // 5ms运行一次
 
 		if(msnID != 0xFF)
 		{
+			// 任务加载后，初始化控制代码
+			g_pControl = ControlInitial();
+
 			// InitPwrSeq();	//MML 开火工品4
 			// InitSD();
 			AutoStep = 5;
@@ -297,9 +304,12 @@ OS_U8 AutoLuanchProcess()  // 5ms运行一次
 			if(g_DeviceState.CurrTick % 4 == 0)// 每20ms，进if
 			{
 				//先判断发动机是否已进入运行状态
-				struct EngineStatus engineStatus = {0};
-				modECU_GetEngineStatus(&engineStatus);
-				switch(engineStatus.CntState)//0停机，1启动中，2散热 3故障 4脱机 5运行（这肯定是协议里的）
+				// struct EngineStatus engineStatus = {0};
+				// modECU_GetEngineStatus(&engineStatus);
+				// switch(engineStatus.CntState)//0停机，1启动中，2散热 3故障 4脱机 5运行（这肯定是协议里的）
+				OS_U8 cntState;
+				GetDataFast(pDataPoolSelf, "ecuState", &cntState);
+				switch(cntState)//0停机，1启动中，2散热 3故障 4脱机 5运行（这肯定是协议里的）
 				{
 					case ENGINE_STOPED://发送启动指令
 							StartEngine();//应该是启动流程
@@ -395,7 +405,7 @@ double dist = sqrt(lat_m*lat_m + lon_m*lon_m + h_m*h_m);
 			if(dist > 2000)
 			{
 				PowerOn(DEVICE_FUSE28V);
-				g_DeviceStatus.FzOnTime = GetCurTime();	// tx_time_get();
+				g_DeviceStatus.FzOnStamp_s = GetCurTime();	// tx_time_get();
 				FzOnFlag = 1;
 			}
 		}
@@ -403,8 +413,7 @@ double dist = sqrt(lat_m*lat_m + lon_m*lon_m + h_m*h_m);
 		{
 			// 引信-引爆电源已经上电
 			// 延时10s
-			g_DeviceStatus.curTime = GetCurTime() - g_DeviceStatus.FzOnTime;
-			if(g_DeviceStatus.curTime > 10)	// 10*1000
+			if((GetCurTime() - g_DeviceStatus.FzOnStamp_s) > 10)	// 10*1000
 			{
 				// 进行二次激活， 发10次指令
 				FuseSend(0x6B);	// 执行电激活
@@ -548,7 +557,7 @@ OS_U32 ControllerCmdHandler(STRU_422_MSG_INFO * frame)	// 数据链或仿真过来的指令
 	{
 		SETDATA(pDataPoolSelf,  "flyError", 1,	OS_U8);
 		SETDATA(pDataPoolSelf, "tcCmd", 0xC0,	OS_U8);
-		DoOpenUm();
+		DoOpenUm();	//紧急伞降开伞
 		break;
 	}
 	case CMD_URGENT_RETURN:	// 0x23 摄像头视频 - 紧急返航
@@ -625,7 +634,7 @@ OS_U8 SeqCalc()
 	{
 		return -1;
 	}
-	if(flightTime >= 0.5)// MML： 时间 > 500ms
+	if(flightTime >= 0.5)// ****************MML： 时间 > 500ms ****************
 	{
 		flightSeq.luanched = 1;
 	}
@@ -637,7 +646,7 @@ OS_U8 SeqCalc()
 }
 
 
-OS_U8 DoIgnition()// 地面软件点击“起飞”
+OS_U8 DoIgnition()// 1、地面软件点击“起飞”（测试用）/ 2、过载（主条件）起飞/ 3、速度起飞（副条件）/ 4、仿真起飞（测试用）
 {
 	MsgToNAV(BUS_NAV_IGNATION,PTR_NULL,0);
 

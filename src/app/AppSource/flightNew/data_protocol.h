@@ -44,17 +44,55 @@ typedef struct _Stru_Initial_Data
 	double longitude_launch;	//发射点
 	double latitude_launch;	
 	double height_launch;
-	double launch_time;		//发射时间
 	double initial_parameter1;//预留初始参数1，例如发射点温度等，可估算 声速、大气等模型
-	double initial_parameter2;//预留初始参数2
+	double initial_parameter2;//预留初始参数2，飞行仿真模式
+	double launch_time;		//发射时间	
+	double lauch_azimuth;		//发射方位角
+	double lauch_pitch;		//发射俯仰角
+	double lauch_booster_pitch;//助推器俯仰角
+	//double type_target;		//目标点类型
+	//double longitude_target;	//目标点 经、纬及高度
+	//double latitude_target;	
+	//double height_target;	
 }Stru_Initial_Data;	//导弹初始状态装订数据
+
+typedef struct  _Stru_Way_Point
+{
+	int num;//航点编号
+	
+	double longitude;	//航点经度
+	double latitude;	//航点纬度
+	double height;		//航点高度
+	int    route_mode; //航点类型
+	int    formation_mode;	//航点信息，未使用
+	double dltTime;//航段时间
+	double turn_angle;//切出航迹角 或 转弯角度（复用） 或 打击落角
+	double turn_radius;//转弯半径或盘旋半径，未使用
+	double velocity;	//速度指令
+	double accept_radius;//接受半径，未使用
+	
+	//处理后数据，标识
+	bool if_flightime_ctrl;/*[到达时间标识；1有效，0无效；]*/		
+	bool if_relativehigh_ctrl;  /*[相对高度（或真高度）控制标识：1有效，0无效]*/     		
+	bool if_heading_hold;  /*[指点飞行标识：1有效，0无效；]*/
+	bool if_groundspeed_ctrl;  /*[地速控制标识：1地速，0空速；]*/     		
+	bool if_attackangle_ctrl;/*[打击落角标识：1指定落角，0无约束；]*/				
+	bool if_turndir_set;/*[盘旋转弯：左转、右转标识；]*/		
+	bool if_prepare_hover;/*[预盘旋标识：1有效，0无效；]*/		
+	//处理后数据
+	double outtrack_angle;/*[指点飞行切出角度，北偏西为正绝对，切出角度deg]*/
+	int hover_round; /*[盘旋圈数]*/
+	double attack_angle;/*[打击落角]*/
+}Stru_Way_Point;
 
 typedef struct _Stru_Route_Data
 {
-	int num_rows;
-	int num_columns;
-	char ** p_str_title; 
+	int num_rows;	// 航点数
+	int num_columns;	// 常量	11
+	char ** p_str_title; 	// 忽略
+	// 指向Stru_Way_Point[num_rows动态生成]
 	double * p_route_data;		//行为不同航点编号，列为航点特征: 编号、经度、纬度、转弯半径、角度、速度、航点类型、信息、高度
+	// 下列：控制内部处理
 	double longitude_target;
 	double latitude_target;
 	double height_target;
@@ -112,7 +150,6 @@ typedef struct _Stru_Target_State_Data
 	double latitude_target;
 	double rcs_target;
 }Stru_Target_State_Data;		//导弹向外部发送的飞行状态信息
-
 /*
 typedef struct _Stru_Data_Send_To_Missile
 {
@@ -159,12 +196,13 @@ typedef enum _TARGET_TYPE
 //***************** 外部仿真控制给导弹输入数据 ********************//
 typedef struct _Stru_Jamming_Data_In
 {
+	//干扰条件编号 0
 	double temperature_environment;
-	int    flag_wind;
+	int    flag_wind;//风拉偏
 	double velocity_wind;
 	double psi_wind;
 	double theta_wind;
-	double lp_pitch;
+	double lp_pitch;//气动拉偏 ok
 	double lp_yaw;
 	double lp_roll;
 	double lp_lift;
@@ -172,11 +210,12 @@ typedef struct _Stru_Jamming_Data_In
 	double lp_side;
 	double lp_wx;
 	double lp_wy;
-	double lp_wz;
-	double lp_rotary_inertia;
-	int    flag_jggr;
-	double det_mass;
-	double det_x_centroid;
+	double lp_wz;///14
+	
+	double lp_rotary_inertia;//惯量拉偏 ok
+	int    flag_jggr;//结构干扰 ok
+	double det_mass;//质量拉偏 ok
+	double det_x_centroid;//质心拉偏
 	double det_y_centroid;
 	double det_z_centroid;
 	double gama0;	//初始姿态偏差
@@ -185,18 +224,18 @@ typedef struct _Stru_Jamming_Data_In
 	double wxerr;	//角速度偏差
 	double wyerr;
 	double wzerr;
-	double lp_dx;//舵效拉偏
+	double lp_dx;//舵效拉偏 ok
 	double lp_dy;
-	double lp_dz;
+	double lp_dz;///29
 
 	double Lp_trust_det;//推力拉偏
 	double Lp_eng_flowvol;//耗油率或流量拉偏
 	double trust_det_pos;
 	double trust_det_angle;
 	double trust_det_alpha;
-	double trust_det_gama;
+	double trust_det_gama;//35
 		
-}Stru_Jamming_Data_In;	//导弹飞行干扰条件数据
+}Stru_Jamming_Data_In;	//导弹飞行干扰条件数据???...
 
 typedef struct _Stru_Mission_Data_In
 {
@@ -244,7 +283,7 @@ typedef struct _Stru_Data_INS_To_Controller
 	double gamas;//反欧拉角：321转序
 	double psis;
 	double zetas;
-	double wx;
+	double wx;	//deg
 	double wy;
 	double wz;
 	double ax;
@@ -263,14 +302,32 @@ typedef struct _Stru_Data_INS_To_Controller
 typedef struct _Stru_Data_Datalink_To_Controller  
 {
 	//在线航迹装订参数
-	Stru_Mission_Update_Data	st_mission_update_data[MAX_CONNECT_NUMBER];
+	Stru_Mission_Update_Data	st_mission_update_data[MAX_CONNECT_NUMBER];//所有网络内链接，弹节点
 	//编队控制临弹状态参数
 	Stru_Missile_State_Data		st_missile_state_data[MAX_CONNECT_NUMBER];
 	//态势构建目标参数
 	Stru_Target_State_Data		st_target_state_data[MAX_TARGET_NUMBER];
 }Stru_Data_Datalink_To_Controller;	//数据链给综控机数据包 内容应与Stru_Data_Send_To_Missile保持一致，同步更新
 
-typedef struct _Stru_Data_Engine_To_Controller  
+typedef struct _Stru_Data_Datalink_To_ControllerSig  
+{
+	//int missile_ID;//未使用
+	//int	target_ID;	//未使用
+	int	update_count;//更新次数
+	int	num_waypoint_updated;	//当前跟新，有效的航迹点数目
+	double longitude  [MAX_ROUTE_NUMBER];
+	double latitude   [MAX_ROUTE_NUMBER];
+	double height     [MAX_ROUTE_NUMBER];
+	int    route_mode [MAX_ROUTE_NUMBER];//航点类型
+	int    formation_mode[MAX_ROUTE_NUMBER];		//航点信息，未使用
+	double dltTime[MAX_ROUTE_NUMBER];//航段时间
+	double turn_angle [MAX_ROUTE_NUMBER];//切出航迹角 或 转弯角度（复用） 或 打击落角
+	double turn_radius[MAX_ROUTE_NUMBER];//转弯半径或盘旋半径，未使用
+	double velocity   [MAX_ROUTE_NUMBER];//速度指令
+	double accept_radius[MAX_ROUTE_NUMBER];//接受半径，未使用
+}Stru_Data_Datalink_To_ControllerSig;	//数据链给综控机数据包，无集群
+
+typedef struct _Stru_Data_Engine_To_Controller
 {
 	double rpm_engine;
 	int ECU_work_status;	//工作状态
@@ -287,10 +344,65 @@ typedef struct _Stru_Data_Controller_To_Seeker
 
 typedef struct _Stru_Data_Controller_To_Datalink  
 {
-	Stru_Mission_Update_Data	st_mission_update_data[MAX_CONNECT_NUMBER];//集群状态，数据链
+	Stru_Mission_Update_Data	st_mission_update_data[MAX_CONNECT_NUMBER];//集群状态，飞控给数据链，优化减小
 	Stru_Missile_State_Data		st_missile_state_data;//导弹状态
 	Stru_Target_State_Data		st_target_state_data[MAX_TARGET_NUMBER];//目标状态
 }Stru_Data_Controller_To_Datalink;	//综控机给数据链数据包
+
+typedef struct Stru_Data_Controller_To_DatalinkTel  
+{
+	//航点信息
+	int curPtNo;			//当前航点号
+	double curTargetLon;	//当前目标航点经度
+	double curTargetLat;	//当前目标航点纬度
+	double curTargetAlt;	//当前目标航点高度
+	//bool on_takeoff;	//起飞完成标志	在电气控制输出结构体
+	//bool open_umbrella;//开伞标志   
+	//bool enginge_off;	//动力停车标志
+
+	//通道舵
+	double rudderRollCmd;	//通道舵副翼
+	double rudderPitchCmd;	//通道舵升降
+	double rudderYawCmd;	//通道舵航向
+	//遥测信息
+	double gamaCmd;	//滚转角指令
+	double nycCmd;	//过载指令
+	double varthetaCmd;//俯仰角指令
+	double heightCmd;//高度指令
+	double ac_dL;//待飞距
+	double ac_dZ;// 侧边距
+	int token_long;// 纵向令牌
+	int token_late;// 侧向令牌
+	double thrustCmd;// 推力指令
+	double  ac_dPsi;//航向角偏差
+	double ac_dR;// 圆轨迹侧边距
+	double cur_thetav;//轨迹倾角
+	double Vcmd;//速度指令 
+	double nyCmd_Guidance;//末制导纵向过载指令
+	double nzCmd_Guidance;//末制导侧向过载指令
+	double pitch_rate_nT_filterOut;//俯仰视线角速度滤波
+	double yaw_rate_nT_filterOut;//偏航视线角速度滤波
+	double deltaR;//弹目距离
+	double dRn; //弹目北向距离  未用到，预留
+	double dRu; //弹目天向距离  未用到，预留
+	double dRe; //弹目东向距离  未用到，预留
+	double Pitch_Preset_Angle;//理论俯仰框架角
+	double Yaw_Preset_Angle;//理论偏航框架角
+	int Dubins_stage;//杜宾斯段
+	int dubins_type1;//杜宾斯类型
+	int dubins_type2;//杜宾斯类型
+	int dubins_type3;//杜宾斯类型
+	double Dubins_length;//杜宾斯段航程
+	double test1;//测试
+	double Min_IAS2Vel;//最低折算速度
+	double mx_ESO;
+	double fduox_ADRC;//ADRC舵偏
+	double Qv;//动压
+	double alpha_ins;	//地速攻角
+	double beta_ins;	//地速侧滑角
+	double MaxRpm; 		//最大转速
+	double DFT_freq_max;//辨识运动频率
+}Stru_Data_Controller_To_DatalinkTel;	//综控机给数据链数据包
 
 typedef struct _Stru_Data_Controller_To_Actuator  
 {
@@ -314,6 +426,10 @@ typedef struct _Stru_Data_Controller_To_Switch_Output
 	bool flag_separate_booster;		//助推器分离(爆炸螺栓或切割锁点火)
 	bool flag_launch_missile_wing;	//弹翼展开(爆炸螺栓点火)
 	bool flag_engine_start;			//主发动机点火(空中炮起点火)
+	
+	bool flag_missle_takeoff;			//起飞 20260415
+	bool flag_engine_shutdown;		//发动机关机 20260415
+	bool flag_open_umbrella;			//开伞	20260415
 }Stru_Data_Controller_To_Switch_Output;	//综控机开关量指令，未用到
 
 
@@ -330,7 +446,7 @@ typedef struct _Stru_Rudder_Reflection
 
 typedef struct _Stru_Data_Missile_To_Environment 
 {
-	double rpm_engine;//发动机转速
+	double rpm_engine;//发动机转速，飞控给发动机油门，发动机与螺旋桨模型，输出螺旋桨转速
 	Stru_Rudder_Reflection st_missile_rudder_reflection;//舵偏输出
 	Stru_Data_Controller_To_Switch_Output st_missile_status_switch;//开关量输出
 }Stru_Data_Missile_To_Environment;	//导弹给环境输出数据
@@ -451,7 +567,9 @@ typedef struct _Stru_Data_Missile_Force
 {
 	double gravity;
 	double thrust;
-	Stru_Data_Aerodynamic_Force st_aerodynamic_force;
+	double thrust_force[3];//助推器及发动机推力
+	double thrust_moment[3];
+	Stru_Data_Aerodynamic_Force st_aerodynamic_force;//气动力及力矩
 }Stru_Data_Missile_Force;	//导弹受力数据
 
 typedef struct _Stru_Data_Function_To_Force_Calc
@@ -460,7 +578,7 @@ typedef struct _Stru_Data_Function_To_Force_Calc
 	double air_speed;
 	double sonic_speed;
 	double air_density;
-	double air_temperature;
+	double air_temperature;//空气温度
 	double height;
 	double wx;
 	double wy;
@@ -468,7 +586,7 @@ typedef struct _Stru_Data_Function_To_Force_Calc
 	double angle_of_attack;
 	double angle_of_side_slip;
 	double gravitational_acceleration;
-	double aby;
+	double aby;	//体轴系，法向过载，可用于静气弹变形，气动力计算
 }Stru_Data_Function_To_Force_Calc;	//导弹受力模型输入
 
 typedef struct _Stru_Data_Function_Solved_Out
@@ -477,7 +595,7 @@ typedef struct _Stru_Data_Function_Solved_Out
 	double air_speed;
 	double angle_of_attack;
 	double angle_of_side_slip;
-	bool flag_leaving_launcher;
+	bool flag_leaving_launcher;	//离架
 	Stru_INS_Data_In * p_st_data_ins_related;
 	Stru_Baro_Data_In * p_st_data_baro_related;
 	Stru_RadioAlt_Data_In * p_st_data_radioalt_related;

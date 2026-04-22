@@ -9,7 +9,7 @@
 #include "../interface/interface_uart.h"
 #include "MsnTime.h"
 #include "../FlightSupport.h"
-#include "../flight/os_flight_io.h"
+// #include "../flight/os_flight_io.h"
 #include <math.h>
 #include "../core/BusInteract.h"
 #include "../support/common.h"

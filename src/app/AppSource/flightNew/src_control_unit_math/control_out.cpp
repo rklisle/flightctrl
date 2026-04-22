@@ -67,6 +67,12 @@ void CMathControlOut::Send_Data()
 	p_st_control_out_output->u2 = m_u_control[1];
 	p_st_control_out_output->u3 = m_u_control[2];
 	p_st_control_out_output->u4 = m_u_control[3];
+	p_st_control_out_output->u5 = m_u_control[4];
+	p_st_control_out_output->u6 = m_u_control[5];
+
+	p_st_control_out_output->uf = m_urf;
+	p_st_control_out_output->uh = m_urh;
+	p_st_control_out_output->ug = m_urg;
 }
 void CMathControlOut::Calc_Data()
 {
@@ -87,18 +93,20 @@ void CMathControlOut::Calc_Data()
 	{
 		//滚转姿态增稳，内环PD，无外环
 		m_urg = m_u25g;
-		m_urg = CFlightGlobalFun::Range(m_urg, 5.0);
+		m_urg = CFlightGlobalFun::Range(m_urg, 10.0);
 		//航向姿态增稳，内环D阻尼，无外环
 		m_urh = m_u5h;
 		//俯仰姿态增稳，内环PD，无外环
 		m_urf = m_u2f * cos(m_gama / RTOA) + m_u5f;
-		m_urf = CFlightGlobalFun::Range(m_urf,(6.0 - fabs(m_urg)));
-		m_urg = CFlightGlobalFun::Range(m_urg, (6.0 - fabs(m_urf)));//无效
+		m_urf = CFlightGlobalFun::Range(m_urf,(15.0 - fabs(m_urg)));
+		m_urg = CFlightGlobalFun::Range(m_urg, (15.0 - fabs(m_urf)));//无效
 
-		m_u_control[0] = CFlightGlobalFun::Range((m_urg - m_urf), 7.5);
-		m_u_control[1] = CFlightGlobalFun::Range((m_urg + m_urh + m_urf), 7.5);
-		m_u_control[2] = CFlightGlobalFun::Range((m_urg - m_urh + m_urf), 7.5);
-		m_u_control[3] = CFlightGlobalFun::Range((m_urg - m_urf), 7.5);
+		m_u_control[0] = CFlightGlobalFun::Range((m_urg - m_urf), 15.0);
+		m_u_control[1] = CFlightGlobalFun::Range((m_urg - m_urf), 15.0);
+		m_u_control[2] = CFlightGlobalFun::Range((m_urg + m_urf), 15.0);
+		m_u_control[3] = CFlightGlobalFun::Range((m_urg + m_urf), 15.0);
+		m_u_control[4] = CFlightGlobalFun::Range(m_urh, 15.0);
+		m_u_control[5] = CFlightGlobalFun::Range(m_urh, 15.0);
 
 //		sim_monitor.flag_stage1 = true;
 //		sim_monitor.flag_stage2 = false;
@@ -109,7 +117,7 @@ void CMathControlOut::Calc_Data()
 	{
 		//滚转姿态PD + 姿态I
 		m_urg = m_u25g + m_u4g;
-		m_urg = CFlightGlobalFun::Range(m_urg, 5.0);
+		m_urg = CFlightGlobalFun::Range(m_urg, 10.0);
 		m_urg_record = m_urg;//更新进入制导前扰动，认为进入制导前为稳态
 
 		//航向: 伪侧滑角三通道过载控制
@@ -141,18 +149,20 @@ void CMathControlOut::Calc_Data()
 			m_urg = (1.0 - (flight_time - m_time_combat_status)) * m_urg_record 
 				+ (flight_time - m_time_combat_status) * m_urg;
 		}
-		m_urg = CFlightGlobalFun::Range(m_urg, 5.0);
+		m_urg = CFlightGlobalFun::Range(m_urg, 10.0);
 		//航向: 伪侧滑角三通道过载控制
 		m_urh = m_urh_zd;
 		
 		//俯仰姿态PD + 外回路高度控制
 		m_urf = m_u2f + m_u5f + m_ugf;
-		m_urf = CFlightGlobalFun::Range(m_urf, (7.5 - fabs(m_urg)));
+		m_urf = CFlightGlobalFun::Range(m_urf, (15.0 - fabs(m_urg)));
 
-		m_u_control[0] = CFlightGlobalFun::Range((m_urg - m_urf), 7.5);
-		m_u_control[1] = CFlightGlobalFun::Range((m_urg + m_urh + m_urf), 7.5);
-		m_u_control[2] = CFlightGlobalFun::Range((m_urg - m_urh + m_urf), 7.5);
-		m_u_control[3] = CFlightGlobalFun::Range((m_urg - m_urf), 7.5);
+		m_u_control[0] = CFlightGlobalFun::Range((m_urg - m_urf), 15.0);	//俯仰、滚转
+		m_u_control[1] = CFlightGlobalFun::Range((m_urg - m_urf), 15.0);
+		m_u_control[2] = CFlightGlobalFun::Range((m_urg + m_urf), 15.0);
+		m_u_control[3] = CFlightGlobalFun::Range((m_urg + m_urf), 15.0);
+		m_u_control[4] = CFlightGlobalFun::Range(m_urh, 15.0);				//航向控制
+		m_u_control[5] = CFlightGlobalFun::Range(m_urh, 15.0);	
 	} 
 	//导引段，正式
 	else
@@ -167,19 +177,20 @@ void CMathControlOut::Calc_Data()
 		//俯仰，伪攻角三通道过载控制
 		m_urf = m_urf_zd;
 		//限幅，保滚转
-		m_urf = CFlightGlobalFun::Range(m_urf, (7.5 - fabs(m_urg)));
+		m_urf = CFlightGlobalFun::Range(m_urf, (15.0 - fabs(m_urg)));
 		
 		//航向
 		m_urh = m_urh_zd;
 		//限幅
-		m_urg = CFlightGlobalFun::Range(m_urg, 6.0);
+		m_urg = CFlightGlobalFun::Range(m_urg, 10.0);
 		
 		//舵控分配
-		m_u_control[0] = CFlightGlobalFun::Range((m_urg - m_urf), 7.5);
-		m_u_control[1] = CFlightGlobalFun::Range((m_urg + m_urh + m_urf), 7.5);
-		m_u_control[2] = CFlightGlobalFun::Range((m_urg - m_urh + m_urf), 7.5);
-		m_u_control[3] = CFlightGlobalFun::Range((m_urg - m_urf), 7.5);
-
+		m_u_control[0] = CFlightGlobalFun::Range((m_urg - m_urf), 15.0);	//俯仰、滚转
+		m_u_control[1] = CFlightGlobalFun::Range((m_urg - m_urf), 15.0);
+		m_u_control[2] = CFlightGlobalFun::Range((m_urg + m_urf), 15.0);
+		m_u_control[3] = CFlightGlobalFun::Range((m_urg + m_urf), 15.0);
+		m_u_control[4] = CFlightGlobalFun::Range(m_urh, 15.0);				//航向控制
+		m_u_control[5] = CFlightGlobalFun::Range(m_urh, 15.0);	
 		// sim_monitor.flag_stage1 = false;
 		// sim_monitor.flag_stage2 = false;
 		// sim_monitor.flag_stage3 = true;

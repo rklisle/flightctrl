@@ -16,7 +16,7 @@
 #include "../Interface/interface_timer.h"  // ÐÂÔötimer½Ó¿Ú
 #include "../core/BusInteract.h"
 #include "../core/DataPool.h"
-#include "../flight/os_flight_io.h"
+// #include "../flight/os_flight_io.h"
 #include "../support/os_bufferLoop.h"
 
 #include <math.h>
@@ -52,7 +52,7 @@ static FREQ_SCAN fs = {
 
 OS_U8 AutoZero();
     
-//OS_U8 InitSrv()	//MML¶æ»ú: Ã»ÈËµ÷ÁË£¬ÕâÊÇÔ­ÏÈ´®¿ÚµÄInit
+//OS_U8 InitSrv()	//¶æ»ú: Ã»ÈËµ÷ÁË£¬ÕâÊÇÔ­ÏÈ´®¿ÚµÄInit
 //{
 //    // ³õÊ¼»¯CANÍ¨ÐÅ£¨¼ÙÉèÒÑ¾­ÓÐCAN³õÊ¼»¯º¯Êý£©
 //    // CAN_Init(500000); // 500Kbps²¨ÌØÂÊ
@@ -71,7 +71,7 @@ OS_U8 AutoZero();
 //    return 0;
 //}
 
-OS_U16 ChkSrvFrame(OS_MEM* pmData)	//MML¶æ»ú ÐèÒª¸üÐÂCANÖ¡¼ì²éÂß¼­ Õâ¸öÃ»ÈËµ÷ÁË¡£ÊÇÔ­ÏÈ´®¿ÚµÄ¡£
+OS_U16 ChkSrvFrame(OS_MEM* pmData)	//¶æ»ú ÐèÒª¸üÐÂCANÖ¡¼ì²éÂß¼­ Õâ¸öÃ»ÈËµ÷ÁË¡£ÊÇÔ­ÏÈ´®¿ÚµÄ¡£
 {
 	if(pmData == PTR_NULL)
 		return 0;
@@ -226,16 +226,13 @@ uint32_t angle_to_ccr(double angle_deg) {
  ***********************************************************/
 OS_U8 MsgToSrv(OS_DOUBLE ctrlDeg[6], OS_U8 ctrlMode/*control = 0x02, 0x44=setZero*/)//04 ´æÈëÊý¾Ý³Ø ¿ØÖÆ¶æ»ú
 {
-	//MML¶æ»ú
+	//¶æ»ú
     SETDATA(pDataPoolSrv, "Sr5Cmd", ctrlDeg[0] * 100, OS_S16); 
 	SETDATA(pDataPoolSrv, "Sr1Cmd", ctrlDeg[1] * 100, OS_S16);
     SETDATA(pDataPoolSrv, "Sr3Cmd", ctrlDeg[2] * 100, OS_S16);
     SETDATA(pDataPoolSrv, "Sr4Cmd", ctrlDeg[3] * 100, OS_S16);
     SETDATA(pDataPoolSrv, "Sr2Cmd", ctrlDeg[4] * 100, OS_S16);
     SETDATA(pDataPoolSrv, "Sr6Cmd", ctrlDeg[5] * 100, OS_S16);
-
-    SETDATA(pDataPoolSrv, "Sr2Angle", ctrlDeg[4], OS_U16);
-    SETDATA(pDataPoolSrv, "Sr6Angle", ctrlDeg[5], OS_S16);
 
 	if (ctrlMode == 0x02) 
 	{
@@ -357,7 +354,7 @@ OS_U8 ServoCtlOnce_6Rudder( double actDeg_1,
 //  ***********************************************************/
 // OS_U32 SrvRtHandler(STRU_422_MSG_INFO * srvMsg)	
 // {
-// 	//MML¶æ»ú£¬ÕâÊÇ280ÓÃµÄ´®¿ÚµÄ»Øµ÷º¯Êý£¬014ÏîÄ¿²»ÓÃ
+// 	//¶æ»ú£¬ÕâÊÇ280ÓÃµÄ´®¿ÚµÄ»Øµ÷º¯Êý£¬014ÏîÄ¿²»ÓÃ
 // 	//Ê×ÏÈÅÐ¶ÏÊÇÊ²Ã´ÀàÐÍµÄÖ¸Áî
 // 	//¶ÔÊý¾ÝÇøÇ°ËÄ×Ö½Ú½øÐÐÅÐ¶Ï
 // 	RECV_CMD_ID recvCmdId = srvMsg->u8MsgID;
@@ -384,7 +381,7 @@ OS_U8 ServoCtlOnce_6Rudder( double actDeg_1,
  */
 OS_U8 CanRtServoHandler(OS_U32 id, OS_BOOL ext_id, const OS_U8* data, OS_U8 len)
 {
-	//MML¶æ»ú£¬ÕâÊÇÐÂµÄCAN¶æ»úµÄ»Øµ÷º¯Êý
+	//¶æ»ú£¬ÕâÊÇÐÂµÄCAN¶æ»úµÄ»Øµ÷º¯Êý
     // Ö»´¦ÀíÀ©Õ¹Ö¡
     if (!ext_id) {
         return -1;
@@ -511,7 +508,7 @@ int InsertServoTestData(
 }
 
 OS_U16 waitForStart = 0;
-OS_U8 MiniLoopSimulation()	//MML¶æ»ú
+OS_U8 MiniLoopSimulation()	//¶æ»ú
 {
 	if((g_DeviceState.workStage & DOM_SIMSRVDAT) != DOM_SIMSRVDAT)
 		return -1;
@@ -566,7 +563,7 @@ OS_U8 StartMiniLoop(float freq, float amp, float zero, OS_U8 enable[6])
  * ²Î¿¼×ÊÁÏ: <TXII-Y1 ¼ýµØÍ¨ÐÅÐ­Òé>
  * ×÷Õß:	³Éºê­Z
  ***********************************************************/
-OS_U32 ServoCmdHandler(STRU_422_MSG_INFO * frame)//03¸ù¾ÝÊý¾ÝÁ´¹ýÀ´µÄÖ¸Áî£¬¾ßÌå¸É»î	//MML¶æ»ú
+OS_U32 ServoCmdHandler(STRU_422_MSG_INFO * frame)//03¸ù¾ÝÊý¾ÝÁ´¹ýÀ´µÄÖ¸Áî£¬¾ßÌå¸É»î	//¶æ»ú
 {
 	OS_U8 msgID = frame->u8MsgID;
 	switch(msgID)
@@ -619,7 +616,7 @@ OS_U32 ServoCmdHandler(STRU_422_MSG_INFO * frame)//03¸ù¾ÝÊý¾ÝÁ´¹ýÀ´µÄÖ¸Áî£¬¾ßÌå¸
 	return 0;
 }
 
-OS_U8 SrvStatusUpdata()	//MML¶æ»ú
+OS_U8 SrvStatusUpdata()	//¶æ»ú
 {
 	MiniLoopSimulation();	//ËÅ·þÐ¡»ØÂ·
 	//ËÅ·þÎ»ÖÃ²éÑ¯£¬Ã¿ÂÖÑ­»·Ö»²éÑ¯Ò»¸öËÅ·þ£¬ÒÔ¾¡Á¿±ÜÃâcan³åÍ»
@@ -651,7 +648,7 @@ OS_U8 SrvStatusUpdata()	//MML¶æ»ú
 	return 0;
 }
 
-OS_U8 DoSrvProtect()//03¶æ»ú½Ç¶È¿ØÖÆÎª0	//MML¶æ»ú £¨280Ä¿Ç°²»ÓÃ£©
+OS_U8 DoSrvProtect()//03¶æ»ú½Ç¶È¿ØÖÆÎª0	//¶æ»ú £¨280Ä¿Ç°²»ÓÃ£©
 {
 	if(SrvProtect > 0)
 	{
@@ -663,7 +660,7 @@ OS_U8 DoSrvProtect()//03¶æ»ú½Ç¶È¿ØÖÆÎª0	//MML¶æ»ú £¨280Ä¿Ç°²»ÓÃ£©
 
 OS_U16 AutoZeroCount = 0;
 
-OS_U8 AutoZero()//03¶æ»ú½Ç¶È¿ØÖÆÎª0	//MML¶æ»ú £¨280Ä¿Ç°²»ÓÃ£©
+OS_U8 AutoZero()//03¶æ»ú½Ç¶È¿ØÖÆÎª0	//¶æ»ú £¨280Ä¿Ç°²»ÓÃ£©
 {
 	if(BookingMode == 1)
 		return 1;

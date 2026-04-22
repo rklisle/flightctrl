@@ -16,8 +16,8 @@
 //#include "./comm/CommHandler.h"
 #include "./support/common.h"
 #include "./core/DataPool.h"
-#include "./flight/os_flight_io.h"
-#include "./flight/RoutePoint.h"
+// #include "./flight/os_flight_io.h"
+// #include "./flight/RoutePoint.h"
 #include "./interface/interface_power.h"
 #include "./mission/mission.h"
 #include "math.h"
@@ -28,11 +28,12 @@
 
 
 //#include "flight_data.h"
-Point safePoints[20];
+Point safePoints[20];	// ¼ÓÔØÈÎÎñºó£¬µÃµ½µÄ°²È«ÇøÓòÎ§À¸ÖĞµÄ¸÷¸öµã¡£
 int airHighArray[1000] = {0};
 int safePointCount;
 
-MISSION homeMsn = {0};
+// MISSION homeMsn = {0};
+extern Stru_Data_Controller_To_DatalinkTel  g_CtrltoDL_tel;
 
 #define d2r		(57.29577951308402)
 /***********************************************************
@@ -46,7 +47,8 @@ static void FlightSeqOutputHandle()	//02 Èç¹ûÊÕµ½É¡½µÃüÁî£¬¹Ø·¢¶¯»ú¡¢¿ªÉ¡¡¢¿Ø¶æ»
 		// ¼ÓÒ»¸ö¶ÔÒıĞÅµÄ¿ØÖÆ
 		FuseSend(0x7A);	// È¡Ïûµç¼¤»î
 		//ÊÕµ½É¡½µÃüÁî
-		struct EngineStatus engineStatus = {0};
+		// struct EngineStatus engineStatus = {0};
+		OS_U8 cntState;
 		static int waitOneSec = 0;
 		//Á¢¿Ì¹Ø±Õ·¢¶¯»ú£¬³ÖĞø·¢ËÍ·¢¶¯»ú×ªËÙµ½µ¡ËÙÖ¸Áî£¬¼°·¢¶¯»úÍ£»úÖ¸Áî
 		if(waitOneSec >= 0 && waitOneSec <10000)
@@ -54,8 +56,10 @@ static void FlightSeqOutputHandle()	//02 Èç¹ûÊÕµ½É¡½µÃüÁî£¬¹Ø·¢¶¯»ú¡¢¿ªÉ¡¡¢¿Ø¶æ»
 			//20msºó¹Ø±Õ·¢¶¯»ú
             if(waitOneSec % 4 == 0)
             {
-				modECU_GetEngineStatus(&engineStatus);
-				if(engineStatus.CntState != ENGINE_STOPED)
+				// modECU_GetEngineStatus(&engineStatus);
+				GetDataFast(pDataPoolSelf, "ecuState", &cntState);
+				// if(engineStatus.CntState != ENGINE_STOPED)
+				if(cntState != ENGINE_STOPED)
 				{
 					StopEngine();
 				}
@@ -65,12 +69,12 @@ static void FlightSeqOutputHandle()	//02 Èç¹ûÊÕµ½É¡½µÃüÁî£¬¹Ø·¢¶¯»ú¡¢¿ªÉ¡¡¢¿Ø¶æ»
 		if(waitOneSec == 40)
 		{
 			// TrigerSeqWithWidth(TEST_1 + 1, 100);//¿ªÉ¡²Ù×÷
-			AngleServo_SetAngle(SERVO_PWM7, 50.0f);//MML¿ªÉ¡¶æ»ú7 ¿ØÖÆ7ºÅ¶æ»úÖÁ50¡ã£¨´Ë´¦½Ç¶È¸ù¾İĞèÒªĞŞ¸Ä£©
+			AngleServo_SetAngle(SERVO_PWM7, 50.0f);//¿ªÉ¡¶æ»ú7 ¿ØÖÆ7ºÅ¶æ»úÖÁ50¡ã£¨´Ë´¦½Ç¶È¸ù¾İĞèÒªĞŞ¸Ä£©
 		}
 		
 		if(waitOneSec == 200)//1ÃëÊ±±£³Ö¶æ»ú»Ø0
 		{			
-			ServoCtlOnce_6Rudder(0, 0, 0, 0, 0, 0);	//MML¶æ»ú
+			ServoCtlOnce_6Rudder(0, 0, 0, 0, 0, 0);	//¶æ»ú
 		}
 		if(waitOneSec == 3000)//15ÃëÊ±¿ªÆøÄÒÇ°
 		{
@@ -141,84 +145,138 @@ static void FlightSeqOutputHandle()	//02 Èç¹ûÊÕµ½É¡½µÃüÁî£¬¹Ø·¢¶¯»ú¡¢¿ªÉ¡¡¢¿Ø¶æ»
 }
 
 /***********************************************************
+ * 014´úÂë
  * º¯ÊıÃû³Æ:FlightTMOutputHandle()
  * º¯Êı¹¦ÄÜ:·ÖÎö·É¿ØÔËËãºóµÄÊä³öÊı¾İ£¬´æÊı¾İ³Ø
   ***********************************************************/
 void FlightTMOutputHandle()	//02 ¿ØÖÆÊä³ö¡ª¡ª>´æÈëÊı¾İ³Ø
 {
-/* *********************************************** MML 20260413*****************************************************
+	SETDATA(pDataPoolFly,	"pitchCmd",	g_CtrltoDL_tel.rudderPitchCmd * 100,	OS_S16);	//Æğ¿Ø±êÖ¾
+	SETDATA(pDataPoolFly,	"rollCmd",	g_CtrltoDL_tel.rudderRollCmd* 100,	OS_S16);	//ÖÆµ¼¼¶Êı
+	SETDATA(pDataPoolFly,	"yawCmd",	g_CtrltoDL_tel.rudderYawCmd* 100,		OS_S16);	//¿ØÖÆ¼¶Êı
 
-	SETDATA(pDataPoolFly,	"pitchCmd",	pOutput->rudderPitchCmd * 100,	OS_S16);	//Æğ¿Ø±êÖ¾
-	SETDATA(pDataPoolFly,	"rollCmd",	pOutput->rudderRollCmd* 100,	OS_S16);	//ÖÆµ¼¼¶Êı
-	SETDATA(pDataPoolFly,	"yawCmd",	pOutput->rudderYawCmd* 100,		OS_S16);	//¿ØÖÆ¼¶Êı
-    
-	SETDATA(pDataPoolFly,	"dRn",	pOutput->dRn,		OS_S16);	//¿ØÖÆ¼¶Êı
-	SETDATA(pDataPoolFly,	"dRu",	pOutput->dRu,		OS_S16);	//¿ØÖÆ¼¶Êı
-	SETDATA(pDataPoolFly,	"dRe",	pOutput->dRe,		OS_S16);	//¿ØÖÆ¼¶Êı
-	
-	SETDATA(pDataPoolFly,	"PitchPre",	pOutput->Pitch_Preset_Angle * 100,		OS_S16);	//¿ØÖÆ¼¶Êı
-	SETDATA(pDataPoolFly,	"YawPre",	pOutput->Yaw_Preset_Angle * 100,		OS_S16);	//¿ØÖÆ¼¶Êı
-    
-	SETDATA(pDataPoolFly,	"fPitchSp",	pOutput->pitch_rate_nT_filterOut * 500,		OS_S16);	//¿ØÖÆ¼¶Êı
-	SETDATA(pDataPoolFly,	"fYawSp",	pOutput->yaw_rate_nT_filterOut * 500,		OS_S16);	//¿ØÖÆ¼¶Êı
- 
-	SETDATA(pDataPoolMsn,	"WP_cur",	pOutput->curPtNo,	OS_U8);//º½µãºÅ
+	SETDATA(pDataPoolFly,	"dRn",	g_CtrltoDL_tel.dRn,		OS_S16);	//¿ØÖÆ¼¶Êı
+	SETDATA(pDataPoolFly,	"dRu",	g_CtrltoDL_tel.dRu,		OS_S16);	//¿ØÖÆ¼¶Êı
+	SETDATA(pDataPoolFly,	"dRe",	g_CtrltoDL_tel.dRe,		OS_S16);	//¿ØÖÆ¼¶Êı
 
-	SETDATA(pDataPoolMsn,	"tarLon",	pOutput->curTargetLon * 1e7, OS_S32 );//Ä¿±êº½µã¾­¶È
-	SETDATA(pDataPoolMsn,	"tarLat",	pOutput->curTargetLat * 1e7, OS_S32 );//Ä¿±êº½µãÎ³¶È
-	SETDATA(pDataPoolMsn,	"tarAlt",	pOutput->curTargetAlt * 1, OS_S16 );//Ä¿±êº½µã¸ß¶È
+	SETDATA(pDataPoolFly,	"PitchPre",	g_CtrltoDL_tel.Pitch_Preset_Angle * 100,		OS_S16);	//¿ØÖÆ¼¶Êı
+	SETDATA(pDataPoolFly,	"YawPre",	g_CtrltoDL_tel.Yaw_Preset_Angle * 100,		OS_S16);	//¿ØÖÆ¼¶Êı
 
-  SETDATA(pDataPoolFly,	"adrc_Mx",	pOutput->mx_ESO * 10, OS_S16 );//adrc
-	SETDATA(pDataPoolFly,	"gamaCmd",	pOutput->gamaCmd * 1e2, OS_S16 );//¹ö×ª½ÇÖ¸Áî
-	SETDATA(pDataPoolFly,	"thetaCmd",	pOutput->varthetaCmd * 1e2, OS_S16 );//¸©Ñö½ÇÖ¸Áî
-	SETDATA(pDataPoolFly,	"nycCmd",	pOutput->nycCmd * 1e3, OS_S16 );//¹ıÔØÖ¸Áî
-	SETDATA(pDataPoolFly,	"highCmd",	pOutput->heightCmd , OS_FLOAT );///¸ß¶ÈÖ¸Áî
-	SETDATA(pDataPoolFly,	"ac_dL",	pOutput->ac_dL * 10, OS_S32 );//´ı·É¾à
-	SETDATA(pDataPoolFly,	"ac_dZ",	pOutput->ac_dZ * 10, OS_S16 );//²à±ß¾à
-	SETDATA(pDataPoolFly,	"tokenlon",	pOutput->token_long * 1, OS_U8 );//×İÏòÁîÅÆ
-	SETDATA(pDataPoolFly,	"tokenlat",	pOutput->token_late * 1, OS_U8 );//²àÏòÁîÅÆ
-	SETDATA(pDataPoolFly,	"ac_dPsi",	pOutput->ac_dPsi * 100, OS_S16 );//º½Ïò½ÇÆ«²î
-	
-	SETDATA(pDataPoolFly,	"ac_dR",	pOutput->ac_dR * 10, OS_S16 );//Ô²¹ì¼£²à±ß¾à
-	SETDATA(pDataPoolFly,	"thetav",	pOutput->cur_thetav * 10, OS_S16 );//¹ì¼£Çã½Ç
-	SETDATA(pDataPoolFly,	"Vcmd",	pOutput->Vcmd * 10, OS_S16 );//ËÙ¶ÈÖ¸Áî
-    
-	SETDATA(pDataPoolFly,	"nyCmd",	pOutput->nyCmd_Guidance * 100 , OS_S16 );//ËÙ¶ÈÖ¸Áî
-	SETDATA(pDataPoolFly,	"nzCmd",	pOutput->nzCmd_Guidance * 100, OS_S16 );//ËÙ¶ÈÖ¸Áî
+	SETDATA(pDataPoolFly,	"fPitchSp",	g_CtrltoDL_tel.pitch_rate_nT_filterOut * 500,		OS_S16);	//¿ØÖÆ¼¶Êı
+	SETDATA(pDataPoolFly,	"fYawSp",	g_CtrltoDL_tel.yaw_rate_nT_filterOut * 500,		OS_S16);	//¿ØÖÆ¼¶Êı
 
-	SETDATA(pDataPoolFly,	"DbsLen",	pOutput->Dubins_length , OS_FLOAT );//ËÙ¶ÈÖ¸Áî
-	SETDATA(pDataPoolFly,	"ADRC",	    pOutput->fduox_ADRC * 100, OS_S16 );//ËÙ¶ÈÖ¸Áî
+	SETDATA(pDataPoolMsn,	"WP_cur",	g_CtrltoDL_tel.curPtNo,	OS_U8);//º½µãºÅ
+
+	SETDATA(pDataPoolMsn,	"tarLon",	g_CtrltoDL_tel.curTargetLon * 1e7, OS_S32 );//Ä¿±êº½µã¾­¶È
+	SETDATA(pDataPoolMsn,	"tarLat",	g_CtrltoDL_tel.curTargetLat * 1e7, OS_S32 );//Ä¿±êº½µãÎ³¶È
+	SETDATA(pDataPoolMsn,	"tarAlt",	g_CtrltoDL_tel.curTargetAlt * 1, OS_S16 );//Ä¿±êº½µã¸ß¶È
+
+	SETDATA(pDataPoolFly,	"adrc_Mx",	g_CtrltoDL_tel.mx_ESO * 10, OS_S16 );//adrc
+	SETDATA(pDataPoolFly,	"gamaCmd",	g_CtrltoDL_tel.gamaCmd * 1e2, OS_S16 );//¹ö×ª½ÇÖ¸Áî
+	SETDATA(pDataPoolFly,	"thetaCmd",	g_CtrltoDL_tel.varthetaCmd * 1e2, OS_S16 );//¸©Ñö½ÇÖ¸Áî
+	SETDATA(pDataPoolFly,	"nycCmd",	g_CtrltoDL_tel.nycCmd * 1e3, OS_S16 );//¹ıÔØÖ¸Áî
+	SETDATA(pDataPoolFly,	"highCmd",	g_CtrltoDL_tel.heightCmd , OS_FLOAT );///¸ß¶ÈÖ¸Áî
+	SETDATA(pDataPoolFly,	"ac_dL",	g_CtrltoDL_tel.ac_dL * 10, OS_S32 );//´ı·É¾à
+	SETDATA(pDataPoolFly,	"ac_dZ",	g_CtrltoDL_tel.ac_dZ * 10, OS_S16 );//²à±ß¾à
+	SETDATA(pDataPoolFly,	"tokenlon",	g_CtrltoDL_tel.token_long * 1, OS_U8 );//×İÏòÁîÅÆ
+	SETDATA(pDataPoolFly,	"tokenlat",	g_CtrltoDL_tel.token_late * 1, OS_U8 );//²àÏòÁîÅÆ
+	SETDATA(pDataPoolFly,	"ac_dPsi",	g_CtrltoDL_tel.ac_dPsi * 100, OS_S16 );//º½Ïò½ÇÆ«²î
+
+	SETDATA(pDataPoolFly,	"ac_dR",	g_CtrltoDL_tel.ac_dR * 10, OS_S16 );//Ô²¹ì¼£²à±ß¾à
+	SETDATA(pDataPoolFly,	"thetav",	g_CtrltoDL_tel.cur_thetav * 10, OS_S16 );//¹ì¼£Çã½Ç
+	SETDATA(pDataPoolFly,	"Vcmd",	g_CtrltoDL_tel.Vcmd * 10, OS_S16 );//ËÙ¶ÈÖ¸Áî
+
+	SETDATA(pDataPoolFly,	"nyCmd",	g_CtrltoDL_tel.nyCmd_Guidance * 100 , OS_S16 );//ËÙ¶ÈÖ¸Áî
+	SETDATA(pDataPoolFly,	"nzCmd",	g_CtrltoDL_tel.nzCmd_Guidance * 100, OS_S16 );//ËÙ¶ÈÖ¸Áî
+
+	SETDATA(pDataPoolFly,	"DbsLen",	g_CtrltoDL_tel.Dubins_length , OS_FLOAT );//ËÙ¶ÈÖ¸Áî
+	SETDATA(pDataPoolFly,	"ADRC",	    g_CtrltoDL_tel.fduox_ADRC * 100, OS_S16 );//ËÙ¶ÈÖ¸Áî
 	//ÔİÊ±½èÓÃµ¼º½°æÊı¾İ		
-  SETDATA(pDataPoolNav, "navWx2", pOutput->arp_ins,	OS_FLOAT);//¹ß²â¹¥½Ç
-	SETDATA(pDataPoolNav, "navWy2", pOutput->beta_ins,	OS_FLOAT);//¹ß²â²à»¬½Ç
-	
-	SETDATA(pDataPoolNav, "navWz2", pOutput->MaxRpm,	OS_FLOAT);//×î´ó×ªËÙ
-	SETDATA(pDataPoolNav, "navAx2", pOutput->DFT_freq_max,	OS_FLOAT);//±æÊ¶ÔË¶¯ÆµÂÊ
+	SETDATA(pDataPoolNav, "navWx2", g_CtrltoDL_tel.alpha_ins,	OS_FLOAT);//¹ß²â¹¥½Ç
+	SETDATA(pDataPoolNav, "navWy2", g_CtrltoDL_tel.beta_ins,	OS_FLOAT);//¹ß²â²à»¬½Ç
+
+	SETDATA(pDataPoolNav, "navWz2", g_CtrltoDL_tel.MaxRpm,	OS_FLOAT);//×î´ó×ªËÙ
+	SETDATA(pDataPoolNav, "navAx2", g_CtrltoDL_tel.DFT_freq_max,	OS_FLOAT);//±æÊ¶ÔË¶¯ÆµÂÊ
     
-	if(pOutput->on_takeoff == 1)
+	if(g_controller_to_switch.flag_missle_takeoff == 1)
 	{
 			SETDATA(pDataPoolSelf,	"RecvLunc",	0xEE , OS_U8 );//ËÙ¶ÈÖ¸Áî
 	}
-*/
+
 }
+/***********************************************************
+ * 280´úÂë
+ * º¯ÊıÃû³Æ:FlightTMOutputHandle()
+ * º¯Êı¹¦ÄÜ:·ÖÎö·É¿ØÔËËãºóµÄÊä³öÊı¾İ£¬´æÊı¾İ³Ø
+  ***********************************************************/
+//void FlightTMOutputHandle()	//02 ¿ØÖÆÊä³ö¡ª¡ª>´æÈëÊı¾İ³Ø
+//{
+//	SETDATA(pDataPoolFly,	"pitchCmd",	pOutput->rudderPitchCmd * 100,	OS_S16);	//Æğ¿Ø±êÖ¾
+//	SETDATA(pDataPoolFly,	"rollCmd",	pOutput->rudderRollCmd* 100,	OS_S16);	//ÖÆµ¼¼¶Êı
+//	SETDATA(pDataPoolFly,	"yawCmd",	pOutput->rudderYawCmd* 100,		OS_S16);	//¿ØÖÆ¼¶Êı
+//    
+//	SETDATA(pDataPoolFly,	"dRn",	pOutput->dRn,		OS_S16);	//¿ØÖÆ¼¶Êı
+//	SETDATA(pDataPoolFly,	"dRu",	pOutput->dRu,		OS_S16);	//¿ØÖÆ¼¶Êı
+//	SETDATA(pDataPoolFly,	"dRe",	pOutput->dRe,		OS_S16);	//¿ØÖÆ¼¶Êı
+//	
+//	SETDATA(pDataPoolFly,	"PitchPre",	pOutput->Pitch_Preset_Angle * 100,		OS_S16);	//¿ØÖÆ¼¶Êı
+//	SETDATA(pDataPoolFly,	"YawPre",	pOutput->Yaw_Preset_Angle * 100,		OS_S16);	//¿ØÖÆ¼¶Êı
+//    
+//	SETDATA(pDataPoolFly,	"fPitchSp",	pOutput->pitch_rate_nT_filterOut * 500,		OS_S16);	//¿ØÖÆ¼¶Êı
+//	SETDATA(pDataPoolFly,	"fYawSp",	pOutput->yaw_rate_nT_filterOut * 500,		OS_S16);	//¿ØÖÆ¼¶Êı
+// 
+//	SETDATA(pDataPoolMsn,	"WP_cur",	pOutput->curPtNo,	OS_U8);//º½µãºÅ
+
+//	SETDATA(pDataPoolMsn,	"tarLon",	pOutput->curTargetLon * 1e7, OS_S32 );//Ä¿±êº½µã¾­¶È
+//	SETDATA(pDataPoolMsn,	"tarLat",	pOutput->curTargetLat * 1e7, OS_S32 );//Ä¿±êº½µãÎ³¶È
+//	SETDATA(pDataPoolMsn,	"tarAlt",	pOutput->curTargetAlt * 1, OS_S16 );//Ä¿±êº½µã¸ß¶È
+
+//  SETDATA(pDataPoolFly,	"adrc_Mx",	pOutput->mx_ESO * 10, OS_S16 );//adrc
+//	SETDATA(pDataPoolFly,	"gamaCmd",	pOutput->gamaCmd * 1e2, OS_S16 );//¹ö×ª½ÇÖ¸Áî
+//	SETDATA(pDataPoolFly,	"thetaCmd",	pOutput->varthetaCmd * 1e2, OS_S16 );//¸©Ñö½ÇÖ¸Áî
+//	SETDATA(pDataPoolFly,	"nycCmd",	pOutput->nycCmd * 1e3, OS_S16 );//¹ıÔØÖ¸Áî
+//	SETDATA(pDataPoolFly,	"highCmd",	pOutput->heightCmd , OS_FLOAT );///¸ß¶ÈÖ¸Áî
+//	SETDATA(pDataPoolFly,	"ac_dL",	pOutput->ac_dL * 10, OS_S32 );//´ı·É¾à
+//	SETDATA(pDataPoolFly,	"ac_dZ",	pOutput->ac_dZ * 10, OS_S16 );//²à±ß¾à
+//	SETDATA(pDataPoolFly,	"tokenlon",	pOutput->token_long * 1, OS_U8 );//×İÏòÁîÅÆ
+//	SETDATA(pDataPoolFly,	"tokenlat",	pOutput->token_late * 1, OS_U8 );//²àÏòÁîÅÆ
+//	SETDATA(pDataPoolFly,	"ac_dPsi",	pOutput->ac_dPsi * 100, OS_S16 );//º½Ïò½ÇÆ«²î
+//	
+//	SETDATA(pDataPoolFly,	"ac_dR",	pOutput->ac_dR * 10, OS_S16 );//Ô²¹ì¼£²à±ß¾à
+//	SETDATA(pDataPoolFly,	"thetav",	pOutput->cur_thetav * 10, OS_S16 );//¹ì¼£Çã½Ç
+//	SETDATA(pDataPoolFly,	"Vcmd",	pOutput->Vcmd * 10, OS_S16 );//ËÙ¶ÈÖ¸Áî
+//    
+//	SETDATA(pDataPoolFly,	"nyCmd",	pOutput->nyCmd_Guidance * 100 , OS_S16 );//ËÙ¶ÈÖ¸Áî
+//	SETDATA(pDataPoolFly,	"nzCmd",	pOutput->nzCmd_Guidance * 100, OS_S16 );//ËÙ¶ÈÖ¸Áî
+
+//	SETDATA(pDataPoolFly,	"DbsLen",	pOutput->Dubins_length , OS_FLOAT );//ËÙ¶ÈÖ¸Áî
+//	SETDATA(pDataPoolFly,	"ADRC",	    pOutput->fduox_ADRC * 100, OS_S16 );//ËÙ¶ÈÖ¸Áî
+//	//ÔİÊ±½èÓÃµ¼º½°æÊı¾İ		
+//  SETDATA(pDataPoolNav, "navWx2", pOutput->arp_ins,	OS_FLOAT);//¹ß²â¹¥½Ç
+//	SETDATA(pDataPoolNav, "navWy2", pOutput->beta_ins,	OS_FLOAT);//¹ß²â²à»¬½Ç
+//	
+//	SETDATA(pDataPoolNav, "navWz2", pOutput->MaxRpm,	OS_FLOAT);//×î´ó×ªËÙ
+//	SETDATA(pDataPoolNav, "navAx2", pOutput->DFT_freq_max,	OS_FLOAT);//±æÊ¶ÔË¶¯ÆµÂÊ
+//    
+//	if(pOutput->on_takeoff == 1)
+//	{
+//			SETDATA(pDataPoolSelf,	"RecvLunc",	0xEE , OS_U8 );//ËÙ¶ÈÖ¸Áî
+//	}
+//}
 
 void FlightSrvOutputHandle()	//02 ¿ØÖÆÊä³ö½Ç¶È¡ª¡ª>²Ù×÷¶æ»ú
 {
 	if((DOM_AUTOMATIC & g_DeviceState.workStage) && flightSeq.luanched == 1)
 	{
-		/* *********************************************** MML 20260413*****************************************************
-
-		ServoCtlOnce_6Rudder(	pOutput->rudder1Cmd,
-								pOutput->rudder2Cmd,
-								pOutput->rudder3Cmd,
-								pOutput->rudder4Cmd,
-								pOutput->rudder5Cmd,
-								pOutput->rudder6Cmd
+		ServoCtlOnce_6Rudder(	g_controller_to_actuator.control_voltage_I	,
+								g_controller_to_actuator.control_voltage_II	,
+								g_controller_to_actuator.control_voltage_III,
+								g_controller_to_actuator.control_voltage_IV	,
+								g_controller_to_actuator.control_voltage_V	,
+								g_controller_to_actuator.control_voltage_VI
 								);
-								*/
 	}
 }
-OS_U8 OutSafeCount = 0;
 OS_U8 OutSafeArea = 0;	// 0°²È«ÇøÀï	1³ö°²È«Çø£¬ÇÒµÈÁËÒ»»á¶ùÈ·¶¨³öÁË°²È«Çø
 void FlightEngineOutputHandle()//02 ÔÚ¸÷ÖÖÇé¿öÏÂ£¨ÊÇ·ñÆğ·É£¿ÊÇ·ñ³ö°²È«Çø£¿£©¿ØÖÆÊä³öÓÍÃÅ¿ª¶È¡ª¡ª>²Ù×÷ÓÍÃÅ¿ª¶ÈÈ«¾Ö±äÁ¿
 {
@@ -232,10 +290,7 @@ void FlightEngineOutputHandle()//02 ÔÚ¸÷ÖÖÇé¿öÏÂ£¨ÊÇ·ñÆğ·É£¿ÊÇ·ñ³ö°²È«Çø£¿£©¿ØÖÆ
 		else
 		{
 			//°²È«ÇøÄÚ£¬Õı³£·ÉĞĞ£¬Ìı¿ØÖÆµÄ
-			/* *********************************************** MML 20260413*****************************************************
-
-			CurEngineRpm = (OS_U32)(pOutput->engineSet * 10.0f);
-			*/
+			CurEngineRpm = (OS_U32)(g_controller_to_engine.control_Kc * 10.0f);
 			// if(CurEngineRpm == 0)
 			// {
 			// 	int a = 0;
@@ -279,7 +334,7 @@ void FlightOutputHandle()  //01 5msÔËĞĞÒ»´Î
  * 3.Ê±¼ä(double,µ¥Î»Ãë,¾«È·µ½0.001)
  * µ±µ±Ç°ÎªÄ£·ÉÄ£Ê½Ê±£¬¹ß×é¡¢GPSÊı¾İ¾ùÀ´×ÔÓÚflash
   ***********************************************************/
-double curAirSpd;
+// double curAirSpd;	// MML Î´Ê¹ÓÃ£¬×¢ÊÍ
 void FlightInputGenerate()
 {
 		if((g_DeviceState.workStage & DOM_HILSMODE) == DOM_HILSMODE)
@@ -292,85 +347,71 @@ void FlightInputGenerate()
 		{
 			g_DeviceState.currTime = GetCurTime()-g_DeviceState.flightStartTime;        
 			float tempf;
-			// GetDataFast(pDataPoolImu, "imuWx",	&tempf); pInput->wx = tempf;
-			// GetDataFast(pDataPoolImu, "imuWy",	&tempf); pInput->wy = tempf;
-			// GetDataFast(pDataPoolImu, "imuWz", 	&tempf); pInput->wz = tempf;
-			// GetDataFast(pDataPoolImu, "imuAx", 	&tempf); pInput->ax = tempf;
-			// GetDataFast(pDataPoolImu, "imuAy", 	&tempf); pInput->ay = tempf;
-			// GetDataFast(pDataPoolImu, "imuAz", 	&tempf); pInput->az = tempf;
+			OS_S32 temps32;
+			OS_S16 temps16;
+			OS_U16 tempu16; //10-19ĞŞ¸ÄOS_S16ÎªOS_U16
 
-			GetDataFast(pDataPoolImu, "imuWx",	&tempf); g_ins_data.wx = tempf;
+			GetDataFast(pDataPoolImu, "imuWx",	&tempf); g_ins_data.wx = tempf;	// pDataPoolNav
 			GetDataFast(pDataPoolImu, "imuWy",	&tempf); g_ins_data.wy = tempf;
 			GetDataFast(pDataPoolImu, "imuWz", 	&tempf); g_ins_data.wz = tempf;
 			GetDataFast(pDataPoolImu, "imuAx", 	&tempf); g_ins_data.ax = tempf;
 			GetDataFast(pDataPoolImu, "imuAy", 	&tempf); g_ins_data.ay = tempf;
 			GetDataFast(pDataPoolImu, "imuAz", 	&tempf); g_ins_data.az = tempf;
 
-			OS_S32 temps32;
-			OS_S16 temps16;
-			// GetDataFast(pDataPoolImu, "navLon", 	&temps32);pInput->navLon = temps32 * 1e-7;
-			// GetDataFast(pDataPoolImu, "navLat", 	&temps32);pInput->navLat = temps32 * 1e-7;
-			// GetDataFast(pDataPoolImu, "navHigh", 	&tempf);pInput->navHigh = tempf;
+			GetDataFast(pDataPoolImu, "navPitch", 	&temps16);g_ins_data.zeta = temps16 * 0.01;
+			GetDataFast(pDataPoolImu, "navDir", 	&tempu16);g_ins_data.psi = tempu16 * 0.01;
+			GetDataFast(pDataPoolImu, "navRoll", 	&temps16);g_ins_data.gama = temps16 * 0.01;
 
+			g_ins_data.psi = -g_ins_data.psi; //±±Æ«¶«×ª±±Æ«Î÷
+			if(g_ins_data.psi > 180)
+				g_ins_data.psi -= 360;
+			if(g_ins_data.psi < -180)
+				g_ins_data.psi += 360;
+				
+			GetDataFast(pDataPoolImu, "navVn", &temps16);g_ins_data.vtx = temps16 * 0.01;
+			GetDataFast(pDataPoolImu, "navVs", &temps16);g_ins_data.vty = temps16 * 0.01;
+			GetDataFast(pDataPoolImu, "navVe", &temps16);g_ins_data.vtz = temps16 * 0.01;
 			GetDataFast(pDataPoolImu, "navLon", 	&temps32);	g_ins_data.longitude = temps32 * 1e-7;
 			GetDataFast(pDataPoolImu, "navLat", 	&temps32);	g_ins_data.latitude = temps32 * 1e-7;
 			GetDataFast(pDataPoolImu, "navHigh", 	&tempf);	g_ins_data.height = tempf;
-			
-					//test
-					//SETDATA(pDataPoolImu, "abc", tempf * 10,	OS_U16);
-					//OS_S16 temp16Alt;
-					//GetDataFast(pDataPoolImu, "abc", 	&temp16Alt);
-					//pInput->navHigh = temp16Alt * 0.1;
-					//test end
 
-/* *********************************************** MML 20260413*****************************************************
-			GetDataFast(pDataPoolImu, "navVn", &temps16);pInput->navVn = temps16 * 0.01;
-			GetDataFast(pDataPoolImu, "navVs", &temps16);pInput->navVs = temps16 * 0.01;
-			GetDataFast(pDataPoolImu, "navVe", &temps16);pInput->navVe = temps16 * 0.01;
-			
-			OS_U16 tempu16; //10-19ĞŞ¸ÄOS_S16ÎªOS_U16
-			GetDataFast(pDataPoolImu, "navPitch", 	&temps16);pInput->pitch = temps16 * 0.01;
-			GetDataFast(pDataPoolImu, "navDir", 	&tempu16);pInput->yaw = tempu16 * 0.01;
-			GetDataFast(pDataPoolImu, "navRoll", 	&temps16);pInput->roll = temps16 * 0.01;
-			pInput->yaw = -pInput->yaw; //±±Æ«¶«×ª±±Æ«Î÷
-			if(pInput->yaw > 180)
-				pInput->yaw -= 360;
-			if(pInput->yaw < -180)
-				pInput->yaw += 360;
-			
-			pInput->Luanched = flightSeq.luanched;
-			
-			double V   = sqrt(pow(pInput->navVn,2) + pow(pInput->navVs,2) + pow(pInput->navVe,2));   // µØËÙ¼ÆËã
-			//¿ÕËÙ¾ÍÊÇµØËÙ£¬¸ßËÙ·É»úµÄ¿ÕËÙÃ»ÓÃ
-			pInput->airSpd = V;
-					
+			GetDataFast(pDataPoolImu, "navState", &g_ins_data.GPS_status);
+
+
+			GetDataFast(pDataPoolSelf, "ecuGetRp", &g_engine_data.rpm_engine);
+			GetDataFast(pDataPoolSelf, "ecuState", &g_engine_data.ECU_work_status);
+
+			double V   = sqrt(pow(g_ins_data.vtx,2) + pow(g_ins_data.vty,2) + pow(g_ins_data.vtz,2));   // µØËÙ¼ÆËã
 			SETDATA(pDataPoolSelf, "GrdSpd", V * 10, OS_S16);//
-			
-			OS_S16 srv1,srv2;
-			GetDataFast(pDataPoolSrv, "Sr1Read", &srv1);
-			GetDataFast(pDataPoolSrv, "Sr2Read", &srv2);
-			pInput->DD1 = srv1 * 0.01;
-			pInput->DD2 = srv2 * 0.01;
-			if(g_DeviceState.srvCountDown == 0)
-			{
-					pInput->DD1 = pOutput->rudder1Cmd;	//MML¶æ»ú
-					pInput->DD2 = pOutput->rudder2Cmd;
-			}				
-			pInput->DD5 = 0;
-			pInput->DD6 = 0;
+			// //¿ÕËÙ¾ÍÊÇµØËÙ£¬¸ßËÙ·É»úµÄ¿ÕËÙÃ»ÓÃ
+			// pInput->airSpd = V;
+					
+
+//			pInput->Luanched = flightSeq.luanched;	// 014²»Ê¹ÓÃ
+
+			// OS_S16 srv1,srv2;
+			// GetDataFast(pDataPoolSrv, "Sr1Read", &srv1);
+			// GetDataFast(pDataPoolSrv, "Sr2Read", &srv2);
+			// pInput->DD1 = srv1 * 0.01;	// 014²»Ê¹ÓÃ
+			// pInput->DD2 = srv2 * 0.01;
+			// if(g_DeviceState.srvCountDown == 0)
+			// {
+			// 		pInput->DD1 = pOutput->rudder1Cmd;	// 014²»Ê¹ÓÃ
+			// 		pInput->DD2 = pOutput->rudder2Cmd;
+			// }				
+			// pInput->DD5 = 0;	// 014²»Ê¹ÓÃ
+			// pInput->DD6 = 0;
 		}
-		//ÉèÖÃÊÓÏß½ÇºÍËø¶¨×´Ì¬
-		GetDataFast(pDataPoolFly,	"sctLock",	 &(pInput->scoutLocked));
-		OS_S16 tempss16;
-		GetDataFast(pDataPoolFly,	"vPitchSp",	 &tempss16);
-		pInput->scoutPitchSpd = (double)tempss16 * 0.002 / 57.3;
-		GetDataFast(pDataPoolFly,	"vYawSp",	 &tempss16);
-		pInput->scoutYawSpd = (double)tempss16 * 0.002 / 57.3;	
-		OS_U16 fuel_n;
-		GetDataFast(pDataPoolSelf,	"fuelRate",	 &fuel_n);
-		pInput->mass_fuel = (double)fuel_n;
-*/
-		}
+		// //ÉèÖÃÊÓÏß½ÇºÍËø¶¨×´Ì¬
+		// GetDataFast(pDataPoolFly,	"sctLock",	 &(pInput->scoutLocked));	// 014²»Ê¹ÓÃ
+		// OS_S16 tempss16;
+		// GetDataFast(pDataPoolFly,	"vPitchSp",	 &tempss16);
+		// pInput->scoutPitchSpd = (double)tempss16 * 0.002 / 57.3;	// 014²»Ê¹ÓÃ
+		// GetDataFast(pDataPoolFly,	"vYawSp",	 &tempss16);
+		// pInput->scoutYawSpd = (double)tempss16 * 0.002 / 57.3;		// 014²»Ê¹ÓÃ
+		// OS_U16 fuel_n;
+		// GetDataFast(pDataPoolSelf,	"fuelRate",	 &fuel_n);
+		// pInput->mass_fuel = (double)fuel_n;	// 014²»Ê¹ÓÃ
 }
 #define d2r		(57.29577951308402)
 
@@ -384,11 +425,11 @@ void DoFlightRun()
 	if((DOM_AUTOMATIC ) & g_DeviceState.workStage)
 	{
 		ControlRun(g_pControl);
-/* *********************************************** MML 20260413*****************************************************
+/* 280´úÂë
 
 		FlightRun(pInput, pOutput);
 
-		pInput->Msn_updatesig = 0;
+		pInput->Msn_updatesig = 0;	// 014 ²»Ê¹ÓÃ
 */		
 	}
 }
@@ -441,6 +482,9 @@ double calculateAngle(Point p1, Point p2, Point p3)
     return acos(cosTheta);
 }
 
+/**º¯Êı¹¦ÄÜ£ºÅĞ¶ÏÄ³¸ö¾­Î³¶ÈµãÊÇ·ñÔÚ°²È«ÇøÄÚ
+ * ·µ»ØÖµ£º  1	°²È«ÇøÄÚ
+ * 			0	°²È«ÇøÍâ*/
 OS_BOOL JudgeInSafe2(double lon, double lat)
 {
 	Point curPt;
@@ -474,6 +518,8 @@ OS_BOOL JudgeInSafe2(double lon, double lat)
 extern OS_U8 RecoverMark;
 OS_U8 JudgeHomeward()	//02 Æğ·É2sºó£¬Ã¿1sÅĞ¶ÏÒ»´Î£¬¿´ÊÇ·ñ³öÁË°²È«Çø£¿ÊÇ·ñĞèÒªÉ¡½µ£¿ÊÇ·ñµØÃæ·¢³ö½ô¼±·µº½£¿
 {
+	static OS_U8 OutSafeCount = 0;
+
 	//Ã¿ÃëÅĞ¶ÏÒ»´ÎÊÇ·ñ³ö°²È«Çø·µº½ºÍÈÎÎñ»úÊ§Áª
 	if(g_DeviceState.CurrTick % 200 != 0)
 		return 1;
@@ -499,7 +545,7 @@ OS_U8 JudgeHomeward()	//02 Æğ·É2sºó£¬Ã¿1sÅĞ¶ÏÒ»´Î£¬¿´ÊÇ·ñ³öÁË°²È«Çø£¿ÊÇ·ñĞèÒªÉ¡½
 		}
 		if(OutSafeCount == 0)
 		{
-			DoOpenUm();//°²È«Çø¿ªÉ¡
+			DoOpenUm();//°²È«ÇøÍâ¿ªÉ¡
 		}
 		else
 		{
@@ -538,16 +584,16 @@ OS_U8 JudgeHomeward()	//02 Æğ·É2sºó£¬Ã¿1sÅĞ¶ÏÒ»´Î£¬¿´ÊÇ·ñ³öÁË°²È«Çø£¿ÊÇ·ñĞèÒªÉ¡½
 		OutSafeArea = false;
 	}
 
-	//µØÃæÖ¸Áî½ô¼±·µº½£¬µ½·µº½µãºó¿ªÉ¡
-	if(homeMsn.MsnCmdType != 0)
-	{
-		double dist = haversine_distance(lat, lon, homeMsn.targetLat, homeMsn.targetLon);
-		if(dist < 150)
-		{
-			SETDATA(pDataPoolSelf,  "flyError", 0x3,	OS_U8);
-			DoOpenUm();//½ô¼±·µº½¿ªÉ¡
-		}
-	}
+	// //µØÃæÖ¸Áî½ô¼±·µº½£¬µ½·µº½µãºó¿ªÉ¡
+	// if(homeMsn.MsnCmdType != 0)	// TODO:À´×ÔµØÃæ£ºµØÃæÈÃÎÒ·µº½£¬ĞèÒª·µº½±êÖ¾Î»£»·µº½µ½ÄÄÀïµÄ¾­Î³¶È¡£
+	// {
+	// 	double dist = haversine_distance(lat, lon, homeMsn.targetLat, homeMsn.targetLon);
+	// 	if(dist < 150)
+	// 	{
+	// 		SETDATA(pDataPoolSelf,  "flyError", 0x3,	OS_U8);
+	// 		DoOpenUm();//½ô¼±·µº½¿ªÉ¡
+	// 	}
+	// }
 	return 0;
 }
 

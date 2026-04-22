@@ -8,10 +8,12 @@
 #include "mission.h"
 #include <math.h>
 #include "../core/BusInteract.h"
-#include "../flight/os_flight_io.h"
+// #include "../flight/os_flight_io.h"
 #include "../Modules/modNav.h"
 #include "../Modules/modFlash.h"
 #include "../FlightSupport.h"
+#include "flightPort.h"
+#include "tx_api.h"
 
 #ifndef M_PI
 #define M_PI (3.1415926)
@@ -43,15 +45,22 @@ void calcNextPt(double curLon, double curLat, double dir, double distance, doubl
 double calculateBearing(double lat1, double lon1, double lat2, double lon2);
 void LoadPaoIDFromFile();
 
+extern Stru_Initial_Data   g_initial_data;//初始发射数据；
+extern Stru_Route_Data     g_route_data;//初始预装订航点信息
+extern Stru_Data_Datalink_To_ControllerSig g_DLtoCtrl_sig;
+extern Stru_Data_Controller_To_Switch_Output    g_controller_to_switch;
+
+extern TX_BYTE_POOL byte_pool_0;
+
 OS_U8 leadID = 1;
 OS_U8 paoID = 1;
 OS_U8 guanID = 1;
 OS_U8 groupID = 0xFF;
 OS_U8 selfID = 0xFF;
-int ptCount = 0;
+int ptCount = 0;	// 总航点数量
 MSN_TASK_MODE curMsnMode = AUTO_MSN_MODE;
 REPORT_STATUS slaverStatus[SLAVE_COUNT] = {0};
-REPORT_STATUS selfStatus = {0};
+REPORT_STATUS selfStatus = {0};		// 紧急返航时要用
 
 //MSN_CMD slaveCmd[SLAVE_COUNT] = {0};
 //MSN_CMD teamMsnCmd = {0};
@@ -60,12 +69,12 @@ REPORT_STATUS selfStatus = {0};
 //MSN_CMD groundCmd = {0};
 
 MSN_CMD autoMsnPt[AUTO_MSN_PT_MAX_COUNT] = {0};
-RoutePointIn slaveCmd[SLAVE_COUNT] = {0};
-RoutePointIn teamMsnCmd = {0};
-RoutePointIn selfCmd = {0};
+RoutePointIn slaveCmd[SLAVE_COUNT] = {0};// 主机从机编队飞行使用。
+RoutePointIn teamMsnCmd = {0};	// 主机从机编队飞行使用。多处使用，谨慎，不能轻易删除
+RoutePointIn selfCmd = {0};	// 暂时用的地方不多
 
-RoutePointIn groundCmd = {0};
-RoutePointIn Arp[AUTO_MSN_PT_MAX_COUNT] = {0};
+// RoutePointIn groundCmd = {0};	// 紧急返航时要用
+RoutePointIn Arp[AUTO_MSN_PT_MAX_COUNT] = {0};	// 多处使用，谨慎，不能轻易删除
 
 FLIGHT_RESTRICTION flightRestriction = {0};
 FORMATION_MODE formationMode = MODE_SURROUND;
@@ -102,7 +111,7 @@ void MissionInit()
  ***********************************************************/
 void RunMissionTask(int tick)
 {
-	if(g_DeviceState.CurrTick % tick != 0)
+	if(g_DeviceState.CurrTick % tick != 0)	// tick为10，每50ms执行一次
 	{
 		return;
 	}
@@ -552,40 +561,52 @@ OS_U8 DoReturnHomeward()
 	
     //首先返航到起飞点，起飞点高度+300米
 		RecoverMark = 1;
-    groundCmd = Arp[0];
-    groundCmd.h = Arp[0].h + 300;
-		groundCmd.V_cmd = 100;
-		//groundCmd.outTrack = -1;
-		groundCmd.w = 5;
+    // groundCmd = Arp[0];
+    // groundCmd.h = Arp[0].h + 300;
+	// 	groundCmd.V_cmd = 100;
+	// 	//groundCmd.outTrack = -1;
+	// 	groundCmd.w = 5;
     for (int i = 0; i < AUTO_MSN_PT_MAX_COUNT; i++)
     {
         if (Arp[i].w == 5)
         {
-            groundCmd = Arp[i];
+            // groundCmd = Arp[i];
+			g_DLtoCtrl_sig.update_count++;
+			g_DLtoCtrl_sig.num_waypoint_updated = 1;
+			g_DLtoCtrl_sig.longitude[0]		= Arp[i].lon;
+			g_DLtoCtrl_sig.latitude[0]		= Arp[i].lat;
+			g_DLtoCtrl_sig.height[0]		= Arp[i].h;
+			g_DLtoCtrl_sig.route_mode[0]	= Arp[i].w;
+			g_DLtoCtrl_sig.formation_mode[0]= 0;
+			g_DLtoCtrl_sig.dltTime[0]		= Arp[i].t;
+			g_DLtoCtrl_sig.turn_radius[0]	= 0;
+			g_DLtoCtrl_sig.velocity[0]		= Arp[i].V_cmd;
+			g_DLtoCtrl_sig.accept_radius[0]	= 0;
             break;
         }
     }
     //重新计算当前点与回收点的连线，设置方位角
-	/* *********************************************** MML 20260413*****************************************************
 
-		OS_U16 curpoint;
-		curpoint = pOutput->curPtNo;
+		// OS_U16 curpoint;
+		// curpoint = pOutput->curPtNo;
     double curLon = selfStatus.lon * 1e-7;
     double curLat = selfStatus.lat * 1e-7;
-    double tarLon = groundCmd.lon;
-    double tarLat = groundCmd.lat;
+    double tarLon = g_DLtoCtrl_sig.longitude[0];
+    double tarLat = g_DLtoCtrl_sig.latitude[0];
     double dir = calculateBearing(curLat, curLon, tarLat, tarLon);
-    //groundCmd.inTrack = dir;
-    groundCmd.sn = curpoint + 1;
-		groundCmd.outTrack = dir;
-		updateNewRP(&groundCmd, 1, curpoint + 1, ptCount);
-		*/
+
+	g_DLtoCtrl_sig.turn_angle[0] = dir;
+
+    // //groundCmd.inTrack = dir;
+    // groundCmd.sn = curpoint + 1;
+	// 	groundCmd.outTrack = dir;
+	// 	updateNewRP(&groundCmd, 1, curpoint + 1, ptCount);
     return 0;
 }
 
 static void GenerateTeamMsn()
 {
-	if(g_DeviceState.currTime < 20.0)
+	if(g_DeviceState.currTime < 20.0)	// 20s之后，执行
 	{
 		return;
 	}
@@ -596,24 +617,26 @@ static void GenerateTeamMsn()
 		// 起飞未完成
 			return;
 	}
-	/* *********************************************** MML 20260413*****************************************************
 
-	// 起飞完成
-	if(pOutput->enginge_off == 1)
+	// 起飞完成（此时，控制算法中输出起飞标志位为1）
+	// if(pOutput->enginge_off == 1)
+	if(g_controller_to_switch.flag_engine_shutdown == 1)
 	{
-		SETDATA(pDataPoolMsn,	"msnComm2",	pOutput->enginge_off, OS_U8);
+		// SETDATA(pDataPoolMsn,	"msnComm2",	pOutput->enginge_off, OS_U8);
+		SETDATA(pDataPoolMsn,	"msnComm2",	g_controller_to_switch.flag_engine_shutdown, OS_U8);
 		StopEngine();
 	}
 	//SETDATA(pDataPoolMsn, "OpenUm", 0,	OS_U8);
-	if(pOutput->open_umbrella == 1)
+	// if(pOutput->open_umbrella == 1)
+	if(g_controller_to_switch.flag_open_umbrella == 1)
 	{
 		//伞降点
 		SETDATA(pDataPoolSelf,  "flyError", 4,  OS_U8);//正常开伞
-		DoOpenUm();//伞降点开伞
-		pOutput->open_umbrella = 0;
+		DoOpenUm();//正常伞降点开伞
+		// pOutput->open_umbrella = 0;
+		g_controller_to_switch.flag_open_umbrella = 0;
 		return;
 	}  
-	*/
 	/*
 	//立刻发出第一个点
 	static int curNavPt = 0;
@@ -721,107 +744,135 @@ OS_U32 MsnCmdHandler(STRU_422_MSG_INFO * frame)
     OS_U8 msgID = frame->u8MsgID;
     switch (msgID)
     {
-    case CMD_MSN_UPDATE:	//TODO:任务航点（在任务文件里的）
+    case CMD_MSN_UPDATE:	// 任务航点（在任务文件里的）
+		// 初始预装订航点， 机载端目前最多支持32点
+		// 每个航点 17 Byte
         UpdatePredictMsnByGround(frame);
         break;
-    case CMD_MSN_NEWPT:	//TODO:新加航点（在航路规划里的）
-    {
-			/*
-        double lon, lat, high, track, speed, arriveTime;
-        MISSION msn;
-        memcpy(&lon, frame->au8Data + 1, 8);
-        memcpy(&lat, frame->au8Data + 9, 8);
-        memcpy(&high, frame->au8Data + 17, 8);
-        memcpy(&track, frame->au8Data + 25, 8);
-        memcpy(&speed, frame->au8Data + 33, 8);
-        memcpy(&arriveTime, frame->au8Data + 41, 8);
-        msn.MsnCmdType = frame->au8Data[0];
-				msn.targetLon = lon;
-				msn.targetLat = lat;
-				msn.targetHigh = high;
-				msn.speed = speed;
-				msn.outTrack = track;
-				UpdateMission(msn);
-			*/
-			{
-				OS_U8 count = frame->au8Data[0];
-				double lon,lat,alt,dir,speed,t;
-				unsigned char type;
-				RoutePointIn nrp[AUTO_MSN_PT_MAX_COUNT];
-				//新获取指令存入nptBuffer
-				memset(nptBuffer, 0, sizeof(nptBuffer));
-				memcpy(nptBuffer, frame->au8Data + 1, count * 49);
-				/* *********************************************** MML 20260413*****************************************************
-
-				OS_U16 curpoint;
-				curpoint = pOutput->curPtNo;
-
-				for (int i = 0; i < count; i++)
-				{	
-					memcpy(&type,  nptBuffer + 49 * i, 1);		
-					memcpy(&lon,   nptBuffer + 49 * i + 1, 8);
-					memcpy(&lat,   nptBuffer + 49 * i + 9, 8);
-					memcpy(&alt,   nptBuffer + 49 * i + 17, 8);
-					memcpy(&dir,   nptBuffer + 49 * i + 25, 8);
-					memcpy(&speed, nptBuffer + 49 * i + 33, 8);
-					memcpy(&t, nptBuffer + 49 * i + 41, 8);				
-					nrp[i].sn = i + curpoint +1;
-					nrp[i].lon = lon;
-					nrp[i].lat = lat;
-					nrp[i].h = alt;
-					nrp[i].outTrack = dir;
-					nrp[i].t = t;
-					nrp[i].w = type;
-					nrp[i].V_cmd = speed;                                                         
-					//nrp[i].if_airspeed_used = 0;							
-				}
-				updateNewRP(nrp, count, curpoint + 1, ptCount); 
+    case CMD_MSN_NEWPT:	//新加航点（在航路规划里的）
+		{
+			// 在线更新航点， 最多支持12点
+			// 每个航点 49 Byte
+				/*
+			double lon, lat, high, track, speed, arriveTime;
+			MISSION msn;
+			memcpy(&lon, frame->au8Data + 1, 8);
+			memcpy(&lat, frame->au8Data + 9, 8);
+			memcpy(&high, frame->au8Data + 17, 8);
+			memcpy(&track, frame->au8Data + 25, 8);
+			memcpy(&speed, frame->au8Data + 33, 8);
+			memcpy(&arriveTime, frame->au8Data + 41, 8);
+			msn.MsnCmdType = frame->au8Data[0];
+					msn.targetLon = lon;
+					msn.targetLat = lat;
+					msn.targetHigh = high;
+					msn.speed = speed;
+					msn.outTrack = track;
+					UpdateMission(msn);
 				*/
-       }
-     }
-			break;
+			OS_U8 count = frame->au8Data[0];
+			double lon,lat,alt,dir,speed,t;
+			unsigned char type;
+			// RoutePointIn nrp[AUTO_MSN_PT_MAX_COUNT];
+			//新获取指令存入nptBuffer
+			memset(nptBuffer, 0, sizeof(nptBuffer));
+			memcpy(nptBuffer, frame->au8Data + 1, count * 49);
+
+			g_DLtoCtrl_sig.update_count++;
+			g_DLtoCtrl_sig.num_waypoint_updated = count;
+
+			// OS_U16 curpoint;
+			// curpoint = pOutput->curPtNo;
+
+			for (int i = 0; i < count; i++)
+			{	
+				memcpy(&type,  nptBuffer + 49 * i, 1);		
+				memcpy(&lon,   nptBuffer + 49 * i + 1, 8);
+				memcpy(&lat,   nptBuffer + 49 * i + 9, 8);
+				memcpy(&alt,   nptBuffer + 49 * i + 17, 8);
+				memcpy(&dir,   nptBuffer + 49 * i + 25, 8);
+				memcpy(&speed, nptBuffer + 49 * i + 33, 8);
+				memcpy(&t, nptBuffer + 49 * i + 41, 8);
+				
+				g_DLtoCtrl_sig.longitude		[i] = lon;
+				g_DLtoCtrl_sig.latitude			[i] = lat;
+				g_DLtoCtrl_sig.height			[i] = alt;
+				g_DLtoCtrl_sig.route_mode		[i] = type;
+				g_DLtoCtrl_sig.formation_mode	[i] = 0;
+				g_DLtoCtrl_sig.dltTime			[i] = t;
+				g_DLtoCtrl_sig.turn_angle		[i] = dir;
+				g_DLtoCtrl_sig.turn_radius		[i] = 0;
+				g_DLtoCtrl_sig.velocity			[i] = speed;
+				g_DLtoCtrl_sig.accept_radius	[i] = 0;
+
+				// nrp[i].sn = i + curpoint +1;
+				// nrp[i].lon = lon;
+				// nrp[i].lat = lat;
+				// nrp[i].h = alt;
+				// nrp[i].outTrack = dir;
+				// nrp[i].t = t;
+				// nrp[i].w = type;
+				// nrp[i].V_cmd = speed;                                                         
+				// //nrp[i].if_airspeed_used = 0;							
+			}
+			// updateNewRP(nrp, count, curpoint + 1, ptCount); 
+		}
+		break;
     }
     return 0;
 }
 
 
-unsigned char ptBuffer[17 * 32];
+unsigned char ptBuffer[17 * 32];	// 每个航点17字节，最多32个航点
+/**在该函数中为控制准备航点数据，写入控制航点数据结构体
+ */
 void UpdatePredictMsnByGround(STRU_422_MSG_INFO * frame)
 {
     unsigned char buf[250];
     memcpy(buf, frame->au8Data, frame->u16Len);
-    
+    // frame->au8Data中，第[0]字节为标志位，0表示传的是安全区数据；[1]、[2]、[3]表示传的是航点信息
     switch(buf[0])
     {
-    case 0:
+    case 0:		// 第0包，传安全区
         groupID = buf[1];
         selfID = buf[2];
-        LoadSafeArea(buf + 3);
-        ptCount = buf[4];
+        LoadSafeArea(buf + 3);	// 获取安全围栏
+        ptCount = buf[4];	// 总航点数量
+		if(ptCount){
+			g_route_data.num_rows = ptCount;
+			g_route_data.num_columns = 11;
+
+			double *pData = NULL;
+			tx_byte_allocate(&byte_pool_0, (void**)&pData, 
+							ptCount * 11 * sizeof(double), TX_NO_WAIT);
+			if(pData == NULL) return;
+
+			g_route_data.p_route_data = pData;
+		}
         break;
-    case 1:
-    case 2:
+    case 1:		// 第1、2、3包，传具体航点信息，每一包航点信息最多只能包括12个航点，总共最多就是30个航点（还是36个航点之类）
+    case 2:		// 每个航点是17个字节，包含经纬高、dir、t、type、speed
     case 3:
         if (ptCount == 0)
             return;
         memcpy(ptBuffer + (buf[0] - 1) * 12 * 17, buf + 1, 12 * 17);
         if (buf[0] * 12 >= ptCount)
         {
-					//RoutePointIn rp[AUTO_MSN_PT_MAX_COUNT];
-					//MSN_CMD tempPt[AUTO_MSN_PT_MAX_COUNT];
-					for (int i = 0; i < ptCount; i++)
-					{
-						int lon,lat;
-						short alt,dir;
-						unsigned short speed,t;
-						unsigned char type;
-						memcpy(&lon,   ptBuffer + 17 * i + 0, 4);
-						memcpy(&lat,   ptBuffer + 17 * i + 4, 4);
-						memcpy(&alt,   ptBuffer + 17 * i + 8, 2);
-						memcpy(&dir,   ptBuffer + 17 * i + 10, 2);
-						memcpy(&t, ptBuffer + 17 * i + 12, 2);
-						memcpy(&type,  ptBuffer + 17 * i + 14, 1);
-						memcpy(&speed, ptBuffer + 17 * i + 15, 2);
+			//RoutePointIn rp[AUTO_MSN_PT_MAX_COUNT];
+			//MSN_CMD tempPt[AUTO_MSN_PT_MAX_COUNT];
+			for (int i = 0; i < ptCount; i++)
+			{
+				int lon,lat;
+				short alt,dir;
+				unsigned short speed,t;
+				unsigned char type;
+				memcpy(&lon,   ptBuffer + 17 * i + 0, 4);	// 参考basic ling194
+				memcpy(&lat,   ptBuffer + 17 * i + 4, 4);
+				memcpy(&alt,   ptBuffer + 17 * i + 8, 2);
+				memcpy(&dir,   ptBuffer + 17 * i + 10, 2);
+				memcpy(&t, ptBuffer + 17 * i + 12, 2);
+				memcpy(&type,  ptBuffer + 17 * i + 14, 1);
+				memcpy(&speed, ptBuffer + 17 * i + 15, 2);
 //						tempPt[i].targetLon = lon * 1e-7;
 //						tempPt[i].targetLat = lat * 1e-7;
 //						tempPt[i].targetHigh = alt;
@@ -831,72 +882,95 @@ void UpdatePredictMsnByGround(STRU_422_MSG_INFO * frame)
 //						tempPt[i].MsnCmdType = type;
 //						tempPt[i].speed = speed;
 //						tempPt[i].delayType = 0;
-						Arp[i].sn = i;
-						Arp[i].lon = lon * 1e-7;
-						Arp[i].lat = lat * 1e-7;
-						Arp[i].h = alt;
-						Arp[i].outTrack = dir *0.01;
-						Arp[i].t = t;
-						Arp[i].w = type;
-						Arp[i].V_cmd = speed;                                                         
-						Arp[i].if_airspeed_used = 0;
-					}
-					/* *********************************************** MML 20260413*****************************************************
+				g_route_data.p_route_data[i * 11 + 0] = i;  // 编号
+				g_route_data.p_route_data[i * 11 + 1] = lon * 1e-7;  // 经度
+				g_route_data.p_route_data[i * 11 + 2] = lat * 1e-7;  // 纬度
+				g_route_data.p_route_data[i * 11 + 3] = alt;
+				g_route_data.p_route_data[i * 11 + 4] = type;		//航点类型
+				g_route_data.p_route_data[i * 11 + 5] = 0;			//航点信息，未使用
+				g_route_data.p_route_data[i * 11 + 6] = t;			//航段时间
+				g_route_data.p_route_data[i * 11 + 7] = dir *0.01;	//切出航迹角 或 转弯角度（复用） 或 打击落角
+				g_route_data.p_route_data[i * 11 + 8] = 0;			//转弯半径或盘旋半径，未使用
+				g_route_data.p_route_data[i * 11 + 9] = speed;		//速度指令
+				g_route_data.p_route_data[i * 11 + 10]= 0;			//接受半径，未使用
 
-					updateRP(Arp, ptCount);
-					*/
+				Arp[i].sn = i;	// 航点号。从0开始编号
+				Arp[i].lon = lon * 1e-7;
+				Arp[i].lat = lat * 1e-7;
+				Arp[i].h = alt;
+				Arp[i].outTrack = dir *0.01;
+				Arp[i].t = t;
+				Arp[i].w = type;
+				Arp[i].V_cmd = speed;                                                         
+				Arp[i].if_airspeed_used = 0;
+			}
+			// updateRP(Arp, ptCount);	// 014 换方式
 /*				
-					memcpy(autoMsnPt, &tempPt[1], sizeof(tempPt) - sizeof(MSN_CMD));
-					RoutePointIn rp[2];
-					rp[0].sn     =  0;
-					rp[0].lon    =  tempPt[0].targetLon;
-					rp[0].lat    =  tempPt[0].targetLat;
-					rp[0].h      =  tempPt[0].targetHigh;
-					rp[0].w      =  10;
-					rp[0].ma_cmd =  0;
+			memcpy(autoMsnPt, &tempPt[1], sizeof(tempPt) - sizeof(MSN_CMD));
+			RoutePointIn rp[2];
+			rp[0].sn     =  0;
+			rp[0].lon    =  tempPt[0].targetLon;
+			rp[0].lat    =  tempPt[0].targetLat;
+			rp[0].h      =  tempPt[0].targetHigh;
+			rp[0].w      =  10;
+			rp[0].ma_cmd =  0;
 
-					//double lon1;
-					//double lat1;
+			//double lon1;
+			//double lat1;
 
-					//calcNextPt(tempPt[0].targetLon,tempPt[0].targetLat,tempPt[0].outTrack,10000,&lat1,&lon1);
-					
-					rp[1].sn     =  1;
-					rp[1].lon    =  tempPt[1].targetLon;//lon1;
-					rp[1].lat    =  tempPt[1].targetLat;//lat1;
-					rp[1].h      =  tempPt[1].targetHigh;
-					rp[1].w      =  4;
-					rp[1].ma_cmd =  tempPt[1].speed / 340.0;
-					//rp[1].if_airspeed_used = 1;
-					updateRP(rp, 2);
-					
-					navInput.InitLon = tempPt[0].targetLon;
-					navInput.InitLat = tempPt[0].targetLat;
-					navInput.InitHigh =tempPt[0].targetHigh;
-					navInput.InitYaw = tempPt[0].outTrack;
+			//calcNextPt(tempPt[0].targetLon,tempPt[0].targetLat,tempPt[0].outTrack,10000,&lat1,&lon1);
+			
+			rp[1].sn     =  1;
+			rp[1].lon    =  tempPt[1].targetLon;//lon1;
+			rp[1].lat    =  tempPt[1].targetLat;//lat1;
+			rp[1].h      =  tempPt[1].targetHigh;
+			rp[1].w      =  4;
+			rp[1].ma_cmd =  tempPt[1].speed / 340.0;
+			//rp[1].if_airspeed_used = 1;
+			updateRP(rp, 2);
+			
+			navInput.InitLon = tempPt[0].targetLon;
+			navInput.InitLat = tempPt[0].targetLat;
+			navInput.InitHigh =tempPt[0].targetHigh;
+			navInput.InitYaw = tempPt[0].outTrack;
 
-					pInput->initLon = tempPt[0].targetLon;
-					pInput->initLat = tempPt[0].targetLat;
-					pInput->initHigh = tempPt[0].targetHigh;
-					pInput->initDir = tempPt[0].outTrack;
+			pInput->initLon = tempPt[0].targetLon;
+			pInput->initLat = tempPt[0].targetLat;
+			pInput->initHigh = tempPt[0].targetHigh;
+			pInput->initDir = tempPt[0].outTrack;
 */
-					navInput.InitLon = Arp[0].lon;
-					navInput.InitLat = Arp[0].lat;
-					navInput.InitHigh =Arp[0].h;
-					navInput.InitYaw = Arp[0].outTrack;
-/* *********************************************** MML 20260413*****************************************************
+			navInput.InitLon  = g_route_data.p_route_data[1];
+			navInput.InitLat  = g_route_data.p_route_data[2];
+			navInput.InitHigh = g_route_data.p_route_data[3];
+			navInput.InitYaw  = g_route_data.p_route_data[7];
 
-					pInput->initLon = Arp[0].lon;
-					pInput->initLat = Arp[0].lat;
-					pInput->initHigh =Arp[0].h;
-					pInput->initDir = Arp[0].outTrack;
-					
-					SETDATA(pDataPoolFly, "DataLon", (pInput->initLon / 0.0000001), OS_S32); //
-					SETDATA(pDataPoolFly, "DataLat",  pInput->initLat / 0.0000001, OS_S32); //
-					SETDATA(pDataPoolFly, "DataHigh", pInput->initHigh, OS_S16);//
-					SETDATA(pDataPoolFly, "DataDir", pInput->initDir / 0.01, OS_U16); //
-*/
-					SETDATA(pDataPoolMsn,   "msnDevID", selfID, OS_U8);
-					SETDATA(pDataPoolMsn,   "msnGrpID", groupID, OS_U8);
+			g_initial_data.missile_ID		= 0;
+			g_initial_data.longitude_launch = g_route_data.p_route_data[1];
+			g_initial_data.latitude_launch  = g_route_data.p_route_data[2];
+			g_initial_data.height_launch    = g_route_data.p_route_data[3];
+			g_initial_data.initial_parameter1 = 20;
+			g_initial_data.initial_parameter2 = 0;
+			g_initial_data.launch_time		= 0;
+			g_initial_data.lauch_azimuth	= g_route_data.p_route_data[7];
+			g_initial_data.lauch_pitch		= 12;
+			g_initial_data.lauch_booster_pitch = 20;
+
+			SETDATA(pDataPoolFly, "DataLon", (g_route_data.p_route_data[1] * 1e7), OS_S32); //
+			SETDATA(pDataPoolFly, "DataLat", (g_route_data.p_route_data[2] * 1e7), OS_S32); //
+			SETDATA(pDataPoolFly, "DataHigh", g_route_data.p_route_data[3], OS_S16);//
+			SETDATA(pDataPoolFly, "DataDir", (g_route_data.p_route_data[7] * 1e2), OS_U16); //
+
+			// pInput->initLon = Arp[0].lon;	// 014 换方式
+			// pInput->initLat = Arp[0].lat;
+			// pInput->initHigh =Arp[0].h;
+			// pInput->initDir = Arp[0].outTrack;
+			
+			// SETDATA(pDataPoolFly, "DataLon", (pInput->initLon / 0.0000001), OS_S32); //
+			// SETDATA(pDataPoolFly, "DataLat",  pInput->initLat / 0.0000001, OS_S32); //
+			// SETDATA(pDataPoolFly, "DataHigh", pInput->initHigh, OS_S16);//
+			// SETDATA(pDataPoolFly, "DataDir", pInput->initDir / 0.01, OS_U16); //
+			SETDATA(pDataPoolMsn,   "msnDevID", selfID, OS_U8);
+			SETDATA(pDataPoolMsn,   "msnGrpID", groupID, OS_U8);
         }
         break;
     default:

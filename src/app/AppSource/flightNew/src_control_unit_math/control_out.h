@@ -33,10 +33,16 @@ typedef struct  _Stru_Control_Out_Input
 
 typedef struct  _Stru_Control_Out_Output
 {
-	double u1;
+	double u1;//ÎïÀí¶æ
 	double u2;
 	double u3;
 	double u4;
+	double u5;
+	double u6;
+
+	double uf;//Âß¼­¶æ
+	double uh;
+	double ug;
 }Stru_Control_Out_Output;
 
 class CMathControlOut

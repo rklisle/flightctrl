@@ -58,7 +58,7 @@ OS_U8 PushLoopMem(OS_U8 rtIndex, OS_U8 *mem, OS_U16 len)
 
 /**函数功能：
  * 从内存池中弹出一帧数据
- * 参数1：哪个内存池
+ * 参数1：根据串口号选择哪个内存池
  * 参数2：数据存到哪里
  * 参数3：数据长度
  * 返回值：0成功 负值：各种失败
@@ -212,6 +212,7 @@ OS_S32 PopFrameLoopMem(OS_U8 rtIndex, OS_U8 *memFrame, OS_U16* u16len)
 
 		if((buffLoop[rtIndex].BUFFER[buffLoop[rtIndex].head] == buffLoop[rtIndex].syncHead_A) && (buffLoop[rtIndex].BUFFER[head_1] == buffLoop[rtIndex].syncHead_B))//0x55AA
 		{
+			// ************************** 根据协议解析出一帧数据的长度msgLen *************************************
 			OS_U16 msgLen;
 			if(buffLoop[rtIndex].fixedLen == 0)//正常情况，计算长度,2字节长度
 			{
@@ -231,6 +232,7 @@ OS_S32 PopFrameLoopMem(OS_U8 rtIndex, OS_U8 *memFrame, OS_U16* u16len)
 			{
 				msgLen = buffLoop[rtIndex].fixedLen;
 			}
+			// ************************* 导航板发过来的数据是169个字节 **************************************
             if(msgLen > 300)
 			{
 				memset(buffLoop[rtIndex].BUFFER, 0, BUFFER_LOOP_POOL_MAX);
@@ -245,7 +247,7 @@ OS_S32 PopFrameLoopMem(OS_U8 rtIndex, OS_U8 *memFrame, OS_U16* u16len)
 			}
 			for(int idx = 0; idx < msgLen; idx++)
 			{
-				memFrame[idx] = buffLoop[rtIndex].BUFFER[buffLoop[rtIndex].head++];
+				memFrame[idx] = buffLoop[rtIndex].BUFFER[buffLoop[rtIndex].head++];	// 从数据帧头开始，拷贝整帧数据
 				if(buffLoop[rtIndex].head == BUFFER_LOOP_POOL_MAX)
 				{
 					buffLoop[rtIndex].head = 0;

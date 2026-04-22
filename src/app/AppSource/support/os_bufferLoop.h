@@ -22,8 +22,8 @@ typedef struct buff_loop
 	OS_U8 syncHead_A;
 	OS_U8 syncHead_B;
 	int lenPos;
-	int lenExtern;
-	int fixedLen;
+	int lenExtern;	// 数据帧中表示长度字节，之外还有lenExtern个字节，总共构成一帧数据	//普通422消息，头部6字节，校验和2字节不算入长度字段
+	int fixedLen;	//0：取HeadA、HeadB后面的两个字节作为长度；-1：暂不清楚；具体数值：固定长度
 	OS_U8 BUFFER[BUFFER_LOOP_POOL_MAX];
 }BUFF_LOOP;
 #pragma pack()

@@ -539,25 +539,5 @@ OS_U8 CalcXYZ()
 	SETDATA(pDataPoolFly, "navVy", vy * 10, OS_S16);
 	SETDATA(pDataPoolFly, "navVz", vz * 10, OS_S16);
 
-	// static uint8_t FzOnFlag = 0;
-	// if(FzOnFlag == 1)
-	// {
-	// 	// 引信-引爆电源已经上电
-	// 	// 延时10s
-	// 	g_DeviceStatus.curTime = GetCurTime() - g_DeviceStatus.FzOnTime;
-	// 	if(g_DeviceStatus.curTime > 10)	// 10*1000
-	// 	{
-	// 		// 进行二次激活， 发10次指令
-	// 		FuseSend(0x6B);	// 执行电激活
-	// 	}
-	// 	return 0;
-	// }
-	// if(sqrt(x*x + y*y +z*z) > 2000)	// 距离发射点2km
-	// {
-	// 	// 打开引信可控电源
-	// 	PowerOn(DEVICE_FUSE28V);
-	// 	g_DeviceStatus.FzOnTime = GetCurTime();	// tx_time_get();
-	// 	FzOnFlag = 1;
-	// }
 	return 0;
 }

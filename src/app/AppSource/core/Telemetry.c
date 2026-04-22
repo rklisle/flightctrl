@@ -183,7 +183,7 @@ static OS_U16 GetTelemetryByTick(OS_U32 tick, OS_U8* buf)
 	//数据区第0字节为group编号
 	*(OS_U8*)(buf + TELE_PARAM_GROUPID_POS) = 0x81;//groupId + 0x81;
 	//数据区第1~4字节为时间
-	*(OS_U32*)(buf + TELE_PARAM_CURTIME_POS) = g_DeviceState.currTime * 1e4;//1e4为c语言科学计数法，表示10000;
+	*(OS_U32*)(buf + TELE_PARAM_CURTIME_POS) = g_DeviceState.currTime * 1e4;
 	return frameLen + TELE_PARAM_FIRSTDATA_POS;
 }
 /***********************************************************
@@ -204,7 +204,8 @@ static OS_U16 GetFlightTelemetryByTick(OS_U32 tick, OS_U8* buf)
 	//数据区第0字节为group编号
 	*(OS_U8*)(buf + TELE_PARAM_GROUPID_POS) = 0x82;
 	//数据区第1~4字节为时间
-	*(OS_U32*)(buf + TELE_PARAM_CURTIME_POS) = g_DeviceState.currTime * 1e4;//1e4为c语言科学计数法，表示10000;	// BUG
+// BUG：此处用g_DeviceState.currTime是否合适，因为这个值起飞时会清0，如果是系统时间，应该用curTime（全局变量）
+	*(OS_U32*)(buf + TELE_PARAM_CURTIME_POS) = g_DeviceState.currTime * 1e4;
 	return len + TELE_PARAM_FIRSTDATA_POS;
 }
 /***********************************************************
@@ -215,7 +216,7 @@ static OS_U16 GetFlightTelemetryByTick(OS_U32 tick, OS_U8* buf)
  * 作者:	成宏璟
  ***********************************************************/
 extern OS_BOOL FlashProgramming;
-void TelemetryFrameOut()	// 遥测数据发送给数据链
+void TelemetryFrameOut()	// 遥测数据发送给数据链 5ms运行一次
 {
 	OS_U32 tick = g_DeviceState.CurrTick;
 

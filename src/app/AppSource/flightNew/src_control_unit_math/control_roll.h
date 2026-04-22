@@ -48,6 +48,8 @@ typedef struct  _Stru_Roll_Control_Output
 	double ug_adrc;
 	double time_combat_delay;
 	double gama_command_compensate;
+	double gama_command;//滚转角指令
+	double wx_command;	 //滚转角速度指令
 }Stru_Roll_Control_Output;
 
 class CMathControlRoll

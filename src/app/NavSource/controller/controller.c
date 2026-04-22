@@ -21,7 +21,7 @@
 OS_U8 navState = 0x44;
 OS_DOUBLE curPress;
 OS_DOUBLE curAirSpdPa;
-OS_DOUBLE curAirSpd;
+// OS_DOUBLE curAirSpd;	// MML Î´Ê¹ÓÃ£¬×¢ÊÍ
 OS_DOUBLE press_height;
 OS_DOUBLE AirSpdHistory[150];//0.75Ãë´°¿Ú
 OS_U8 SendNavQiuStart = 0;

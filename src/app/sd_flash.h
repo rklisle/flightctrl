@@ -2,7 +2,7 @@
 #define __SD_FLASH_H__
 #include <stdint.h>
 #include "tx_api.h"
-#define FILE_COUNT	(6)
+#define FILE_COUNT	(1)
 
 int32_t  sd_flash_init(TX_BYTE_POOL *pmem);//used
 

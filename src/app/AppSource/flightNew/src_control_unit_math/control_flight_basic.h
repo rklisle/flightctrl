@@ -15,26 +15,20 @@
 #include "control_engine.h"
 #include "../data_protocol.h"
 
-typedef struct  _Stru_Way_Point
-{
-	double longitude;
-	double latitude;
-	double height;
-	double turn_radius;
-	double turn_angle;
-	double velocity;
-	int    route_mode;//航点类型
-	int    formation_mode;	//待扩充???...
-}Stru_Way_Point;
+
 
 typedef struct  _Stru_Command
 {
-	bool flag_separate_booster;	 //助推器分离
-	bool flag_launch_missile_wing;//弹翼展开
-	bool flag_engine_start;		//发动机点火
-	bool flag_seeker_on;			//导引头开机
-	bool flag_lock_on_permit;		//锁定允许标识
+	bool flag_separate_booster;	 //助推器分离，三角翼项目，自动分离，不需要发出指令
+	bool flag_launch_missile_wing;//弹翼展开，三角翼项目未使用
+	bool flag_engine_start;		//发动机点火，三角翼项目改为，怠速转70%油门 或 满油门
+	bool flag_seeker_on;			//导引头开机，三角翼项目待扩展，后续安装导引头后使用
+	bool flag_lock_on_permit;		//锁定允许标识，三角翼项目待扩展，后续安装导引头后使用
 	bool flag_combat_status;		//锁定目标，进入战斗/末制导状态，给引信发送“延迟装订、保险解除指令”
+
+	bool flag_missile_takeoff;	//起飞
+	bool flag_engine_shutdown;	//发动机关机
+	bool flag_open_umbrella;		//开伞回收
 }Stru_Command;
 
 typedef struct  _Stru_Control_Time
@@ -55,8 +49,12 @@ typedef struct  _Stru_Control_Time
 	double time_turn_in_end;		//入转弯结束时间: 预计滚转过渡完成时间
 	double time_turn_out_start;	//出转弯开始时间
 	double time_turn_out_end;		//出转弯结束时间
-	double time_turn_in_minimum;
-	double time_arrive_minimum;
+	double time_turn_in_minimum;	//入弯最小时刻，满足转弯条件时刻 + 10s
+	double time_arrive_minimum;	//所有航迹总飞行时长，
+
+	double time_missile_takeoff;	//起飞
+	double time_engine_shutdown;	//发动机关机
+	double time_open_umbrella;	//开伞回收
 }Stru_Control_Time;
 
 typedef struct  _Stru_Control_flag
@@ -74,14 +72,14 @@ typedef struct  _Stru_Control_flag
 	
 	bool flag_engine_start_finish_set;//初始爬升段发动机大车，即最大能力爬升结束，转发动机巡航控制指令及油门
 	//bool flag_engine_start_finish;//同时发动机开机，不延迟
-	
-	bool flag_seeker_on_set;		
-	bool flag_seeker_on;			//导引头开机，光电导引头一般可长时间工作，助推器分离一段使劲按后即可开机
-	
+
 	bool flag_launch_turn_set;	
 	bool flag_launch_turn;		//扇面转弯过程中，结束后无效	
 	bool flag_altitude_control_set;
 	bool flag_altitude_control;	//首次接入高度控制
+	
+	bool flag_seeker_on_set;		
+	bool flag_seeker_on;			//导引头开机，光电导引头一般可长时间工作，助推器分离一段使劲按后即可开机
 	
 	bool flag_lock_on_permit;		//导引头锁定允许: 切换最后一个航点(视情优化为，弹目距离小于阈值时，锁定允许)
 	bool flag_cooperative_attack_set;
@@ -95,22 +93,27 @@ typedef struct  _Stru_Control_flag
 	
 	bool flag_waypoint_turn;	//航迹转弯过程中标识
 	bool flag_turn_out_set;	//出转弯过程中标识，航迹转弯和扇面转弯共用
+
+	bool flag_missile_takeoff;	//起飞
+	bool flag_engine_shutdown;	//发动机关机
+	bool flag_open_umbrella;		//开伞回收
 }Stru_Control_flag;
 
 typedef struct  _Stru_Flight_Basic_Input
 {
 	int missile_ID;
 	int engine_start_result;
-	double engine_rpm;//从发动机接收的状态转速
+	double engine_rpm;		//从发动机接收的状态转速
 	double engine_cmd_rpm;//发动给发动机的指令转速，二选一
-	double engine_cmd_Kc;//发动给发动机的指令油门，二选一
+	double engine_cmd_Kc;	//发动给发动机的指令油门，二选一
 	
-	Stru_Data_RadioAlt_To_Controller st_radioalt_data;//无线电高度表给控制???...
-	Stru_Data_Baro_To_Controller st_baro_data;//空速管给控制???...
+	Stru_Data_RadioAlt_To_Controller st_radioalt_data;//无线电高度表给控制，三角翼项目未使用
+	Stru_Data_Baro_To_Controller st_baro_data;//空速管给控制
 	Stru_Data_Engine_To_Controller st_engine_data;//发动机给控制???...
 	Stru_Data_INS_To_Controller	st_ins_data;
 	Stru_Data_Seeker_To_Controller	st_seeker_data;
-	Stru_Data_Datalink_To_Controller	st_datalink_data;
+	//Stru_Data_Datalink_To_Controller	st_datalink_data;
+	Stru_Data_Datalink_To_ControllerSig	st_datalink_datasig;
 }Stru_Flight_Basic_Input;
 
 typedef struct  _Stru_Flight_Basic_Output
@@ -132,20 +135,32 @@ typedef struct  _Stru_Flight_Basic_Output
 	double wy;
 	double wz;
 	double g;	//重力常数
-	double dqf;
+	double dqf;	//视线角速度
 	double dqh;	
 	double qf;
 	double qh;
 	double time_to_go;
-	double phif;
+	double phif;//框架角
 	double phih;
 	double angle_zw;
 	double radius_zw;
 	double target_velocity;
 	double target_time;
 	double target_height;
+	//新增信息start
+	double dynamic_pressure;//动压
+	double target_long;
+	double target_lat;
+	int token_long;//纵向，未使用
+	int token_lat;//侧向，未使用
+	double dlt_psic;//航迹角偏差，未使用
+	double sz_circle;//圆轨迹侧偏距，未使用
+	double theta;//弹道倾角，未使用
+	double alpha_vg;//地速攻角，未使用
+	double beita_vg;//地速侧滑角，未使用
+	//新增信息end
 	double ground_temperature;
-	double distance_target;
+	double distance_target;//待飞距离
 	double distance_target_t_combat;
 	double gama_turn_nominal;
 	double velocity_average_10s;
@@ -157,8 +172,8 @@ typedef struct  _Stru_Flight_Basic_Output
 	bool flag_waypoint_turn;
 	bool flag_altitude_climb;
 	bool flag_altitude_decline;
-	bool flag_velocity_control;	//空速类型
-	bool flag_fire_distribution;//火力分配
+	bool flag_velocity_control; //空速类型
+	bool flag_fire_distribution;//火力分配，未用到
 	Stru_Command st_command;
 	Stru_Control_Time st_control_time;
 }Stru_Flight_Basic_Output;
@@ -169,7 +184,7 @@ public:
 	CMathControlFlightBasic(); 
 	double flight_time;
 	int time_tick;
-	//Stru_Debug_Monitor					* p_st_debug_monitor;//调试信息
+//	Stru_Debug_Monitor					* p_st_debug_monitor;//调试信息
 	Stru_Route_Data						* p_st_route_data_preflight;//预装航线信息
 	Stru_Initial_Data					* p_st_initial_data;//发射信息
 	Stru_Flight_Basic_Input				* p_st_flight_basic_input;
@@ -180,7 +195,7 @@ private:
 	void Get_Data();
 	void Calc_Data();
 	void Send_Data();
-	// void Monitor_Data();
+	void Monitor_Data();
 	void Calc_Command();	
 	void Calc_Flight_Data();
 	void Calc_Mass_Data();
@@ -192,14 +207,17 @@ private:
 	void Control_Altitude_Change();
 	void Coord_Rebuild();
 	void Update_Task_Info();
-	//void Change_Task_Info_Online();
+	void Change_Task_Info_Online();
 	bool Judge_Turn_Error();
 	
 	int m_missile_ID;
 	int m_missile_flight_mode;//0x55 测试训练，0xAA 虚拟打击或导引头捕获后打击
-
+	double m_ground_temperature;
 	int m_num_way_point;	//总航点数
 	int m_num_way_point_target;//目标航点(当前航段)
+	Stru_Way_Point m_st_way_point[MAX_ROUTE_NUMBER];//航点，发射点不是第0航点；航点号为0，表征第一个(目标)航点
+	Stru_Way_Point m_st_target;//目标信息，位置、转弯半径、角度(正航向或转弯角度等)、速度、航点类型及信息类型
+	
 	int valid_count;	//视线角速度计算，弹目盲区距离计数，小于某值不再更新
 	int count_qk;		//离架或启控
 	int count_v_5;		//启控备保
@@ -217,10 +235,8 @@ private:
 	int count_sd_in;	//小于提前转弯距离
 	int count_turn_out;//转弯转出，进入直航
 	int count_turn_error;//转弯角度过大，异常
-	//int count_update;	//数据链或任务机，航点更新
-	double m_ground_temperature;
-	Stru_Way_Point m_st_way_point[MAX_ROUTE_NUMBER];//航点，发射点不是第0航点；航点号为0，表征第一个(目标)航点
-	Stru_Way_Point m_st_target;//目标信息，位置、转弯半径、角度(正航向或转弯角度等)、速度、航点类型及信息类型
+	int count_update;	//数据链或任务机，航点更新
+
 	
 	Stru_Control_flag m_st_control_flag;//时序及时间
 	Stru_Control_Time m_st_control_time;
@@ -239,14 +255,13 @@ private:
 	double m_zeta;
 	double m_gama;
 	double m_psit;//地理系，偏航角
+	
 	//处理后数据 
-	double m_vs;	//组合垂速
-	double m_hz;	//组合高度
-
 	double m_vx;	//轴向速度
 	double m_sx;	//轴向位移，用于离架判断
-	
 	double m_v;		//合速度，地速
+	double m_vs;	//组合垂速
+	double m_hz;	//组合高度
 	double m_vnx;	//射向速度
 	double m_vnz;	//侧向速度
 	double m_g;		//根据纬度、海拔高度修正，用于计算过载 	
@@ -258,22 +273,20 @@ private:
 	double m_total_pressure;
 	//处理后数据
 	int m_baroalt_status;
-
-	//无线电高度表数据
-	double m_radioalt_hight;
-	int m_radioalt_status;
-	
-	
-	//处理后数据
 	double m_hbaro;		
 	double m_Vbaro;//气压高度表指示空速
 	double m_v_air;//空速
+	double m_dynamic_pressure;//动压
 	double m_v_average_1s;
 	double m_v_average_10s;
 	double m_mach;//马赫数，空速，经过高度、温度修正后马赫数修正
 	double m_v_record_100ms[10];
 	double m_v_record_1s[10];
-	
+
+	//无线电高度表数据
+	double m_radioalt_hight;
+	int m_radioalt_status;
+
 	//发动机状态及转速
 	int m_engine_start_result;//发动机开机状态
 	double m_engine_state_rpm;//状态转速
@@ -312,15 +325,18 @@ private:
 	int m_seeker_pixelh;//航向像素偏差，下负上正
 	double m_seeker_distance_target;//导引头输出弹目距离，雷达或激光可直接输出；
 										//可将光或红外根据高度差、视线角估算，也可根据目标像素大小和焦距估计目标距离；
+	double m_seeker_targetlong;//目标位置
+	double m_seeker_targetlat;
+	double m_seeker_targethight;
 
-	//处理后数据
+	//处理后数据，与虚拟导引数据整合
 	double m_dqf;	//视线角速度
 	double m_dqh;
 	double m_phif;	//框架角（引导搜指令）
 	double m_phih;
 	double m_Qf;	//视线角
 	double m_Qh;
-	double m_time_to_go;	//（末制导）到达时间 
+	double m_time_to_go;//（末制导）到达时间 
 	
 	//航线信息
 	double m_longitude_A;//已过航点，前一航段，目标航点
@@ -338,8 +354,10 @@ private:
 	double m_distance_target_t_combat;//进入战斗指令（进入末制导）时，目标距离；
 	double m_A;		//航段方位角，北偏西 为正	
 	//distance_AB//航段航程，为临时变量
+	double m_total_distance;//总航程（预处理）,
+	double m_alpha_AB;		//航段方位角（预处理），真航迹角，北偏东为正
+	
 	double m_sz;	//侧向位移，与侧向速度共同，用于侧偏控制
-
 	double m_psit_t_turn_in;//转弯开始时刻，真航向角
 	double m_psin;	//导航系偏航角，用于视线角速度计算
 	double m_psicn;//地理系，弹道偏角或航迹角，北偏西为正，180~180deg
@@ -353,9 +371,6 @@ private:
 	double m_z_coordinate_turn;
 	double m_distance_turn_in_compensate;//转弯提前距离，角度过渡补偿
 	double m_distance_turn_in;//转弯提前距离
-	
-	double m_total_distance;//总航程（预处理）,
-	double m_alpha_AB;		//航段方位角（预处理），真航迹角，北偏东为正
 };
 
 

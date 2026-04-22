@@ -80,6 +80,7 @@ telemetryParam tm_flight[] =
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"AirPress",	2},
 // 空速 *10倍， 单位 米/秒
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"AirSpd",	2},
+// 地速 *10倍， 单位 米/秒
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"GrdSpd",	2},
 // 气压高度，单位 米
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"AirHigh",	2},
@@ -139,7 +140,7 @@ telemetryParam tm_flight[] =
 telemetryParam tm_200hz[] =
 {
 	/** 预发射状态：0xCC —— 发动机启动完成，转速达标
-	 *  起飞完成：	0xEE
+	 *  控制输出起飞完成：	0xEE
 	 *  不发射了，发动机停机：0x00
 	 */
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"RecvLunc",	1},
@@ -187,7 +188,7 @@ telemetryParam tm_200hz[] =
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuseaz",	4},
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"cpuTemp",	2},
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"cpuTemp2",	2},
-	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"mcuTemp",	2},	//MML 这里的参数对应遥测表
+	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"mcuTemp",	2},	// 这里的参数对应遥测表
 	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"Batt28V",	2},
 	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"Batt28A",	2},
 	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"VCombin",	2},
@@ -270,7 +271,7 @@ telemetryParam tm_200hz[] =
 //014：发动机错误码定义：0无异常 1油压异常 
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"ecuError",	1},
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuelRate",	2},//
-// 0正常飞行，3距离伞降点<150，4正常开伞，0xCC出安全区
+// 0正常飞行，3距离伞降点<150，4正常开伞，0xCC出安全区标志
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"flyError",	1},
 // 存的是1000倍的实际电流值
 	{&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr1A",	2},

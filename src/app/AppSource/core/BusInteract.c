@@ -174,7 +174,7 @@ void InitRts()
     // rtList[RT_IMU].ptr_Init = ImuInit;
     // rtList[RT_IMU].ptr_ChkFrameSum = ChkImuFrame;
     
-    // rtList[RT_SRV].ckIndex = 0;//0		//链路  射后透传	//MML舵机
+    // rtList[RT_SRV].ckIndex = 0;//0		//链路  射后透传	//舵机
 	// rtList[RT_SRV].chIndex = 4;//4
 	// rtList[RT_SRV].devID = 0x01;
 	// rtList[RT_SRV].devBuad = 115200;
@@ -186,7 +186,7 @@ void InitRts()
 	// rtList[RT_SRV].ptr_ChkFrameSum = ChkSrvFrame;
 
 
-    // rtList[RT_P900].ckIndex = 0;//0		//链路  射后透传	MML目前没用
+    // rtList[RT_P900].ckIndex = 0;//0		//链路  射后透传	目前没用
 	// rtList[RT_P900].chIndex = 8;//2
 	// rtList[RT_P900].devID = 0x01;
 	// rtList[RT_P900].devBuad = 115200;

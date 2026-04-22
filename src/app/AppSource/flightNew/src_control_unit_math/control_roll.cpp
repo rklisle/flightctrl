@@ -119,6 +119,8 @@ void CMathControlRoll::Send_Data()
 	p_st_roll_control_output->ug_adrc = m_ug_adrc;	//ADRC����
 	p_st_roll_control_output->time_combat_delay = m_time_combat_delay;
 	p_st_roll_control_output->gama_command_compensate = m_gama_command_compensate_out;
+	p_st_roll_control_output->gama_command = m_gama_command;
+	p_st_roll_control_output->wx_command = m_wx_command;
 }
 void CMathControlRoll::Calc_Data()
 {

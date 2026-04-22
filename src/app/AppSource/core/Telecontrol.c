@@ -26,14 +26,14 @@ OS_U32 CmdHandler(STRU_422_MSG_INFO * frame)//02 //	RT_DATA_LINK
 	//非交互模式时，不处理地面指令
 	if((g_DeviceState.workStage & DOM_INTERACTIVE) !=  DOM_INTERACTIVE)
 	{
-		// MML 运行到这里，说明地面软件点击“起飞”，此时只能处理“紧急伞降”、“紧急返航”、“开关发动机”...等指令
+		// 运行到这里，说明地面软件点击“起飞”，此时只能处理“紧急伞降”、“紧急返航”、“开关发动机”...等指令
 		if(msgId != CMD_URGENT_LAND && msgId != CMD_URGENT_RETURN && msgId != CMD_START_STOP_ENGINE && msgId != CMD_MSN_NEWPT && msgId != CMD_USER_SETTARGET && msgId != CMD_SET_IMAGEMODE)
 		{
 			return -1;
 		}
 	}
 	//箭地协议是自己写的，能够保证msgID的有效性及互斥性
-	// MML 交互模式时，能处理下列switch中的指令
+	// 交互模式时，能处理下列switch中的指令
 	switch(msgId)
 	{
 	case BUS_SLAVER_REPORT:

@@ -11,7 +11,6 @@
 // 作者: wym
 // 完成日期: 
 //==================================================================/
-#include "../data_protocol.h"
 #include "control_flight_basic.h"
 #include "control_roll.h"
 #include "control_yaw.h"
@@ -24,8 +23,8 @@ typedef enum _MODULE_TYPE
 	ENUM_FLIGHT_BASIC				= 0,
 	ENUM_CONTROL_ROLL				= 1,
 	ENUM_CONTROL_YAW				= 2,
-	ENUM_CONTROL_PITCH				= 3,
-	ENUM_CONTROL_ENGINE				= 4,
+	ENUM_CONTROL_PITCH			= 3,
+	ENUM_CONTROL_ENGINE			= 4,
 	ENUM_CONTROL_OUT				= 5
 }MODULE_TYPE;
 
@@ -38,23 +37,25 @@ public:
 	double flight_time;
 	int time_tick;
 	int missile_ID;
-	//Stru_Debug_Monitor				* p_st_debug_monitor;//调试/监控接口
+//	Stru_Debug_Monitor				* p_st_debug_monitor;//调试/监控接口
 	//输入
-	// Stru_Data_Seeker_To_Controller		* p_st_data_seeker_to_controller;//协议接口数据
+	Stru_Data_Seeker_To_Controller		* p_st_data_seeker_to_controller;//协议接口数据
 	Stru_Data_INS_To_Controller			* p_st_data_ins_to_controller;
 	//Stru_Data_Datalink_To_Controller	* p_st_data_datalink_to_controller;
+	Stru_Data_Datalink_To_ControllerSig * p_st_data_datalink_to_controllersig;
 	Stru_Data_Engine_To_Controller		* p_st_data_engine_to_controller;
 	Stru_Data_Baro_To_Controller		* p_st_data_baro_to_controller;
-	// Stru_Data_RadioAlt_To_Controller	* p_st_data_radioalt_to_controller;
+	Stru_Data_RadioAlt_To_Controller	* p_st_data_radioalt_to_controller;
 	//输出
-	// Stru_Data_Controller_To_Seeker		* p_st_data_controller_to_seeker;
-	//Stru_Data_Controller_To_Datalink	* p_st_data_controller_to_datalink;
+	Stru_Data_Controller_To_Seeker		* p_st_data_controller_to_seeker;
+	Stru_Data_Controller_To_Datalink	* p_st_data_controller_to_datalink;
+	Stru_Data_Controller_To_DatalinkTel	* p_st_data_controller_to_datalinktel;//数据链用于遥测
 	Stru_Data_Controller_To_Engine		* p_st_data_controller_to_engine;//发动机
 	Stru_Data_Controller_To_Actuator	* p_st_data_controller_to_actuator;//舵机
-	// Stru_Data_Controller_To_Switch_Output	* p_st_data_controller_to_switch_output;//电气、开关量
+	Stru_Data_Controller_To_Switch_Output	* p_st_data_controller_to_switch_output;//输出三个标识
 	
-	Stru_Route_Data                       	* p_st_route_data_preflight;	//航迹装订
-	Stru_Initial_Data                     		* p_st_initial_data;			//初始数据
+	Stru_Route_Data                       	* p_st_route_data_preflight;	//航迹装订，发射前预先装订
+	Stru_Initial_Data                     	* p_st_initial_data;			//初始数据，一些列变量
 private:
 	void Update_Input_Data(MODULE_TYPE MODULE_NAME);
 	void Update_Output_Data();

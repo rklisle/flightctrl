@@ -39,7 +39,7 @@ typedef struct
 
 extern OS_DOUBLE curPress;
 extern OS_DOUBLE curAirSpdPa;
-extern OS_DOUBLE curAirSpd;
+// extern OS_DOUBLE curAirSpd;	// MML Î´Ê¹ÓÃ£¬×¢ÊÍ
 extern OS_U8 InitReportParam();
 extern OS_U8 SeqCalc();
 extern OS_U8 OnFireCmdSend();

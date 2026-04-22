@@ -83,6 +83,21 @@ typedef struct MSN_CMD
 	OS_U32 arriveTime;		//到达时间
 }MSN_CMD;
 
+typedef struct {
+	int sn; 			//点号 0-固定为发射点 其他-为规划航路点
+	double lon;
+	double lat;
+	int h; //高度m 
+	int w; //航点类型
+	int t; //到达时间 秒
+	float V_cmd; //飞行马赫数指令
+	float outTrack;//航向
+//	float radis;		//盘旋半径   
+//	float hit_angle;//打击角度
+	unsigned char if_airspeed_used; //是否启用空速控制
+	unsigned char if_GuideFlight; //是否指点
+}RoutePointIn;
+
 typedef enum MSN_TASK_MODE
 {
 	AUTO_MSN_MODE = 0,

@@ -10,7 +10,7 @@
 #include "../core/DataPool.h"
 #include "../core/BusInteract.h"
 #include "../interface/interface_power.h"
-#include "../flight/os_flight_io.h"
+// #include "../flight/os_flight_io.h"
 #include "./modNav.h"
 #include "../StateMachine.h"
 #include <math.h>
@@ -44,12 +44,12 @@ OS_U8 SaveHilInDataPool(STRU_HIL_INPUT *hilInfo)
 //		SETDATA(pDataPoolImu, "navPitch", hilInfo->pitch * 1e2,	OS_S16);
 //		SETDATA(pDataPoolImu, "navDir", dir * 1e2,	OS_U16);//
 //		SETDATA(pDataPoolImu, "navRoll", hilInfo->roll * 1e2,	OS_S16);
-		if(g_DeviceState.srvCountDown == 0)
-		{
-			// MML 半实物过来的数据就是100倍的，hilInfo->DD1这个应该就是100倍的角度值
-			SETDATA(pDataPoolSrv, "Sr1Read", hilInfo->DD1, OS_S16);
-			SETDATA(pDataPoolSrv, "Sr2Read", hilInfo->DD2, OS_S16);
-		}
+		// if(g_DeviceState.srvCountDown == 0)
+		// {
+		// 	// 280 半实物过来的数据就是100倍的，hilInfo->DD1这个应该就是100倍的角度值
+		// 	SETDATA(pDataPoolSrv, "Sr1Read", hilInfo->DD1, OS_S16);	// 014不使用
+		// 	SETDATA(pDataPoolSrv, "Sr2Read", hilInfo->DD2, OS_S16);	// 014不使用
+		// }
     
 	return 0;
 }
@@ -107,7 +107,7 @@ OS_U32 HilRtHandler(STRU_422_MSG_INFO * frame)// RT_HIL
 	case 0x23://紧急返航
 		ControllerCmdHandler(frame);
 		break;
-	case CMD_MSN_NEWPT://仿真上注任务指令	// 280 该命令不用 注释掉 by MML
+	case CMD_MSN_NEWPT://仿真上注任务指令	// 280 该命令不用 注释掉
 		{
 			// double lon,lat,high,track,speed,arriveTime;
 			// memcpy(&lon, frame->au8Data + 1, 8);
@@ -126,7 +126,7 @@ OS_U32 HilRtHandler(STRU_422_MSG_INFO * frame)// RT_HIL
 			// UpdateMission(msn);
 		}
 		break;
-	case 0x20:	// MML: 仿真已经起飞了
+	case 0x20:	// : 仿真已经起飞了
 		{
 			STRU_HIL_INPUT hilInfo = {0};
 			memcpy(&hilInfo, frame->au8Data, sizeof(hilInfo));
@@ -160,88 +160,93 @@ OS_U32 HilRtHandler(STRU_422_MSG_INFO * frame)// RT_HIL
 
 OS_U8 HilFlightStage()
 {
-/* *********************************************** MML 20260413*****************************************************
+		g_ins_data.wx = hilInput.wx;
+		g_ins_data.wy = hilInput.wy;
+		g_ins_data.wz = hilInput.wz;
+		g_ins_data.ax = hilInput.ax;
+		g_ins_data.ay = hilInput.ay;
+		g_ins_data.az = hilInput.az;
 
-		pInput->Luanched = flightSeq.luanched;
-		pInput->ax = hilInput.ax;
-		pInput->ay = hilInput.ay;
-		pInput->az = hilInput.az;
-    
-		pInput->wx = hilInput.wx ;
-		pInput->wy = hilInput.wy;
-		pInput->wz = hilInput.wz;
+		g_ins_data.zeta = hilInput.pitch;
+		g_ins_data.psi = hilInput.yaw;
+		g_ins_data.gama = hilInput.roll;
 
-		pInput->navLon = hilInput.lon;
-		pInput->navLat = hilInput.lat;
-		pInput->navHigh = hilInput.alt;
-		pInput->navVn = hilInput.vn;
-		pInput->navVs = hilInput.vs;
-		pInput->navVe = hilInput.ve;
-    
-    double V   = sqrt(pow(pInput->navVn,2) + pow(pInput->navVs,2) + pow(pInput->navVe,2));   // 地速计算
-    //空速就是地速，高速飞机的空速没用
-    pInput->airSpd = V;
+		g_ins_data.vtx = hilInput.vn;
+		g_ins_data.vty = hilInput.vs;
+		g_ins_data.vtz = hilInput.ve;
 
-		pInput->pitch = hilInput.pitch;
-		pInput->yaw = hilInput.yaw;
-		pInput->roll = hilInput.roll;
-    
-    
-    
-    pInput->DD1 = hilInput.DD1;
-    pInput->DD2 = hilInput.DD2;
-    
-    if(g_DeviceState.srvCountDown > 0)
-    {
-        OS_S16 srv1,srv2;
-        GetDataFast(pDataPoolSrv, "Sr1Read", &srv1);
-        GetDataFast(pDataPoolSrv, "Sr2Read", &srv2);
-        pInput->DD1 = srv1 * 0.01;
-        pInput->DD2 = srv2 * 0.01;
-    }
-    
+		g_ins_data.longitude = hilInput.lon;
+		g_ins_data.latitude = hilInput.lat;
+		g_ins_data.height = hilInput.alt;
 
-		SETDATA(pDataPoolImu, "imuAx", pInput->ax,	OS_FLOAT);//加速度
-		SETDATA(pDataPoolImu, "imuAy", pInput->ay,	OS_FLOAT);
-		SETDATA(pDataPoolImu, "imuAz", pInput->az,	OS_FLOAT);
+		GetDataFast(pDataPoolNav, "navState", &g_ins_data.GPS_status);
+
+
+		GetDataFast(pDataPoolSelf, "ecuGetRp", &g_engine_data.rpm_engine);
+		GetDataFast(pDataPoolSelf, "ecuState", &g_engine_data.ECU_work_status);
+
+	// pInput->Luanched = flightSeq.luanched;	// 014不使用
+
+	// double V   = sqrt(pow(g_ins_data.vtx,2) + pow(g_ins_data.vty,2) + pow(g_ins_data.vtz,2));   // 地速计算
+    // //空速就是地速，高速飞机的空速没用
+    // pInput->airSpd = V;
+
+	// pInput->DD1 = hilInput.DD1; // 014不使用
+    // pInput->DD2 = hilInput.DD2;
+    
+    // if(g_DeviceState.srvCountDown > 0)
+    // {
+    //     OS_S16 srv1,srv2;
+    //     GetDataFast(pDataPoolSrv, "Sr1Read", &srv1);
+    //     GetDataFast(pDataPoolSrv, "Sr2Read", &srv2);
+    //     pInput->DD1 = srv1 * 0.01; // 014不使用
+    //     pInput->DD2 = srv2 * 0.01;
+    // }
+
+		SETDATA(pDataPoolImu, "imuAx", g_ins_data.ax,	OS_FLOAT);//加速度
+		SETDATA(pDataPoolImu, "imuAy", g_ins_data.ay,	OS_FLOAT);
+		SETDATA(pDataPoolImu, "imuAz", g_ins_data.az,	OS_FLOAT);
+
+		SETDATA(pDataPoolSelf, "AirPress", hilInput.DD1*100, OS_S16);	// MML新增
 
    	if(hilInput.useNav)
-		{
+	{
         OS_FLOAT tempf;
-				GetDataFast(pDataPoolImu, "imuWx",	&tempf);pInput->wx = tempf;
-				GetDataFast(pDataPoolImu, "imuWy",	&tempf);pInput->wy = tempf;
-				GetDataFast(pDataPoolImu, "imuWz", 	&tempf);pInput->wz = tempf;
+				GetDataFast(pDataPoolImu, "imuWx",	&tempf);g_ins_data.wx = tempf;
+				GetDataFast(pDataPoolImu, "imuWy",	&tempf);g_ins_data.wy = tempf;
+				GetDataFast(pDataPoolImu, "imuWz", 	&tempf);g_ins_data.wz = tempf;
 				OS_S16 temps16;
 				OS_U16 tempu16;
 				GetDataFast(pDataPoolImu, "navPitch", 	&temps16);//
-				pInput->pitch = temps16 * 0.01;
+				g_ins_data.zeta = temps16 * 0.01;
 				GetDataFast(pDataPoolImu, "navDir", 	&tempu16);
-				pInput->yaw = -tempu16 * 0.01;
+				g_ins_data.psi = -tempu16 * 0.01;
 				GetDataFast(pDataPoolImu, "navRoll", 	&temps16);
-				pInput->roll = temps16 * 0.01;
-        if(pInput->yaw < -180)
-            pInput->yaw += 360;
+				g_ins_data.gama = temps16 * 0.01;
+        if(g_ins_data.psi < -180)
+            g_ins_data.psi += 360;
 
     }
-    double groundSpd = sqrt(pow(pInput->navVn,2) + pow(pInput->navVs,2) + pow(pInput->navVe,2));
+    double groundSpd = sqrt(pow(g_ins_data.vtx,2) + pow(g_ins_data.vty,2) + pow(g_ins_data.vtz,2));
     SETDATA(pDataPoolSelf, "GrdSpd", groundSpd * 10, OS_S16);//
    
-//			SETDATA(pDataPoolImu, "imuWx", pInput->wx,	OS_FLOAT);//角速度
-//			SETDATA(pDataPoolImu, "imuWY", pInput->wy ,	OS_FLOAT);
-//			SETDATA(pDataPoolImu, "imuWZ", pInput->wz,	OS_FLOAT);
+//			SETDATA(pDataPoolImu, "imuWx", g_ins_data.wx,	OS_FLOAT);//角速度
+//			SETDATA(pDataPoolImu, "imuWY", g_ins_data.wy ,	OS_FLOAT);
+//			SETDATA(pDataPoolImu, "imuWZ", g_ins_data.wz,	OS_FLOAT);
 
 
-		SETDATA(pDataPoolImu, "navLon", pInput->navLon * 1e7,		OS_S32);//惯组经度
-		SETDATA(pDataPoolImu, "navLat", pInput->navLat * 1e7,		OS_S32);//惯组纬度
-		SETDATA(pDataPoolImu, "navHigh", pInput->navHigh , OS_FLOAT);//惯组高
+		SETDATA(pDataPoolImu, "navLon", g_ins_data.longitude * 1e7,		OS_S32);//惯组经度
+		SETDATA(pDataPoolImu, "navLat", g_ins_data.latitude * 1e7,		OS_S32);//惯组纬度
+		SETDATA(pDataPoolImu, "navHigh", g_ins_data.height , OS_FLOAT);//惯组高
 
-		SETDATA(pDataPoolImu, "navVn", pInput->navVn* 100,	OS_S16);//
-		SETDATA(pDataPoolImu, "navVs", pInput->navVs* 100,	OS_S16);//
-		SETDATA(pDataPoolImu, "navVe", pInput->navVe* 100,	OS_S16);//
+		SETDATA(pDataPoolImu, "navVn", g_ins_data.vtx* 100,	OS_S16);//
+		SETDATA(pDataPoolImu, "navVs", g_ins_data.vty* 100,	OS_S16);//
+		SETDATA(pDataPoolImu, "navVe", g_ins_data.vtz* 100,	OS_S16);//
 
-//			SETDATA(pDataPoolImu, "navRoll", pInput->roll * 100,	OS_S16);//
-//			SETDATA(pDataPoolImu, "navPitch", pInput->pitch * 100,	OS_S16);//
-		if(pInput->Luanched)	
+//			SETDATA(pDataPoolImu, "navRoll", g_ins_data.gama * 100,	OS_S16);//
+//			SETDATA(pDataPoolImu, "navPitch", g_ins_data.zeta * 100,	OS_S16);//
+//**************************  MML 20260417*****************************
+		if(flightSeq.luanched)	
 		{
 			SETDATA(pDataPoolImu, "navState", 0x64, OS_U8);//导航状态
 		}
@@ -249,39 +254,39 @@ OS_U8 HilFlightStage()
 		{
 			SETDATA(pDataPoolImu, "navState", 0, OS_U8);//导航状态
 		}
-		double dir = -pInput->yaw;
+
+		double dir = -g_ins_data.psi;
 		if(dir < 0)
 		{
 			dir += 360;
 		}
 //		SETDATA(pDataPoolImu, "navDir", dir * 100,		OS_U16);
 
-		SETDATA(pDataPoolSelf, "AirSpd", pInput->airSpd * 10, OS_S16);
+		// SETDATA(pDataPoolSelf, "AirSpd", pInput->airSpd * 10, OS_S16);
 		
-		OS_S16 temps16;
-		OS_U8 locked;
-		GetDataFast(pDataPoolFly,	"sctLock",	 &(locked));
-		GetDataFast(pDataPoolFly,	"vPitchSp",	 &temps16);
-		pInput->scoutPitchSpd = (double)temps16 * 0.002 / 57.3;
-		GetDataFast(pDataPoolFly,	"vYawSp",	 &temps16);
-		pInput->scoutYawSpd = (double)temps16 * 0.002 / 57.3;
-		pInput->scoutLocked = locked;
-//		if(pInput->scoutLocked == 0 && locked == 1)
+		// OS_S16 temps16;
+		// OS_U8 locked;
+		// GetDataFast(pDataPoolFly,	"sctLock",	 &(locked));
+		// GetDataFast(pDataPoolFly,	"vPitchSp",	 &temps16);
+		// pInput->scoutPitchSpd = (double)temps16 * 0.002 / 57.3;	// 014不使用
+		// GetDataFast(pDataPoolFly,	"vYawSp",	 &temps16);
+		// pInput->scoutYawSpd = (double)temps16 * 0.002 / 57.3;	// 014不使用
+		// pInput->scoutLocked = locked;	// 014不使用
+//		if(pInput->scoutLocked == 0 && locked == 1)	// 014不使用
 //		{
 //			enableDelayTick--;
 //			if(enableDelayTick == 0)
 //			{
-//				pInput->scoutLocked = 1;
+//				pInput->scoutLocked = 1;	// 014不使用
 //			}
-//			else if(pInput->scoutLocked == 0)
+//			else if(pInput->scoutLocked == 0)	// 014不使用
 //			{
 //				enableDelayTick = 2;
 //			}
 //		}
-//		pInput->scoutLocked = 1;
-//		pInput->scoutPitchSpd = pitchspd / 57.3;
-//		pInput->scoutYawSpd = yawspd /57.3;
-*/
+//		pInput->scoutLocked = 1;	// 014不使用
+//		pInput->scoutPitchSpd = pitchspd / 57.3;	// 014不使用
+//		pInput->scoutYawSpd = yawspd /57.3;	// 014不使用
 		return 0;
 }
 

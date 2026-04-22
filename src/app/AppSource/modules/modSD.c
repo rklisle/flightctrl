@@ -24,7 +24,8 @@ unsigned char SD_MountOK = FALSE;    // TRUE£∫SDø®“—π“‘ÿ£®—”≥Ÿπ“‘ÿ£©£ªFALSE£∫SDø
 unsigned char SD_Enable = FALSE;    // TRUE£∫SDø®≥ı ºªØ≥…π¶£ªFALSE£∫SDø®≥ı ºªØ ß∞‹
 
 SD_FILE sdFile[FILE_COUNT];
-char fileName[FILE_COUNT][13] = {"TMData.dat","FireA.csv","GPS.csv","Mems.csv","navZ.csv","TMFlight.dat"};
+char fileName[FILE_COUNT][11] = {"TMData.dat"};
+// char fileName[FILE_COUNT][13] = {"TMData.dat","FireA.csv","GPS.csv","Mems.csv","navZ.csv","TMFlight.dat"};
 
 static TX_MUTEX                 s_mutex_write[FILE_COUNT];   
 
@@ -115,18 +116,19 @@ OS_U8 InitSD()
 			sdFile[i].fileOpenRes = fatFsFileOpen(fileName[i],i);
 		}
 
-		char memsHead[100];
-		char fireHead[100];
-		char navZHead[100];
-		char GPSHead[120];
-		sprintf(fireHead, "time,BatV,BatA,CombinV,CombinA,SrvV,SrvA\n");
-		sprintf(GPSHead, "time,lon,lat,high,gpsvn,gpsvs,gpsve,sacount,locaState,pdop,dir,dirmark,updatemark,dirEffect,gpsTrac\n");
-		sprintf(memsHead, "time,ax,ay,az,wx,wy,wz\n");
-		sprintf(navZHead, "time,x,y,z,vx,vy,vz, pitch,yaw,roll,lon,lat,high,mode,navvn,navvs,navve\n");
-		WriteToSD(1, (OS_U8 *)fireHead, strlen(fireHead) );
-		WriteToSD(2, (OS_U8 *)GPSHead, strlen(GPSHead) );
-		WriteToSD(3, (OS_U8 *)memsHead, strlen(memsHead) );
-		WriteToSD(4, (OS_U8 *)navZHead, strlen(navZHead) );
+        // MML : remove not used files
+		// char memsHead[100];
+		// char fireHead[100];
+		// char navZHead[100];
+		// char GPSHead[120];
+		// sprintf(fireHead, "time,BatV,BatA,CombinV,CombinA,SrvV,SrvA\n");
+		// sprintf(GPSHead, "time,lon,lat,high,gpsvn,gpsvs,gpsve,sacount,locaState,pdop,dir,dirmark,updatemark,dirEffect,gpsTrac\n");
+		// sprintf(memsHead, "time,ax,ay,az,wx,wy,wz\n");
+		// sprintf(navZHead, "time,x,y,z,vx,vy,vz, pitch,yaw,roll,lon,lat,high,mode,navvn,navvs,navve\n");
+		// WriteToSD(1, (OS_U8 *)fireHead, strlen(fireHead) );
+		// WriteToSD(2, (OS_U8 *)GPSHead, strlen(GPSHead) );
+		// WriteToSD(3, (OS_U8 *)memsHead, strlen(memsHead) );
+		// WriteToSD(4, (OS_U8 *)navZHead, strlen(navZHead) );
 
 		for(int i=0;i<sizeof(sdFile)/sizeof(SD_FILE);i++)
 		{

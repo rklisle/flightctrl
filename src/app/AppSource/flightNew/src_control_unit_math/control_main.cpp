@@ -5,20 +5,22 @@ CMathControlMain::CMathControlMain()
 {
 	missile_ID = 0;
 	m_target_attack_ID = 0;
-//	p_st_data_seeker_to_controller = NULL;
+	p_st_data_seeker_to_controller = NULL;
 	p_st_data_ins_to_controller = NULL;
 	//p_st_data_datalink_to_controller = NULL;
+	p_st_data_datalink_to_controllersig = NULL;
 	p_st_data_engine_to_controller = NULL;
 	p_st_data_baro_to_controller = NULL;
-//	p_st_data_radioalt_to_controller = NULL;
-//	p_st_data_controller_to_seeker = NULL;
-	//p_st_data_controller_to_datalink = NULL;
+	p_st_data_radioalt_to_controller = NULL;
+	p_st_data_controller_to_seeker = NULL;
+	p_st_data_controller_to_datalink = NULL;
+	p_st_data_controller_to_datalinktel = NULL;
 	p_st_data_controller_to_engine = NULL;
 	p_st_data_controller_to_actuator = NULL;
-//	p_st_data_controller_to_switch_output = NULL;
+	p_st_data_controller_to_switch_output = NULL;
 	p_st_route_data_preflight = NULL;
 	p_st_initial_data = NULL;
-	// p_st_debug_monitor = NULL;
+//	p_st_debug_monitor = NULL;
 
 
 	//初始化数据缓存
@@ -93,6 +95,7 @@ void CMathControlMain::Run()
 	//舵控分配
 	Update_Input_Data(ENUM_CONTROL_OUT);
 	m_math_control_out.Run();
+	
 	Update_Output_Data();	
 }
 
@@ -102,6 +105,7 @@ void CMathControlMain::Update_Input_Data(MODULE_TYPE MODULE_NAME)
 	{
 	case ENUM_FLIGHT_BASIC:			//更新基本信息计算模块输入
 		m_st_flight_basic_input.missile_ID = missile_ID;
+		//数据链 指定 攻击目标ID，即 人在回路锁定，飞控将目标ID及特征信息，发动给导引头实现目标选择，实现稳定跟踪
 		//m_target_attack_ID = p_st_data_datalink_to_controller->st_mission_update_data[missile_ID].target_ID;
 		m_math_control_flight_basic.flight_time = flight_time;
 		m_math_control_flight_basic.time_tick = time_tick;
@@ -114,10 +118,10 @@ void CMathControlMain::Update_Input_Data(MODULE_TYPE MODULE_NAME)
 		memcpy(&m_st_flight_basic_input.st_baro_data,
 			p_st_data_baro_to_controller,
 			sizeof(Stru_Data_Baro_To_Controller));
-
-//		memcpy(&m_st_flight_basic_input.st_radioalt_data,
-//			p_st_data_radioalt_to_controller,
-//			sizeof(Stru_Data_RadioAlt_To_Controller));
+		
+		memcpy(&m_st_flight_basic_input.st_radioalt_data,
+			p_st_data_radioalt_to_controller,
+			sizeof(Stru_Data_RadioAlt_To_Controller));
 		
 		memcpy(&m_st_flight_basic_input.st_engine_data,
 			p_st_data_engine_to_controller,
@@ -126,11 +130,13 @@ void CMathControlMain::Update_Input_Data(MODULE_TYPE MODULE_NAME)
 		memcpy(&m_st_flight_basic_input.st_ins_data,
 			p_st_data_ins_to_controller,
 			sizeof(Stru_Data_INS_To_Controller));
-
-//		memcpy(&m_st_flight_basic_input.st_seeker_data,
-//			&p_st_data_seeker_to_controller[m_target_attack_ID],
-//			sizeof(Stru_Data_Seeker_To_Controller));
-
+		//根据攻击目标ID，确定锁定目标m_target_attack_ID
+		memcpy(&m_st_flight_basic_input.st_seeker_data,
+			&p_st_data_seeker_to_controller[m_target_attack_ID],
+			sizeof(Stru_Data_Seeker_To_Controller));
+		memcpy(&m_st_flight_basic_input.st_datalink_datasig,
+			p_st_data_datalink_to_controllersig,
+			sizeof(Stru_Data_Datalink_To_ControllerSig));
 		//memcpy(&m_st_flight_basic_input.st_datalink_data,
 		//	p_st_data_datalink_to_controller,
 		//	sizeof(Stru_Data_Datalink_To_Controller));
@@ -145,13 +151,12 @@ void CMathControlMain::Update_Input_Data(MODULE_TYPE MODULE_NAME)
 		m_st_roll_control_input.v	 = m_st_flight_basic_output.v;
 		m_st_roll_control_input.vnz	 = m_st_flight_basic_output.vnz;
 		m_st_roll_control_input.g	 = m_st_flight_basic_output.g;
-// MML 20260415 seeker does NOT used in first flight, whenever used, add codes below
-//		if (p_st_data_seeker_to_controller[m_target_attack_ID].flag_combat_status
-//			/*&&(m_st_flight_basic_output.num_way_point_target == (p_st_route_data_preflight->num_rows - 1))*/)
-//		{
-//			m_st_roll_control_input.dqh	= p_st_data_seeker_to_controller[m_target_attack_ID].yaw_LOS_rate;
-//		} 
-//		else
+		if (p_st_data_seeker_to_controller[m_target_attack_ID].flag_combat_status
+			/*&&(m_st_flight_basic_output.num_way_point_target == (p_st_route_data_preflight->num_rows - 1))*/)
+		{
+			m_st_roll_control_input.dqh	= p_st_data_seeker_to_controller[m_target_attack_ID].yaw_LOS_rate;
+		} 
+		else
 		{
 			m_st_roll_control_input.dqh	= m_st_flight_basic_output.dqh;
 		}
@@ -188,13 +193,12 @@ void CMathControlMain::Update_Input_Data(MODULE_TYPE MODULE_NAME)
 		m_st_yaw_control_input.g	= m_st_flight_basic_output.g;
 		m_st_yaw_control_input.qh	= m_st_flight_basic_output.qh;
 		m_st_yaw_control_input.tgo	= m_st_flight_basic_output.time_to_go;
-// MML 20260415 seeker does NOT used in first flight, whenever used, add codes below
-//		if (p_st_data_seeker_to_controller[m_target_attack_ID].flag_combat_status
-//			/*&&(m_st_flight_basic_output.num_way_point_target == (p_st_route_data_preflight->num_rows - 1))*/)
-//		{
-//			m_st_yaw_control_input.dqh	= p_st_data_seeker_to_controller[m_target_attack_ID].yaw_LOS_rate;
-//		} 
-//		else
+		if (p_st_data_seeker_to_controller[m_target_attack_ID].flag_combat_status
+			/*&&(m_st_flight_basic_output.num_way_point_target == (p_st_route_data_preflight->num_rows - 1))*/)
+		{
+			m_st_yaw_control_input.dqh	= p_st_data_seeker_to_controller[m_target_attack_ID].yaw_LOS_rate;
+		} 
+		else
 		{
 			m_st_yaw_control_input.dqh	= m_st_flight_basic_output.dqh;
 		}
@@ -221,13 +225,12 @@ void CMathControlMain::Update_Input_Data(MODULE_TYPE MODULE_NAME)
 		m_st_pitch_control_input.vs   = m_st_flight_basic_output.vs;
 		m_st_pitch_control_input.g    = m_st_flight_basic_output.g;
 		//m_st_pitch_control_input.mass = m_st_flight_basic_output.
-// MML 20260415 seeker does NOT used in first flight, whenever used, add codes below
-//		if (p_st_data_seeker_to_controller[m_target_attack_ID].flag_combat_status
-//			/*&&(m_st_flight_basic_output.num_way_point_target == (p_st_route_data_preflight->num_rows - 1))*/)
-//		{
-//			m_st_pitch_control_input.dqf = p_st_data_seeker_to_controller[m_target_attack_ID].pitch_LOS_rate;
-//		} 
-//		else
+		if (p_st_data_seeker_to_controller[m_target_attack_ID].flag_combat_status
+			/*&&(m_st_flight_basic_output.num_way_point_target == (p_st_route_data_preflight->num_rows - 1))*/)
+		{
+			m_st_pitch_control_input.dqf = p_st_data_seeker_to_controller[m_target_attack_ID].pitch_LOS_rate;
+		} 
+		else
 		{
 			m_st_pitch_control_input.dqf = m_st_flight_basic_output.dqf;
 		}
@@ -303,33 +306,59 @@ void CMathControlMain::Update_Input_Data(MODULE_TYPE MODULE_NAME)
 void CMathControlMain::Update_Output_Data()
 {
 	//输出导引头数据
-//	p_st_data_controller_to_seeker->flag_seeker_on = m_st_flight_basic_output.st_command.flag_seeker_on;
-//	p_st_data_controller_to_seeker->flag_lock_on_permit = m_st_flight_basic_output.st_command.flag_lock_on_permit;
-//	p_st_data_controller_to_seeker->pitch_gimbal_angle_calc = m_st_flight_basic_output.phif;
-//	p_st_data_controller_to_seeker->yaw_gimbal_angle_calc = m_st_flight_basic_output.phih;
-	/*输出数据链数据
-	p_st_data_controller_to_datalink->st_missile_state_data.missile_ID = p_st_initial_data->missile_ID;
-	p_st_data_controller_to_datalink->st_missile_state_data.flag_missile_launched = true;
-	p_st_data_controller_to_datalink->st_missile_state_data.gama = p_st_data_ins_to_controller->gama;
-	p_st_data_controller_to_datalink->st_missile_state_data.psi = p_st_data_ins_to_controller->psi;
-	p_st_data_controller_to_datalink->st_missile_state_data.zeta = p_st_data_ins_to_controller->zeta;
-	p_st_data_controller_to_datalink->st_missile_state_data.longitude = p_st_data_ins_to_controller->longitude;
-	p_st_data_controller_to_datalink->st_missile_state_data.latitude = p_st_data_ins_to_controller->latitude;
-	p_st_data_controller_to_datalink->st_missile_state_data.height = p_st_data_ins_to_controller->height;
-	p_st_data_controller_to_datalink->st_missile_state_data.wx = p_st_data_ins_to_controller->wx;
-	p_st_data_controller_to_datalink->st_missile_state_data.wy = p_st_data_ins_to_controller->wy;
-	p_st_data_controller_to_datalink->st_missile_state_data.wz = p_st_data_ins_to_controller->wz;
-	p_st_data_controller_to_datalink->st_missile_state_data.vtx = p_st_data_ins_to_controller->vtx;
-	p_st_data_controller_to_datalink->st_missile_state_data.vty = p_st_data_ins_to_controller->vty;
-	p_st_data_controller_to_datalink->st_missile_state_data.vtz = p_st_data_ins_to_controller->vtz;
-	p_st_data_controller_to_datalink->st_missile_state_data.au = p_st_data_ins_to_controller->au;
-	p_st_data_controller_to_datalink->st_missile_state_data.ax = p_st_data_ins_to_controller->ax;
-	p_st_data_controller_to_datalink->st_missile_state_data.ay = p_st_data_ins_to_controller->ay;
-	p_st_data_controller_to_datalink->st_missile_state_data.az = p_st_data_ins_to_controller->az;
-	p_st_data_controller_to_datalink->st_missile_state_data.pitch_LOS = m_st_flight_basic_output.qf;
-	p_st_data_controller_to_datalink->st_missile_state_data.yaw_LOS = m_st_flight_basic_output.qh;
-	p_st_data_controller_to_datalink->st_missile_state_data.time_to_go = m_st_flight_basic_output.time_to_go;
-	*/
+	p_st_data_controller_to_seeker->flag_seeker_on = m_st_flight_basic_output.st_command.flag_seeker_on;
+	p_st_data_controller_to_seeker->flag_lock_on_permit = m_st_flight_basic_output.st_command.flag_lock_on_permit;
+	p_st_data_controller_to_seeker->pitch_gimbal_angle_calc = m_st_flight_basic_output.phif;
+	p_st_data_controller_to_seeker->yaw_gimbal_angle_calc = m_st_flight_basic_output.phih;
+	//输出数据链数据
+	p_st_data_controller_to_datalinktel->curPtNo = m_st_flight_basic_output.num_way_point_target;//m_st_flight_basic_output;
+	p_st_data_controller_to_datalinktel->curTargetLon = m_st_flight_basic_output.target_long;
+	p_st_data_controller_to_datalinktel->curTargetLat = m_st_flight_basic_output.target_lat;
+	p_st_data_controller_to_datalinktel->curTargetAlt = m_st_flight_basic_output.target_height;
+	p_st_data_controller_to_datalinktel->ac_dL = m_st_flight_basic_output.distance_target;//待飞距
+	//通道舵
+	p_st_data_controller_to_datalinktel->rudderRollCmd = m_st_control_out_output.ug;	//通道舵副翼
+	p_st_data_controller_to_datalinktel->rudderPitchCmd = m_st_control_out_output.uf;	//通道舵升降
+	p_st_data_controller_to_datalinktel->rudderYawCmd = m_st_control_out_output.uh;		//通道舵航向
+	//遥测信息
+	p_st_data_controller_to_datalinktel->gamaCmd = m_st_roll_control_output.gama_command;	//滚转角指令
+	p_st_data_controller_to_datalinktel->nycCmd = m_st_pitch_control_output.ny_command;		//过载指令
+	p_st_data_controller_to_datalinktel->varthetaCmd = m_st_pitch_control_output.zeta_command;//俯仰角指令
+	p_st_data_controller_to_datalinktel->heightCmd = m_st_pitch_control_output.h_command;//高度指令
+	p_st_data_controller_to_datalinktel->ac_dZ = m_st_flight_basic_output.sz;// 侧边距
+	p_st_data_controller_to_datalinktel->token_long = m_st_flight_basic_output.token_long;// 纵向令牌
+	p_st_data_controller_to_datalinktel->token_late = m_st_flight_basic_output.token_lat;// 侧向令牌
+	p_st_data_controller_to_datalinktel->thrustCmd = m_st_engine_control_output.control_Kc;// 推力指令
+	p_st_data_controller_to_datalinktel->ac_dPsi = m_st_flight_basic_output.dlt_psic;//航向角偏差
+	p_st_data_controller_to_datalinktel->ac_dR = m_st_flight_basic_output.sz_circle;// 圆轨迹侧边距，未用到
+	p_st_data_controller_to_datalinktel->cur_thetav = m_st_flight_basic_output.theta;//轨迹倾角，未用到
+	p_st_data_controller_to_datalinktel->Vcmd = m_st_flight_basic_output.target_velocity;//速度指令 
+	p_st_data_controller_to_datalinktel->nyCmd_Guidance = 0.0;//末制导纵向过载指令，与过载指令复用
+	p_st_data_controller_to_datalinktel->nzCmd_Guidance = 0.0;//末制导侧向过载指令，与滚转角复用
+	p_st_data_controller_to_datalinktel->pitch_rate_nT_filterOut = m_st_flight_basic_output.dqf;//俯仰视线角速度滤波
+	p_st_data_controller_to_datalinktel->yaw_rate_nT_filterOut = m_st_flight_basic_output.dqh;//偏航视线角速度滤波
+	p_st_data_controller_to_datalinktel->deltaR = m_st_flight_basic_output.distance_target;//弹目距离
+	p_st_data_controller_to_datalinktel->dRn = 0.0; //弹目北向距离  未用到，预留
+	p_st_data_controller_to_datalinktel->dRu = 0.0; //弹目天向距离  未用到，预留
+	p_st_data_controller_to_datalinktel->dRe = 0.0; //弹目东向距离  未用到，预留
+	p_st_data_controller_to_datalinktel->Pitch_Preset_Angle = m_st_flight_basic_output.phif;//理论俯仰框架角
+	p_st_data_controller_to_datalinktel->Yaw_Preset_Angle = m_st_flight_basic_output.phih;//理论偏航框架角
+	p_st_data_controller_to_datalinktel->Dubins_stage = 0;//杜宾斯段
+	p_st_data_controller_to_datalinktel->dubins_type1 = 0;//杜宾斯类型
+	p_st_data_controller_to_datalinktel->dubins_type2 = 0;//杜宾斯类型
+	p_st_data_controller_to_datalinktel->dubins_type3 = 0;//杜宾斯类型
+	p_st_data_controller_to_datalinktel->Dubins_length = 0.0;//杜宾斯段航程
+	p_st_data_controller_to_datalinktel->test1 = 0.0;//测试
+	p_st_data_controller_to_datalinktel->Min_IAS2Vel = 0.0;//最低折算速度
+	p_st_data_controller_to_datalinktel->mx_ESO = 0.0;
+	p_st_data_controller_to_datalinktel->fduox_ADRC = 0.0;//ADRC舵偏
+	p_st_data_controller_to_datalinktel->Qv = m_st_flight_basic_output.dynamic_pressure;//动压
+	p_st_data_controller_to_datalinktel->alpha_ins = m_st_flight_basic_output.alpha_vg;	//地速攻角
+	p_st_data_controller_to_datalinktel->beta_ins = m_st_flight_basic_output.beita_vg;	//地速侧滑角
+	p_st_data_controller_to_datalinktel->MaxRpm = 0.0; 		//最大转速
+	p_st_data_controller_to_datalinktel->DFT_freq_max = 0.0;//辨识运动频率
+	
+	
 	//输出发动机数据
 	p_st_data_controller_to_engine->control_rpm = m_st_engine_control_output.control_rpm;
 	p_st_data_controller_to_engine->ECU_work_cmd = m_st_flight_basic_output.ECU_work_cmd;
@@ -341,7 +370,11 @@ void CMathControlMain::Update_Output_Data()
 	p_st_data_controller_to_actuator->control_voltage_IV  = m_st_control_out_output.u4;
 	
 	//输出开关量数据
-//	p_st_data_controller_to_switch_output->flag_engine_start = m_st_flight_basic_output.st_command.flag_engine_start;//发动机开机
-//	p_st_data_controller_to_switch_output->flag_launch_missile_wing = m_st_flight_basic_output.st_command.flag_launch_missile_wing;//弹翼展开
-//	p_st_data_controller_to_switch_output->flag_separate_booster = m_st_flight_basic_output.st_command.flag_separate_booster;//助推器分离
+	p_st_data_controller_to_switch_output->flag_engine_start = m_st_flight_basic_output.st_command.flag_engine_start;//发动机开机
+	p_st_data_controller_to_switch_output->flag_launch_missile_wing = m_st_flight_basic_output.st_command.flag_launch_missile_wing;//弹翼展开
+	p_st_data_controller_to_switch_output->flag_separate_booster = m_st_flight_basic_output.st_command.flag_separate_booster;//助推器分离
+	//开关量输出
+	p_st_data_controller_to_switch_output->flag_missle_takeoff = m_st_flight_basic_output.st_command.flag_missile_takeoff;//起飞
+	p_st_data_controller_to_switch_output->flag_engine_shutdown = m_st_flight_basic_output.st_command.flag_engine_shutdown;//发动机关机
+	p_st_data_controller_to_switch_output->flag_separate_booster = m_st_flight_basic_output.st_command.flag_separate_booster;//开伞
 }

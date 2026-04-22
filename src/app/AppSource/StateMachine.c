@@ -16,7 +16,7 @@
 #include "./core/Telecontrol.h"
 #include "./core/BusInteract.h"
 #include "./support/os_framework.h"
-#include "flight/os_flight_io.h"
+// #include "flight/os_flight_io.h"
 #include "payload/payloadController.h"
 #include "./support/support.h"
 #include "./Interface/Interface_flash.h"
@@ -31,7 +31,7 @@ DeviceState g_DeviceState={0};
 DeviceStatus g_DeviceStatus = {0};
 void *g_pControl = NULL;
 
-void RunInitialInit()   // MML 初始化调用一次
+void RunInitialInit()   //  初始化调用一次
 {
     //g_pControl = newCMathControlMain();
 
@@ -46,7 +46,7 @@ void RunInitialInit()   // MML 初始化调用一次
     //控制初始化函数
     // FlightInit();       //飞行航点描述
 //    g_pControl = ControlInitial(prepare_input_for_ctrl_run,process_output_after_ctrl_run);
-    g_pControl = ControlInitial();
+    // g_pControl = ControlInitial();   // 改在加载任务后调用
 
 	FlashInit();        //把NorFlash准备好，读了一遍JEDEC
 
@@ -86,7 +86,6 @@ void RunStageMachineStep()  // 5ms运行一次
 /***********************************************************
  * 统计内存池使用情况
 /***********************************************************/
-
 CHAR *name;
 ULONG available;
 ULONG fragments;
@@ -102,19 +101,13 @@ status = tx_byte_pool_info_get( &byte_pool_0,
                                 &first_suspended,
                                 &suspended_count,
                                 &next_pool);
-
 if(TX_SUCCESS != status)
 {
-    while (1)
-    {
-        ;
-    }
-
+    while (1) {}
 }                               
-
 /***********************************************************/
 
-// 1.智能控制器状态更新
+    // 1.智能控制器状态更新
 	ControllerStatusUpdata();
     
 	// 3.准备给飞控的数据
@@ -130,13 +123,13 @@ if(TX_SUCCESS != status)
     // 12.输出到遥测，组帧发送
 	TelemetryFrameOut();
 	// 8.载荷处理
-	PayloadHandle();        //MML 配电板→飞控 上报实时电压电流数据
+	PayloadHandle();        // 配电板→飞控 上报实时电压电流数据
 	// 9.伺服定时处理（伺服小回路，伺服位置查询)
 	SrvStatusUpdata();
 	// 10.电调发动机定时处理
 	AutoDriveEnginePwm();
     // 11.
-    AutoLuanchProcess();    //MML 飞控→给各个设备上电、加载任务信息、惯组对准、转导航、发动机启动、预发射、发射、
+    AutoLuanchProcess();    // 飞控→给各个设备上电、加载任务信息、惯组对准、转导航、发动机启动、预发射、发射、
      // 2.
 	RunMissionTask(10);   
     //unsigned long current_time1 = tx_time_get();

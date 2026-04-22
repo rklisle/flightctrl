@@ -66,7 +66,7 @@ typedef struct
 typedef struct
 {
 	OS_U8 CanIndex;
-	OS_U8 NodeIndex;	//舵机节点号，默认0x25	//MML舵机
+	OS_U8 NodeIndex;	//舵机节点号，默认0x25	//舵机
 	OS_U16 MsgID;
 	OS_U8 MsgLen;
 	OS_U8 MsgData[8];
@@ -274,17 +274,17 @@ typedef struct
 	OS_U8 detachState;
 	OS_FLOAT temperature;
 	OS_U8 luanchStart;		//预发射标志
-	OS_DOUBLE flightStartTime;
-	OS_U64 CurrTick;	// MML: 发射时置0，大状态机中，每5ms+1
-	OS_DOUBLE currTime;
+	OS_DOUBLE flightStartTime;	// 起飞时，记录的时间（该时间是以程序初始化时为0时的）	// 单位 s
+	OS_U64 CurrTick;	// 程序初始化时从0增加，每5ms+1；起飞时，DoIgnition函数中，赋值0，大状态机中，每5ms+1
+	OS_DOUBLE currTime;	// 程序初始化从0增加+0.005s；起飞时置0，重新从0增加+0.005s	// 单位 s
 	OS_U64 BJTimeSecond;
 	OS_U16 BJTimeMS;
 }DeviceState;
 
 typedef struct
 {
-	OS_DOUBLE FzOnTime;	// fuse power-on time
-	OS_DOUBLE curTime;
+	OS_DOUBLE FzOnStamp_s;	// fuse power-on time	// 单位 s
+	// OS_DOUBLE sysTime_s;	// 系统时间，程序启动时0	// 单位 s
 	OS_U8 msgFromGCS;	// message from Ground Control Station // 用于启动SD卡文件写入。初始化时设置为0x00，收到数据链传来数据时设置为0x01
 }DeviceStatus;
 #pragma pack()

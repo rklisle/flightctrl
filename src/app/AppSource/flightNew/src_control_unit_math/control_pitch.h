@@ -44,6 +44,10 @@ typedef struct  _Stru_Pitch_Control_Output
 	double u5f;
 	double ugf;
 	double urf_zd;
+	//π˝‘ÿ÷∏¡Ó
+	double h_command;
+	double zeta_command;
+	double ny_command;
 }Stru_Pitch_Control_Output;
 
 class CMathControlPitch

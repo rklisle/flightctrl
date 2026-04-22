@@ -16,7 +16,7 @@ OS_U8 PayloadHandle()
    		ScoutAutoSend();
 	}
     SaveOnceBattery();
-    SavePwrSeq();        //MML 配电板→飞控 上报的实时电压电流数据 存入数据池
+    SavePwrSeq();        // 配电板→飞控 上报的实时电压电流数据 存入数据池
     return 0;
 }
 

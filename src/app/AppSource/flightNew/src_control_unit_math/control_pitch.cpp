@@ -118,6 +118,9 @@ void CMathControlPitch::Send_Data()
 	p_st_pitch_control_output->u5f = m_u5f;
 	p_st_pitch_control_output->ugf = m_ugf;	//¸ß¶È¿ØÖÆ
 	p_st_pitch_control_output->urf_zd = m_urf_zd;
+	p_st_pitch_control_output->h_command = m_h_command;
+	p_st_pitch_control_output->zeta_command = m_zeta_command;
+	p_st_pitch_control_output->ny_command = m_ny_command;
 }
 void CMathControlPitch::Calc_Data()
 {
