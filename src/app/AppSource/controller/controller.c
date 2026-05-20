@@ -217,9 +217,6 @@ OS_U8 AutoLuanchProcess()  // 5ms运行一次
 
 		if(msnID != 0xFF)
 		{
-			// 任务加载后，初始化控制代码
-			g_pControl = ControlInitial();
-
 			// InitPwrSeq();	//MML 开火工品4
 			// InitSD();
 			AutoStep = 5;
@@ -283,6 +280,9 @@ OS_U8 AutoLuanchProcess()  // 5ms运行一次
 	//6.等待发动机启动指令发出
 	if(AutoStep == 8)
 	{
+		// 初始化控制代码
+		g_pControl = ControlInitial();
+
 		if(EngineStartCmd == 1)
 		{
 			AutoStep = 9;
@@ -364,7 +364,14 @@ OS_U8 AutoLuanchProcess()  // 5ms运行一次
 		GetDataFast(pDataPoolSelf,	"startFly",	&startFly);
 		if(startFly == 1)//DoIgnition函数将startFly置1，地面 发控首页 - 起飞
 		{
-			AutoStep = 13;
+			FuseSend(ARM_I);	//已经起飞了，发送一级解保指令（条件2g过载）
+			// 判断第8字节为0x40
+			OS_U8 fzFeedbk;
+			GetDataFast(pDataPoolSelf, "fzFeedbk", &fzFeedbk);
+			if(fzFeedbk & 0x40)
+			{
+				AutoStep = 13;
+			}
 		}
 	}    
 	//10.起飞之后，飞出2km后给引信的引爆电源上电
@@ -399,25 +406,46 @@ double lon_m = (curLon - launchLon) * 111320.0 * cos(mid_lat_rad);
 
 double h_m = curHigh - launchHigh;
 
-double dist = sqrt(lat_m*lat_m + lon_m*lon_m + h_m*h_m);
+double dist = sqrt(lat_m*lat_m + lon_m*lon_m);
 
-
-			if(dist > 2000)
+			if((dist > 2000)&&(h_m > 200))
 			{
-				PowerOn(DEVICE_FUSE28V);
-				g_DeviceStatus.FzOnStamp_s = GetCurTime();	// tx_time_get();
-				FzOnFlag = 1;
+				FuseSend(ARM_II);// 发送二级解保
+
+				OS_U8 fzFeedbk;
+				GetDataFast(pDataPoolSelf, "fzFeedbk", &fzFeedbk);
+				if(fzFeedbk & 0xC0)
+				{
+					PowerOn(DEVICE_FUSE28V);
+					g_DeviceStatus.FzOnStamp_s = GetCurTime();	// tx_time_get();
+					FzOnFlag = 1;
+				}
 			}
 		}
 		else
 		{
 			// 引信-引爆电源已经上电
-			// 延时10s
-			if((GetCurTime() - g_DeviceStatus.FzOnStamp_s) > 10)	// 10*1000
+			// 延时2s
+			if((GetCurTime() - g_DeviceStatus.FzOnStamp_s) > 2)
 			{
-				// 进行二次激活， 发10次指令
-				FuseSend(0x6B);	// 执行电激活
-				AutoStep = 14;
+				// 判断距离目标是否<2km	
+				OS_DOUBLE deltaR;
+				GetDataFast(pDataPoolFly, "deltaR", &deltaR);//弹目距离
+				if(deltaR != 0)
+				{
+					if(deltaR < 2000)
+					{
+						FuseSend(ARM_III);//发送三级解保
+
+						// 判断第9字节为0x80
+						OS_U8 fzTask;
+						GetDataFast(pDataPoolSelf, "fzTask", &fzTask);
+						if(fzTask & 0x80)
+						{
+							AutoStep = 14;
+						}
+					}
+				}
 			}
 		}
 	}
@@ -555,14 +583,14 @@ OS_U32 ControllerCmdHandler(STRU_422_MSG_INFO * frame)	// 数据链或仿真过来的指令
 	}*/
 	case CMD_URGENT_LAND:	// 0x22 摄像头视频 - 紧急伞降
 	{
-		SETDATA(pDataPoolSelf,  "flyError", 1,	OS_U8);
+		SETDATA(pDataPoolSelf,  "flyError", 1,	OS_U8);	//地面让紧急伞降
 		SETDATA(pDataPoolSelf, "tcCmd", 0xC0,	OS_U8);
 		DoOpenUm();	//紧急伞降开伞
 		break;
 	}
 	case CMD_URGENT_RETURN:	// 0x23 摄像头视频 - 紧急返航
 	{
-		SETDATA(pDataPoolSelf,  "flyError", 2,	OS_U8);
+		SETDATA(pDataPoolSelf,  "flyError", 2,	OS_U8);	//地面让紧急返航
 		SETDATA(pDataPoolSelf, "tcCmd", 0xC1,	OS_U8);
 		DoReturnHomeward();
 		break;

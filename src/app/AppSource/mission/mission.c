@@ -57,7 +57,6 @@ OS_U8 paoID = 1;
 OS_U8 guanID = 1;
 OS_U8 groupID = 0xFF;
 OS_U8 selfID = 0xFF;
-int ptCount = 0;	// 总航点数量
 MSN_TASK_MODE curMsnMode = AUTO_MSN_MODE;
 REPORT_STATUS slaverStatus[SLAVE_COUNT] = {0};
 REPORT_STATUS selfStatus = {0};		// 紧急返航时要用
@@ -219,7 +218,7 @@ static void PathPlanning()
 		return;
 	}
 	//获取当前地面指令/程控指令
-	if(curMsnMode == AUTO_MSN_MODE)
+	if(curMsnMode == AUTO_MSN_MODE)	//MML 此条件目前永远成立
 	{//程控模式，读取预设指令列表
 		GenerateTeamMsn();
 	}
@@ -632,7 +631,7 @@ static void GenerateTeamMsn()
 	{
 		//伞降点
 		SETDATA(pDataPoolSelf,  "flyError", 4,  OS_U8);//正常开伞
-		DoOpenUm();//正常伞降点开伞
+		DoOpenUm();//正常伞降点开伞(含紧急返航)
 		// pOutput->open_umbrella = 0;
 		g_controller_to_switch.flag_open_umbrella = 0;
 		return;
@@ -828,17 +827,22 @@ unsigned char ptBuffer[17 * 32];	// 每个航点17字节，最多32个航点
  */
 void UpdatePredictMsnByGround(STRU_422_MSG_INFO * frame)
 {
+	static int ptCount = 0;	// 总航点数量
+
     unsigned char buf[250];
     memcpy(buf, frame->au8Data, frame->u16Len);
     // frame->au8Data中，第[0]字节为标志位，0表示传的是安全区数据；[1]、[2]、[3]表示传的是航点信息
     switch(buf[0])
     {
     case 0:		// 第0包，传安全区
+		ptCount = buf[4];	// 总航点数量
+        if (ptCount == 0) return;
+
         groupID = buf[1];
         selfID = buf[2];
         LoadSafeArea(buf + 3);	// 获取安全围栏
-        ptCount = buf[4];	// 总航点数量
-		if(ptCount){
+        
+		// if(ptCount){
 			g_route_data.num_rows = ptCount;
 			g_route_data.num_columns = 11;
 
@@ -848,13 +852,12 @@ void UpdatePredictMsnByGround(STRU_422_MSG_INFO * frame)
 			if(pData == NULL) return;
 
 			g_route_data.p_route_data = pData;
-		}
+		// }
         break;
     case 1:		// 第1、2、3包，传具体航点信息，每一包航点信息最多只能包括12个航点，总共最多就是30个航点（还是36个航点之类）
     case 2:		// 每个航点是17个字节，包含经纬高、dir、t、type、speed
     case 3:
-        if (ptCount == 0)
-            return;
+        if (ptCount == 0) return;
         memcpy(ptBuffer + (buf[0] - 1) * 12 * 17, buf + 1, 12 * 17);
         if (buf[0] * 12 >= ptCount)
         {
@@ -866,13 +869,13 @@ void UpdatePredictMsnByGround(STRU_422_MSG_INFO * frame)
 				short alt,dir;
 				unsigned short speed,t;
 				unsigned char type;
-				memcpy(&lon,   ptBuffer + 17 * i + 0, 4);	// 参考basic ling194
-				memcpy(&lat,   ptBuffer + 17 * i + 4, 4);
-				memcpy(&alt,   ptBuffer + 17 * i + 8, 2);
-				memcpy(&dir,   ptBuffer + 17 * i + 10, 2);
-				memcpy(&t, ptBuffer + 17 * i + 12, 2);
-				memcpy(&type,  ptBuffer + 17 * i + 14, 1);
-				memcpy(&speed, ptBuffer + 17 * i + 15, 2);
+				memcpy(&lon,	ptBuffer + 17 * i + 0, 4);	// 参考basic ling194
+				memcpy(&lat,	ptBuffer + 17 * i + 4, 4);
+				memcpy(&alt,	ptBuffer + 17 * i + 8, 2);
+				memcpy(&dir,	ptBuffer + 17 * i + 10, 2);
+				memcpy(&t,		ptBuffer + 17 * i + 12, 2);
+				memcpy(&type,	ptBuffer + 17 * i + 14, 1);
+				memcpy(&speed,	ptBuffer + 17 * i + 15, 2);
 //						tempPt[i].targetLon = lon * 1e-7;
 //						tempPt[i].targetLat = lat * 1e-7;
 //						tempPt[i].targetHigh = alt;
@@ -894,13 +897,13 @@ void UpdatePredictMsnByGround(STRU_422_MSG_INFO * frame)
 				g_route_data.p_route_data[i * 11 + 9] = speed;		//速度指令
 				g_route_data.p_route_data[i * 11 + 10]= 0;			//接受半径，未使用
 
-				Arp[i].sn = i;	// 航点号。从0开始编号
-				Arp[i].lon = lon * 1e-7;
-				Arp[i].lat = lat * 1e-7;
-				Arp[i].h = alt;
+				Arp[i].sn 	= i;	// 航点号。从0开始编号
+				Arp[i].lon 	= lon * 1e-7;
+				Arp[i].lat 	= lat * 1e-7;
+				Arp[i].h 	= alt;
 				Arp[i].outTrack = dir *0.01;
-				Arp[i].t = t;
-				Arp[i].w = type;
+				Arp[i].t 	= t;
+				Arp[i].w 	= type;
 				Arp[i].V_cmd = speed;                                                         
 				Arp[i].if_airspeed_used = 0;
 			}
@@ -957,7 +960,7 @@ void UpdatePredictMsnByGround(STRU_422_MSG_INFO * frame)
 
 			SETDATA(pDataPoolFly, "DataLon", (g_route_data.p_route_data[1] * 1e7), OS_S32); //
 			SETDATA(pDataPoolFly, "DataLat", (g_route_data.p_route_data[2] * 1e7), OS_S32); //
-			SETDATA(pDataPoolFly, "DataHigh", g_route_data.p_route_data[3], OS_S16);//
+			SETDATA(pDataPoolFly, "DataHigh", g_route_data.p_route_data[3], 	   OS_S16);//
 			SETDATA(pDataPoolFly, "DataDir", (g_route_data.p_route_data[7] * 1e2), OS_U16); //
 
 			// pInput->initLon = Arp[0].lon;	// 014 换方式

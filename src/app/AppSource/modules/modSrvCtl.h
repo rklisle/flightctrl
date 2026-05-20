@@ -141,7 +141,7 @@ OS_U8 Servo_SendCANFrame(OS_U32 id, OS_U8 *data, OS_U8 len);
 OS_U8 AngleToPosition_CAN(double angle, OS_U8 *high, OS_U8 *low);
 double PositionToAngle_CAN(OS_U8 high, OS_U8 low);
 
-OS_U8 StartMiniLoop(float freq, float amp, float zero, OS_U8 enable[6]);
+OS_U8 StartMiniLoop(float freq, float amp, float zero, OS_U8 enable[7]);
 OS_U8 MiniLoopSimulation();
 extern OS_U8 ServoCtlOnce_6Rudder(double actDeg_1, double actDeg_2, double actDeg_3, 
     double actDeg_4, double actDeg_5, double actDeg_6);

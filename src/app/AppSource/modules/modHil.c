@@ -23,33 +23,33 @@ void StopHilTest();
 OS_U8 SaveHilInDataPool(STRU_HIL_INPUT *hilInfo)
 {
 		memcpy(&hilInput, hilInfo, sizeof(STRU_HIL_INPUT));
-//		SETDATA(pDataPoolImu, "imuWx", hilInfo->wx,	OS_FLOAT);
-//		SETDATA(pDataPoolImu, "imuWy", hilInfo->wy,	OS_FLOAT);
-//		SETDATA(pDataPoolImu, "imuWz", hilInfo->wz,	OS_FLOAT);
-//		SETDATA(pDataPoolImu, "imuAx", hilInfo->ax,	OS_FLOAT);
-//		SETDATA(pDataPoolImu, "imuAy", hilInfo->ay,	OS_FLOAT);
-//		SETDATA(pDataPoolImu, "imuAz", hilInfo->az,	OS_FLOAT);
+		SETDATA(pDataPoolImu, "imuWx", hilInfo->wx,	OS_FLOAT);
+		SETDATA(pDataPoolImu, "imuWy", hilInfo->wy,	OS_FLOAT);
+		SETDATA(pDataPoolImu, "imuWz", hilInfo->wz,	OS_FLOAT);
+		SETDATA(pDataPoolImu, "imuAx", hilInfo->ax,	OS_FLOAT);
+		SETDATA(pDataPoolImu, "imuAy", hilInfo->ay,	OS_FLOAT);
+		SETDATA(pDataPoolImu, "imuAz", hilInfo->az,	OS_FLOAT);
 
-//		SETDATA(pDataPoolImu, "navLon", hilInfo->lon * 1e7,	OS_S32);
-//		SETDATA(pDataPoolImu, "navLat", hilInfo->lat * 1e7,	OS_S32);
-//		SETDATA(pDataPoolImu, "navHigh", hilInfo->alt,	    OS_FLOAT);
-//		SETDATA(pDataPoolImu, "navVn", hilInfo->vn * 1e2,	OS_S16);
-//		SETDATA(pDataPoolImu, "navVs", hilInfo->vs * 1e2,	OS_S16);
-//		SETDATA(pDataPoolImu, "navVe", hilInfo->ve * 1e2,	OS_S16);
+		SETDATA(pDataPoolImu, "navLon", hilInfo->lon * 1e7,	OS_S32);
+		SETDATA(pDataPoolImu, "navLat", hilInfo->lat * 1e7,	OS_S32);
+		SETDATA(pDataPoolImu, "navHigh", hilInfo->alt,	    OS_FLOAT);
+		SETDATA(pDataPoolImu, "navVn", hilInfo->vn * 1e2,	OS_S16);
+		SETDATA(pDataPoolImu, "navVs", hilInfo->vs * 1e2,	OS_S16);
+		SETDATA(pDataPoolImu, "navVe", hilInfo->ve * 1e2,	OS_S16);
 
-//		double dir = hilInfo->yaw;
-//		dir = -dir;
-//		if(dir < 0)
-//				dir += 360;
-//		SETDATA(pDataPoolImu, "navPitch", hilInfo->pitch * 1e2,	OS_S16);
-//		SETDATA(pDataPoolImu, "navDir", dir * 1e2,	OS_U16);//
-//		SETDATA(pDataPoolImu, "navRoll", hilInfo->roll * 1e2,	OS_S16);
-		// if(g_DeviceState.srvCountDown == 0)
-		// {
-		// 	// 280 半实物过来的数据就是100倍的，hilInfo->DD1这个应该就是100倍的角度值
-		// 	SETDATA(pDataPoolSrv, "Sr1Read", hilInfo->DD1, OS_S16);	// 014不使用
-		// 	SETDATA(pDataPoolSrv, "Sr2Read", hilInfo->DD2, OS_S16);	// 014不使用
-		// }
+		double dir = hilInfo->yaw;
+		dir = -dir;
+		if(dir < 0)
+				dir += 360;
+		SETDATA(pDataPoolImu, "navPitch", hilInfo->pitch * 1e2,	OS_S16);
+		SETDATA(pDataPoolImu, "navDir", dir * 1e2,	OS_U16);//
+		SETDATA(pDataPoolImu, "navRoll", hilInfo->roll * 1e2,	OS_S16);
+		if(g_DeviceState.srvCountDown == 0)
+		{
+			// 280 半实物过来的数据就是100倍的，hilInfo->DD1这个应该就是100倍的角度值
+			SETDATA(pDataPoolSrv, "Sr1Read", hilInfo->DD1, OS_S16);	
+			SETDATA(pDataPoolSrv, "Sr2Read", hilInfo->DD2, OS_S16);	
+		}
     
 	return 0;
 }
@@ -168,7 +168,7 @@ OS_U8 HilFlightStage()
 		g_ins_data.az = hilInput.az;
 
 		g_ins_data.zeta = hilInput.pitch;
-		g_ins_data.psi = hilInput.yaw;
+		g_ins_data.psi  = hilInput.yaw;
 		g_ins_data.gama = hilInput.roll;
 
 		g_ins_data.vtx = hilInput.vn;
@@ -179,7 +179,7 @@ OS_U8 HilFlightStage()
 		g_ins_data.latitude = hilInput.lat;
 		g_ins_data.height = hilInput.alt;
 
-		GetDataFast(pDataPoolNav, "navState", &g_ins_data.GPS_status);
+		GetDataFast(pDataPoolImu, "navState", &g_ins_data.GPS_status);// pDataPoolNav
 
 
 		GetDataFast(pDataPoolSelf, "ecuGetRp", &g_engine_data.rpm_engine);
@@ -207,7 +207,9 @@ OS_U8 HilFlightStage()
 		SETDATA(pDataPoolImu, "imuAy", g_ins_data.ay,	OS_FLOAT);
 		SETDATA(pDataPoolImu, "imuAz", g_ins_data.az,	OS_FLOAT);
 
-		SETDATA(pDataPoolSelf, "AirPress", hilInput.DD1*100, OS_S16);	// MML新增
+		SETDATA(pDataPoolSelf, "AirPress", hilInput.DD1*0.1, OS_S16);	// MML新增
+	g_baro_data.static_pressure = hilInput.DD1;
+	g_baro_data.total_pressure  = hilInput.DD2;
 
    	if(hilInput.useNav)
 	{

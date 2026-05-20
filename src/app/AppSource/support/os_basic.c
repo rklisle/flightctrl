@@ -1,6 +1,7 @@
 #include "os_framework.h"
 #include "os_basic.h"
 #include <math.h>
+#include <stdint.h>
 
 static OS_U16 crc16_table[] = 
 {
@@ -94,6 +95,37 @@ unsigned short reflect_uint16(unsigned short value) {
         reflected |= ((value >> i) & 0x01) << (15 - i);
     }
     return reflected;
+}
+
+/**
+ * CRC-16-XMODEM
+ * 多项式: 0x1021
+ * 初始值: 0x0000
+ * 结果异或: 0x0000
+ * 输入反转: false
+ * 输出反转: false
+ * 
+ * @param data 数据指针
+ * @param length 数据长度（字节）
+ * @return CRC16 校验值
+ */
+uint16_t crc16_xmodem(const uint8_t *data, int length)
+{
+    uint16_t crc = 0x0000;
+    
+    for (int i = 0; i < length; i++) {
+        crc ^= (uint16_t)data[i] << 8;
+        
+        for (int j = 0; j < 8; j++) {
+            if (crc & 0x8000) {
+                crc = (crc << 1) ^ 0x1021;
+            } else {
+                crc <<= 1;
+            }
+        }
+    }
+    
+    return crc;
 }
 
 unsigned short crc16_ccitt(const unsigned char *data, int length) {

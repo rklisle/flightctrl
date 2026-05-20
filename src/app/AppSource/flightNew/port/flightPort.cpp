@@ -23,6 +23,10 @@ Stru_Initial_Data   g_initial_data = {0};//初始发射数据；
 Stru_Route_Data     g_route_data = {0};//初始预装订航点信息
 Stru_Data_Datalink_To_ControllerSig     g_DLtoCtrl_sig = {0};//数据链，在线更新航点信息
 
+// 新增：时间全局变量定义
+double   g_flight_time = 0.0;
+int      g_time_tick = 0;
+
 //static pre_ctrl_run_callback_t s_pre_cb = NULL;
 //static post_ctrl_run_callback_t s_post_cb = NULL;
 
@@ -60,6 +64,10 @@ extern "C"{
         p->p_st_initial_data = &g_initial_data;
         p->p_st_data_datalink_to_controllersig = &g_DLtoCtrl_sig;
 
+        // 新增：绑定时间变量（直接使用全局变量地址）
+        p->flight_time = g_flight_time;  // 注意：这只是初始化时赋值
+        p->time_tick = g_time_tick;
+        
         p->Initial();
     }
     
@@ -74,6 +82,9 @@ extern "C"{
 //        {   // prepare control input data
 //            s_pre_cb();
 //        }
+        // 关键：每次运行前从全局变量同步到实例
+        pinst->flight_time = g_flight_time;
+        pinst->time_tick = g_time_tick;
         
         pinst->Run();
 

@@ -151,6 +151,7 @@ int TFTP_Write(void* handle, struct pbuf* p)
         return -1;
     }
     
+    tx_mutex_get(&mutex_rwSD, TX_WAIT_FOREVER);
     // 写入数据
     res = f_write(&tftp_file, p->payload, p->len, &bytes_written);
     if (res != FR_OK) {
@@ -160,7 +161,8 @@ int TFTP_Write(void* handle, struct pbuf* p)
     
     // 重要：立即同步到存储设备，防止数据丢失
     f_sync(&tftp_file);
-    
+    tx_mutex_put(&mutex_rwSD);
+
     // 调试信息
     // printf("[TFTP] Wrote %u bytes\r\n", bytes_written);
     

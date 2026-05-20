@@ -280,7 +280,7 @@ typedef struct _Stru_Data_INS_To_Controller
 	double gama;//正欧拉角：北天东地理系，经过231转序，前上右弹体系
 	double psi;
 	double zeta;
-	double gamas;//反欧拉角：321转序
+	double gamas;//反欧拉角：321转序	//014不使用
 	double psis;
 	double zetas;
 	double wx;	//deg
@@ -329,9 +329,9 @@ typedef struct _Stru_Data_Datalink_To_ControllerSig
 
 typedef struct _Stru_Data_Engine_To_Controller
 {
-	double rpm_engine;
-	int ECU_work_status;	//工作状态
-	int engine_start_result;//启动状态0x55启动过程中，0xAA启动完成，0xFF启动异常
+	double rpm_engine;		//014 指令69，实际转速
+	int ECU_work_status;	//工作状态	//014 发动机状态机的状态 0停机 1启动中 2散热 5运行
+	int engine_start_result;//启动状态0x55启动过程中，0xAA启动完成，0xFF启动异常	//014不使用
 }Stru_Data_Engine_To_Controller;	//发动机给综控机数据包
 
 typedef struct _Stru_Data_Controller_To_Seeker  
@@ -416,9 +416,9 @@ typedef struct _Stru_Data_Controller_To_Actuator
 
 typedef struct _Stru_Data_Controller_To_Engine  
 {
-	double control_Kc;	//指令油门，二选一
-	double control_rpm;//指令转速，二选一
-	int ECU_work_cmd;	//控制指令0x00 无指令，0x11 自检，0x22 启动，0x33 转速控制,  0x44 关机
+	double control_Kc;	//指令油门，二选一	//014 取值范围0.0~100.0
+	double control_rpm;//指令转速，二选一	//014不使用
+	int ECU_work_cmd;	//控制指令0x00 无指令，0x11 自检，0x22 启动，0x33 转速控制,  0x44 关机	//014不使用
 }Stru_Data_Controller_To_Engine;	//综控机给发动机数据包
 
 typedef struct _Stru_Data_Controller_To_Switch_Output  

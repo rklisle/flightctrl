@@ -246,7 +246,7 @@ typedef struct
 	// DOM_SIMSRVDAT	= 0x1<<2,	// 伺服小回路模式，伺服数据由地面给出，自动生成并替换输出
 	// DOM_TRIGGERON	= 0x1<<3,	// 时序开关，是否输出时序动作
 	// DOM_AUTOMATIC	= 0x1<<4,	// 自动过程，射后自动执行的过程，周期调用
-	// DOM_HILSMODE	= 0x1<<5,	// 半实物模式
+	// DOM_HILSMODE		= 0x1<<5,	// 半实物模式
 	// DOM_NAVON		= 0x1<<6,	// 开启导航
 	FUNC_DOMAIN workStage;
 	/** 各单机通信状态，初始设置为200tick，每个tick调用-1，每次收到数据恢复200.保证在通讯中断1秒内能够反馈到遥测 */

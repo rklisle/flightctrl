@@ -27,6 +27,7 @@ struct app_can_rx_msg
 
 typedef struct fdcan_agent_tag
 {
+    uint32_t                id;
     FDCAN_HandleTypeDef*    phdl;
     TX_THREAD               tcb;
     TX_QUEUE                queue;
@@ -284,11 +285,10 @@ struct app_can_rx_msg   recvCanMsg[2] = {0};
 void app_can_demo (ULONG thread_input) 
 {
     uint32_t    actual_flags = 0;
-    struct app_can_rx_msg   msg = {0};
-    fdcan_agent_t* pinst = &s_inst[thread_input];
+    fdcan_agent_t* pinst = (fdcan_agent_t*)thread_input;
     
    // init can driver
-    prv_FDCAN_Init(pinst->phdl,thread_input);
+    prv_FDCAN_Init(pinst->phdl,pinst->id);
 
     /* activate tmr */
     //tx_timer_activate(&s_tmr);
@@ -301,10 +301,10 @@ void app_can_demo (ULONG thread_input)
                             TX_WAIT_FOREVER);
         if(actual_flags & APP_CAN_RX_EVENT)
         { 
-            tx_mutex_get(&can_mutex_write[thread_input], TX_WAIT_FOREVER);
-            memcpy(&recvCanMsg[thread_input], &canCurMsg[thread_input], sizeof(struct app_can_rx_msg));
-            tx_mutex_put(&can_mutex_write[thread_input]);
-            pinst->pcb(recvCanMsg[thread_input].id, recvCanMsg[thread_input].ext_id, recvCanMsg[thread_input].buf, recvCanMsg[thread_input].len);
+            tx_mutex_get(&can_mutex_write[pinst->id], TX_WAIT_FOREVER);
+            memcpy(&recvCanMsg[pinst->id], &canCurMsg[pinst->id], sizeof(struct app_can_rx_msg));
+            tx_mutex_put(&can_mutex_write[pinst->id]);
+            pinst->pcb(recvCanMsg[pinst->id].id, recvCanMsg[pinst->id].ext_id, recvCanMsg[pinst->id].buf, recvCanMsg[pinst->id].len);
 
             /*
             // receive some message
@@ -324,30 +324,30 @@ void app_can_demo (ULONG thread_input)
     }
 }
 
-int32_t app_can_init(TX_BYTE_POOL *pmem, FDCAN_HandleTypeDef* phdl,pcan_recv_cb_t pcb )
+int32_t app_can_init(TX_BYTE_POOL *pmem, FDCAN_HandleTypeDef* phdl,pcan_recv_cb_t pcb, uint32_t idx)
 {
     (void)pmem;
-    int32_t k;
     fdcan_agent_t *pinst;
     
-    for(k=0; k<(sizeof(s_inst)/sizeof(fdcan_agent_t)); k++)
-    {
-        pinst  = &s_inst[k];
-        if(pinst->phdl == NULL)
-        {
-            break;
-        }
-        pinst = NULL;
-    }
-
-    if(pinst == NULL)
-    {
+    if(s_inst[idx].phdl != NULL)
+    {   // occupied yet
         return -1;
     }
+    pinst = &s_inst[idx];
+    // for(k=0; k<(sizeof(s_inst)/sizeof(fdcan_agent_t)); k++)
+    // {
+    //     pinst  = &s_inst[k];
+    //     if(pinst->phdl == NULL)
+    //     {
+    //         break;
+    //     }
+    //     pinst = NULL;
+    // }
+    pinst->id = idx;
     pinst->phdl = phdl;
     pinst->pcb = pcb;
 
-    tx_mutex_create(&can_mutex_write[k], "sd_write_mutex", TX_INHERIT);
+    tx_mutex_create(&can_mutex_write[idx], "sd_write_mutex", TX_INHERIT);
     
     tx_queue_create(    &pinst->queue, 
                         "can mbox", 
@@ -362,12 +362,12 @@ int32_t app_can_init(TX_BYTE_POOL *pmem, FDCAN_HandleTypeDef* phdl,pcan_recv_cb_
     tx_thread_create(   &pinst->tcb, 
                         "can", 
                         app_can_demo, 
-                        k, 
+                        (ULONG)pinst, 
                         pinst->app_stack,
                         sizeof(pinst->app_stack), 
                         TX_MAX_PRIORITIES - 10,
                         TX_MAX_PRIORITIES - 10, 
                         TX_NO_TIME_SLICE, 
                         TX_AUTO_START);
-    return k;
+    return idx;
 }

@@ -417,17 +417,17 @@ SETDATA(pDataPoolNav, "navLon", navInfo->s32navLon,	OS_S32);//导航经度
 	SETDATA(pDataPoolNav, "navAz", navInfo->imuAz16507,	OS_FLOAT);//原始加速度Z
 
 
-//  SETDATA(pDataPoolNav, "navWx2", navInfo->imuWx20689,	OS_FLOAT);//原始角速度X
-//	SETDATA(pDataPoolNav, "navWy2", navInfo->imuWy20689,	OS_FLOAT);//原始角速度Y
-//	SETDATA(pDataPoolNav, "navWz2", navInfo->imuWz20689,	OS_FLOAT);//原始角速度Z
-//	SETDATA(pDataPoolNav, "navAx2", navInfo->imuAx20689,	OS_FLOAT);//原始加速度X
+	SETDATA(pDataPoolNav, "navWx2", navInfo->imuWx20689,	OS_FLOAT);//原始角速度X
+	SETDATA(pDataPoolNav, "navWy2", navInfo->imuWy20689,	OS_FLOAT);//原始角速度Y
+	SETDATA(pDataPoolNav, "navWz2", navInfo->imuWz20689,	OS_FLOAT);//原始角速度Z
+	SETDATA(pDataPoolNav, "navAx2", navInfo->imuAx20689,	OS_FLOAT);//原始加速度X
 	SETDATA(pDataPoolNav, "navAy2", navInfo->imuAy20689,	OS_FLOAT);//原始加速度Y
 	SETDATA(pDataPoolNav, "navAz2", navInfo->imuAz20689,	OS_FLOAT);//原始加速度Z
     
-	SETDATA(pDataPoolNav, "navWx3", navInfo->imuWx42688,	OS_FLOAT);//原始角速度X
-	SETDATA(pDataPoolNav, "navWy3", navInfo->imuWy42688,	OS_FLOAT);//原始角速度Y
-	SETDATA(pDataPoolNav, "navWz3", navInfo->imuWz42688,	OS_FLOAT);//原始角速度Z
-	SETDATA(pDataPoolNav, "navAx3", navInfo->imuAx42688,	OS_FLOAT);//原始加速度X
+	// SETDATA(pDataPoolNav, "navWx3", navInfo->imuWx42688,	OS_FLOAT);//原始角速度X
+	// SETDATA(pDataPoolNav, "navWy3", navInfo->imuWy42688,	OS_FLOAT);//原始角速度Y
+	// SETDATA(pDataPoolNav, "navWz3", navInfo->imuWz42688,	OS_FLOAT);//原始角速度Z
+	// SETDATA(pDataPoolNav, "navAx3", navInfo->imuAx42688,	OS_FLOAT);//原始加速度X
 	SETDATA(pDataPoolNav, "navAy3", navInfo->imuAy42688,	OS_FLOAT);//原始加速度Y
 	SETDATA(pDataPoolNav, "navAz3", navInfo->imuAz42688,	OS_FLOAT);//原始加速度Z
 

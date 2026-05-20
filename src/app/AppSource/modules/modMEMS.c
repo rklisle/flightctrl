@@ -146,7 +146,7 @@ OS_U8 ToImuFocus()
 	return 0;
 }
 extern float fwxhil,fwyhil,fwzhil;
-static OS_U8 SaveImuInDataPool(STRU_IMU_INFO* buf)
+static OS_U8 SaveImuInDataPool(STRU_IMU_INFO* buf)  //014不用
 {
 	 //上电后为准备状态；对准前以及对准过程中不响应转导航指令，转导航后不再响应对准指令
 	
@@ -264,7 +264,7 @@ static OS_U8 SaveImuInDataPool(STRU_IMU_INFO* buf)
  * 参考资料: <TXII-Y1 422箭上通信协议>
  * 作者:	成宏璟
  ***********************************************************/
-OS_U32 ImuRtHandler(STRU_422_MSG_INFO * frame)
+OS_U32 ImuRtHandler(STRU_422_MSG_INFO * frame)  //014不用
 {
 	OS_U8 msgID = frame->u8MsgID;
 	switch(msgID)

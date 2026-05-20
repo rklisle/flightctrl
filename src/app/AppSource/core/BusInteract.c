@@ -48,9 +48,9 @@ void InitCanRts()
     hfdcan2.Instance = FDCAN2;
     // fdCan[0] = app_can_init(NULL, &hfdcan1, CanRtBattHandler);	//MML舵机
 #ifdef SERVO_CAN
-	fdCan[0] = app_can_init(NULL, &hfdcan1, CanRtServoHandler);  // 改为舵机处理函数
+	fdCan[0] = app_can_init(NULL, &hfdcan1, CanRtServoHandler, 0);  // 改为舵机处理函数
 #endif
-    fdCan[1] = app_can_init(NULL, &hfdcan2, CanRtPwrSeqHandler);	//MML配电板
+    fdCan[1] = app_can_init(NULL, &hfdcan2, CanRtPwrSeqHandler, 1);	//MML配电板
 
 }
 /***********************************************************
@@ -116,9 +116,9 @@ void InitRts()
 	rtList[RT_FUSE].devStopLen = 1;
 	rtList[RT_FUSE].oddCheckEnable = FALSE;
     rtList[RT_FUSE].evenCheckEnable = FALSE;
-	rtList[RT_FUSE].ptr_RtHandler = FuseRtHandler;
-    rtList[RT_FUSE].ptr_Init = InitFuse;
-    rtList[RT_FUSE].ptr_ChkFrameSum = ChkFuseStandardFrame;
+	rtList[RT_FUSE].ptr_RtHandler = FuseRtHandler;	// 通过组好的标准帧，读出数据区，目的是解析外设有用的数据
+    rtList[RT_FUSE].ptr_Init = InitFuse;			
+    rtList[RT_FUSE].ptr_ChkFrameSum = ChkFuseStandardFrame;// 根据外设协议，往标准帧里填数，目的是组成标准帧
 
 	rtList[PRINTF_UART_CHANNEL].ckIndex = 0;
 	rtList[PRINTF_UART_CHANNEL].chIndex = 4;	// UART5 —— 输出log信息

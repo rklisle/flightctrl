@@ -1,6 +1,7 @@
 #ifndef _OS_BASIC_H_
 #define _OS_BASIC_H_
 
+#include <stdint.h>
 #include "./os_framework.h"
 
 OS_BOOL Chk2in3U16(OS_U16 u16Data1, OS_U16 u16Data2, OS_U16 u16Data3, OS_U16* pu16DataOut);
@@ -18,6 +19,8 @@ OS_VOID SetBit_U8(OS_U8* pu8In, OS_U8 u8Index);
 OS_VOID ClearBit_U8(OS_U8* pu8In, OS_U8 u8Index);
 
 OS_BOOL Chk16CRC_U8(OS_U8* pu8Start, OS_U32 u32Length, OS_U16 CRCValue);
+
+uint16_t crc16_xmodem(const uint8_t *data, int length);
 
 unsigned short crc16_ccitt(const unsigned char *data, int length) ;
 

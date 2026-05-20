@@ -34,6 +34,8 @@ int safePointCount;
 
 // MISSION homeMsn = {0};
 extern Stru_Data_Controller_To_DatalinkTel  g_CtrltoDL_tel;
+extern double	g_flight_time;
+extern int		g_time_tick;
 
 #define d2r		(57.29577951308402)
 /***********************************************************
@@ -44,8 +46,8 @@ static void FlightSeqOutputHandle()	//02 Èç¹ûÊÕµ½É¡½µÃüÁî£¬¹Ø·¢¶¯»ú¡¢¿ªÉ¡¡¢¿Ø¶æ»
 {
 	if(flightSeq.umOpen == 1)
 	{
-		// ¼ÓÒ»¸ö¶ÔÒıĞÅµÄ¿ØÖÆ
-		FuseSend(0x7A);	// È¡Ïûµç¼¤»î
+		// // ¼ÓÒ»¸ö¶ÔÒıĞÅµÄ¿ØÖÆ
+		// FuseSend(0x7A);	// È¡Ïûµç¼¤»î
 		//ÊÕµ½É¡½µÃüÁî
 		// struct EngineStatus engineStatus = {0};
 		OS_U8 cntState;
@@ -155,6 +157,7 @@ void FlightTMOutputHandle()	//02 ¿ØÖÆÊä³ö¡ª¡ª>´æÈëÊı¾İ³Ø
 	SETDATA(pDataPoolFly,	"rollCmd",	g_CtrltoDL_tel.rudderRollCmd* 100,	OS_S16);	//ÖÆµ¼¼¶Êı
 	SETDATA(pDataPoolFly,	"yawCmd",	g_CtrltoDL_tel.rudderYawCmd* 100,		OS_S16);	//¿ØÖÆ¼¶Êı
 
+	SETDATA(pDataPoolFly,	"deltaR",	g_CtrltoDL_tel.deltaR,		OS_DOUBLE);	//µ¯Ä¿¾àÀë
 	SETDATA(pDataPoolFly,	"dRn",	g_CtrltoDL_tel.dRn,		OS_S16);	//¿ØÖÆ¼¶Êı
 	SETDATA(pDataPoolFly,	"dRu",	g_CtrltoDL_tel.dRu,		OS_S16);	//¿ØÖÆ¼¶Êı
 	SETDATA(pDataPoolFly,	"dRe",	g_CtrltoDL_tel.dRe,		OS_S16);	//¿ØÖÆ¼¶Êı
@@ -192,11 +195,11 @@ void FlightTMOutputHandle()	//02 ¿ØÖÆÊä³ö¡ª¡ª>´æÈëÊı¾İ³Ø
 	SETDATA(pDataPoolFly,	"DbsLen",	g_CtrltoDL_tel.Dubins_length , OS_FLOAT );//ËÙ¶ÈÖ¸Áî
 	SETDATA(pDataPoolFly,	"ADRC",	    g_CtrltoDL_tel.fduox_ADRC * 100, OS_S16 );//ËÙ¶ÈÖ¸Áî
 	//ÔİÊ±½èÓÃµ¼º½°æÊı¾İ		
-	SETDATA(pDataPoolNav, "navWx2", g_CtrltoDL_tel.alpha_ins,	OS_FLOAT);//¹ß²â¹¥½Ç
-	SETDATA(pDataPoolNav, "navWy2", g_CtrltoDL_tel.beta_ins,	OS_FLOAT);//¹ß²â²à»¬½Ç
+	SETDATA(pDataPoolNav, "navWx3", g_CtrltoDL_tel.alpha_ins,	OS_FLOAT);//¹ß²â¹¥½Ç
+	SETDATA(pDataPoolNav, "navWy3", g_CtrltoDL_tel.beta_ins,	OS_FLOAT);//¹ß²â²à»¬½Ç
 
-	SETDATA(pDataPoolNav, "navWz2", g_CtrltoDL_tel.MaxRpm,	OS_FLOAT);//×î´ó×ªËÙ
-	SETDATA(pDataPoolNav, "navAx2", g_CtrltoDL_tel.DFT_freq_max,	OS_FLOAT);//±æÊ¶ÔË¶¯ÆµÂÊ
+	SETDATA(pDataPoolNav, "navWz3", g_CtrltoDL_tel.MaxRpm,	OS_FLOAT);//×î´ó×ªËÙ
+	SETDATA(pDataPoolNav, "navAx3", g_CtrltoDL_tel.DFT_freq_max,	OS_FLOAT);//±æÊ¶ÔË¶¯ÆµÂÊ
     
 	if(g_controller_to_switch.flag_missle_takeoff == 1)
 	{
@@ -337,6 +340,10 @@ void FlightOutputHandle()  //01 5msÔËĞĞÒ»´Î
 // double curAirSpd;	// MML Î´Ê¹ÓÃ£¬×¢ÊÍ
 void FlightInputGenerate()
 {
+	// ÉèÖÃÊ±¼ä£¨Ö±½ÓĞŞ¸ÄÈ«¾Ö±äÁ¿£©
+    g_flight_time = g_DeviceState.currTime;
+    g_time_tick   = g_DeviceState.CurrTick;
+
 		if((g_DeviceState.workStage & DOM_HILSMODE) == DOM_HILSMODE)
 		{
 			//°ëÊµÎï·ÂÕæÄ£Ê½
@@ -565,7 +572,8 @@ OS_U8 JudgeHomeward()	//02 Æğ·É2sºó£¬Ã¿1sÅĞ¶ÏÒ»´Î£¬¿´ÊÇ·ñ³öÁË°²È«Çø£¿ÊÇ·ñĞèÒªÉ¡½
 		{
 			if(judgeError >= 3)
 			{
-				SETDATA(pDataPoolSelf,  "flyError", 0xCC,	OS_U8);
+				// ³ö°²È«Çø£¬ÇÒÊ±¼ä³¬¹ı3s
+				SETDATA(pDataPoolSelf,  "flyError", 0xCC,	OS_U8);//·É³ö°²È«Çø³¬¹ı3s
 				if(OutSafeArea == false)
 					OutSafeCount = 35;
 				OutSafeArea = true;
@@ -601,7 +609,11 @@ OS_U8 JudgeHomeward()	//02 Æğ·É2sºó£¬Ã¿1sÅĞ¶ÏÒ»´Î£¬¿´ÊÇ·ñ³öÁË°²È«Çø£¿ÊÇ·ñĞèÒªÉ¡½
 // extern int RP_NUMBER;
 
 
-
+/**¿ªÉ¡ÈıÖÖÌõ¼ş£º
+ * 1.³ö°²È«Çø¿ªÉ¡£¨·É¿Ø×Ô¼ºÅĞ¶Ï£©
+ * 2.½ô¼±É¡½µ¿ªÉ¡£¨ÌıµØÃæÕ¾µÄ£©
+ * 3.Õı³£É¡½µµã¿ªÉ¡£¬½ô¼±·µº½¿ªÉ¡£¨Ìı¿ØÖÆµÄ£©
+ */
 OS_U8 DoOpenUm()
 {
 	//½â³ı·É¿ØËã·¨¶Ô¿ØÖÆÏµÍ³µÄ¹ÜÀí

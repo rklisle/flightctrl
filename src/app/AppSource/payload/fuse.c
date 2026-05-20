@@ -14,17 +14,17 @@
 #include "../support/common.h"
 #include "../support/os_bufferLoop.h"
 
-FUSE_LONG_STATUS fuseStatus = {0};
-OS_U8 FuseSend(OS_U8 msgID);
+FUSE_RCV_FRAME fuseFrame = {0};
+
 OS_U8 InitFuse()
 {
-	buffLoop[RT_FUSE].syncHead_A = 0xAA;
-	buffLoop[RT_FUSE].syncHead_B = 0x55;
+	buffLoop[RT_FUSE].syncHead_A = 0xEB;
+	buffLoop[RT_FUSE].syncHead_B = 0x90;
 	buffLoop[RT_FUSE].lenExtern = 0;	// 数据帧中表示长度字节，之外还有lenExtern个字节，总共构成一帧数据	//普通422消息，头部6字节，校验和2字节不算入长度字段
 	buffLoop[RT_FUSE].head = 0;
 	buffLoop[RT_FUSE].tail = 0;
-	buffLoop[RT_FUSE].lenPos = 2;	//0;	//除了Head_A和Head_B之外再偏移多少字节才到长度字节	//同步头后第n个字节为长度
-	buffLoop[RT_FUSE].fixedLen = 15;	//0：取HeadA、HeadB后面的两个字节作为长度；-1：暂不清楚；具体数值：固定长度
+	buffLoop[RT_FUSE].lenPos = 0;	//0;	//除了Head_A和Head_B之外再偏移多少字节才到长度字节	//同步头后第n个字节为长度
+	buffLoop[RT_FUSE].fixedLen = 27;	//0：取HeadA、HeadB后面的两个字节作为长度；-1：暂不清楚；具体数值：固定长度
 	buffLoop[RT_FUSE].inited = TRUE;
 	return 0;
 }
@@ -37,17 +37,17 @@ OS_U16 ChkFuseStandardFrame(OS_MEM* pmData)
 	memcpy(data,pmData, 100);
 
 	// if(pmData[1] != 0xAA || pmData[2] != 0x55)
-	if(pmData[1] != buffLoop[RT_FUSE].syncHead_A || pmData[2] != buffLoop[RT_FUSE].syncHead_B)
+	if(pmData[1] != buffLoop[RT_FUSE].syncHead_A || pmData[2] != buffLoop[RT_FUSE].syncHead_B || pmData[3] != 0xFC)
 	{
 		return 0;
 	}
     
-	// pmData[15] * 0x100 + pmData[14]
-    OS_U16 checkSumRecv = pmData[buffLoop[RT_FUSE].fixedLen] * 0x100 + pmData[buffLoop[RT_FUSE].fixedLen - 1];	//（小端序） 下标30这个字节左移8位 + 下标29的字节
-    OS_U16 checkSumCalc = CheckSum16_8(pmData + 1, buffLoop[RT_FUSE].fixedLen - 2);
+	// pmData[26] * 0x100 + pmData[27]
+    OS_U16 checkSumRecv = pmData[buffLoop[RT_FUSE].fixedLen - 1] * 0x100 + pmData[buffLoop[RT_FUSE].fixedLen];	//大端序
+    OS_U16 checkSumCalc = crc16_xmodem(pmData + 1, buffLoop[RT_FUSE].fixedLen - 2);
     
    if(checkSumRecv != checkSumCalc)
-	{//校验和不通过
+	{//校验不通过
 		static int errorCount32 = 0;
         errorCount32++;
 		OS_U8 errorCount = (errorCount32 & 0xFF);
@@ -56,18 +56,12 @@ OS_U16 ChkFuseStandardFrame(OS_MEM* pmData)
 	}
 
 	/** 重新组帧 */
-	pmData[3] = pmData[5];
-	pmData[4] = 0;	// pmData[3];
-	pmData[5] = 0;	// pmData[4];
-	pmData[6] = 0x11;
-	pmData[7] = pmData[9];
-	pmData[9] = pmData[12];
-	pmData[11] = pmData[10];
-	pmData[12] = pmData[11];
-	pmData[10] = pmData[13];
-	pmData[13] = pmData[14];
-	pmData[14] = pmData[15];
-	return pmData[3] - 1 + 5;
+	pmData[3] = 17;		//au8Data长度
+	pmData[4] = 0;		// 长度
+	pmData[5] = 0;		// u8Seq
+	pmData[6] = 0x11;	// u8MsgID  // 此处仿照了280
+	memcpy(pmData+7, pmData+9, 17);// au8Data 
+	return pmData[3] + 7 + 2;
 
 	// /** 原来280程序 */
     // memmove(pmData + 7, pmData + 6, pmData[3]);	// BUG 此处是否会指针踩了别的区域？
@@ -80,18 +74,29 @@ OS_U16 ChkFuseStandardFrame(OS_MEM* pmData)
 
 OS_U32 FuseRtHandler(STRU_422_MSG_INFO *data)
 {
-    if(data->u16Len != 0x0F)
+    if(data->u16Len != 17)
     {
         return -1;
     }
-    // if(data->u16Len == 0x0B)
-    // {
-    //     //change to 30byte frame
-    //     FuseSend(0x55);
-    // }
-	//SCOUT_STATUS scoStatus;
-	memcpy(&fuseStatus, data->au8Data, sizeof(FUSE_LONG_STATUS));
 
+	memcpy(&fuseFrame, data->au8Data, sizeof(FUSE_RCV_FRAME));
+
+	// SD_CMD = (fuseFrame.feedback >> 0) & 0x01;
+	// SF_OK  = (fuseFrame.feedback >> 1) & 0x01;
+
+    SETDATA(pDataPoolSelf, "fzFeedbk", fuseFrame.feedbk,OS_U8 );
+    SETDATA(pDataPoolSelf, "fzTask",   fuseFrame.task,	OS_U8 );
+    SETDATA(pDataPoolSelf, "fzFirV",   fuseFrame.firV,	OS_U16);
+    SETDATA(pDataPoolSelf, "fzPrxA",   fuseFrame.prxA,	OS_U16);
+    SETDATA(pDataPoolSelf, "fzIC12V",  fuseFrame.ic12V,	OS_U16);
+    SETDATA(pDataPoolSelf, "fzDetV",   fuseFrame.detV,	OS_U16);
+    SETDATA(pDataPoolSelf, "fzDcfA",   fuseFrame.dcfA,	OS_U16);
+    SETDATA(pDataPoolSelf, "fzC1Stat", fuseFrame.c1Stat,OS_U16);
+    SETDATA(pDataPoolSelf, "fzUnitNo", fuseFrame.unitNo,OS_U16);
+    SETDATA(pDataPoolSelf, "fzImpSt",  fuseFrame.impSt,	OS_U8 );
+
+
+/** 280 
     float ax = fuseStatus.ax * 0.00122 / 0.18 / 0.7 * 9.8;
     float ay = fuseStatus.ay * 0.00122 / 0.18 / 0.7 * 9.8;
     float az = fuseStatus.az * 0.00122 / 0.18 / 0.7 * 9.8;
@@ -110,56 +115,64 @@ OS_U32 FuseRtHandler(STRU_422_MSG_INFO *data)
     SETDATA(pDataPoolSelf, "fuseaz", az,	    OS_FLOAT);
     SETDATA(pDataPoolSelf, "fuseg", g,	    OS_FLOAT);
     SETDATA(pDataPoolSelf, "fuseTemp", fuseStatus.temp,	    OS_U16);
-    
+*/    
 	g_DeviceState.fuseCountDown = 200;
 	return 0;
 }
 
-static OS_U8 GenFuseBuf(OS_U8 *buf, OS_U8 msgID)
+static OS_U8 GenFuseBuf(OS_U8 *buf, FuzeCmdType cmd)
 {
-    OS_U8 data[10];
-    data[0] = 0x55;
-    data[1] = 0xAA;
-    data[2] = 0x09;
-	switch (msgID)
-	{
-	case 0x3E:
-		/* code */
-		data[3] = 0x01;
-		break;
-	default:
-		data[3] = 0x03;
-		break;
-	}
-    data[4] = 0x11;
-    data[5] = 0x21;
-	data[6] = msgID;
+    OS_U8 command[10] = {0};
 
-	OS_U16 checksum = CheckSum16_8(data, 7);
-    data[7] = (checksum & 0xFF);
-    data[8] = ((checksum >> 8) & 0xFF);
-    // memcpy(buf, data, 9);
-	
-	for (int i = 0; i < 10; i++)
-	{
-		memcpy(buf + i * 9, data, 9);
-	}
-    return 90;
+    command[0] = 0xEB;
+    command[1] = 0x90;
+    command[2] = 0xFC;
+
+    switch (cmd)
+    {
+    case ARM_I:
+        command[4] = 0x55;  // EB 90 FC 00 55 00 00 00
+        break;
+    case ARM_II:
+        command[5] = 0x55;  // EB 90 FC 00 00 55 00 00
+        break;
+    case ARM_III:
+        command[6] = 0x55;  // EB 90 FC 00 00 00 55 00
+        break;
+    case DETO:
+        command[7] = 0x55;  // EB 90 FC 00 00 00 00 55
+        break;
+    default:
+        return 0;  // 无效命令
+    }
+
+    // 计算 CRC16（前8字节）
+    OS_U16 checksum = crc16_xmodem(command, 8);
+    command[8] = ((checksum >> 8) & 0xFF);
+    command[9] = (checksum & 0xFF);
+
+    // 重复10次，共100字节
+    for (int i = 0; i < 10; i++)
+    {
+        memcpy(buf + i * 10, command, 10);
+    }
+
+    return 100;
 }
 
 static OS_U8 MsgToFuse(OS_U8 *buf, OS_U16 len)
 {
 	RT rt = rtList[RT_FUSE];
-    OS_U8 data[100];
-    memcpy(data, buf, len);
 	UART_PutBuff(rt.chIndex, buf, len);
 	return 0;
 }
 
-OS_U8 FuseSend(OS_U8 msgID)
+OS_U8 FuseSend(FuzeCmdType cmd)
 {
-	OS_U8 inData[200] = {0};
-	OS_U8 inLen = GenFuseBuf(inData, msgID);
+	if(cmd < ARM_I || cmd > DETO) return -1;
+
+	OS_U8 inData[128] = {0};
+	OS_U8 inLen = GenFuseBuf(inData, cmd);
 	MsgToFuse(inData, inLen);
 	return 0;
 }

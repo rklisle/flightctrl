@@ -18,6 +18,6 @@ typedef OS_U8 (*pcan_recv_cb_t)(OS_U32 id, OS_BOOL ext, const OS_U8 *data, OS_U8
 int32_t app_can_send(int32_t fd, uint32_t id, bool ext_id, const uint8_t* pdata, uint32_t datalen);
 
 
-int32_t app_can_init(TX_BYTE_POOL *pmem, FDCAN_HandleTypeDef* phdl,pcan_recv_cb_t pcb );
+int32_t app_can_init(TX_BYTE_POOL *pmem, FDCAN_HandleTypeDef* phdl,pcan_recv_cb_t pcb , uint32_t idx);
 
 #endif

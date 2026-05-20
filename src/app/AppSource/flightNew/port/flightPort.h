@@ -32,6 +32,10 @@ extern Stru_Route_Data     g_route_data;    // 初始预装订航点信息
 extern Stru_Initial_Data   g_initial_data;  // 发射点/起飞点信息
 extern Stru_Data_Datalink_To_ControllerSig  g_DLtoCtrl_sig; // 在线更新多个航点
 
+// 新增：时间变量
+extern double   g_flight_time;    // 飞行时间
+extern int      g_time_tick;      // 时间节拍
+
 // typedef void(*pre_ctrl_run_callback_t)(void);
 // typedef void(*post_ctrl_run_callback_t)(void);
 

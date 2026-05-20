@@ -473,7 +473,8 @@ int InsertServoTestData(
 	double* actuator_III,
     double* actuator_IV,
     double* actuator_V,
-    double* actuator_VI)
+    double* actuator_VI,
+    double* actuator_VII)
 {
 	static unsigned int tickOffset=0;
 	//static unsigned int freqIndex = 0;
@@ -492,9 +493,10 @@ int InsertServoTestData(
 		*actuator_I 	 = fs.enable[0]*(fs.zeroAngle+ fs.ampAngle*sin(2*PI*fs.freq*(tickOffset*fs.tickStep)));
 		*actuator_II	 = fs.enable[1]*(fs.zeroAngle+ fs.ampAngle*sin(2*PI*fs.freq*(tickOffset*fs.tickStep)));
 		*actuator_III    = fs.enable[2]*(fs.zeroAngle+ fs.ampAngle*sin(2*PI*fs.freq*(tickOffset*fs.tickStep)));
-        *actuator_IV 	 = fs.enable[3]*(fs.zeroAngle+ fs.ampAngle*sin(2*PI*fs.freq*(tickOffset*fs.tickStep)));
+		*actuator_IV 	 = fs.enable[3]*(fs.zeroAngle+ fs.ampAngle*sin(2*PI*fs.freq*(tickOffset*fs.tickStep)));
 		*actuator_V	     = fs.enable[4]*(fs.zeroAngle+ fs.ampAngle*sin(2*PI*fs.freq*(tickOffset*fs.tickStep)));
 		*actuator_VI     = fs.enable[5]*(fs.zeroAngle+ fs.ampAngle*sin(2*PI*fs.freq*(tickOffset*fs.tickStep)));
+		*actuator_VII    = fs.enable[6]*(fs.zeroAngle+ fs.ampAngle*sin(2*PI*fs.freq*(tickOffset*fs.tickStep)));
 		++tickOffset;
 	}
 	else
@@ -508,7 +510,7 @@ int InsertServoTestData(
 }
 
 OS_U16 waitForStart = 0;
-OS_U8 MiniLoopSimulation()	//¶æ»ú
+OS_U8 MiniLoopSimulation()	//¶æ»ú  // 5msÔËĞĞÒ»´Î
 {
 	if((g_DeviceState.workStage & DOM_SIMSRVDAT) != DOM_SIMSRVDAT)
 		return -1;
@@ -517,11 +519,15 @@ OS_U8 MiniLoopSimulation()	//¶æ»ú
 		waitForStart--;
 		return 0;
 	}
-	double a1=0,a2=0,a3=0,a4=0,a5=0,a6=0;
+	double a1=0,a2=0,a3=0,a4=0,a5=0,a6=0,a7=0;
 	//short mm1,mm2,mm3,mm4;,&mm1,&mm2,&mm3,&mm4
-	InsertServoTestData(&a1, &a2, &a3, &a4, &a5, &a6);
+	InsertServoTestData(&a1, &a2, &a3, &a4, &a5, &a6, &a7);
 
 	ServoCtlOnce_6Rudder(a1,a2,a3,a4,a5,a6);
+
+    // ´Ë´¦ĞÂÔö¶æ»úµÄĞ¡»ØÂ·²âÊÔ - µÚ7Â·
+    AngleServo_SetAngle(SERVO_PWM7, (float)a7);
+
 	return 0;
 }
 
@@ -543,12 +549,12 @@ OS_U8 MiniLoopSimulation()	//¶æ»ú
 //     return 0;
 // }
 
-OS_U8 StartMiniLoop(float freq, float amp, float zero, OS_U8 enable[6])
+OS_U8 StartMiniLoop(float freq, float amp, float zero, OS_U8 enable[7])
 {
 	fs.freq = freq;
 	fs.ampAngle = amp;
 	fs.zeroAngle = zero;
-	memcpy(fs.enable, enable, 6*sizeof(OS_U8));
+	memcpy(fs.enable, enable, 7*sizeof(OS_U8));
 	//¿ªÆôÉ¨Æµ
 	g_DeviceState.workStage |= DOM_SIMSRVDAT;
 	return 0;
@@ -596,8 +602,8 @@ OS_U32 ServoCmdHandler(STRU_422_MSG_INFO * frame)//03¸ù¾İÊı¾İÁ´¹ıÀ´µÄÖ¸Áî£¬¾ßÌå¸
 		{
 			STRU_SERVO_MinLoopTest_REQUEST* srvPtr = (STRU_SERVO_MinLoopTest_REQUEST*)frame->au8Data;
 			//ÉèÖÃÉ¨Æµ²ÎÊı
-			OS_U8 enable[6];
-			for(int i=0;i<6;i++)
+			OS_U8 enable[7];
+			for(int i=0;i<7;i++)
 			{
 				enable[i] = ((srvPtr->LevelOneAcuator_Enb >> i) & 1);
 			}

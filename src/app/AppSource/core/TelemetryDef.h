@@ -28,8 +28,8 @@ telemetryParam tm_flight[] =
 	{&DataPoolALL[MSN_DATAPOOL_INDEX],	"autoStep",	1},
 	//导引头：3连接，2断连
 	{&DataPoolALL[MSN_DATAPOOL_INDEX],	"paylodtp",	1},
-	{&DataPoolALL[MSN_DATAPOOL_INDEX],	"WP_cur",	1},
-	{&DataPoolALL[MSN_DATAPOOL_INDEX],	"tarLon",	4},
+	{&DataPoolALL[MSN_DATAPOOL_INDEX],	"WP_cur",	1},	//当前航点号
+	{&DataPoolALL[MSN_DATAPOOL_INDEX],	"tarLon",	4},	//当前航点经度
 	{&DataPoolALL[MSN_DATAPOOL_INDEX],	"tarLat",	4},
 	{&DataPoolALL[MSN_DATAPOOL_INDEX],	"tarAlt",	2},
 	{&DataPoolALL[MSN_DATAPOOL_INDEX],	"msnComm1",	1},
@@ -40,7 +40,7 @@ telemetryParam tm_flight[] =
 	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"imuAx",	4},
 	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"imuAy",	4},
 	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"imuAz",	4},
-	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"gpsLon",	4},
+	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"gpsLon",	4}, //GPS原始经度
 	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"gpsLat",	4},
 	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"gpsAlt",	2},
 	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"gpsVn",	2},
@@ -53,10 +53,10 @@ telemetryParam tm_flight[] =
 	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"gpsMinit",	1},
 	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"gpsSec",	1},
 	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"gpsMSec",	1},
-	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"dirEffec",	1},
-	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"gpsDir",	2},
+	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"dirEffec",	1}, //GPS航向有效标志
+	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"gpsDir",	2}, //GPS双天线定位航向角
 	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"gpsScCnt",	1},	// 定位星数
-	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"navLon",	4},
+	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"navLon",	4}, //组合导航经度
 	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"navLat",	4},
 	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"navHigh",	4},
 	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"navVn",	2},
@@ -96,8 +96,8 @@ telemetryParam tm_flight[] =
 	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"highCmd",	4},
 	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"ac_dL",	4},
 	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"ac_dZ",	2},
-	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"tokenlon",	1},
-	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"tokenlat",	1},
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"tokenlon",	1}, //纵向令牌
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"tokenlat",	1}, //侧向令牌
 	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"ac_dR",	2},
 	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"thetav",	2},
 	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"Vcmd",	2},
@@ -117,9 +117,10 @@ telemetryParam tm_flight[] =
 	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"pitchCmd",	2},
 	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"rollCmd",	2},
 	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"yawCmd",	2},
-	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"dRn",	2},
-	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"dRu",	2},
-	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"dRe",	2},
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"deltaR",	4},	// 弹目距离
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"dRn",	2},	// 弹目北向距离
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"dRu",	2},	// 弹目天向距离
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"dRe",	2},	// 弹目东向距离
 	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"PitchPre",	2},
 	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"YawPre",	2},
 	// 舵机角度值，一组6个，存的都是控制实际输出角度的100倍
@@ -130,12 +131,12 @@ telemetryParam tm_flight[] =
 	{&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr5Cmd",	2}, // yaw left
 	{&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr6Cmd",	2}, // yaw right
 	// 舵机角度值，一组6个，存的都是角度的100倍
-	{&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr1Read",	2},
-	{&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr2Read",	2},
-	{&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr3Read",	2},
-	{&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr4Read",	2},
-	{&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr5Read",	2},
-	{&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr6Read",	2},
+	// {&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr1Read",	2}, //舵偏反馈
+	// {&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr2Read",	2},
+	// {&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr3Read",	2},
+	// {&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr4Read",	2},
+	// {&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr5Read",	2},
+	// {&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr6Read",	2},
 };
 telemetryParam tm_200hz[] =
 {
@@ -147,7 +148,7 @@ telemetryParam tm_200hz[] =
 	//	1：地面按下起飞，0：没按下
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"startFly",	1},
 	/** 起飞模式
-	 * 1：加速度 > 30
+	 * 1：加速度 > 30m/s?
 	 * 2：地面点击起飞
 	 * 3：组合导航状态 且 速度 > 10
 	 */
@@ -176,16 +177,26 @@ telemetryParam tm_200hz[] =
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"scout2",	2},
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"scout3",	2},
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"scout4",	2},
-	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuseMode",	1},
-	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuse24V",	1},
-	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuseActv",	1},
-	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuseBIT",	1},
-	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuse5V",	2},
-	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuseuf",	2},
-	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuseTemp",	2},
-	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuseax",	4},
-	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuseay",	4},
-	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuseaz",	4},
+	// {&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuseMode",	1},
+	// {&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuse24V",	1},
+	// {&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuseActv",	1},
+	// {&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuseBIT",	1},
+	// {&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuse5V",	2},
+	// {&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuseuf",	2},
+	// {&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuseTemp",	2},
+	// {&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuseax",	4},
+	// {&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuseay",	4},
+	// {&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuseaz",	4},
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fzFeedbk",	1},
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fzTask",	1},
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fzFirV",	2},
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fzPrxA",	2},
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fzIC12V",	2},
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fzDetV",	2},
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fzDcfA",	2},
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fzC1Stat",	2},
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fzUnitNo",	2},
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fzImpSt",	1},
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"cpuTemp",	2},
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"cpuTemp2",	2},
 	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"mcuTemp",	2},	// 这里的参数对应遥测表
