@@ -48,7 +48,7 @@ public:
 	Stru_Data_RadioAlt_To_Controller	* p_st_data_radioalt_to_controller;
 	//输出
 	Stru_Data_Controller_To_Seeker		* p_st_data_controller_to_seeker;
-	Stru_Data_Controller_To_Datalink	* p_st_data_controller_to_datalink;
+	//Stru_Data_Controller_To_Datalink	* p_st_data_controller_to_datalink;
 	Stru_Data_Controller_To_DatalinkTel	* p_st_data_controller_to_datalinktel;//数据链用于遥测
 	Stru_Data_Controller_To_Engine		* p_st_data_controller_to_engine;//发动机
 	Stru_Data_Controller_To_Actuator	* p_st_data_controller_to_actuator;//舵机

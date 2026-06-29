@@ -14,7 +14,7 @@ typedef struct _NavInitStr{
 	double v_e; //东向速度 m/s
 	double v_d; //下向速度 m/s
 	double fai0;//初始航向角	
-unsigned char cmd;//导航方式
+    unsigned char cmd;//导航方式
 }NavInitStr;
 
 //GNSS输入数据

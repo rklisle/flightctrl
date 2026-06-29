@@ -27,8 +27,8 @@ typedef struct telemetry
 }telemetry;
 
 
-extern void InitTelemetry();
-extern void TelemetryFrameOut();
+extern void InitTelemetry();//Ò£²â¡¢´æ´¢³õÊ¼»¯
+extern void TelemetryFrameOut();//Ò£²â¡¢´æ´¢Êä³ö
 
 
 

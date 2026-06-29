@@ -1,7 +1,7 @@
 /*
  * modBC.c
  *
- *  Created on: 2022Äê3ÔÂ15ÈÕ
+ *  Created on: 2022ï¿½ï¿½3ï¿½ï¿½15ï¿½ï¿½
  *      Author: Lenovo
  */
 #include "stm32h7xx_hal_adc.h"
@@ -23,6 +23,7 @@
 #include "../support/common.h"
 //#include "../comm/CommHandler.h"
 #include "../payload/MsnTime.h"
+#include "flightPort.h"
 #include "../interface/interface_power.h"
 #include <math.h>
 #include "fuse.h"
@@ -35,11 +36,28 @@ OS_U8 LunchDetective();
 float Read_CPU_Temperature(void) ;
 extern long calcTimeCpu0;
 extern int sd_card_fault;
-OS_U8 EngineStartCmd = 0;    //À´×ÔµØÃæµÄ¿ØÖÆ²ÎÊý£¬ 1£ºÆô¶¯·¢¶¯»ú£»0£ºÍ£Ö¹·¢¶¯»ú
+OS_U8 EngineStartCmd = 0;    //ï¿½ï¿½ï¿½Ôµï¿½ï¿½ï¿½Ä¿ï¿½ï¿½Æ²ï¿½ï¿½ï¿½ï¿½ï¿½??? 1ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½0ï¿½ï¿½Í£Ö¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 float System_GetCoreTemperature();
 extern void ReConnectUart();
-OS_DOUBLE AirSpdHistory[150];
 extern void *g_pControl;
+OS_DOUBLE AirSpdHistory[150];
+
+static void EnsureLaunchControl(void)
+{
+	static OS_U8 controlReady = 0;
+
+	if(controlReady != 0)
+		return;
+
+	if(g_pControl != NULL)
+	{
+		deleteCMathControlMain(g_pControl);
+		g_pControl = NULL;
+	}
+	g_pControl = ControlInitial();
+	if(g_pControl != NULL)
+		controlReady = 1;
+}
 
 OS_DOUBLE Average(OS_DOUBLE array[], int len)
 {
@@ -73,33 +91,43 @@ OS_U8 CalcAirSpd()
 	AirSpdHistory[0] = sqrt(1.225f / ru) * sqrt(2 * curAirSpdPa/ 1.225);
 	float curAirSpd = Average(AirSpdHistory, airHistoryCount);
     
-    SETDATA(pDataPoolSelf,	"AirPress",	curPress *0.1,	OS_U16);
-    SETDATA(pDataPoolSelf,	"AirHigh",	press_height,	OS_S16);
-    SETDATA(pDataPoolSelf,	"AirSpd",	curAirSpd * 10, OS_S16);
+    SETDATA(pDataPoolSelf,	"AirPress",	curPress *0.1,	OS_U16);//Ñ¹ï¿½ï¿½
+    SETDATA(pDataPoolSelf,	"AirHigh",	press_height,	OS_S16);//ï¿½ï¿½Ñ¹ï¿½ß¶ï¿½
+    SETDATA(pDataPoolSelf,	"AirSpd",	curAirSpd * 10, OS_S16);//ï¿½ï¿½Ñ¹ï¿½ï¿½ï¿½ï¿½
     
     return 0;
 }
 
 /***********************************************************
- * º¯ÊýÃû³Æ:AutoLuanchProcess()
- * º¯Êý¹¦ÄÜ: Éè±¸ÉÏµçºó×Ô¶¯¿ªÊ¼½øÈëÉÏµç¡¢×Ô¼ì¡¢¶Ô×¼¡¢×¼±¸·¢ÉäµÈÁ÷³Ì
- *			 Á÷³ÌÍê³ÉºóµÈ´ý×îÖÕ·¢Éä£¬ÆäÖÐ¹ý³ÌÎÞÐèÈÎºÎÈËÎª¸ÉÔ¤
- * ×÷Õß:	³Éºê­Z
+ * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½:AutoLuanchProcess()
+ * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½: ï¿½è±¸ï¿½Ïµï¿½ï¿½ï¿½Ô¶ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½Ïµï¿½???ï¿½Ô¼ì¡¢ï¿½ï¿½×¼ï¿½ï¿½×¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½???
+ *			 ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Éºï¿½È´ï¿½ï¿½ï¿½ï¿½Õ·ï¿½ï¿½ä£¬ï¿½ï¿½ï¿½Ð¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îºï¿½ï¿½ï¿½Îªï¿½ï¿½Ô¤
+ * ï¿½ï¿½ï¿½ï¿½:	ï¿½Éºï¿½Z
  ***********************************************************/
-OS_U8 AutoLuanchProcess()  // 5msÔËÐÐÒ»´Î
+OS_U8 AutoLuanchProcess()  // 5msï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½
 {
-	static int AutoStep = 0;//0
+	int testCmd=0;
+	if(testCmd==1)
+	{
+		//PowerOn(DEVICE_FUSE28V);
+		PowerOn(DEVICE_FUSE_ISO5V);
+	}
+	//ï¿½ï¿½ï¿½Ìµï¿½ï¿½È²ï¿½ï¿½è£¬ï¿½ï¿½Ê¼Îª0
+	static int AutoStep = 0;
 	if(AutoStep == 14)
 	return 0;
+
+	//ï¿½ï¿½Éºï¿½???ï¿½ï¿½Ö´ï¿½ï¿½ï¿½ï¿½ï¿½Ìµï¿½ï¿½ï¿½
 	// if((g_DeviceState.workStage & DOM_AUTOMATIC) == DOM_AUTOMATIC)
 	// 		return 0;    
-	//EngineStartCmd = 1;
-	//IgnitionMark = TRUE;
-	//1.¶Ô¸÷Éè±¸ÉÏµç
-	//5sÊ±¶Ô¹ß×é¡¢µ¼ÒýÍ·ÉÏµç
+	//EngineStartCmd = 1; //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½
+	//IgnitionMark = TRUE;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½???
+	
+	///1.ï¿½Ô¸ï¿½ï¿½è±¸ï¿½Ïµï¿½
+	//ï¿½É¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð²ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½È´ï¿½5sï¿½ó£¬¶Ô¹ï¿½ï¿½é¡¢ï¿½ï¿½ï¿½ï¿½Í·ï¿½Ïµï¿½
 	if(g_DeviceState.currTime > 5.0 && AutoStep == 0)
 	{
-		//ÅÐÅäµç°åºÏÂ·¹©µçµçÑ¹£¬Ð¡ÓÚ20·üÊ±·¢ËÍ¿ªÆôÃüÁî
+		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â·ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¹ï¿½ï¿½Ð¡ï¿½ï¿½20ï¿½ï¿½Ê±ï¿½ï¿½ï¿½Í¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		if(g_DeviceState.imuCountDown == 0)
 		{
 			static int powerSend = 0;
@@ -118,16 +146,14 @@ OS_U8 AutoLuanchProcess()  // 5msÔËÐÐÒ»´Î
 			AutoStep = 1;
 		}
 	}
-	//7sÊ±¶ÔÒýÐÅÉÏµç
 	if(g_DeviceState.currTime > 7.0 && AutoStep == 1)
 	{
-		//ÒýÐÅ¹©µçÎÞ²É¼¯µã£¬ÅÐ¶ÏÒýÐÅÍ¨ÐÅ×´Ì¬
 		if(g_DeviceState.fuseCountDown == 0)
 		{
 			static int sendFlag = 0;
 			if(sendFlag == 0)
 			{
-				// PowerOn(DEVICE_FUSE28V);	// ¸ÄÔÚmodNav.c Line 536
+				// PowerOn(DEVICE_FUSE28V);	
 				PowerOn(DEVICE_FUSE_ISO5V);
 				sendFlag = 1;
 			}
@@ -140,10 +166,8 @@ OS_U8 AutoLuanchProcess()  // 5msÔËÐÐÒ»´Î
 			AutoStep = 2;
 		}
 	}
-	//9sÊ±¶ÔËÅ·þÉÏµç
 	if(g_DeviceState.currTime > 9.0 && AutoStep == 2)
-	{
-		//ËÅ·þ¹©µçÎÞ²É¼¯µã£¬ÅÐ¶ÏËÅ·þÍ¨ÐÅ×´Ì¬
+	{		
 		if(g_DeviceState.srvCountDown == 0)
 		{
 			static int powerSend1 = 0;
@@ -181,16 +205,16 @@ OS_U8 AutoLuanchProcess()  // 5msÔËÐÐÒ»´Î
 			AutoStep = 3;
 		}
 	}
-	//11sÊ±¶Ô·¢¶¯»úÉÏµç
+	//11sÊ±ï¿½Ô·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ïµï¿½
 	if(g_DeviceState.currTime > 11.0 && AutoStep == 3)
 	{
-		//²»ÅÐ¶Ï¹©µç£¬Ö±½ÓÅÐ¶Ï·¢¶¯»úÍ¨ÐÅ
+		//ï¿½ï¿½ï¿½Ð¶Ï¹ï¿½ï¿½ç£¬Ö±ï¿½ï¿½ï¿½Ð¶Ï·ï¿½ï¿½ï¿½ï¿½ï¿½Í¨ï¿½ï¿½
 		if(g_DeviceState.ecuCountDown == 0)
 		{
 			static int powerSend2 = 0;
 			if(powerSend2 == 0)
 			{
-					// PowerOn(DEVICE_BATT_ENGINE);	// ·¢¶¯»ú
+					// PowerOn(DEVICE_BATT_ENGINE);	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 					// PowerOn(DEVICE_BATT_BATT2);
 					powerSend2 = 1;
 			}
@@ -204,12 +228,13 @@ OS_U8 AutoLuanchProcess()  // 5msÔËÐÐÒ»´Î
 			AutoStep = 4;
 		}
 	}
-    //2.µÈ´ýµØÃæ¼ÓÔØÈÎÎñÐÅÏ¢
+    ///2.ï¿½È´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½?ï¿½ï¿½SDï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½
 	if(AutoStep == 4)
 	{
 		OS_U8 msnID;
 		GetDataFast(pDataPoolMsn, "msnDevID", &msnID);
 
+		//
 		if(g_DeviceStatus.msgFromGCS != 0x00)
 		{
 			InitSD();
@@ -217,33 +242,33 @@ OS_U8 AutoLuanchProcess()  // 5msÔËÐÐÒ»´Î
 
 		if(msnID != 0xFF)
 		{
-			// InitPwrSeq();	//MML ¿ª»ð¹¤Æ·4
+			// InitPwrSeq();	//MML ï¿½ï¿½ï¿½ï¿½Æ·4
 			// InitSD();
 			AutoStep = 5;
 		}
 	}
-	//3.¹ß×é¶Ô×¼
+	///3.ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½?
 	if(AutoStep == 5)
 	{
-		//Æô¶¯¶Ô×¼
+		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×¼
 		STRU_422_MSG_INFO msg;
 		msg.u8MsgID = CMD_NAV_INIT;
 		NavCmdHandler(&msg);
-		msg.u8MsgID = CMD_HOR_CALC_REQ;
+		msg.u8MsgID = CMD_HOR_CALC_REQ;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Õµï¿½ï¿½ï¿½Ê¼ï¿½ï¿½Ôªï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×¼ï¿½ï¿½ï¿½ï¿½
 		NavCmdHandler(&msg);
-		ImuCmdHandler(&msg); //TODO: IMU 014Õâ¸öÓ¦¸ÃÊÇÃ»ÓÐÁË¡£
+		ImuCmdHandler(&msg); //TODO: IMU 014ï¿½ï¿½ï¿½Ó¦ï¿½ï¿½ï¿½ï¿½Ã»ï¿½ï¿½ï¿½Ë¡ï¿½???
 		AutoStep = 6;
 	}
-	//4.ÅÐ¶Ï¶Ô×¼Íê³É£¬Íê³Éºó×ªµ¼º½
+	///4.ï¿½Ð¶Ï¶ï¿½×¼ï¿½ï¿½É£ï¿½ï¿½ï¿½Éºï¿½×ªï¿½ï¿½ï¿½ï¿½
 	if(AutoStep == 6)
 	{
-    //AutoStep = 7;
-		//¶Ô×¼Íê³É
+    	//AutoStep = 7;
+		//ï¿½ï¿½×¼ï¿½ï¿½ï¿½???
 		//ToImu();
 		OS_U8 imuStatus, navStatus;
 		GetDataFast(pDataPoolImu, "navState", &imuStatus);
 		GetDataFast(pDataPoolNav, "navState", &navStatus);
-		//ÖÐ¿Æµ¼¿Ø×Ô¼º×ªµ¼º½£¬ËùÒÔÅÐ¶Ïµ¼º½×´Ì¬
+		//ï¿½Ð¿Æµï¿½ï¿½ï¿½ï¿½Ô¼ï¿½×ªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð¶Ïµï¿½ï¿½ï¿½×´Ì¬
 		//if((imuStatus == 0x3F)&&(navStatus == 0x3F))
 		// if(imuStatus == 0x3F)
 		// {
@@ -255,14 +280,14 @@ OS_U8 AutoLuanchProcess()  // 5msÔËÐÐÒ»´Î
 		// }
 		if(navStatus == 0x3F)
 		{
-			// ×Ô¶¯×ªµ¼º½
+			// ï¿½Ô¶ï¿½×ªï¿½ï¿½ï¿½ï¿½
 			STRU_422_MSG_INFO msg;
 			msg.u8MsgID = CMD_TO_NAV_REQ;
 			NavCmdHandler(&msg);
 			AutoStep = 7;
 		}
 	}
-	//5.ÐÇÀú×°¶©(¿ÕÈ±)/ ×Ô¶¯×ªÉäºó
+	///5.ï¿½ï¿½ï¿½ï¿½×°ï¿½ï¿½(ï¿½ï¿½È±)/ ï¿½Ô¶ï¿½×ªï¿½ï¿½ï¿½???
 	if(AutoStep == 7)
 	{
 		// AutoStep = 8;
@@ -270,51 +295,55 @@ OS_U8 AutoLuanchProcess()  // 5msÔËÐÐÒ»´Î
 		GetDataFast(pDataPoolNav, "navState", &navStatus);
 		if(navStatus == 0x64)
 		{
-			// ×Ô¶¯×ªÉäºó
+			// ï¿½Ô¶ï¿½×ªï¿½ï¿½ï¿½???
 			STRU_422_MSG_INFO msg;
 			msg.u8MsgID = CMD_TO_AFTER_LUANCH;
 			NavCmdHandler(&msg);
 			AutoStep = 8;
 		}
 	}
-	//6.µÈ´ý·¢¶¯»úÆô¶¯Ö¸Áî·¢³ö
+	//6.ï¿½È´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½î·¢ï¿½ï¿½
 	if(AutoStep == 8)
 	{
-		// ³õÊ¼»¯¿ØÖÆ´úÂë
-		g_pControl = ControlInitial();
+		// ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½Æ´ï¿½ï¿½ï¿½
+		EnsureLaunchControl();
 
+		//ï¿½Õµï¿½ï¿½ï¿½ï¿½ï¿½Õ¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½î¡±
 		if(EngineStartCmd == 1)
 		{
 			AutoStep = 9;
 		}
 	}
-	//6.·¢¶¯»úÆô¶¯
+	//6.ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	if(AutoStep == 9)
 	{
 		//AutoStep = 10; //test
 		//return 0;
+
+		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+		//ï¿½Õµï¿½ï¿½Ëµï¿½ï¿½ï¿½Õ¾ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½î£¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í£Ö¹ï¿½ï¿½ï¿½Ë»Øµï¿½ï¿½ï¿½ï¿½È´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		if(EngineStartCmd == 0)
 		{
-			//ÓÃ»§ÊÖ¶¯ÓÖ·¢ËÍÁËÍ£»úÖ¸Áî
+			//ï¿½Ã»ï¿½ï¿½Ö¶ï¿½ï¿½Ö·ï¿½ï¿½ï¿½ï¿½ï¿½Í£ï¿½ï¿½Ö¸ï¿½ï¿½
 			StopEngine();
 			AutoStep = 8;
 		}
 		else
 		{
-			if(g_DeviceState.CurrTick % 4 == 0)// Ã¿20ms£¬½øif
+			if(g_DeviceState.CurrTick % 4 == 0)// Ã¿20msï¿½ï¿½ï¿½ï¿½if
 			{
-				//ÏÈÅÐ¶Ï·¢¶¯»úÊÇ·ñÒÑ½øÈëÔËÐÐ×´Ì¬
+				//ï¿½ï¿½ï¿½Ð¶Ï·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½Ñ½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×´Ì¬
 				// struct EngineStatus engineStatus = {0};
 				// modECU_GetEngineStatus(&engineStatus);
-				// switch(engineStatus.CntState)//0Í£»ú£¬1Æô¶¯ÖÐ£¬2É¢ÈÈ 3¹ÊÕÏ 4ÍÑ»ú 5ÔËÐÐ£¨Õâ¿Ï¶¨ÊÇÐ­ÒéÀïµÄ£©
+				// switch(engineStatus.CntState)//0Í£ï¿½ï¿½ï¿½ï¿½1ï¿½ï¿½ï¿½ï¿½ï¿½Ð£ï¿½2É¢ï¿½ï¿½ 3ï¿½ï¿½ï¿½ï¿½ 4ï¿½Ñ»ï¿½ 5ï¿½ï¿½ï¿½Ð£ï¿½ï¿½ï¿½Ï¶ï¿½ï¿½ï¿½ï¿½?ï¿½ï¿½ï¿½ï¿½Ä£ï¿½???
 				OS_U8 cntState;
 				GetDataFast(pDataPoolSelf, "ecuState", &cntState);
-				switch(cntState)//0Í£»ú£¬1Æô¶¯ÖÐ£¬2É¢ÈÈ 3¹ÊÕÏ 4ÍÑ»ú 5ÔËÐÐ£¨Õâ¿Ï¶¨ÊÇÐ­ÒéÀïµÄ£©
+				switch(cntState)//0Í£ï¿½ï¿½ï¿½ï¿½1ï¿½ï¿½ï¿½ï¿½ï¿½Ð£ï¿½2É¢ï¿½ï¿½ 3ï¿½ï¿½ï¿½ï¿½ 4ï¿½Ñ»ï¿½ 5ï¿½ï¿½ï¿½Ð£ï¿½ï¿½ï¿½Ï¶ï¿½ï¿½ï¿½ï¿½?ï¿½ï¿½ï¿½ï¿½Ä£ï¿½???
 				{
-					case ENGINE_STOPED://·¢ËÍÆô¶¯Ö¸Áî
-							StartEngine();//Ó¦¸ÃÊÇÆô¶¯Á÷³Ì
+					case ENGINE_STOPED://ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½
+							StartEngine();//Ó¦ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 							break;
-					case ENGINE_WARMUP://µÈ´ýÆô¶¯
+					case ENGINE_WARMUP://ï¿½È´ï¿½ï¿½ï¿½ï¿½ï¿½
 							break;
 					case ENGINE_SHUTTING_DOWN:
 							break;
@@ -325,47 +354,57 @@ OS_U8 AutoLuanchProcess()  // 5msÔËÐÐÒ»´Î
 			}
 		}
 	}
-	//7.×Ô¶¯½øÈëÔ¤·¢Éä
+	//7.ï¿½Ô¶ï¿½ï¿½ï¿½ï¿½ï¿½Ô¤ï¿½ï¿½ï¿½ï¿½
 	if(AutoStep == 10)
 	{
-    g_DeviceState.luanchStart = 1;
-		SETDATA(pDataPoolSelf,	"RecvLunc",	0xCC,	OS_U8);//Ô¤·¢ÉäÍê³É£¬µÈ´ý·¢Éä½âËøÖ¸Áî
+    	g_DeviceState.luanchStart = 1;//ï¿½ï¿½Î»ï¿½ï¿½ï¿½ï¿½×¼ï¿½ï¿½ï¿½Ã±ï¿½Ê¶
+		SETDATA(pDataPoolSelf,	"RecvLunc",	0xCC,	OS_U8);//Ô¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É£ï¿½ï¿½È´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½
 		AutoStep = 11;
 	}
-	//8.Ô¤·¢ÉäÍê³É£¬µÈ´ýµØÃæ½âËøÖ¸Áî
+	//8.Ô¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É£ï¿½ï¿½È´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½
 	if(AutoStep == 11)
 	{
+		//ï¿½Õµï¿½ï¿½Ëµï¿½ï¿½ï¿½Õ¾ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½î£¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í£Ö¹ï¿½ï¿½ï¿½Ë»Øµï¿½ï¿½ï¿½ï¿½È´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		if(EngineStartCmd == 0)
 		{
-			//ÓÃ»§ÊÖ¶¯ÓÖ·¢ËÍÁËÍ£»úÖ¸Áî         
+			//ï¿½Ã»ï¿½ï¿½Ö¶ï¿½ï¿½Ö·ï¿½ï¿½ï¿½ï¿½ï¿½Í£ï¿½ï¿½Ö¸ï¿½ï¿½         
 			StopEngine();
 			AutoStep = 8;
-			g_DeviceState.luanchStart = 0;
-			SETDATA(pDataPoolSelf,	"RecvLunc",	0x00,	OS_U8);
+			
+			g_DeviceState.luanchStart = 0;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×¼ï¿½ï¿½ï¿½Ã±ï¿½ï¿½?
+			SETDATA(pDataPoolSelf,	"RecvLunc",	0x00,	OS_U8);//ï¿½ï¿½ï¿½Ô¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		}
-		if(IgnitionMark == TRUE)//µØÃæ·¢ËÍÈ«²¿½âËøÖ¸Áî
+
+		//ï¿½Õµï¿½ï¿½ï¿½ï¿½ï¿½Õ¾È«ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½
+		if(IgnitionMark == TRUE)
 		{
 			AutoStep = 12;
 		}
 	}
-	//9.µØÃæ½âËøÒÑ¾­Íê³É£¬µÈ´ý»ð¼ý¼¤·¢
+	
+	//9.ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¾ï¿½ï¿½ï¿½É£ï¿½ï¿½È´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½???
+	//ï¿½ï¿½ï¿½Ýµï¿½ï¿½ï¿½Ö¸ï¿½î¡°È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½/ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í£Ö¹ï¿½ï¿½;
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½???
 	if(AutoStep == 12)
 	{
+		//ï¿½Õµï¿½ï¿½Ëµï¿½ï¿½ï¿½Õ¾ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½î£¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í£Ö¹ï¿½ï¿½ï¿½Ë»Øµï¿½ï¿½ï¿½ï¿½È´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		if(EngineStartCmd == 0)
 		{
-			//ÓÃ»§ÊÖ¶¯ÓÖ·¢ËÍÁËÍ£»úÖ¸Áî
+			//ï¿½Ã»ï¿½ï¿½Ö¶ï¿½ï¿½Ö·ï¿½ï¿½ï¿½ï¿½ï¿½Í£ï¿½ï¿½Ö¸ï¿½ï¿½
 			StopEngine();
 			AutoStep = 8;
 			IgnitionMark = FALSE;
 			g_DeviceState.luanchStart = 0;
-			SETDATA(pDataPoolSelf,	"RecvLunc",	0x00,	OS_U8);
+			SETDATA(pDataPoolSelf,	"RecvLunc",	0x00,	OS_U8);//ï¿½ï¿½ï¿½Ô¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		}
+
+		//DoIgnition() ï¿½Ú²ï¿½ï¿½ï¿½"startFly"ï¿½ï¿½ï¿½ï¿½1ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½???
 		OS_U8 startFly = 0;
 		GetDataFast(pDataPoolSelf,	"startFly",	&startFly);
-		if(startFly == 1)//DoIgnitionº¯Êý½«startFlyÖÃ1£¬µØÃæ ·¢¿ØÊ×Ò³ - Æð·É
+		if(startFly == 1)
 		{
-			FuseSend(ARM_I);	//ÒÑ¾­Æð·ÉÁË£¬·¢ËÍÒ»¼¶½â±£Ö¸Áî£¨Ìõ¼þ2g¹ýÔØ£©
-			// ÅÐ¶ÏµÚ8×Ö½ÚÎª0x40
+			FuseSend(ARM_I);	//ï¿½Ñ¾ï¿½ï¿½ï¿½ï¿½ï¿½Ë£ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½â±£Ö¸ï¿½ï¿½???ï¿½ï¿½ï¿½ï¿½2gï¿½ï¿½ï¿½Ø£ï¿½
+			// ï¿½Ð¶Ïµï¿½8ï¿½Ö½ï¿½Îª0x40
 			OS_U8 fzFeedbk;
 			GetDataFast(pDataPoolSelf, "fzFeedbk", &fzFeedbk);
 			if(fzFeedbk & 0x40)
@@ -374,44 +413,42 @@ OS_U8 AutoLuanchProcess()  // 5msÔËÐÐÒ»´Î
 			}
 		}
 	}    
-	//10.Æð·ÉÖ®ºó£¬·É³ö2kmºó¸øÒýÐÅµÄÒý±¬µçÔ´ÉÏµç
+	//10.ï¿½ï¿½ï¿½ï¿½?ï¿½ó£¬·É³ï¿½2kmï¿½ï¿½ï¿½ï¿½Ô¸ß¶È´ï¿½ï¿½ï¿½???2mï¿½ó£¬¸ï¿½ï¿½ï¿½ï¿½Åµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô´ï¿½Ïµï¿½
 	if(AutoStep == 13)
 	{
+		//ï¿½ï¿½ï¿½Å¹ï¿½ï¿½ç¼°ï¿½ï¿½ï¿½ï¿½ï¿½â±£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ïµï¿½
 		static uint8_t FzOnFlag = 0;
 		if (0 == FzOnFlag)
 		{
 			OS_S32 launchLon,launchLat,curLon,curLat;
 			OS_S16 launchHigh;
 			OS_FLOAT curHigh;
-		
-			GetDataFast(pDataPoolFly, "DataLon", &launchLon);//Æð·ÉÎ»ÖÃµÄ¾­Î³¸ß
+			GetDataFast(pDataPoolFly, "DataLon", &launchLon);//ï¿½ï¿½ï¿½Î»ï¿½ÃµÄ¾ï¿½Î³ï¿½ï¿½???
 			GetDataFast(pDataPoolFly, "DataLat", &launchLat);//
 			GetDataFast(pDataPoolFly, "DataHigh", &launchHigh);//
-
 			launchLon = launchLon * 1e-7;
 			launchLat = launchLat * 1e-7;
 
-			GetDataFast(pDataPoolImu, "navLon", &curLon);//µ±Ç°Î»ÖÃµÄ¾­Î³¸ß
+			GetDataFast(pDataPoolImu, "navLon", &curLon);//ï¿½ï¿½Ç°Î»ï¿½ÃµÄ¾ï¿½Î³ï¿½ï¿½
 			GetDataFast(pDataPoolImu, "navLat", &curLat);//
 			GetDataFast(pDataPoolImu, "navHigh", &curHigh);//
-
 			curLon = curLon * 1e-7;
 			curLat = curLat * 1e-7;
 
-double lat_m = (curLat - launchLat) * 111320.0;
-
-// ¾­¶È·½Ïò£ºÐèÒª³ËÒÔ cos(Î³¶È)
-double mid_lat_rad = (launchLat + curLat) / 2.0 * 3.1415926535 / 180.0;
-double lon_m = (curLon - launchLon) * 111320.0 * cos(mid_lat_rad);
-
-double h_m = curHigh - launchHigh;
-
-double dist = sqrt(lat_m*lat_m + lon_m*lon_m);
+			double lat_m = (curLat - launchLat) * 111320.0;//Î³ï¿½È²ï¿½ ï¿½ï¿½Ó¦ï¿½ï¿½Ë®Æ½ï¿½ï¿½ï¿½ï¿½
+			// ï¿½ï¿½ï¿½È·ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½ cos(Î³ï¿½ï¿½)
+			double mid_lat_rad = (launchLat + curLat) / 2.0 * 3.1415926535 / 180.0;
+			double lon_m = (curLon - launchLon) * 111320.0 * cos(mid_lat_rad);//ï¿½ï¿½ï¿½È²ï¿½ ï¿½ï¿½Ó¦ï¿½ï¿½Ë®Æ½ï¿½ï¿½ï¿½ï¿½
+			
+			//ï¿½ß¶È²ï¿½
+			double h_m = curHigh - launchHigh;
+			//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½???
+			double dist = sqrt(lat_m*lat_m + lon_m*lon_m);
 
 			if((dist > 2000)&&(h_m > 200))
 			{
-				FuseSend(ARM_II);// ·¢ËÍ¶þ¼¶½â±£
-
+				//ï¿½ï¿½ï¿½Í¶ï¿½ï¿½ï¿½ï¿½â±£ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½î£¬ï¿½ï¿½È¡Ö´ï¿½ï¿½×´Ì¬ï¿½ï¿½ï¿½â±£ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½Êµï¿½ï¿½Ïµï¿½
+				FuseSend(ARM_II);
 				OS_U8 fzFeedbk;
 				GetDataFast(pDataPoolSelf, "fzFeedbk", &fzFeedbk);
 				if(fzFeedbk & 0xC0)
@@ -422,22 +459,24 @@ double dist = sqrt(lat_m*lat_m + lon_m*lon_m);
 				}
 			}
 		}
+		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô´ï¿½Ïµï¿½ï¿½ï¿½Ó³ï¿½???2sï¿½ï¿½Ê¼ï¿½Ð¶Ï£ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½ï¿½ï¿½Ð¡ï¿½ï¿½2kmï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½â±£Ö¸ï¿½ï¿½
 		else
 		{
-			// ÒýÐÅ-Òý±¬µçÔ´ÒÑ¾­ÉÏµç
-			// ÑÓÊ±2s
+			// ï¿½ï¿½ï¿½ï¿½-ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô´ï¿½Ñ¾ï¿½ï¿½Ïµï¿½
+			// ï¿½ï¿½Ê±2s
 			if((GetCurTime() - g_DeviceStatus.FzOnStamp_s) > 2)
 			{
-				// ÅÐ¶Ï¾àÀëÄ¿±êÊÇ·ñ<2km	
-				OS_DOUBLE deltaR;
-				GetDataFast(pDataPoolFly, "deltaR", &deltaR);//µ¯Ä¿¾àÀë
+				// ï¿½Ð¶Ï¾ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½ï¿½Ç·ï¿½<2km	
+				OS_FLOAT deltaR;
+				GetDataFast(pDataPoolFly, "deltaR", &deltaR);//ï¿½ï¿½Ä¿ï¿½ï¿½ï¿½ï¿½
 				if(deltaR != 0)
 				{
+					//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½â±£
 					if(deltaR < 2000)
 					{
-						FuseSend(ARM_III);//·¢ËÍÈý¼¶½â±£
+						FuseSend(ARM_III);
 
-						// ÅÐ¶ÏµÚ9×Ö½ÚÎª0x80
+						//ï¿½Ð¶Ïµï¿½9ï¿½Ö½ï¿½Îª0x80
 						OS_U8 fzTask;
 						GetDataFast(pDataPoolSelf, "fzTask", &fzTask);
 						if(fzTask & 0x80)
@@ -449,54 +488,61 @@ double dist = sqrt(lat_m*lat_m + lon_m*lon_m);
 			}
 		}
 	}
-	SETDATA(pDataPoolMsn,	"autoStep",	AutoStep,	OS_U8);	
-	//ÅÐ¶Ïµ¼ÒýÍ·ÊÇ·ñÁ¬½Ó£¬Èç¹ûÁ¬½ÓÔòÀàÐÍÎª0b11 = 3£¬Èç¹ûÎ´Á¬½ÓÀàÐÍÎª0b10 = 2
+	//ï¿½ï¿½ï¿½Ìµï¿½ï¿½È²ï¿½ï¿½è£¬ï¿½ï¿½ï¿½ï¿½
+	SETDATA(pDataPoolMsn,	"autoStep",	AutoStep, OS_U8);	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì²ï¿½ï¿½è£¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å´ï¿½ï¿½ï¿½ï¿½ï¿½
+	
+	//ï¿½Ð¶Ïµï¿½ï¿½ï¿½Í·ï¿½Ç·ï¿½ï¿½ï¿½ï¿½Ó£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½?0b11 = 3ï¿½ï¿½ï¿½ï¿½ï¿½Î´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½?0b10 = 2
 	if(g_DeviceState.scoutCountDown != 0)
 	{
-		SETDATA(pDataPoolMsn,	"paylodtp",	3,	OS_U8);
+		SETDATA(pDataPoolMsn,	"paylodtp",	3,	OS_U8);//ï¿½ï¿½ï¿½ï¿½Í·ï¿½ï¿½ï¿½ï¿½
 	}
 	else
 	{
-		SETDATA(pDataPoolMsn,	"paylodtp",	2,	OS_U8);
+		SETDATA(pDataPoolMsn,	"paylodtp",	2,	OS_U8);//ï¿½ï¿½ï¿½ï¿½Í·Î´ï¿½ï¿½ï¿½ï¿½
 	}
-  return 0;
+	
+	return 0;
 }
 
 
 
 /***********************************************************
- * º¯ÊýÃû³Æ:ControllerStatusUpdata()
- * º¯Êý¹¦ÄÜ: ÖÇÄÜ¿ØÖÆÆ÷5ms¶¨Ê±Æ÷£¬ËùÓÐÐèÒªÖÇÄÜ¿ØÖÆÆ÷°´Ê±¼ä´¥·¢µÄÐÐÎª¾ùÔÚ´ËÖ´ÐÐ¡£°üÀ¨£º
- * 	1.×Ô¼ìÊý¾ÝÊÕ¼¯£¬²¢´æÊý¾Ý³ØÈëÒ£²â
- * 	2.·¢ÉäÇ°¸øµØÃæ·¢ËÍÅäµçÐÅÏ¢±¨¸æ
- * ×÷Õß:	³Éºê­Z
+ * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½:ControllerStatusUpdata()
+ * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½: ï¿½ï¿½ï¿½Ü¿ï¿½ï¿½ï¿½ï¿½ï¿½5msï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½Ü¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ä´¥ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½Ú´ï¿½Ö´ï¿½Ð¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+ * 	1.ï¿½Ô¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Õ¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý³ï¿½ï¿½ï¿½Ò£ï¿½ï¿½
+ * 	2.ï¿½ï¿½ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½ï¿½æ·¢ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½?ï¿½ï¿½ï¿½ï¿½
+ * ï¿½ï¿½ï¿½ï¿½:	ï¿½Éºï¿½Z
  ***********************************************************/
-OS_U8 ControllerStatusUpdata()	// 5msÔËÐÐÒ»´Î
+OS_U8 ControllerStatusUpdata()	// 5msï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½
 {
-	//ÅÐ¶ÏÆð·ÉÌõ¼þ£¬Ìõ¼þÂú×ã¾ÍÆð·É£»¼ì²é¸÷ÍâÉèÍ¨ÐÅ×´Ì¬
-	SelfCheckCollpse();		//×Ô¼ìÅäÖÃºÍ»Ø±¨	
-	CalcAirSpd();		// ¼ÆËã¿ÕËÙ
-	ReConnectUart();	// ÖØÁ¬´®¿Ú
+	//ï¿½Ð¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½?ï¿½ï¿½×´Ì¬
+	SelfCheckCollpse();//ï¿½ï¿½ï¿½Â·É¿ï¿½ï¿½Â¶È¡ï¿½Í¨Ñ¶×´Ì¬ï¿½ï¿½SDï¿½ï¿½ï¿½æ´¢×´Ì¬
+	
+	CalcAirSpd();		// ï¿½É¼ï¿½ï¿½ï¿½Ñ¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¹ï¿½ß¶È¡ï¿½ï¿½ï¿½ï¿½ï¿½
+	
+	ReConnectUart();	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	return 0;
 }
 
 
 /***********************************************************
- * º¯ÊýÃû³Æ:SelfCheckCollpse()
- * º¯Êý¹¦ÄÜ: ÖÇÄÜ¿ØÖÆÆ÷¸÷Éè±¸×´Ì¬ÊÕ¼¯£¬Èç¹ûÓÐµØÃæÇëÇó×Ô¼ìÐÅÏ¢£¬Ôò×éÖ¯×Ô¼ìÐÅÏ¢ÏÂ´«
- * ×÷Õß:	³Éºê­Z
+ * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½:SelfCheckCollpse()
+ * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½: ï¿½ï¿½ï¿½Ü¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½è±¸×´Ì¬ï¿½Õ¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ðµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô¼ï¿½ï¿½ï¿½ï¿½?ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¯ï¿½Ô¼ï¿½ï¿½ï¿½Ï¢ï¿½Â´ï¿½
+ * ï¿½ï¿½ï¿½ï¿½:	ï¿½Éºï¿½Z
  ***********************************************************/
 static OS_U8 SelfCheckCollpse()
 {
+	//ï¿½ï¿½ï¿½ï¿½Ð¶ï¿½???
     LunchDetective();
-	//±±¾©Ê±¼ä
+	
+	//ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½
 	//SETDATA(pDataPoolSelf,	"BJTime",	g_DeviceState.BJTimeSecond,	OS_U32);
 
-	//ºËÐÄÎÂ¶È
+	//ï¿½ï¿½ï¿½ï¿½ï¿½Â¶ï¿½
 	float t = System_GetCoreTemperature();
 	g_DeviceState.temperature = t;
 
-	//ÊÕ¼¯¸÷Éè±¸Í¨ÐÅ×´Ì¬
+	//ï¿½Õ¼ï¿½ï¿½ï¿½ï¿½è±¸Í¨ï¿½ï¿½×´Ì¬
 	g_DeviceState.hilCountDown = g_DeviceState.hilCountDown > 0?g_DeviceState.hilCountDown-1:0;
 	g_DeviceState.ecuCountDown  = g_DeviceState.ecuCountDown > 0?g_DeviceState.ecuCountDown-1:0;
 	g_DeviceState.battCountDown  = g_DeviceState.battCountDown > 0?g_DeviceState.battCountDown-1:0;
@@ -507,19 +553,19 @@ static OS_U8 SelfCheckCollpse()
 	g_DeviceState.imuCountDown = g_DeviceState.imuCountDown > 0?g_DeviceState.imuCountDown-1:0;
 	g_DeviceState.scoutCountDown = g_DeviceState.scoutCountDown >0? g_DeviceState.scoutCountDown-1:0;
 
-	SETDATA(pDataPoolSelf,	"commHil",	g_DeviceState.hilCountDown,		OS_U8);
-	SETDATA(pDataPoolSelf,	"commBatt",	g_DeviceState.battCountDown,	OS_U8);
-  SETDATA(pDataPoolSelf,	"commPwr",	g_DeviceState.powerCountDown,	OS_U8);
-	SETDATA(pDataPoolSelf,	"commEcu",	g_DeviceState.ecuCountDown,		OS_U8);
-	SETDATA(pDataPoolSelf,	"commNav",	g_DeviceState.navCountDown,		OS_U8);
+	SETDATA(pDataPoolSelf,	"commHil",	g_DeviceState.hilCountDown,	OS_U8);//ï¿½ï¿½ï¿½ï¿½
+	SETDATA(pDataPoolSelf,	"commBatt",	g_DeviceState.battCountDown,	OS_U8);//ï¿½ï¿½ï¿½???
+	SETDATA(pDataPoolSelf,	"commPwr",	g_DeviceState.powerCountDown,	OS_U8);//ï¿½ï¿½ï¿½ï¿½
+	SETDATA(pDataPoolSelf,	"commEcu",	g_DeviceState.ecuCountDown,	OS_U8);//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	SETDATA(pDataPoolSelf,	"commNav",	g_DeviceState.navCountDown,	OS_U8);//ï¿½ï¿½ï¿½ï¿½
 
-	SETDATA(pDataPoolSelf,	"commSrv",	g_DeviceState.srvCountDown,		OS_U8);
-	SETDATA(pDataPoolSelf,	"commImu",	g_DeviceState.imuCountDown,		OS_U8);
-  SETDATA(pDataPoolSelf,	"commFuse",	g_DeviceState.fuseCountDown,	OS_U8);
-	SETDATA(pDataPoolSelf,	"commScot",	g_DeviceState.scoutCountDown,	OS_U8);
+	SETDATA(pDataPoolSelf,	"commSrv",	g_DeviceState.srvCountDown,		OS_U8);//ï¿½Å·ï¿½
+	SETDATA(pDataPoolSelf,	"commImu",	g_DeviceState.imuCountDown,		OS_U8);//ï¿½ß²àµ¥Ôª
+	SETDATA(pDataPoolSelf,	"commFuse",	g_DeviceState.fuseCountDown,	OS_U8);//ï¿½ï¿½ï¿½ï¿½
+	SETDATA(pDataPoolSelf,	"commScot",	g_DeviceState.scoutCountDown,	OS_U8);//ï¿½ï¿½ï¿½ï¿½Í·Í¨Ñ¶
 
-	SETDATA(pDataPoolSelf,	"cpuTemp",	g_DeviceState.temperature * 100,		OS_S16);
-	SETDATA(pDataPoolSelf,	"selfMode",	g_DeviceState.workStage,		OS_U8);
+	SETDATA(pDataPoolSelf,	"cpuTemp",	g_DeviceState.temperature * 100,		OS_S16);//ï¿½É¿ï¿½ï¿½Â¶ï¿½
+	SETDATA(pDataPoolSelf,	"selfMode",	g_DeviceState.workStage,		OS_U8);//ï¿½ï¿½ï¿½ï¿½ï¿½×¶ï¿½
 
 	OS_U8 sdState;
 	if(SD_Enable == FALSE)
@@ -531,7 +577,7 @@ static OS_U8 SelfCheckCollpse()
 			sdState = sd_card_fault==0?1:0xEE;
 	}
 
-	SETDATA(pDataPoolSelf,	"sdState",	sdState,	OS_U8);
+	SETDATA(pDataPoolSelf,	"sdState",	sdState,	OS_U8);//ï¿½æ´¢SDï¿½ï¿½×´Ì¬
 
 	return 0;
 }
@@ -539,19 +585,19 @@ static OS_U8 SelfCheckCollpse()
 OS_U8 InitReportParam()
 {
 	SETDATA(pDataPoolNav,	"imuFocus",	 0,		OS_U8);
-	SETDATA(pDataPoolSelf,	"tcCmd",	 0xAA,		OS_U8);
-    
+	
+	SETDATA(pDataPoolSelf,	"tcCmd",	 0xAA,		OS_U8);//ï¿½ï¿½ï¿½ï¿½Õ¾Ö¸ï¿½ï¿½
     SETDATA(pDataPoolSelf,	"flyError",	 0xFF,		OS_U8);
 
 	return 0;
 }
 
 /***********************************************************
- * º¯ÊýÃû³Æ:BCCmdHandler()
- * º¯Êý¹¦ÄÜ: ÐèÒªÖÇÄÜ¿ØÖÆÆ÷´¦ÀíµÄÖ¸ÁîÄÚÈÝ
- * ×÷Õß:	³Éºê­Z
+ * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½:BCCmdHandler()
+ * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½: ï¿½ï¿½Òªï¿½ï¿½ï¿½Ü¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+ * ï¿½ï¿½ï¿½ï¿½:	ï¿½Éºï¿½Z
  ***********************************************************/
-OS_U32 ControllerCmdHandler(STRU_422_MSG_INFO * frame)	// Êý¾ÝÁ´»ò·ÂÕæ¹ýÀ´µÄÖ¸Áî
+OS_U32 ControllerCmdHandler(STRU_422_MSG_INFO * frame)	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½
 {
 	OS_U8 msgId = frame->u8MsgID;
 	switch(msgId)
@@ -572,55 +618,58 @@ OS_U32 ControllerCmdHandler(STRU_422_MSG_INFO * frame)	// Êý¾ÝÁ´»ò·ÂÕæ¹ýÀ´µÄÖ¸Áî
 	/*
 	case CMD_DATA_SET:
 	{
-		//·¢ËÍ¸ø·É¿Ø
+		//ï¿½ï¿½ï¿½Í¸ï¿½ï¿½É¿ï¿½
 		FLIGHT_CMD cmd;
-		cmd.cmdType = 0;//²ÎÊýÉÏ´«
+		cmd.cmdType = 0;//ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½
 		cmd.paramID = frame->au8Data[0];
 		cmd.paramValue = *(OS_FLOAT *)(&frame->au8Data[1]);
 		SETDATA(pDataPoolSelf, "tcCmd", cmd.paramID,	OS_U8);
 		FlightControlCmd(cmd);
 		break;
 	}*/
-	case CMD_URGENT_LAND:	// 0x22 ÉãÏñÍ·ÊÓÆµ - ½ô¼±É¡½µ
+	case CMD_URGENT_LAND:	// 0x22 ï¿½ï¿½ï¿½ï¿½Í·ï¿½ï¿½Æµ - ï¿½ï¿½ï¿½ï¿½É¡ï¿½ï¿½
 	{
-		SETDATA(pDataPoolSelf,  "flyError", 1,	OS_U8);	//µØÃæÈÃ½ô¼±É¡½µ
+		SETDATA(pDataPoolSelf,  "flyError", 1,	OS_U8);	//ï¿½ï¿½ï¿½ï¿½ï¿½Ã½ï¿½ï¿½ï¿½É¡ï¿½ï¿½
 		SETDATA(pDataPoolSelf, "tcCmd", 0xC0,	OS_U8);
-		DoOpenUm();	//½ô¼±É¡½µ¿ªÉ¡
+		DoOpenUm();	//ï¿½ï¿½ï¿½ï¿½É¡ï¿½ï¿½ï¿½ï¿½É¡
 		break;
 	}
-	case CMD_URGENT_RETURN:	// 0x23 ÉãÏñÍ·ÊÓÆµ - ½ô¼±·µº½
+	case CMD_URGENT_RETURN:	// 0x23 ï¿½ï¿½ï¿½ï¿½Í·ï¿½ï¿½Æµ - ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	{
-		SETDATA(pDataPoolSelf,  "flyError", 2,	OS_U8);	//µØÃæÈÃ½ô¼±·µº½
+		SETDATA(pDataPoolSelf,  "flyError", 2,	OS_U8);	//ï¿½ï¿½ï¿½ï¿½ï¿½Ã½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		SETDATA(pDataPoolSelf, "tcCmd", 0xC1,	OS_U8);
 		DoReturnHomeward();
 		break;
 	}
-	case CMD_ENGINE_START:	// 0xF6 Ê×Ò³ - ·¢¶¯»úÆô¶¯
+	case CMD_ENGINE_START:	// 0xF6 ï¿½ï¿½Ò³ - ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	{
-		EngineStartCmd = 1;
+		EngineStartCmd = 1;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		break;
 	}
-	case CMD_ENGINE_STOP:	// 0xF7 Ê×Ò³ - ·¢¶¯»úÍ£»ú
+	case CMD_ENGINE_STOP:	// 0xF7 ï¿½ï¿½Ò³ - ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í£ï¿½ï¿½
 	{
-		EngineStartCmd = 0;
+		EngineStartCmd = 0;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø»ï¿½
 		break;
 	}
-	case CMD_FORE_LAUNCH_REQ:	//Ô¤·¢Éä£¨Î´Ê¹ÓÃ£©
+	case CMD_FORE_LAUNCH_REQ://Ç¿ï¿½Æ·ï¿½ï¿½ï¿½×¼ï¿½ï¿½ï¿½ï¿½ï¿½??? ï¿½ï¿½ È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½(×¼ï¿½ï¿½Î´ï¿½ï¿½ï¿½???)
 	{
+		//ï¿½Õµï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½î£¬Ç°ï¿½Ã·ï¿½ï¿½ï¿½×¼ï¿½ï¿½ï¿½ï¿½ï¿½???
 		if(0x11==frame->au8Data[0])
 		{
 			g_DeviceState.luanchStart = 1;
 			SETDATA(pDataPoolSelf,	"RecvLunc",	0xCC,	OS_U8);
 		}
+		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç°ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½???
 		else
 		{
 			g_DeviceState.luanchStart = 0;
 			SETDATA(pDataPoolSelf,	"RecvLunc",	0,	OS_U8);
-			IgnitionMark = FALSE;//·¢ÉäºóÍÏ²åÎ´·ÖÀëÇ°Ò²¿ÉÒÔÍË³öÔ¤·¢ÉäÒÔÖÐÖ¹·¢ÉäÁ÷³Ì
+			//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï²ï¿½Î´ï¿½ï¿½ï¿½ï¿½Ç°Ò²ï¿½ï¿½ï¿½ï¿½ï¿½Ë³ï¿½Ô¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½???
+			IgnitionMark = FALSE;
 		}
 	}
 		break;
-	case CMD_LAUNCH_REQ:	//0xFA Ê×Ò³ - È«²¿½âËø
+	case CMD_LAUNCH_REQ:	//0xFA ï¿½ï¿½Ò³ - È«ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç¿ï¿½Æ·ï¿½ï¿½ï¿½×¼ï¿½ï¿½ï¿½ï¿½É£ï¿½???
 	{
 		if( 0xAA == frame->au8Data[0]
 		 && 0xBB == frame->au8Data[1]
@@ -628,24 +677,36 @@ OS_U32 ControllerCmdHandler(STRU_422_MSG_INFO * frame)	// Êý¾ÝÁ´»ò·ÂÕæ¹ýÀ´µÄÖ¸Áî
 		 && 0xDD == frame->au8Data[3]
 		 && 0xEE == frame->au8Data[4])
 		{
+			//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ë£ï¿½ï¿½ï¿½ï¿½???
 			if(g_DeviceState.luanchStart == 1)
-				Ignition();
+			{
+				//g_DeviceState.luanchStart = 1;//ï¿½ï¿½Ð§
+				SETDATA(pDataPoolSelf,	"RecvLunc",	1,	OS_U8);
+				IgnitionMark = TRUE;
+
+				//ï¿½Ø¸ï¿½ï¿½ï¿½ï¿½ï¿½
+				//Ignition();
+				//ï¿½Ú²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ë£ï¿½IgnitionMark = TRUE;
+				//ï¿½Ú²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ë£ï¿½ï¿½òµ¼ºï¿½ï¿½ï¿½ï¿½Í£ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½???
+			}
 		}
 	}
 		break;
-	case CMD_LUANCH_FORCE:	// 0xFB Ê×Ò³ - Æð·É
+	case CMD_LUANCH_FORCE:	// 0xFB ï¿½ï¿½Ò³ - ï¿½ï¿½ï¿½???
 		if( 0xAA == frame->au8Data[0]
 		 && 0xBB == frame->au8Data[1]
 		 && 0xCC == frame->au8Data[2]
 		 && 0xDD == frame->au8Data[3]
 		 && 0xEE == frame->au8Data[4])
 		{
+			//
 			if(IgnitionMark == TRUE && ((g_DeviceState.workStage & DOM_AUTOMATIC) != DOM_AUTOMATIC))
 			{
-				MsgToNAV(BUS_NAV_IGNATION, PTR_NULL, 0);
-				SETDATA(pDataPoolSelf,	"luanMode",	2,	OS_U8); //Æð·ÉÄ£Ê½µØÃæµã»÷Æð·ÉµÄ·½Ê½ 0 µ¥·¢ 1 Á¬·¢ 2 Æë·¢
+				SETDATA(pDataPoolSelf, "luanMode",	2,	OS_U8); //ï¿½ï¿½ï¿½Ä£Ê½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÉµÄ·ï¿½Ê½ 0 ï¿½ï¿½ï¿½ï¿½ 1 ï¿½ï¿½ï¿½Ù¶ï¿½ï¿½ï¿½ï¿½ï¿½ 2 ï¿½ï¿½ï¿½Ô·ï¿½ï¿½ä£¨ï¿½ÛºÏ²ï¿½ï¿½Ô»ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½???3 ï¿½Ù¶ï¿½ï¿½ï¿½ï¿½ï¿½
+				
 				IgnitionMark = FALSE;
 				DoIgnition();
+				//ï¿½Ú²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ MsgToNAV(BUS_NAV_IGNATION, PTR_NULL, 0);
 			}
 		}
 		break;
@@ -658,11 +719,13 @@ OS_U8 SeqCalc()
 {
 	OS_U32 flightTick = g_DeviceState.CurrTick;
 	OS_DOUBLE flightTime = flightTick * 0.005;
+	//ï¿½ï¿½ï¿½ï¿½Ç°Î´Ö´ï¿½ï¿½
 	if((DOM_AUTOMATIC & g_DeviceState.workStage) != DOM_AUTOMATIC)
 	{
 		return -1;
 	}
-	if(flightTime >= 0.5)// ****************MML£º Ê±¼ä > 500ms ****************
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½0.5sï¿½ï¿½ï¿½ï¿½Îªï¿½É¿ï¿½ï¿½ï¿½ï¿½ï¿½
+	if(flightTime >= 0.5)// ****************MMLï¿½ï¿½ Ê±ï¿½ï¿½ > 500ms ****************
 	{
 		flightSeq.luanched = 1;
 	}
@@ -674,65 +737,65 @@ OS_U8 SeqCalc()
 }
 
 
-OS_U8 DoIgnition()// 1¡¢µØÃæÈí¼þµã»÷¡°Æð·É¡±£¨²âÊÔÓÃ£©/ 2¡¢¹ýÔØ£¨Ö÷Ìõ¼þ£©Æð·É/ 3¡¢ËÙ¶ÈÆð·É£¨¸±Ìõ¼þ£©/ 4¡¢·ÂÕæÆð·É£¨²âÊÔÓÃ£©
+OS_U8 DoIgnition()// 1ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã£ï¿½/ 2ï¿½ï¿½ï¿½ï¿½ï¿½Ø£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½???/ 3ï¿½ï¿½ï¿½Ù¶ï¿½ï¿½ï¿½É£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½???/ 4ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã£ï¿½???
 {
-	MsgToNAV(BUS_NAV_IGNATION,PTR_NULL,0);
-
+	MsgToNAV(BUS_NAV_IGNATION,PTR_NULL,0);//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½???
+	
 	g_DeviceState.workStage &= ~((unsigned int)DOM_INTERACTIVE);
 	g_DeviceState.workStage |= DOM_AUTOMATIC;
 	g_DeviceState.flightStartTime = GetCurTime();
 	g_DeviceState.CurrTick = 0;
 
-	SETDATA(pDataPoolSelf,	"startFly",	1,	OS_U8);
-	SETDATA(pDataPoolSelf,	"luncTime",	g_DeviceState.BJTimeSecond,	OS_U32);
-	SETDATA(pDataPoolSelf,  "flyError", 0,	OS_U8);//Õý³£·ÉÐÐ   
+	SETDATA(pDataPoolSelf, "startFly",	1,	OS_U8);//ï¿½ï¿½É±ï¿½ï¿½?
+	SETDATA(pDataPoolSelf, "luncTime",	g_DeviceState.BJTimeSecond,	OS_U32);//ï¿½ï¿½Ïµï¿½ï¿½ï¿½Ê±ï¿½ï¿½???ï¿½ï¿½ï¿½ï¿½ï¿½Õ¡ï¿½Ê±ï¿½ï¿½ï¿½ï¿½
+	SETDATA(pDataPoolSelf, "flyError", 0,	OS_U8);//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½   
 	return 0;
 }
 
-OS_U8 IgnitionMark = FALSE;  // µØÃæÈ«²¿½âËø°´Å¥µã»÷±êÖ¾
+OS_U8 IgnitionMark = FALSE;  // ï¿½ï¿½ï¿½ï¿½È«ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å¥ï¿½ï¿½ï¿½ï¿½ï¿½Ö¾ï¿½ï¿½ï¿½ï¿½Éºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½???
 
 /***********************************************************
- * º¯ÊýÃû³Æ:Ignition()
- * º¯Êý¹¦ÄÜ: ·¢ÉäÖ¸Áî£¬¿É±»Êý¾ÝÁ´¡¢µØÃæµ÷ÓÃ¡£½ÓÊÕµ½Ö¸ÁîºóÉèÖÃÕû¼ý×´Ì¬£¬ÖØÐÂ³õÊ¼»¯·É¿ØËã·¨
- * ÊäÈë£¬Çå³ý¶æ¿Ø»ýÀÛÊý¾Ý
- * ×÷Õß:	³Éºê­Z
+ * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½:Ignition()
+ * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½: ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½î£¬ï¿½É±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã¡ï¿½ï¿½ï¿½ï¿½Õµï¿½Ö¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×´Ì¬ï¿½ï¿½ï¿½ï¿½ï¿½Â³ï¿½Ê¼ï¿½ï¿½ï¿½É¿ï¿½ï¿½ã·¨
+ * ï¿½ï¿½ï¿½ë£¬ï¿½ï¿½ï¿½ï¿½ï¿½Ø»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+ * ï¿½ï¿½ï¿½ï¿½:	ï¿½Éºï¿½Z
  ***********************************************************/
 OS_U8 Ignition()
 {
-	IgnitionMark = TRUE;
-	SETDATA(pDataPoolSelf,	"RecvLunc",	1,	OS_U8);
-	g_DeviceState.luanchStart = 1;
-
+	//ï¿½ï¿½ï¿½ï¿½Ïµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½??? ï¿½ï¿½ï¿½???
 	MsgToNAV(BUS_NAV_IGNATION, PTR_NULL, 0);
-	//²âÊÔ½×¶Î£¬Ö±½Ó·¢Éä
+	
+	//ï¿½ï¿½ï¿½Ô½×¶Î£ï¿½Ö±ï¿½Ó·ï¿½ï¿½ï¿½
 	//DoIgnition();
 	return 0;
 }
 
-OS_U8 LunchDetective()	// ÅÐ¶ÏÆð·ÉÌõ¼þ£¬Æð·É
+OS_U8 LunchDetective()	// ï¿½Ð¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 {
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö´ï¿½ï¿½
 	if(IgnitionMark == TRUE && ((g_DeviceState.workStage & DOM_AUTOMATIC) != DOM_AUTOMATIC))
 	{
 		OS_FLOAT fAx;
-		GetDataFast(pDataPoolImu, "imuAx", &fAx);//
+		GetDataFast(pDataPoolImu, "imuAx", &fAx);//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½???
         
 		OS_S16 vn,ve;
-		GetDataFast(pDataPoolImu, "navVe", &ve);//
-		GetDataFast(pDataPoolImu, "navVn", &vn);//
+		GetDataFast(pDataPoolImu, "navVe", &ve);
+		GetDataFast(pDataPoolImu, "navVn", &vn);
 		OS_U8 navState;
-		GetDataFast(pDataPoolImu, "navState", &navState);//
+		GetDataFast(pDataPoolImu, "navState", &navState);//ï¿½ï¿½ï¿½ï¿½×´Ì¬
 		float fvn,fve;
 		fvn = vn * 0.01;
 		fve = ve * 0.01;
-		float v = sqrt(pow(fvn,2) + pow(fve,2));
+		float v = sqrt(pow(fvn,2) + pow(fve,2));	//Ë®Æ½ï¿½Ù¶ï¿½
         
 		static OS_U8 detachCount = 1;
 		if(fabs(fAx) > 30.0)
 		{
+			//ï¿½ï¿½ï¿½Ä£ï¿½?1ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶È´ï¿½ï¿½ï¿½30ï¿½ï¿½Ã¿ï¿½ë·½
 			if(detachCount == 5)
 			{
 				DoIgnition();
-				SETDATA(pDataPoolSelf,	"luanMode",	1,	OS_U8); //Æð·ÉÄ£Ê½1 ¼ÓËÙ¶È´óÓÚ30ÅÐ¶ÏµÄÆð·É·½Ê½
+				SETDATA(pDataPoolSelf,	"luanMode",	1,	OS_U8); //ï¿½ï¿½ï¿½ï¿½Ä£Ê½
 				IgnitionMark = FALSE;
 			}
 			else
@@ -742,22 +805,23 @@ OS_U8 LunchDetective()	// ÅÐ¶ÏÆð·ÉÌõ¼þ£¬Æð·É
 		}
 		else
 		{
+			//ï¿½ï¿½ï¿½Ä£ï¿½?3ï¿½ï¿½ï¿½ï¿½Ïµï¿½ï¿½ï¿½×´ï¿½?ï¿½ï¿½ï¿½Ù¶È´ï¿½ï¿½ï¿½10m/s
 			if(v > 10.0 && navState == 0x60)
 			{
 				if(detachCount == 5)
 				{
-						DoIgnition();
-						SETDATA(pDataPoolSelf,	"luanMode",	3,	OS_U8); //Æð·ÉÄ£Ê½×éºÏµ¼º½×´Ì¬ºÍËÙ¶È´óÓÚ10
-						IgnitionMark = FALSE;
+					DoIgnition();
+					SETDATA(pDataPoolSelf,	"luanMode",	3,	OS_U8);
+					IgnitionMark = FALSE;
 				}
 				else
 				{
-						detachCount++;
+					detachCount++;
 				}
 			}
 			else
 			{
-					detachCount = 1;
+				detachCount = 1;
 			}
 		}
 	}

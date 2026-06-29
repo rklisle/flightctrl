@@ -90,7 +90,6 @@ const STRU_STANDARD_FRAME* PeekStandardMessage()
 	//遍历所有422口，接收底层在本轮查询之间收到的所有帧
 	for(int rtIndex=0; rtIndex<MODULE_COUNT; rtIndex++)//
 	{
-		
 		//if(rtIndex == RT_NAV_1)
 			//continue; //暂时不调导航
 		OS_U16 u16Length[MAX_SIMUL_FRAME] = {0};
@@ -599,6 +598,7 @@ double EcllipesToAltitude(double lon, double lat, double ecllipseHigh)
 	return h1;
 }
 
+//根据海拔高度，计算空气密度
 OS_U8 uav_density(float alt, float *ru)
 {
 	float	H,T, PP, RR;

@@ -1,7 +1,7 @@
 /*
  * FlightSupport.c
  *
- *  Created on: 2022Äê3ÔÂ23ÈÕ
+ *  Created on: 2022??3??23??
  *      Author: Lenovo
  */
 #include "FlightSupport.h"
@@ -25,10 +25,13 @@
 #include "interface_timer.h"
 #include "fuse.h"
 #include "StateMachine.h"
+#include "./core/BusInteract.h"
+#include <stdio.h>
+#include <string.h>
 
 
 //#include "flight_data.h"
-Point safePoints[20];	// ¼ÓÔØÈÎÎñºó£¬µÃµ½µÄ°²È«ÇøÓòÎ§À¸ÖĞµÄ¸÷¸öµã¡£
+Point safePoints[20];	// ????????????????????????????????
 int airHighArray[1000] = {0};
 int safePointCount;
 
@@ -39,23 +42,23 @@ extern int		g_time_tick;
 
 #define d2r		(57.29577951308402)
 /***********************************************************
- * º¯ÊıÃû³Æ:FlightSeqOutputHandle()
- * º¯Êı¹¦ÄÜ:¸ù¾İ·É¿ØÔËËãµÄÊ±Ğò½á¹û£¬´¥·¢Ê±Ğò¿ª¹Ø
+ * ????????:FlightSeqOutputHandle()
+ * ????????:??????????????????????????
   ***********************************************************/
-static void FlightSeqOutputHandle()	//02 Èç¹ûÊÕµ½É¡½µÃüÁî£¬¹Ø·¢¶¯»ú¡¢¿ªÉ¡¡¢¿Ø¶æ»ú½Ç¶È¡¢ÆøÄÒ¡¢¶æ»ú¶Ïµç¡¢¸îÉ¡¡¢·¢¶¯»ú¶Ïµç
+static void FlightSeqOutputHandle()	//02 ????????????????????????????????????????????????????????????????
 {
 	if(flightSeq.umOpen == 1)
 	{
-		// // ¼ÓÒ»¸ö¶ÔÒıĞÅµÄ¿ØÖÆ
-		// FuseSend(0x7A);	// È¡Ïûµç¼¤»î
-		//ÊÕµ½É¡½µÃüÁî
+		// // ???????????????
+		// FuseSend(0x7A);	// ????????
+		//???????????
 		// struct EngineStatus engineStatus = {0};
 		OS_U8 cntState;
 		static int waitOneSec = 0;
-		//Á¢¿Ì¹Ø±Õ·¢¶¯»ú£¬³ÖĞø·¢ËÍ·¢¶¯»ú×ªËÙµ½µ¡ËÙÖ¸Áî£¬¼°·¢¶¯»úÍ£»úÖ¸Áî
+		//???????????????????????????????????????????????????
 		if(waitOneSec >= 0 && waitOneSec <10000)
 		{
-			//20msºó¹Ø±Õ·¢¶¯»ú
+			//20ms?????????
             if(waitOneSec % 4 == 0)
             {
 				// modECU_GetEngineStatus(&engineStatus);
@@ -67,52 +70,52 @@ static void FlightSeqOutputHandle()	//02 Èç¹ûÊÕµ½É¡½µÃüÁî£¬¹Ø·¢¶¯»ú¡¢¿ªÉ¡¡¢¿Ø¶æ»
 				}
             }
 		}
-		//200msÃëºó¿ªÉ¡
+		//200ms?????
 		if(waitOneSec == 40)
 		{
-			// TrigerSeqWithWidth(TEST_1 + 1, 100);//¿ªÉ¡²Ù×÷
-			AngleServo_SetAngle(SERVO_PWM7, 50.0f);//¿ªÉ¡¶æ»ú7 ¿ØÖÆ7ºÅ¶æ»úÖÁ50¡ã£¨´Ë´¦½Ç¶È¸ù¾İĞèÒªĞŞ¸Ä£©
+			// TrigerSeqWithWidth(TEST_1 + 1, 100);//????????
+			AngleServo_SetAngle(SERVO_PWM7, 50.0f);//???????7 ????7??????50??????????????????
 		}
 		
-		if(waitOneSec == 200)//1ÃëÊ±±£³Ö¶æ»ú»Ø0
+		if(waitOneSec == 200)//1???????????0
 		{			
-			ServoCtlOnce_6Rudder(0, 0, 0, 0, 0, 0);	//¶æ»ú
+			ServoCtlOnce_6Rudder(0, 0, 0, 0, 0, 0);	//???
 		}
-		if(waitOneSec == 3000)//15ÃëÊ±¿ªÆøÄÒÇ°
+		if(waitOneSec == 3000)//15??????????
 		{
-			// TrigerSeqWithWidth(TEST_1 + 2, 100);//Ç°ÆøÄÒ²Ù×÷
+			// TrigerSeqWithWidth(TEST_1 + 2, 100);//????????
 		}
-		if(waitOneSec == 3080)//15.4ÃëÊ±¿ªÆøÄÒºó
+		if(waitOneSec == 3080)//15.4??????????
 		{
-			// TrigerSeqWithWidth(TEST_1 + 3, 100);//ºóÆøÄÒ²Ù×÷
+			// TrigerSeqWithWidth(TEST_1 + 3, 100);//?????????
 		}
-		if(waitOneSec == 4000)//20Ãë¶æ»úÏÂµç
+		if(waitOneSec == 4000)//20???????
 		{
-			//¶ÏËÅ·şµç
+			//???????
 			PowerOff(DEVICE_SRV_PWR28V);
 		}
 		static OS_U8 yijinggesan = 0;
 		if(waitOneSec > 4000 && yijinggesan == 0)
 		{
-			//¿ªÊ¼ÅĞ¶Ï¸îÉ¡
+			//??????????
 			OS_S16 navVs;
 			GetDataFast(pDataPoolImu, "navVs", 	&navVs);
-			float fvs = navVs * 0.01;	// µÃµ½Êµ¼Êµ¼º½ÌìËÙ
+			float fvs = navVs * 0.01;	// ?????????????
             if(g_DeviceState.imuCountDown != 0)
             {
-				// ±íÊ¾ ÓëIMUÍ¨ĞÅÕı³£
+				// ??? ??IMU???????
                 if(fabs(fvs) < 1.0)
                 {
-					// ËÙ¶ÈºÜÂıÁË£¬ËµÃ÷½µÂäÉ¡Æğ×÷ÓÃÁË
-                    TrigerSeqWithWidth(TEST_1 + 0, 100);//¸îÉ¡²Ù×÷
+					// ??????????????????????????
+                    TrigerSeqWithWidth(TEST_1 + 0, 100);//????????
                     yijinggesan = 1;
                 }
             }
             else
             {
-				// ±íÊ¾ ÓëIMUÍ¨ĞÅ²»ÉÏ
+				// ??? ??IMU??????
                 OS_S16 airHigh;
-                GetDataFast(pDataPoolSelf, "AirHigh", &airHigh);//ÆøÑ¹¸ß¶È
+                GetDataFast(pDataPoolSelf, "AirHigh", &airHigh);//??????
                 memmove(&airHighArray[1], &airHighArray[0], sizeof(int) * 999);
                 airHighArray[0] = airHigh;
                 OS_U8 airStable = 1;
@@ -120,14 +123,14 @@ static void FlightSeqOutputHandle()	//02 Èç¹ûÊÕµ½É¡½µÃüÁî£¬¹Ø·¢¶¯»ú¡¢¿ªÉ¡¡¢¿Ø¶æ»
                 {
                     if(fabs(airHigh - airHighArray[i]) > 5)
                     {
-						// ±íÊ¾ ¸ß¶ÈÏÂ½µ»òÉÏÉıºÜ¿ì£¬ËµÃ÷½µÂäÉ¡»¹Ã»½«·É»úËÙ¶ÈÀ­ÏÂÀ´
+						// ??? ?????????????????????????????????????????
                         airStable = 0;
                         break;
                     }                        
                 }
                 if(airStable == 1)
                 {
-                    TrigerSeqWithWidth(TEST_1 + 0, 100);//¸îÉ¡²Ù×÷
+                    TrigerSeqWithWidth(TEST_1 + 0, 100);//????????
                     yijinggesan = 1;
                 }
             }
@@ -140,137 +143,144 @@ static void FlightSeqOutputHandle()	//02 Èç¹ûÊÕµ½É¡½µÃüÁî£¬¹Ø·¢¶¯»ú¡¢¿ªÉ¡¡¢¿Ø¶æ»
 		GetDataFast(pDataPoolSelf,  "ecuTemp", 	&ecuTemp);
 		if(ecuTemp * 0.1 < 65)
 		{
-				//¶Ï·¢¶¯»ú24v¹©µç
-				// PowerOff(DEVICE_BATT_ENGINE);	//MML ·¢¶¯»ú
+				//???????24v????
+				// PowerOff(DEVICE_BATT_ENGINE);	//MML ??????
 		}
 	}
 }
 
 /***********************************************************
- * 014´úÂë
- * º¯ÊıÃû³Æ:FlightTMOutputHandle()
- * º¯Êı¹¦ÄÜ:·ÖÎö·É¿ØÔËËãºóµÄÊä³öÊı¾İ£¬´æÊı¾İ³Ø
+ * 014????
+ * ????????:FlightTMOutputHandle()
+ * ????????:????????????????????????????
   ***********************************************************/
-void FlightTMOutputHandle()	//02 ¿ØÖÆÊä³ö¡ª¡ª>´æÈëÊı¾İ³Ø
+void FlightTMOutputHandle()	//02 ???????????>?????????
 {
-	SETDATA(pDataPoolFly,	"pitchCmd",	g_CtrltoDL_tel.rudderPitchCmd * 100,	OS_S16);	//Æğ¿Ø±êÖ¾
-	SETDATA(pDataPoolFly,	"rollCmd",	g_CtrltoDL_tel.rudderRollCmd* 100,	OS_S16);	//ÖÆµ¼¼¶Êı
-	SETDATA(pDataPoolFly,	"yawCmd",	g_CtrltoDL_tel.rudderYawCmd* 100,		OS_S16);	//¿ØÖÆ¼¶Êı
+	SETDATA(pDataPoolFly,	"pitchCmd",	g_CtrltoDL_tel.rudderPitchCmd * 100,	OS_S16);	//?????
+	SETDATA(pDataPoolFly,	"rollCmd",	g_CtrltoDL_tel.rudderRollCmd* 100,	OS_S16);	//???????
+	SETDATA(pDataPoolFly,	"yawCmd",	g_CtrltoDL_tel.rudderYawCmd* 100,		OS_S16);	//???????
 
-	SETDATA(pDataPoolFly,	"deltaR",	g_CtrltoDL_tel.deltaR,		OS_DOUBLE);	//µ¯Ä¿¾àÀë
-	SETDATA(pDataPoolFly,	"dRn",	g_CtrltoDL_tel.dRn,		OS_S16);	//¿ØÖÆ¼¶Êı
-	SETDATA(pDataPoolFly,	"dRu",	g_CtrltoDL_tel.dRu,		OS_S16);	//¿ØÖÆ¼¶Êı
-	SETDATA(pDataPoolFly,	"dRe",	g_CtrltoDL_tel.dRe,		OS_S16);	//¿ØÖÆ¼¶Êı
+	SETDATA(pDataPoolFly,	"deltaR",	(OS_FLOAT)g_CtrltoDL_tel.deltaR,	OS_FLOAT);	//???????
+	SETDATA(pDataPoolFly,	"dRn",	g_CtrltoDL_tel.dRn,		OS_S16);	//???????
+	SETDATA(pDataPoolFly,	"dRu",	g_CtrltoDL_tel.dRu,		OS_S16);	//???????
+	SETDATA(pDataPoolFly,	"dRe",	g_CtrltoDL_tel.dRe,		OS_S16);	//???????
 
-	SETDATA(pDataPoolFly,	"PitchPre",	g_CtrltoDL_tel.Pitch_Preset_Angle * 100,		OS_S16);	//¿ØÖÆ¼¶Êı
-	SETDATA(pDataPoolFly,	"YawPre",	g_CtrltoDL_tel.Yaw_Preset_Angle * 100,		OS_S16);	//¿ØÖÆ¼¶Êı
+	SETDATA(pDataPoolFly,	"PitchPre",	g_CtrltoDL_tel.Pitch_Preset_Angle * 100,		OS_S16);	//???????
+	SETDATA(pDataPoolFly,	"YawPre",	g_CtrltoDL_tel.Yaw_Preset_Angle * 100,		OS_S16);	//???????
 
-	SETDATA(pDataPoolFly,	"fPitchSp",	g_CtrltoDL_tel.pitch_rate_nT_filterOut * 500,		OS_S16);	//¿ØÖÆ¼¶Êı
-	SETDATA(pDataPoolFly,	"fYawSp",	g_CtrltoDL_tel.yaw_rate_nT_filterOut * 500,		OS_S16);	//¿ØÖÆ¼¶Êı
+	//???????
+	//???????
 
-	SETDATA(pDataPoolMsn,	"WP_cur",	g_CtrltoDL_tel.curPtNo,	OS_U8);//º½µãºÅ
+	SETDATA(pDataPoolMsn,	"WP_cur",	g_CtrltoDL_tel.curPtNo,	OS_U8);//?????
 
-	SETDATA(pDataPoolMsn,	"tarLon",	g_CtrltoDL_tel.curTargetLon * 1e7, OS_S32 );//Ä¿±êº½µã¾­¶È
-	SETDATA(pDataPoolMsn,	"tarLat",	g_CtrltoDL_tel.curTargetLat * 1e7, OS_S32 );//Ä¿±êº½µãÎ³¶È
-	SETDATA(pDataPoolMsn,	"tarAlt",	g_CtrltoDL_tel.curTargetAlt * 1, OS_S16 );//Ä¿±êº½µã¸ß¶È
+	SETDATA(pDataPoolMsn,	"tarLon",	g_CtrltoDL_tel.curTargetLon * 1e7, OS_S32 );//???????
+	SETDATA(pDataPoolMsn,	"tarLat",	g_CtrltoDL_tel.curTargetLat * 1e7, OS_S32 );//?????????
+	SETDATA(pDataPoolMsn,	"tarAlt",	g_CtrltoDL_tel.curTargetAlt * 1, OS_S16 );//???????
+
+	// if (g_DeviceState.CurrTick % 100 == 0)
+	// {
+	// 	char tmMsg[128];
+	// 	sprintf(tmMsg, "FlightTM: curPtNo=%d, curTargetLon=%.7f, curTargetLat=%.7f\n",g_CtrltoDL_tel.curPtNo,g_CtrltoDL_tel.curTargetLon,g_CtrltoDL_tel.curTargetLat);
+	// 	PrintDebug(tmMsg);
+	// }
 
 	SETDATA(pDataPoolFly,	"adrc_Mx",	g_CtrltoDL_tel.mx_ESO * 10, OS_S16 );//adrc
-	SETDATA(pDataPoolFly,	"gamaCmd",	g_CtrltoDL_tel.gamaCmd * 1e2, OS_S16 );//¹ö×ª½ÇÖ¸Áî
-	SETDATA(pDataPoolFly,	"thetaCmd",	g_CtrltoDL_tel.varthetaCmd * 1e2, OS_S16 );//¸©Ñö½ÇÖ¸Áî
-	SETDATA(pDataPoolFly,	"nycCmd",	g_CtrltoDL_tel.nycCmd * 1e3, OS_S16 );//¹ıÔØÖ¸Áî
-	SETDATA(pDataPoolFly,	"highCmd",	g_CtrltoDL_tel.heightCmd , OS_FLOAT );///¸ß¶ÈÖ¸Áî
-	SETDATA(pDataPoolFly,	"ac_dL",	g_CtrltoDL_tel.ac_dL * 10, OS_S32 );//´ı·É¾à
-	SETDATA(pDataPoolFly,	"ac_dZ",	g_CtrltoDL_tel.ac_dZ * 10, OS_S16 );//²à±ß¾à
-	SETDATA(pDataPoolFly,	"tokenlon",	g_CtrltoDL_tel.token_long * 1, OS_U8 );//×İÏòÁîÅÆ
-	SETDATA(pDataPoolFly,	"tokenlat",	g_CtrltoDL_tel.token_late * 1, OS_U8 );//²àÏòÁîÅÆ
-	SETDATA(pDataPoolFly,	"ac_dPsi",	g_CtrltoDL_tel.ac_dPsi * 100, OS_S16 );//º½Ïò½ÇÆ«²î
+	SETDATA(pDataPoolFly,	"gamaCmd",	g_CtrltoDL_tel.gamaCmd * 1e2, OS_S16 );//????????
+	SETDATA(pDataPoolFly,	"thetaCmd",	g_CtrltoDL_tel.varthetaCmd * 1e2, OS_S16 );//?????????
+	SETDATA(pDataPoolFly,	"nycCmd",	g_CtrltoDL_tel.nycCmd * 1e3, OS_S16 );//???????
+	SETDATA(pDataPoolFly,	"highCmd",	g_CtrltoDL_tel.heightCmd , OS_FLOAT );///??????
+	SETDATA(pDataPoolFly,	"ac_dL",	g_CtrltoDL_tel.ac_dL * 10, OS_S32 );//?????
+	SETDATA(pDataPoolFly,	"ac_dZ",	g_CtrltoDL_tel.ac_dZ * 10, OS_S16 );//????
+	SETDATA(pDataPoolFly,	"tokenlon",	g_CtrltoDL_tel.token_long * 1, OS_U8 );//????????
+	SETDATA(pDataPoolFly,	"tokenlat",	g_CtrltoDL_tel.token_late * 1, OS_U8 );//????????
+	SETDATA(pDataPoolFly,	"ac_dPsi",	g_CtrltoDL_tel.ac_dPsi * 100, OS_S16 );//????????
 
-	SETDATA(pDataPoolFly,	"ac_dR",	g_CtrltoDL_tel.ac_dR * 10, OS_S16 );//Ô²¹ì¼£²à±ß¾à
-	SETDATA(pDataPoolFly,	"thetav",	g_CtrltoDL_tel.cur_thetav * 10, OS_S16 );//¹ì¼£Çã½Ç
-	SETDATA(pDataPoolFly,	"Vcmd",	g_CtrltoDL_tel.Vcmd * 10, OS_S16 );//ËÙ¶ÈÖ¸Áî
+	SETDATA(pDataPoolFly,	"ac_dR",	g_CtrltoDL_tel.ac_dR * 10, OS_S16 );//???????
+	SETDATA(pDataPoolFly,	"thetav",	g_CtrltoDL_tel.cur_thetav * 10, OS_S16 );//?????
+	SETDATA(pDataPoolFly,	"Vcmd",	g_CtrltoDL_tel.Vcmd * 10, OS_S16 );//??????
 
-	SETDATA(pDataPoolFly,	"nyCmd",	g_CtrltoDL_tel.nyCmd_Guidance * 100 , OS_S16 );//ËÙ¶ÈÖ¸Áî
-	SETDATA(pDataPoolFly,	"nzCmd",	g_CtrltoDL_tel.nzCmd_Guidance * 100, OS_S16 );//ËÙ¶ÈÖ¸Áî
+	SETDATA(pDataPoolFly,	"nyCmd",	g_CtrltoDL_tel.nyCmd_Guidance * 100 , OS_S16 );//??????
+	SETDATA(pDataPoolFly,	"nzCmd",	g_CtrltoDL_tel.nzCmd_Guidance * 100, OS_S16 );//??????
 
-	SETDATA(pDataPoolFly,	"DbsLen",	g_CtrltoDL_tel.Dubins_length , OS_FLOAT );//ËÙ¶ÈÖ¸Áî
-	SETDATA(pDataPoolFly,	"ADRC",	    g_CtrltoDL_tel.fduox_ADRC * 100, OS_S16 );//ËÙ¶ÈÖ¸Áî
-	//ÔİÊ±½èÓÃµ¼º½°æÊı¾İ		
-	SETDATA(pDataPoolNav, "navWx3", g_CtrltoDL_tel.alpha_ins,	OS_FLOAT);//¹ß²â¹¥½Ç
-	SETDATA(pDataPoolNav, "navWy3", g_CtrltoDL_tel.beta_ins,	OS_FLOAT);//¹ß²â²à»¬½Ç
+	SETDATA(pDataPoolFly,	"DbsLen",	g_CtrltoDL_tel.Dubins_length , OS_FLOAT );//??????
+	SETDATA(pDataPoolFly,	"ADRC",	    g_CtrltoDL_tel.fduox_ADRC * 100, OS_S16 );//??????
+	//????????????????		
+	SETDATA(pDataPoolNav, "navWx3", g_CtrltoDL_tel.alpha_ins,	OS_FLOAT);//?????
+	SETDATA(pDataPoolNav, "navWy3", g_CtrltoDL_tel.beta_ins,	OS_FLOAT);//??????
 
-	SETDATA(pDataPoolNav, "navWz3", g_CtrltoDL_tel.MaxRpm,	OS_FLOAT);//×î´ó×ªËÙ
-	SETDATA(pDataPoolNav, "navAx3", g_CtrltoDL_tel.DFT_freq_max,	OS_FLOAT);//±æÊ¶ÔË¶¯ÆµÂÊ
+	SETDATA(pDataPoolNav, "navWz3", g_CtrltoDL_tel.MaxRpm,	OS_FLOAT);//??????
+	SETDATA(pDataPoolNav, "navAx3", g_CtrltoDL_tel.DFT_freq_max,	OS_FLOAT);//?????????
     
 	if(g_controller_to_switch.flag_missle_takeoff == 1)
 	{
-			SETDATA(pDataPoolSelf,	"RecvLunc",	0xEE , OS_U8 );//ËÙ¶ÈÖ¸Áî
+			SETDATA(pDataPoolSelf,	"RecvLunc",	0xEE , OS_U8 );//??????
 	}
 
 }
 /***********************************************************
- * 280´úÂë
- * º¯ÊıÃû³Æ:FlightTMOutputHandle()
- * º¯Êı¹¦ÄÜ:·ÖÎö·É¿ØÔËËãºóµÄÊä³öÊı¾İ£¬´æÊı¾İ³Ø
+ * 280????
+ * ????????:FlightTMOutputHandle()
+ * ????????:????????????????????????????
   ***********************************************************/
-//void FlightTMOutputHandle()	//02 ¿ØÖÆÊä³ö¡ª¡ª>´æÈëÊı¾İ³Ø
+//void FlightTMOutputHandle()	//02 ???????????>?????????
 //{
-//	SETDATA(pDataPoolFly,	"pitchCmd",	pOutput->rudderPitchCmd * 100,	OS_S16);	//Æğ¿Ø±êÖ¾
-//	SETDATA(pDataPoolFly,	"rollCmd",	pOutput->rudderRollCmd* 100,	OS_S16);	//ÖÆµ¼¼¶Êı
-//	SETDATA(pDataPoolFly,	"yawCmd",	pOutput->rudderYawCmd* 100,		OS_S16);	//¿ØÖÆ¼¶Êı
+//	SETDATA(pDataPoolFly,	"pitchCmd",	pOutput->rudderPitchCmd * 100,	OS_S16);	//?????
+//	SETDATA(pDataPoolFly,	"rollCmd",	pOutput->rudderRollCmd* 100,	OS_S16);	//???????
+//	SETDATA(pDataPoolFly,	"yawCmd",	pOutput->rudderYawCmd* 100,		OS_S16);	//???????
 //    
-//	SETDATA(pDataPoolFly,	"dRn",	pOutput->dRn,		OS_S16);	//¿ØÖÆ¼¶Êı
-//	SETDATA(pDataPoolFly,	"dRu",	pOutput->dRu,		OS_S16);	//¿ØÖÆ¼¶Êı
-//	SETDATA(pDataPoolFly,	"dRe",	pOutput->dRe,		OS_S16);	//¿ØÖÆ¼¶Êı
+//	SETDATA(pDataPoolFly,	"dRn",	pOutput->dRn,		OS_S16);	//???????
+//	SETDATA(pDataPoolFly,	"dRu",	pOutput->dRu,		OS_S16);	//???????
+//	SETDATA(pDataPoolFly,	"dRe",	pOutput->dRe,		OS_S16);	//???????
 //	
-//	SETDATA(pDataPoolFly,	"PitchPre",	pOutput->Pitch_Preset_Angle * 100,		OS_S16);	//¿ØÖÆ¼¶Êı
-//	SETDATA(pDataPoolFly,	"YawPre",	pOutput->Yaw_Preset_Angle * 100,		OS_S16);	//¿ØÖÆ¼¶Êı
+//	SETDATA(pDataPoolFly,	"PitchPre",	pOutput->Pitch_Preset_Angle * 100,		OS_S16);	//???????
+//	SETDATA(pDataPoolFly,	"YawPre",	pOutput->Yaw_Preset_Angle * 100,		OS_S16);	//???????
 //    
-//	SETDATA(pDataPoolFly,	"fPitchSp",	pOutput->pitch_rate_nT_filterOut * 500,		OS_S16);	//¿ØÖÆ¼¶Êı
-//	SETDATA(pDataPoolFly,	"fYawSp",	pOutput->yaw_rate_nT_filterOut * 500,		OS_S16);	//¿ØÖÆ¼¶Êı
+//	SETDATA(pDataPoolFly,	"fPitchSp",	pOutput->pitch_rate_nT_filterOut * 500,		OS_S16);	//???????
+//	SETDATA(pDataPoolFly,	"fYawSp",	pOutput->yaw_rate_nT_filterOut * 500,		OS_S16);	//???????
 // 
-//	SETDATA(pDataPoolMsn,	"WP_cur",	pOutput->curPtNo,	OS_U8);//º½µãºÅ
+//	SETDATA(pDataPoolMsn,	"WP_cur",	pOutput->curPtNo,	OS_U8);//?????
 
-//	SETDATA(pDataPoolMsn,	"tarLon",	pOutput->curTargetLon * 1e7, OS_S32 );//Ä¿±êº½µã¾­¶È
-//	SETDATA(pDataPoolMsn,	"tarLat",	pOutput->curTargetLat * 1e7, OS_S32 );//Ä¿±êº½µãÎ³¶È
-//	SETDATA(pDataPoolMsn,	"tarAlt",	pOutput->curTargetAlt * 1, OS_S16 );//Ä¿±êº½µã¸ß¶È
+//	SETDATA(pDataPoolMsn,	"tarLon",	pOutput->curTargetLon * 1e7, OS_S32 );//???????
+//	SETDATA(pDataPoolMsn,	"tarLat",	pOutput->curTargetLat * 1e7, OS_S32 );//?????????
+//	SETDATA(pDataPoolMsn,	"tarAlt",	pOutput->curTargetAlt * 1, OS_S16 );//???????
 
 //  SETDATA(pDataPoolFly,	"adrc_Mx",	pOutput->mx_ESO * 10, OS_S16 );//adrc
-//	SETDATA(pDataPoolFly,	"gamaCmd",	pOutput->gamaCmd * 1e2, OS_S16 );//¹ö×ª½ÇÖ¸Áî
-//	SETDATA(pDataPoolFly,	"thetaCmd",	pOutput->varthetaCmd * 1e2, OS_S16 );//¸©Ñö½ÇÖ¸Áî
-//	SETDATA(pDataPoolFly,	"nycCmd",	pOutput->nycCmd * 1e3, OS_S16 );//¹ıÔØÖ¸Áî
-//	SETDATA(pDataPoolFly,	"highCmd",	pOutput->heightCmd , OS_FLOAT );///¸ß¶ÈÖ¸Áî
-//	SETDATA(pDataPoolFly,	"ac_dL",	pOutput->ac_dL * 10, OS_S32 );//´ı·É¾à
-//	SETDATA(pDataPoolFly,	"ac_dZ",	pOutput->ac_dZ * 10, OS_S16 );//²à±ß¾à
-//	SETDATA(pDataPoolFly,	"tokenlon",	pOutput->token_long * 1, OS_U8 );//×İÏòÁîÅÆ
-//	SETDATA(pDataPoolFly,	"tokenlat",	pOutput->token_late * 1, OS_U8 );//²àÏòÁîÅÆ
-//	SETDATA(pDataPoolFly,	"ac_dPsi",	pOutput->ac_dPsi * 100, OS_S16 );//º½Ïò½ÇÆ«²î
+//	SETDATA(pDataPoolFly,	"gamaCmd",	pOutput->gamaCmd * 1e2, OS_S16 );//????????
+//	SETDATA(pDataPoolFly,	"thetaCmd",	pOutput->varthetaCmd * 1e2, OS_S16 );//?????????
+//	SETDATA(pDataPoolFly,	"nycCmd",	pOutput->nycCmd * 1e3, OS_S16 );//???????
+//	SETDATA(pDataPoolFly,	"highCmd",	pOutput->heightCmd , OS_FLOAT );///??????
+//	SETDATA(pDataPoolFly,	"ac_dL",	pOutput->ac_dL * 10, OS_S32 );//?????
+//	SETDATA(pDataPoolFly,	"ac_dZ",	pOutput->ac_dZ * 10, OS_S16 );//????
+//	SETDATA(pDataPoolFly,	"tokenlon",	pOutput->token_long * 1, OS_U8 );//????????
+//	SETDATA(pDataPoolFly,	"tokenlat",	pOutput->token_late * 1, OS_U8 );//????????
+//	SETDATA(pDataPoolFly,	"ac_dPsi",	pOutput->ac_dPsi * 100, OS_S16 );//????????
 //	
-//	SETDATA(pDataPoolFly,	"ac_dR",	pOutput->ac_dR * 10, OS_S16 );//Ô²¹ì¼£²à±ß¾à
-//	SETDATA(pDataPoolFly,	"thetav",	pOutput->cur_thetav * 10, OS_S16 );//¹ì¼£Çã½Ç
-//	SETDATA(pDataPoolFly,	"Vcmd",	pOutput->Vcmd * 10, OS_S16 );//ËÙ¶ÈÖ¸Áî
+//	SETDATA(pDataPoolFly,	"ac_dR",	pOutput->ac_dR * 10, OS_S16 );//???????
+//	SETDATA(pDataPoolFly,	"thetav",	pOutput->cur_thetav * 10, OS_S16 );//?????
+//	SETDATA(pDataPoolFly,	"Vcmd",	pOutput->Vcmd * 10, OS_S16 );//??????
 //    
-//	SETDATA(pDataPoolFly,	"nyCmd",	pOutput->nyCmd_Guidance * 100 , OS_S16 );//ËÙ¶ÈÖ¸Áî
-//	SETDATA(pDataPoolFly,	"nzCmd",	pOutput->nzCmd_Guidance * 100, OS_S16 );//ËÙ¶ÈÖ¸Áî
+//	SETDATA(pDataPoolFly,	"nyCmd",	pOutput->nyCmd_Guidance * 100 , OS_S16 );//??????
+//	SETDATA(pDataPoolFly,	"nzCmd",	pOutput->nzCmd_Guidance * 100, OS_S16 );//??????
 
-//	SETDATA(pDataPoolFly,	"DbsLen",	pOutput->Dubins_length , OS_FLOAT );//ËÙ¶ÈÖ¸Áî
-//	SETDATA(pDataPoolFly,	"ADRC",	    pOutput->fduox_ADRC * 100, OS_S16 );//ËÙ¶ÈÖ¸Áî
-//	//ÔİÊ±½èÓÃµ¼º½°æÊı¾İ		
-//  SETDATA(pDataPoolNav, "navWx2", pOutput->arp_ins,	OS_FLOAT);//¹ß²â¹¥½Ç
-//	SETDATA(pDataPoolNav, "navWy2", pOutput->beta_ins,	OS_FLOAT);//¹ß²â²à»¬½Ç
+//	SETDATA(pDataPoolFly,	"DbsLen",	pOutput->Dubins_length , OS_FLOAT );//??????
+//	SETDATA(pDataPoolFly,	"ADRC",	    pOutput->fduox_ADRC * 100, OS_S16 );//??????
+//	//????????????????		
+//  SETDATA(pDataPoolNav, "navWx2", pOutput->arp_ins,	OS_FLOAT);//?????
+//	SETDATA(pDataPoolNav, "navWy2", pOutput->beta_ins,	OS_FLOAT);//??????
 //	
-//	SETDATA(pDataPoolNav, "navWz2", pOutput->MaxRpm,	OS_FLOAT);//×î´ó×ªËÙ
-//	SETDATA(pDataPoolNav, "navAx2", pOutput->DFT_freq_max,	OS_FLOAT);//±æÊ¶ÔË¶¯ÆµÂÊ
+//	SETDATA(pDataPoolNav, "navWz2", pOutput->MaxRpm,	OS_FLOAT);//??????
+//	SETDATA(pDataPoolNav, "navAx2", pOutput->DFT_freq_max,	OS_FLOAT);//?????????
 //    
 //	if(pOutput->on_takeoff == 1)
 //	{
-//			SETDATA(pDataPoolSelf,	"RecvLunc",	0xEE , OS_U8 );//ËÙ¶ÈÖ¸Áî
+//			SETDATA(pDataPoolSelf,	"RecvLunc",	0xEE , OS_U8 );//??????
 //	}
 //}
 
-void FlightSrvOutputHandle()	//02 ¿ØÖÆÊä³ö½Ç¶È¡ª¡ª>²Ù×÷¶æ»ú
+void FlightSrvOutputHandle()	//02 ?????????????>???????
 {
-	if((DOM_AUTOMATIC & g_DeviceState.workStage) && flightSeq.luanched == 1)
-	{
+	//if((DOM_AUTOMATIC & g_DeviceState.workStage) && flightSeq.luanched == 1)
+	//{
 		ServoCtlOnce_6Rudder(	g_controller_to_actuator.control_voltage_I	,
 								g_controller_to_actuator.control_voltage_II	,
 								g_controller_to_actuator.control_voltage_III,
@@ -278,165 +288,175 @@ void FlightSrvOutputHandle()	//02 ¿ØÖÆÊä³ö½Ç¶È¡ª¡ª>²Ù×÷¶æ»ú
 								g_controller_to_actuator.control_voltage_V	,
 								g_controller_to_actuator.control_voltage_VI
 								);
-	}
+	//}
 }
-OS_U8 OutSafeArea = 0;	// 0°²È«ÇøÀï	1³ö°²È«Çø£¬ÇÒµÈÁËÒ»»á¶ùÈ·¶¨³öÁË°²È«Çø
-void FlightEngineOutputHandle()//02 ÔÚ¸÷ÖÖÇé¿öÏÂ£¨ÊÇ·ñÆğ·É£¿ÊÇ·ñ³ö°²È«Çø£¿£©¿ØÖÆÊä³öÓÍÃÅ¿ª¶È¡ª¡ª>²Ù×÷ÓÍÃÅ¿ª¶ÈÈ«¾Ö±äÁ¿
+OS_U8 OutSafeArea = 0;	// 0???????	1?????????????????????????????
+void FlightEngineOutputHandle()//02 ????????????????????????????????????????????????>?????????????????
 {
-	if(flightSeq.luanched == 1 && ((g_DeviceState.workStage & DOM_AUTOMATIC) == DOM_AUTOMATIC))
+	//if(flightSeq.luanched == 1 && ((g_DeviceState.workStage & DOM_AUTOMATIC) == DOM_AUTOMATIC))
+	if(flightSeq.luanched == 1)
 	{
+		//????????????????????
 		if(OutSafeArea)
 		{
-			//Àë¿ª°²È«Çø£¬½µµÍ·¢¶¯»ú×ªËÙ
+			//?????????????????????
 			// CurEngineRpm = 18000;
+			//?????????
+			//StopEngine();
+			//CurEngineRpm = 0;
+
+			//?????30%?????2s??????3s??????
 		}
+		//?????????????????????
 		else
 		{
-			//°²È«ÇøÄÚ£¬Õı³£·ÉĞĞ£¬Ìı¿ØÖÆµÄ
+			//?????????????????????????
 			CurEngineRpm = (OS_U32)(g_controller_to_engine.control_Kc * 10.0f);
-			// if(CurEngineRpm == 0)
-			// {
-			// 	int a = 0;
-			// }
-			
 		}
 	}
-    else if(flightSeq.luanched == 0 && ((g_DeviceState.workStage & DOM_AUTOMATIC) == DOM_AUTOMATIC))
+    //else if(flightSeq.luanched == 0 && ((g_DeviceState.workStage & DOM_AUTOMATIC) == DOM_AUTOMATIC))
+    else
     {
-		//´ËÊ±£¬ÂíÉÏ¾ÍÒª·ÉÁË£¬ÓÍÃÅÓ¦¸ÃºÜ´ó²Å¶Ô
-        CurEngineRpm = 800;	// TODO: ECU ÓÍÃÅÉèÖÃĞèÒªÔÙµ÷Õû£¬Ä¿Ç°ÊÇĞ´Èí¼şÊ±µÄÁÙÊ±ÉèÖÃ¡£ ÓÍÃÅÔİÇÒÉèÖÃ80.0%	//50500;
+		//????????????????????????????
+        CurEngineRpm = 300;//??30%????		//800;//??80%????	////TODO: ECU ???????????????????????????????????????? ????????????80.0%	//50500;
     }
-
+	//CurEngineRpm = 300;
 	SETDATA(pDataPoolFly, "EngineRp", CurEngineRpm,	OS_U16);
 }
 
 /***********************************************************
- * º¯ÊıÃû³Æ:FlightOutputHandle()
- * º¯Êı¹¦ÄÜ:µ÷ÓÃ·É¿ØÖ÷ÔËËãº¯Êıºó£¬´¦Àí·É¿ØÖ÷º¯ÊıÊä³ö£¬ÕâĞ©Êä³ö°üÀ¨:
- * 1.Ê±ĞòĞÅÏ¢£¬ÓÃÒÔ´¥·¢Ê±Ğò£¬°üÀ¨·ÖÀë¡¢»ğ¼ıµã»ğ¡¢¿ªÉ¡µÈĞèÇó
- * 2.Ò£²âĞÅÏ¢£¬ÓÃÒÔÏÂ´«µØÃæ
+ * ????????:FlightOutputHandle()
+ * ????????:?????????????????????????????????????????????:
+ * 1.????????????????????????????????????????
+ * 2.???????????????????
   ***********************************************************/
-void FlightOutputHandle()  //01 5msÔËĞĞÒ»´Î
+void FlightOutputHandle()  //01 5ms???????
 {
-	if(DOM_AUTOMATIC & g_DeviceState.workStage)
+	//????
+	if((DOM_AUTOMATIC & g_DeviceState.workStage) || (DOM_HILSMODE & g_DeviceState.workStage))
 	{		
-		FlightSrvOutputHandle();//·É¿ØÊä³ö¡ª¡ª>¿Ø¶æ»ú
-		FlightEngineOutputHandle();//·É¿ØÊä³ö¡ª¡ª>¿Ø·¢¶¯»ú
-		FlightTMOutputHandle();//´æ´¢·É¿ØÊä³ö
-		JudgeHomeward();//ÅĞ¶Ï°²È«Çø£¬ÅĞ¶ÏÊÇ·ñĞèÒªÉ¡½µ
+		FlightSrvOutputHandle();//??????????>????
+		FlightEngineOutputHandle();//??????????>???????
+		FlightTMOutputHandle();//??????????>???
+		JudgeHomeward();//????????????????????????
 	}
-	FlightSeqOutputHandle();//02 Èç¹ûÊÕµ½É¡½µÃüÁî£¬¹Ø·¢¶¯»ú¡¢¿ªÉ¡¡¢¿Ø¶æ»ú½Ç¶È¡¢ÆøÄÒ¡¢¶æ»ú¶Ïµç¡¢¸îÉ¡¡¢·¢¶¯»ú¶Ïµç
-	CalcXYZ();// ×ø±êÏµ×ª»»
+	FlightSeqOutputHandle();//02 ????????????????????????????????????????????????????????????????
+	CalcXYZ();// ????????
 }
 
 /***********************************************************
- * º¯ÊıÃû³Æ:FlightInputGenerate()
- * º¯Êı¹¦ÄÜ:µ÷ÓÃ·É¿ØÖ÷ÔËËãº¯ÊıÇ°£¬×¼±¸¸ø·É¿ØµÄÊäÈëÊı¾İ£¬Ö÷Òª°üÀ¨£º
- * 1.¹ß×éÊı¾İ
- * 2.GPSÊı¾İ
- * 3.Ê±¼ä(double,µ¥Î»Ãë,¾«È·µ½0.001)
- * µ±µ±Ç°ÎªÄ£·ÉÄ£Ê½Ê±£¬¹ß×é¡¢GPSÊı¾İ¾ùÀ´×ÔÓÚflash
+ * ????????:FlightInputGenerate()
+ * ????????:?????????????????????????????????????????????
+ * 1.????????
+ * 2.GPS????
+ * 3.???(double,??????,?????0.001)
+ * ??????????????????GPS???????????flash
   ***********************************************************/
-// double curAirSpd;	// MML Î´Ê¹ÓÃ£¬×¢ÊÍ
+// double curAirSpd;	// MML ?????????
 void FlightInputGenerate()
 {
-	// ÉèÖÃÊ±¼ä£¨Ö±½ÓĞŞ¸ÄÈ«¾Ö±äÁ¿£©
+	// ?????????????????????
     g_flight_time = g_DeviceState.currTime;
     g_time_tick   = g_DeviceState.CurrTick;
 
-		if((g_DeviceState.workStage & DOM_HILSMODE) == DOM_HILSMODE)
-		{
-			//°ëÊµÎï·ÂÕæÄ£Ê½
-			g_DeviceState.currTime = GetCurTime()-g_DeviceState.flightStartTime;
-			HilFlightStage();
-		}
-		else//ÕıÊ½·ÉĞĞÄ£Ê½
-		{
-			g_DeviceState.currTime = GetCurTime()-g_DeviceState.flightStartTime;        
-			float tempf;
-			OS_S32 temps32;
-			OS_S16 temps16;
-			OS_U16 tempu16; //10-19ĞŞ¸ÄOS_S16ÎªOS_U16
+	g_DeviceState.currTime = GetCurTime()-g_DeviceState.flightStartTime;
 
-			GetDataFast(pDataPoolImu, "imuWx",	&tempf); g_ins_data.wx = tempf;	// pDataPoolNav
-			GetDataFast(pDataPoolImu, "imuWy",	&tempf); g_ins_data.wy = tempf;
-			GetDataFast(pDataPoolImu, "imuWz", 	&tempf); g_ins_data.wz = tempf;
-			GetDataFast(pDataPoolImu, "imuAx", 	&tempf); g_ins_data.ax = tempf;
-			GetDataFast(pDataPoolImu, "imuAy", 	&tempf); g_ins_data.ay = tempf;
-			GetDataFast(pDataPoolImu, "imuAz", 	&tempf); g_ins_data.az = tempf;
+	//??????????
+	if((g_DeviceState.workStage & DOM_HILSMODE) == DOM_HILSMODE)
+	{
+		HilFlightStage();
+	}
+	//?????????
+	else
+	{   
+		float tempf;
+		OS_S32 temps32;
+		OS_S16 temps16;
+		OS_U16 tempu16; //10-19???OS_S16?OS_U16
 
-			GetDataFast(pDataPoolImu, "navPitch", 	&temps16);g_ins_data.zeta = temps16 * 0.01;
-			GetDataFast(pDataPoolImu, "navDir", 	&tempu16);g_ins_data.psi = tempu16 * 0.01;
-			GetDataFast(pDataPoolImu, "navRoll", 	&temps16);g_ins_data.gama = temps16 * 0.01;
+		GetDataFast(pDataPoolImu, "imuWx",	&tempf); g_ins_data.wx = tempf;	// pDataPoolNav
+		GetDataFast(pDataPoolImu, "imuWy",	&tempf); g_ins_data.wy = tempf;
+		GetDataFast(pDataPoolImu, "imuWz", 	&tempf); g_ins_data.wz = tempf;
+		GetDataFast(pDataPoolImu, "imuAx", 	&tempf); g_ins_data.ax = tempf;
+		GetDataFast(pDataPoolImu, "imuAy", 	&tempf); g_ins_data.ay = tempf;
+		GetDataFast(pDataPoolImu, "imuAz", 	&tempf); g_ins_data.az = tempf;
+		GetDataFast(pDataPoolImu, "navPitch", 	&temps16);g_ins_data.zeta = temps16 * 0.01;
+		GetDataFast(pDataPoolImu, "navDir", 	&tempu16);g_ins_data.psi = tempu16 * 0.01;
+		GetDataFast(pDataPoolImu, "navRoll", 	&temps16);g_ins_data.gama = temps16 * 0.01;
+		//???????????,???????0~360deg????-180~180deg
+		g_ins_data.psi = -g_ins_data.psi; 
+		if(g_ins_data.psi > 180)
+			g_ins_data.psi -= 360;
+		if(g_ins_data.psi < -180)
+			g_ins_data.psi += 360;
+		//????????
+		GetDataFast(pDataPoolImu, "navVn", &temps16);g_ins_data.vtx = temps16 * 0.01;
+		GetDataFast(pDataPoolImu, "navVs", &temps16);g_ins_data.vty = temps16 * 0.01;
+		GetDataFast(pDataPoolImu, "navVe", &temps16);g_ins_data.vtz = temps16 * 0.01;
+		GetDataFast(pDataPoolImu, "navLon", 	&temps32);	g_ins_data.longitude = temps32 * 1e-7;
+		GetDataFast(pDataPoolImu, "navLat", 	&temps32);	g_ins_data.latitude = temps32 * 1e-7;
+		GetDataFast(pDataPoolImu, "navHigh", 	&tempf);	g_ins_data.height = tempf;
+		//????????
+		GetDataFast(pDataPoolImu, "navState", &g_ins_data.GPS_status);
 
-			g_ins_data.psi = -g_ins_data.psi; //±±Æ«¶«×ª±±Æ«Î÷
-			if(g_ins_data.psi > 180)
-				g_ins_data.psi -= 360;
-			if(g_ins_data.psi < -180)
-				g_ins_data.psi += 360;
-				
-			GetDataFast(pDataPoolImu, "navVn", &temps16);g_ins_data.vtx = temps16 * 0.01;
-			GetDataFast(pDataPoolImu, "navVs", &temps16);g_ins_data.vty = temps16 * 0.01;
-			GetDataFast(pDataPoolImu, "navVe", &temps16);g_ins_data.vtz = temps16 * 0.01;
-			GetDataFast(pDataPoolImu, "navLon", 	&temps32);	g_ins_data.longitude = temps32 * 1e-7;
-			GetDataFast(pDataPoolImu, "navLat", 	&temps32);	g_ins_data.latitude = temps32 * 1e-7;
-			GetDataFast(pDataPoolImu, "navHigh", 	&tempf);	g_ins_data.height = tempf;
+		//????????????
+		GetDataFast(pDataPoolSelf, "ecuGetRp", &g_engine_data.rpm_engine);
+		GetDataFast(pDataPoolSelf, "ecuState", &g_engine_data.ECU_work_status);
 
-			GetDataFast(pDataPoolImu, "navState", &g_ins_data.GPS_status);
+		//?????????????????
+		//????????????????????g_baro_data?????????
 
+		//??????????????????
 
-			GetDataFast(pDataPoolSelf, "ecuGetRp", &g_engine_data.rpm_engine);
-			GetDataFast(pDataPoolSelf, "ecuState", &g_engine_data.ECU_work_status);
+		//???????
+		double V   = sqrt(pow(g_ins_data.vtx,2) + pow(g_ins_data.vty,2) + pow(g_ins_data.vtz,2));   // ???????
+		SETDATA(pDataPoolSelf, "GrdSpd", V * 10, OS_S16);
+		
+		// //?????????????????????????
+		// pInput->airSpd = V;
+		//	pInput->Luanched = flightSeq.luanched;	// 014?????
 
-			double V   = sqrt(pow(g_ins_data.vtx,2) + pow(g_ins_data.vty,2) + pow(g_ins_data.vtz,2));   // µØËÙ¼ÆËã
-			SETDATA(pDataPoolSelf, "GrdSpd", V * 10, OS_S16);//
-			// //¿ÕËÙ¾ÍÊÇµØËÙ£¬¸ßËÙ·É»úµÄ¿ÕËÙÃ»ÓÃ
-			// pInput->airSpd = V;
-					
-
-//			pInput->Luanched = flightSeq.luanched;	// 014²»Ê¹ÓÃ
-
-			// OS_S16 srv1,srv2;
-			// GetDataFast(pDataPoolSrv, "Sr1Read", &srv1);
-			// GetDataFast(pDataPoolSrv, "Sr2Read", &srv2);
-			// pInput->DD1 = srv1 * 0.01;	// 014²»Ê¹ÓÃ
-			// pInput->DD2 = srv2 * 0.01;
-			// if(g_DeviceState.srvCountDown == 0)
-			// {
-			// 		pInput->DD1 = pOutput->rudder1Cmd;	// 014²»Ê¹ÓÃ
-			// 		pInput->DD2 = pOutput->rudder2Cmd;
-			// }				
-			// pInput->DD5 = 0;	// 014²»Ê¹ÓÃ
-			// pInput->DD6 = 0;
-		}
-		// //ÉèÖÃÊÓÏß½ÇºÍËø¶¨×´Ì¬
-		// GetDataFast(pDataPoolFly,	"sctLock",	 &(pInput->scoutLocked));	// 014²»Ê¹ÓÃ
+		// OS_S16 srv1,srv2;
+		// GetDataFast(pDataPoolSrv, "Sr1Read", &srv1);
+		// GetDataFast(pDataPoolSrv, "Sr2Read", &srv2);
+		// pInput->DD1 = srv1 * 0.01;	// 014?????
+		// pInput->DD2 = srv2 * 0.01;
+		// if(g_DeviceState.srvCountDown == 0)
+		// {
+		// 		pInput->DD1 = pOutput->rudder1Cmd;	// 014?????
+		// 		pInput->DD2 = pOutput->rudder2Cmd;
+		// }				
+		// pInput->DD5 = 0;	// 014?????
+		// pInput->DD6 = 0;
+	}
+		// //????????????????
+		// GetDataFast(pDataPoolFly,	"sctLock",	 &(pInput->scoutLocked));	// 014?????
 		// OS_S16 tempss16;
 		// GetDataFast(pDataPoolFly,	"vPitchSp",	 &tempss16);
-		// pInput->scoutPitchSpd = (double)tempss16 * 0.002 / 57.3;	// 014²»Ê¹ÓÃ
+		// pInput->scoutPitchSpd = (double)tempss16 * 0.002 / 57.3;	// 014?????
 		// GetDataFast(pDataPoolFly,	"vYawSp",	 &tempss16);
-		// pInput->scoutYawSpd = (double)tempss16 * 0.002 / 57.3;		// 014²»Ê¹ÓÃ
+		// pInput->scoutYawSpd = (double)tempss16 * 0.002 / 57.3;		// 014?????
 		// OS_U16 fuel_n;
 		// GetDataFast(pDataPoolSelf,	"fuelRate",	 &fuel_n);
-		// pInput->mass_fuel = (double)fuel_n;	// 014²»Ê¹ÓÃ
+		// pInput->mass_fuel = (double)fuel_n;	// 014?????
 }
 #define d2r		(57.29577951308402)
 
 /***********************************************************
- * º¯ÊıÃû³Æ:DoFlightRun()
- * º¯Êı¹¦ÄÜ:µ÷ÓÃ·É¿ØÖ÷ÔËËãº¯Êı£¬½öµ±·¢Éäºó½øÈëµ÷ÓÃ
+ * ????????:DoFlightRun()
+ * ????????:????????????????????????????????
   ***********************************************************/
 extern void *g_pControl;
 void DoFlightRun()
 {
-	if((DOM_AUTOMATIC ) & g_DeviceState.workStage)
+	if((DOM_AUTOMATIC & g_DeviceState.workStage) || (DOM_HILSMODE & g_DeviceState.workStage))
 	{
 		ControlRun(g_pControl);
-/* 280´úÂë
+/* 280????
 
 		FlightRun(pInput, pOutput);
 
-		pInput->Msn_updatesig = 0;	// 014 ²»Ê¹ÓÃ
+		pInput->Msn_updatesig = 0;	// 014 ?????
 */		
 	}
 }
@@ -444,54 +464,54 @@ void DoFlightRun()
 OS_U8 InitSafeArea(OS_U8* buf)
 {
 	OS_S32 lon,lat;
-	safePointCount = buf[0];// Î§À¸µãÊı
+	safePointCount = buf[0];// ????????
 	for(int i=0;i<safePointCount;i++)
 	{
 		lon = *((OS_S32*)(buf+ 2 + i*8));
 		lat = *((OS_S32*)(buf+ 6 + i*8));
-        safePoints[i].x = lon * 1e-7;   // ¾­¶È 
-        safePoints[i].y = lat * 1e-7; 	// Î³¶È 
+        safePoints[i].x = lon * 1e-7;   // ???? 
+        safePoints[i].y = lat * 1e-7; 	// ???? 
 	}
     
 	return 0;
     
 }
 
-// ¼ÆËãÁ½¸öÏòÁ¿µÄµã»ı
+// ????????????????
 double dotProduct(Point a, Point b) {
     return a.x * b.x + a.y * b.y;
 }
 
-// ¼ÆËãÏòÁ¿µÄÄ£
+// ???????????
 double vectorMagnitude(Point a)
 {
     return sqrt(a.x * a.x + a.y * a.y);
 }
 
-// ¼ÆËãÈı¸öµãÖ®¼äµÄ¼Ğ½Ç
+// ?????????????????
 double calculateAngle(Point p1, Point p2, Point p3)
 {
-    // ¼ÆËãÏòÁ¿P1P3ºÍP2P3
+    // ????????P1P3??P2P3
     Point vectorP1P3 = {p3.x - p1.x, p3.y - p1.y};
     Point vectorP2P3 = {p3.x - p2.x, p3.y - p2.y};
 
-    // ¼ÆËãÏòÁ¿µÄµã»ı
+    // ????????????
     double dot = dotProduct(vectorP1P3, vectorP2P3);
 
-    // ¼ÆËãÏòÁ¿µÄÄ£
+    // ???????????
     double magnitudeP1P3 = vectorMagnitude(vectorP1P3);
     double magnitudeP2P3 = vectorMagnitude(vectorP2P3);
 
-    // ¼ÆËã¼Ğ½ÇµÄÓàÏÒÖµ
+    // ?????????????
     double cosTheta = dot / (magnitudeP1P3 * magnitudeP2P3);
 
-    // ¼ÆËã²¢·µ»Ø¼Ğ½Ç£¨ÒÔ»¡¶ÈÎªµ¥Î»£©
+    // ????????????????????????
     return acos(cosTheta);
 }
 
-/**º¯Êı¹¦ÄÜ£ºÅĞ¶ÏÄ³¸ö¾­Î³¶ÈµãÊÇ·ñÔÚ°²È«ÇøÄÚ
- * ·µ»ØÖµ£º  1	°²È«ÇøÄÚ
- * 			0	°²È«ÇøÍâ*/
+/**??????????????????????????????????
+ * ???????  1	???????
+ * 			0	???????*/
 OS_BOOL JudgeInSafe2(double lon, double lat)
 {
 	Point curPt;
@@ -511,7 +531,7 @@ OS_BOOL JudgeInSafe2(double lon, double lat)
 		allAngle += angle[i];
 	}
 	OS_BOOL is_inside;
-	if(allAngle> 2*3.1 && allAngle < 2*3.2)//2pai
+	if(allAngle> 2*3.1 && allAngle < 2*3.2)///2pai
 	{
 		is_inside = TRUE;
 	}
@@ -523,18 +543,20 @@ OS_BOOL JudgeInSafe2(double lon, double lat)
 }
 
 extern OS_U8 RecoverMark;
-OS_U8 JudgeHomeward()	//02 Æğ·É2sºó£¬Ã¿1sÅĞ¶ÏÒ»´Î£¬¿´ÊÇ·ñ³öÁË°²È«Çø£¿ÊÇ·ñĞèÒªÉ¡½µ£¿ÊÇ·ñµØÃæ·¢³ö½ô¼±·µº½£¿
+//???10s???1s???????????????????????????3s?????????
+OS_U8 JudgeHomeward()
 {
 	static OS_U8 OutSafeCount = 0;
 
-	//Ã¿ÃëÅĞ¶ÏÒ»´ÎÊÇ·ñ³ö°²È«Çø·µº½ºÍÈÎÎñ»úÊ§Áª
+	//???????????????????????????????????1s????
 	if(g_DeviceState.CurrTick % 200 != 0)
 		return 1;
 
-	//ÅĞ¶Ï°²È«ÇøÊ»³ö
-	if(g_DeviceState.CurrTick < 200 * 2)//2sºóÆğÅĞ°²È«Çø
+	//?????????????????4s?????????
+	if(g_DeviceState.CurrTick < 200 * 10)
 		return 1;
 
+	//???????????
 	int ilon,ilat;
 	double lon,lat;
 	GetDataFast(pDataPoolImu, "navLon", &ilon);
@@ -544,64 +566,70 @@ OS_U8 JudgeHomeward()	//02 Æğ·É2sºó£¬Ã¿1sÅĞ¶ÏÒ»´Î£¬¿´ÊÇ·ñ³öÁË°²È«Çø£¿ÊÇ·ñĞèÒªÉ¡½
 
 	if(OutSafeArea)
 	{
-		// ³ö°²È«ÇøÁË
-		if(OutSafeCount == 30)
+		// ???????????????????
+		if(OutSafeCount == 3)
 		{
 			StopEngine();
 			CurEngineRpm = 0;
 		}
+		//?????????????
 		if(OutSafeCount == 0)
 		{
-			DoOpenUm();//°²È«ÇøÍâ¿ªÉ¡
+			DoOpenUm();//?????????
 		}
 		else
 		{
 			OutSafeCount--;
 		}
 	}
-	//³ö°²È«Çø¿ª?
-  static int judgeError = 0;
+	//?????????
+	static int judgeError = 0;
 	if(JudgeInSafe2(lon,lat) == FALSE)
 	{
-		// ³ö°²È«ÇøÁË
-		if(RecoverMark == 1)	// µØÃæ·¢³ö½ô¼±·µº½£¬¸ÃÖµÖÃÎª1
+		//????M??????????????????????????
+		if(RecoverMark == 1)
 		{
-				;
+			;
 		}
+		//?????????
 		else
 		{
+			//????3s???????????????????????
 			if(judgeError >= 3)
-			{
-				// ³ö°²È«Çø£¬ÇÒÊ±¼ä³¬¹ı3s
-				SETDATA(pDataPoolSelf,  "flyError", 0xCC,	OS_U8);//·É³ö°²È«Çø³¬¹ı3s
+			{	
+				SETDATA(pDataPoolSelf,  "flyError", 0xCC,	OS_U8);
+				
+				//???????????????????2s??????????????????5s???????	
 				if(OutSafeArea == false)
-					OutSafeCount = 35;
+					OutSafeCount = 5;//35;
 				OutSafeArea = true;
-				CurEngineRpm = 200;	// TODO: ECU ÓÍÃÅÉèÖÃĞèÒªÔÙµ÷Õû£¬Ä¿Ç°ÊÇĞ´Èí¼şÊ±µÄÁÙÊ±ÉèÖÃ¡£ ÓÍÃÅÔİÇÒÉèÖÃ20.0%	//18000;
+				
+				//???????????30%???? 
+				CurEngineRpm = 300;	/// TODO: ECU ???????????????????????????????????????? ????????????20.0%	//18000;
 			}
 			else
 			{
-					judgeError++;
+				judgeError++;
 			}
 		}
 	}
 	else
 	{
-		// ÔÚ°²È«ÇøÄÚ
+		//????????
 		judgeError = 0;
 		OutSafeArea = false;
 	}
 
-	// //µØÃæÖ¸Áî½ô¼±·µº½£¬µ½·µº½µãºó¿ªÉ¡
-	// if(homeMsn.MsnCmdType != 0)	// TODO:À´×ÔµØÃæ£ºµØÃæÈÃÎÒ·µº½£¬ĞèÒª·µº½±êÖ¾Î»£»·µº½µ½ÄÄÀïµÄ¾­Î³¶È¡£
-	// {
+	// //???????????????????????????
+	//if(homeMsn.MsnCmdType != 0)	// TODO:????????????????????????????????????????????????????
+	//{
 	// 	double dist = haversine_distance(lat, lon, homeMsn.targetLat, homeMsn.targetLon);
 	// 	if(dist < 150)
 	// 	{
 	// 		SETDATA(pDataPoolSelf,  "flyError", 0x3,	OS_U8);
-	// 		DoOpenUm();//½ô¼±·µº½¿ªÉ¡
+	// 		DoOpenUm();//????????????
 	// 	}
-	// }
+	//}
 	return 0;
 }
 
@@ -609,17 +637,17 @@ OS_U8 JudgeHomeward()	//02 Æğ·É2sºó£¬Ã¿1sÅĞ¶ÏÒ»´Î£¬¿´ÊÇ·ñ³öÁË°²È«Çø£¿ÊÇ·ñĞèÒªÉ¡½
 // extern int RP_NUMBER;
 
 
-/**¿ªÉ¡ÈıÖÖÌõ¼ş£º
- * 1.³ö°²È«Çø¿ªÉ¡£¨·É¿Ø×Ô¼ºÅĞ¶Ï£©
- * 2.½ô¼±É¡½µ¿ªÉ¡£¨ÌıµØÃæÕ¾µÄ£©
- * 3.Õı³£É¡½µµã¿ªÉ¡£¬½ô¼±·µº½¿ªÉ¡£¨Ìı¿ØÖÆµÄ£©
+/**??????????????
+ * 1.????????????????????????
+ * 2.????????????????????????
+ * 3.????????????????????????????????????
  */
 OS_U8 DoOpenUm()
 {
-	//½â³ı·É¿ØËã·¨¶Ô¿ØÖÆÏµÍ³µÄ¹ÜÀí
+	//????????????????????
 	g_DeviceState.workStage &= ~DOM_AUTOMATIC;
 
-	//¿ªÉ¡
+	//????
 	flightSeq.umOpen = 1;
 	//CurEngineRpm = 18000;
 	//SETDATA(pDataPoolFly, "EngineRp", CurEngineRpm,	OS_U16);

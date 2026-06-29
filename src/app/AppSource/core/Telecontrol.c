@@ -22,7 +22,8 @@ OS_U32 CmdHandler(STRU_422_MSG_INFO * frame)//02 //	RT_DATA_LINK
 {
 	OS_U8 msgId = frame->u8MsgID;
 	SETDATA(pDataPoolSelf,	"gmsgId",	msgId,		OS_U8);
-	g_DeviceStatus.msgFromGCS = 0x01;
+	g_DeviceStatus.msgFromGCS = 0x01;//SD卡开始存储
+	
 	//非交互模式时，不处理地面指令
 	if((g_DeviceState.workStage & DOM_INTERACTIVE) !=  DOM_INTERACTIVE)
 	{
@@ -132,6 +133,7 @@ OS_U32 CmdHandler(STRU_422_MSG_INFO * frame)//02 //	RT_DATA_LINK
 	return 0;
 }
 
+//应答消息处理
 OS_U8 CmdResponseHandler(OS_U8 msgID, OS_U16 msgLen, OS_U8* buf)
 {
 	MsgToDevice(RT_DATA_LINK, msgID, msgLen, buf);

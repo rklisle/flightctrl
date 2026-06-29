@@ -14,8 +14,6 @@
 //#define USE_NAV_IMU
 extern OS_BOOL use_nav_board;
 
-
-
 extern OS_U8 ControllerStatusUpdata();
 extern OS_U32 ControllerCmdHandler(STRU_422_MSG_INFO * frame);
 extern OS_U8 Ignition();
@@ -31,8 +29,8 @@ typedef struct
 	OS_U8 engineState;	//0:不操作  1：起动  2：停止
 	OS_U8 umOpen;//	开伞指令0:不操作， 1:开伞
 	//OS_U8 wingTouched;
-	OS_U8 steableFlight;
-	OS_U8 luanched;	// 起飞tick>100,置1； 否则为0
+	OS_U8 steableFlight;//未用到
+	OS_U8 luanched;// 弹动后0.5s,认为可靠发射，即启控置1； 否则为0
 	OS_U8 destory;//自毁 0:不操作 1:自毁
 }FLIGHT_SEQ;
 #pragma pack()

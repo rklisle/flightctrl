@@ -1,7 +1,7 @@
 /*
  * modIMU.c
  *
- *  Created on: 2021Äê10ÔÂ16ÈÕ
+ *  Created on: 2021ï¿½ï¿½10ï¿½ï¿½16ï¿½ï¿½
  *      Author: QL
  */
 #include "../StateMachine.h"
@@ -19,19 +19,17 @@
 #include "../interface/interface_power.h"
 #include "../payload/fuse.h"
 
-STRU_NAV_INPUT navInput;
+STRU_NAV_INPUT navInput = {0, 0, 0, 0, 1, 210, 0};
 #define PI (3.1415926)
-static double northDir = 0;//·½Î»½Ç
-static double Global = 0;  //µ±µØ¼ÓËÙ¶È
-static double Sigma0 = 0;  //µ±µØ×Ô×ª½ÇËÙ¶È
+static double northDir = 0;//ï¿½ï¿½Î»ï¿½ï¿½
+static double Global = 0;  //ï¿½ï¿½ï¿½Ø¼ï¿½ï¿½Ù¶ï¿½
+static double Sigma0 = 0;  //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½ï¿½Ù¶ï¿½
 double dpitch;
 double dyaw;
 double dpitchUnHor;
 double dyawUnHor;
-OS_U8 CalcXYZ();
 
-OS_U8 SaveNavInDataPool(STRU_NAV_INFO *navInfo);
-
+//ï¿½òµ¼ºï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½ï¿½ï¿½Ï¢
 OS_U8 MsgToNAV(OS_U8 msgID, OS_U8 *data, OS_U8 len)
 {
 	MsgToDevice(RT_NAV, msgID, len, data);
@@ -40,9 +38,10 @@ OS_U8 MsgToNAV(OS_U8 msgID, OS_U8 *data, OS_U8 len)
 }
 
 /***********************************************************
- * º¯ÊýÃû³Æ: DoHorizonCalc()
- * º¯Êý¹¦ÄÜ: Ë®Æ½¼ÆËãËã·¨º¯Êý¡£
- * ×÷Õß:	¿ØÖÆ²¿ÃÅ
+ * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½: DoHorizonCalc()
+ * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½: Ë®Æ½ï¿½ï¿½ï¿½ï¿½ï¿½ã·¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+ * ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç¡ï¿½ï¿½ï¿½ï¿½ï¿½Ç¡ï¿½ï¿½ï¿½×ªï¿½Ç¡ï¿½ï¿½ï¿½Î³ï¿½ß¡ï¿½ï¿½Í¼ï¿½ï¿½Ù¶È¡ï¿½ï¿½Í½ï¿½ï¿½Ù¶ï¿½
+ * ï¿½ï¿½ï¿½ï¿½:	ï¿½ï¿½ï¿½Æ²ï¿½ï¿½ï¿½
  ***********************************************************/
 static OS_S32 HorizontalCalc(OS_DOUBLE ax,
 					   		 OS_DOUBLE ay,
@@ -84,12 +83,13 @@ static OS_S32 HorizontalCalc(OS_DOUBLE ax,
 
 	switch(u8CalcCnt)
 	{
-	case 0:	//¿ªÊ¼¼ÆËã
+	case 0:	//ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½
 		s_AxsumIMU= s_AysumIMU= s_AzsumIMU=
 		s_WxsumIMU= s_WysumIMU= s_WzsumIMU=
 		s_Lonsum= s_Latsum= s_Heightsum=0;
 		break;
-	default: //»ý·Ö//¼ÆËã
+	default: 
+		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶È¡ï¿½ï¿½ï¿½ï¿½Ù¶È¡ï¿½ï¿½ï¿½Î³ï¿½ß¾ï¿½Öµ
 		s_AxsumIMU += ax;
 		s_AysumIMU += ay;
 		s_AzsumIMU += az;
@@ -100,14 +100,14 @@ static OS_S32 HorizontalCalc(OS_DOUBLE ax,
 		s_Latsum += lat;
 		s_Heightsum += height;
 
-		s_AxsumRocket = s_AxsumIMU; //¹ß×é×ø±êÏµµ½¼ýÌå×ø±êÏµµÄ×ª»»£¬ÒÀ¾ÝÐÍºÅÒÔ¼°°²×°Çé¿ö¶ÔÓ¦
+		s_AxsumRocket = s_AxsumIMU; //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ïµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ïµï¿½ï¿½×ªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Íºï¿½ï¿½Ô¼ï¿½ï¿½ï¿½×°ï¿½ï¿½ï¿½ï¿½ï¿½Ó¦
 		s_AysumRocket = s_AysumIMU;
 		s_AzsumRocket = s_AzsumIMU;
 		s_WxsumRocket = s_WxsumIMU;
 		s_WysumRocket = s_WysumIMU;
 		s_WzsumRocket = s_WzsumIMU;
 
-		axAverage = s_AxsumRocket / u8CalcCnt;   //È¡Ë®Æ½¼ÆËã180sÄÚµÄÆ½¾ùÖµ
+		axAverage = s_AxsumRocket / u8CalcCnt;   //È¡Ë®Æ½ï¿½ï¿½ï¿½ï¿½180sï¿½Úµï¿½Æ½ï¿½ï¿½Öµ
 		ayAverage = s_AysumRocket / u8CalcCnt;
 		azAverage = s_AzsumRocket / u8CalcCnt;
 		wxAverage = s_WxsumRocket / u8CalcCnt;
@@ -118,76 +118,80 @@ static OS_S32 HorizontalCalc(OS_DOUBLE ax,
 		if(pLat) *pLat = s_Latsum / u8CalcCnt;
 		if(pHeight) *pHeight = s_Heightsum / u8CalcCnt;
 
+		//ï¿½Í¼ï¿½ï¿½Ù¶È¡ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½
 		globalIn = sqrt(axAverage * axAverage + ayAverage * ayAverage + azAverage * azAverage);
 		if(pGlocal) *pGlocal = globalIn;
 		//*pGlocal = axAverage;
 		if(pSigma0) *pSigma0 = sqrt(wxAverage * wxAverage + wyAverage * wyAverage + wzAverage * wzAverage)*3600;
 
-		//1ÏóÏÞ³¯ÉäÏò
-		d_pitch = - asin(ayAverage / globalIn); //ÒÀ¾Ý·¢Éä×ø±êÏµÓë¼ýÌå×ø±êÏµ¹ØÏµÈ·¶¨·ûºÅ
+		///1ï¿½ï¿½ï¿½Þ³ï¿½ï¿½ï¿½ï¿½ï¿½
+		d_pitch = - asin(ayAverage / globalIn); //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ = ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½/ï¿½Ï¼ï¿½ï¿½Ù¶ï¿½
 		pitch = d_pitch + PI / 2;
-		yaw = asin(azAverage / globalIn / sin(pitch)); //Í¬ÉÏ
+		yaw = asin(azAverage / globalIn / sin(pitch)); //ï¿½ï¿½ï¿½ï¿½ï¿½
 
-		//3ÏóÏÞ³¯ÉäÏò
-		//d_pitch = asin(ayAverage / globalIn); //ÒÀ¾Ý·¢Éä×ø±êÏµÓë¼ýÌå×ø±êÏµ¹ØÏµÈ·¶¨·ûºÅ
+		///3ï¿½ï¿½ï¿½Þ³ï¿½ï¿½ï¿½ï¿½ï¿½
+		//d_pitch = asin(ayAverage / globalIn); //ï¿½ï¿½ï¿½Ý·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ïµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ïµï¿½ï¿½ÏµÈ·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		//pitch = d_pitch + PI / 2;
-		//yaw = - asin(azAverage / globalIn / sin(pitch)); //Í¬ÉÏ
+		//yaw = - asin(azAverage / globalIn / sin(pitch)); //Í¬ï¿½ï¿½
 
+		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç¡ï¿½ï¿½ï¿½ï¿½ï¿½Ç¡ï¿½ï¿½ï¿½×ªï¿½ï¿½
 		if(pPItch) *pPItch = toDeg(d_pitch);
 		if(pYaw) *pYaw = toDeg(yaw);
-		if(pNorth) *pNorth = toDeg(atan2(wzAverage, wyAverage));//Y1 3ÏóÏÞ³¯ÉäÏò£¬²»ÐèÒªÔÙ¼Ópi
+		if(pNorth) *pNorth = toDeg(atan2(wzAverage, wyAverage));//Y1 3ï¿½ï¿½ï¿½Þ³ï¿½ï¿½ï¿½ï¿½ò£¬²ï¿½ï¿½ï¿½Òªï¿½Ù¼ï¿½pi
 		if(*pNorth < 0)
 			*pNorth += 360;
-		//Y6 if(pNorth) *pNorth = toDeg(atan2(wzAverage, wyAverage)+ PI); //g_HorizontalCalc_north ½á¹û·¶Î§Îª-pi/2~pi/2,Õë¶Ô·½Î»½Ç·ÖÄ¸±ØÐë´óÓÚ0 2021521 Óà
+		//Y6 if(pNorth) *pNorth = toDeg(atan2(wzAverage, wyAverage)+ PI); //g_HorizontalCalc_north ï¿½ï¿½ï¿½ï¿½ï¿½Î§Îª-pi/2~pi/2,ï¿½ï¿½Ô·ï¿½Î»ï¿½Ç·ï¿½Ä¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½0 2021521 ï¿½ï¿½
 		break;
 	}
 	return 1;
 }
 
 /***********************************************************
- * º¯ÊýÃû³Æ: DoHorizonCalc()
- * º¯Êý¹¦ÄÜ: Ë®Æ½¼ÆËãÆô¶¯º¯Êý£¬ÊäÈë²ÎÊýÎª:
- * 			(1)hCalcCnt	Ë®Æ½¼ÆËãµ±Ç°µÄ¼ÆÊý
- * 			(2)hCalcTotalCnt Ë®Æ½¼ÆËãµÄ½ØÖÁÃë¼ÆÊý
- * 			µ±½ØÖÁ¼ÆÊýÎª0Ê±£¬²»ÐèÒª½øÐÐË®Æ½¼ÆËã¡£
- * 			µ±ÊÕµ½µØÃæË®Æ½¼ÆËãÇëÇóºó£¬»á½«hCalcTotalCntÖÃÎª180£¬hCalcCntÖÃÎª0£¬²¢¿ªÊ¼½øÐÐÀÛ¼Ó¼ÆÊý²¢½øÐÐË®Æ½¼ÆËã¡£
- * ×÷Õß:	³Éºê­Z
+ * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½: DoHorizonCalc()
+ * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½: Ë®Æ½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îª:
+ * 			(1)hCalcCnt	Ë®Æ½ï¿½ï¿½ï¿½ãµ±Ç°ï¿½Ä¼ï¿½ï¿½ï¿½
+ * 			(2)hCalcTotalCnt Ë®Æ½ï¿½ï¿½ï¿½ï¿½Ä½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+ * 			ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îª0Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½Ë®Æ½ï¿½ï¿½ï¿½ã¡£
+ * 			ï¿½ï¿½ï¿½Õµï¿½ï¿½ï¿½ï¿½ï¿½Ë®Æ½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ó£¬»á½«hCalcTotalCntï¿½ï¿½Îª180ï¿½ï¿½hCalcCntï¿½ï¿½Îª0ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½Û¼Ó¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ë®Æ½ï¿½ï¿½ï¿½ã¡£
+ * ï¿½ï¿½ï¿½ï¿½:	ï¿½Éºï¿½Z
  ***********************************************************/
-static OS_U32 hCalcCnt = 0;
-static OS_U32 hCalcTotalCnt = 0;
+static OS_U32 hCalcCnt = 0;//Ë®Æ½ï¿½ï¿½Ì¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+static OS_U32 hCalcTotalCnt = 0;//×ªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½46s = 46 * 200 * 5ms
 static OS_U8 DoHorizonCalc()
 {
+	//ï¿½Ï¼ï¿½ï¿½Ù¶È¡ï¿½ï¿½ï¿½ï¿½Ù¶È¸ï¿½ï¿½ï¿½
 	if(hCalcTotalCnt)
 	{
+		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ã£¬ï¿½ï¿½ï¿½Ù¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		if(hCalcCnt == hCalcTotalCnt)
 		{
 			hCalcCnt = 0;
 			hCalcTotalCnt = 0;
 			return 0;
 		}
+		//Ã¿1s = 5ms*200ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		else if(hCalcCnt % 200 == 0)
-		{//ÔÚ³ÖÐø¼ÆËãµÄ¹ý³ÌÖÐ£¬Ò²Ã¿¸ô1ÃëÏÂ´«Ò»´Î¼ÆËã½á¹û¡£
-			SETDATA(pDataPoolNav, "Global", Global, OS_DOUBLE);//µ±µØ¼ÓËÙ¶È
-			SETDATA(pDataPoolNav, "Sigma0", Sigma0, OS_DOUBLE);//ºÏ³É½ÇËÙ¶È
+		{//ï¿½Ú³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¹ï¿½ï¿½ï¿½ï¿½Ð£ï¿½Ò²Ã¿ï¿½ï¿½1ï¿½ï¿½ï¿½Â´ï¿½Ò»ï¿½Î¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+			SETDATA(pDataPoolNav, "Global", Global, OS_DOUBLE);//ï¿½ï¿½ï¿½Ø¼ï¿½ï¿½Ù¶ï¿½
+			SETDATA(pDataPoolNav, "Sigma0", Sigma0, OS_DOUBLE);//ï¿½Ï³É½ï¿½ï¿½Ù¶ï¿½
 		}
 	}
+
+	//Ë®Æ½ï¿½ï¿½ï¿½ï¿½ã£ºï¿½ï¿½ï¿½ï¿½ï¿½Ç¡ï¿½ï¿½ï¿½ï¿½ï¿½Ç¡ï¿½ï¿½ï¿½×ªï¿½Ç¡ï¿½ï¿½ï¿½Î³ï¿½ß¡ï¿½ï¿½Í¼ï¿½ï¿½Ù¶È¡ï¿½ï¿½Í½ï¿½ï¿½Ù¶È¼ï¿½ï¿½ï¿½
 	float fax,fay,faz,fwx,fwy,fwz;
-	GetDataFast(pDataPoolNav, "navWx", &fwx);//Ô­Ê¼½ÇËÙ¶ÈX
-	GetDataFast(pDataPoolNav, "navWy", &fwy);//Ô­Ê¼½ÇËÙ¶ÈY
-	GetDataFast(pDataPoolNav, "navWz", &fwz);//Ô­Ê¼½ÇËÙ¶ÈZ
-	GetDataFast(pDataPoolNav, "navAx", &fax);//Ô­Ê¼¼ÓËÙ¶ÈX
-	GetDataFast(pDataPoolNav, "navAy", &fay);//Ô­Ê¼¼ÓËÙ¶ÈY
-	GetDataFast(pDataPoolNav, "navAz", &faz);//Ô­Ê¼¼ÓËÙ¶ÈZ
-
-
+	GetDataFast(pDataPoolNav, "navWx", &fwx);//Ô­Ê¼ï¿½ï¿½ï¿½Ù¶ï¿½X
+	GetDataFast(pDataPoolNav, "navWy", &fwy);//Ô­Ê¼ï¿½ï¿½ï¿½Ù¶ï¿½Y
+	GetDataFast(pDataPoolNav, "navWz", &fwz);//Ô­Ê¼ï¿½ï¿½ï¿½Ù¶ï¿½Z
+	GetDataFast(pDataPoolNav, "navAx", &fax);//Ô­Ê¼ï¿½ï¿½ï¿½Ù¶ï¿½X
+	GetDataFast(pDataPoolNav, "navAy", &fay);//Ô­Ê¼ï¿½ï¿½ï¿½Ù¶ï¿½Y
+	GetDataFast(pDataPoolNav, "navAz", &faz);//Ô­Ê¼ï¿½ï¿½ï¿½Ù¶ï¿½Z
+	//ï¿½ï¿½ï¿½hCalcTotalCntÎª0,Ëµï¿½ï¿½Ë®Æ½ï¿½ï¿½ï¿½ï¿½Î´ï¿½ï¿½ï¿½ï¿½
+	//ï¿½ï¿½ï¿½hCalcCntï¿½Ñ¾ï¿½ï¿½ï¿½ï¿½ï¿½180*200Ê±ï¿½ï¿½Ëµï¿½ï¿½Ë®Æ½ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¾ï¿½ï¿½ï¿½ï¿½ï¿½
+	//Ö»ï¿½Ðµï¿½ï¿½ï¿½ï¿½æ·¢ï¿½ï¿½Ë®Æ½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½ï¿½hCalcTotalCntï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½hCalcCntï¿½ï¿½0,ï¿½ï¿½Ê¼Ã¿5msï¿½ï¿½Ò»ï¿½ï¿½Ë®Æ½ï¿½ï¿½ï¿½ï¿½
 	double ax = fax,ay=fay,az=faz,wx=fwx,wy=fwy,wz=fwz;
-
-	//Èç¹ûhCalcTotalCntÎª0,ËµÃ÷Ë®Æ½¼ÆËãÎ´Æô¶¯
-	//Èç¹ûhCalcCntÒÑ¾­´óÓÚ180*200Ê±£¬ËµÃ÷Ë®Æ½¼ÆËãÒÑ¾­½áÊø
-	//Ö»ÓÐµ±µØÃæ·¢ËÍË®Æ½¼ÆËãÖ¸Áîºó£¬hCalcTotalCnt¸³Öµ£¬ÇÒhCalcCntÖÃ0,¿ªÊ¼Ã¿5ms×öÒ»´ÎË®Æ½¼ÆËã
 	if(hCalcTotalCnt && hCalcCnt<hCalcTotalCnt)
 	{
-		HorizontalCalc(	ax,
+		HorizontalCalc(ax,
 						ay,
 						az,
 						wx,
@@ -196,9 +200,9 @@ static OS_U8 DoHorizonCalc()
 						0,
 						0,
 						0,
-						&dpitchUnHor,
+						&dpitchUnHor,//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 						&dyawUnHor,
-						&northDir,
+						&northDir,//ï¿½æ·½Î»ï¿½ï¿½
 						NULL,
 						NULL,
 						NULL,
@@ -210,6 +214,7 @@ static OS_U8 DoHorizonCalc()
 	return 1;
 }
 
+//ï¿½òµ¼ºï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½
 OS_U32 NavCmdHandler(STRU_422_MSG_INFO * frame)
 {
 	OS_U8 msgID = frame->u8MsgID;
@@ -217,36 +222,36 @@ OS_U32 NavCmdHandler(STRU_422_MSG_INFO * frame)
 	{
 		case CMD_NAV_INIT:
 		{
-			//ÔÚ¶Ô×¼µÄÊ±ºò£¬ÉÏ×¢³õÊ¼Êý¾Ý
+			//ï¿½Ú¶ï¿½×¼ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½×¢ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½
 			OS_S8 InitData[100];
-			//Ë®Æ½°²×°
+			//Ë®Æ½ï¿½ï¿½×°
 			//InitData[0] = 1;
 			//InitData[1] = -3;
 			//InitData[2] = 2;
-			//´¹Ö±°²×°
+			//ï¿½ï¿½Ö±ï¿½ï¿½×°
 			InitData[0] = 1;
 			InitData[1] = 3;
 			InitData[2] = -2;
-            
-            //MINI
-            //InitData[0] = 2;
-			//InitData[1] = -3;
-		//	InitData[2] = -1;
+    
 			memcpy(InitData + 3, &navInput.InitLon, 8);
 			memcpy(InitData + 11, &navInput.InitLat, 8);
 			memcpy(InitData + 19, &navInput.InitHigh, 8);
 			memcpy(InitData + 27, &navInput.InitYaw, 8);
-			MsgToDevice(RT_NAV , BUS_NAV_INIT_DATA, 35, (OS_U8*)InitData);
+			InitData[35] = (OS_S8)navInput.navAlignMode;
+    		InitData[36] = (OS_U8)(navInput.navAlignTime & 0xFF);
+    		InitData[37] = (OS_U8)(navInput.navAlignTime >> 8);
+			//MsgToDevice(RT_NAV , BUS_NAV_INIT_DATA, 35, (OS_U8*)InitData);
+			MsgToDevice(RT_NAV , BUS_NAV_INIT_DATA, 38, (OS_U8*)InitData);
 		}
 		break;
-		case CMD_HOR_CALC_REQ://¶Ô×¼ÇëÇó ·ÖË®Æ½¶Ô×¼ºÍ´¹Ö±¶Ô×¼Á½ÖÖÄ£Ê½
+		case CMD_HOR_CALC_REQ://ï¿½ï¿½×¼ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ë®Æ½ï¿½ï¿½×¼ï¿½Í´ï¿½Ö±ï¿½ï¿½×¼ï¿½ï¿½ï¿½ï¿½Ä£Ê½
 		{
 
-			if(frame->au8Data[0] == 0)//Ë®Æ½¶Ô×¼
+			if(frame->au8Data[0] == 0)//Ë®Æ½ï¿½ï¿½×¼
 			{
 				SETDATA(pDataPoolNav,	"imuFocus",	 2,		OS_U8);
 			}
-			else if(frame->au8Data[0] == 1)//´¹Ö±¶Ô×¼
+			else if(frame->au8Data[0] == 1)//ï¿½ï¿½Ö±ï¿½ï¿½×¼
 			{
 				SETDATA(pDataPoolNav,	"imuFocus",	 1,		OS_U8);
 			}
@@ -254,13 +259,13 @@ OS_U32 NavCmdHandler(STRU_422_MSG_INFO * frame)
 			MsgToDevice(RT_NAV, BUS_NAV_FOCUS, 0, (OS_U8*)&toNav);
 		}
 		break;
-		case CMD_TO_NAV_REQ: //Æô¶¯×éºÏµ¼º½ÇëÇó
+		case CMD_TO_NAV_REQ: //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ïµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		{
 			OS_U8 toNav[1];
 			MsgToDevice(RT_NAV, BUS_NAV_START_NAV, 0, (OS_U8*)&toNav);
-			g_DeviceState.workStage |= DOM_NAVON;//×ªµ¼º½Ä£Ê½
+			g_DeviceState.workStage |= DOM_NAVON;//×ªï¿½ï¿½ï¿½ï¿½Ä£Ê½
 
-			//Æô¶¯±¾»úµÄË®Æ½¼ÆËã
+			//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ë®Æ½ï¿½ï¿½ï¿½ï¿½
 			hCalcCnt = 0;
 			OS_U8 calcSecond = 46;
 			hCalcTotalCnt = calcSecond * 200;
@@ -268,7 +273,8 @@ OS_U32 NavCmdHandler(STRU_422_MSG_INFO * frame)
 			break;
         case CMD_TO_AFTER_LUANCH:
         {
-            MsgToNAV(BUS_NAV_IGNATION, PTR_NULL, 0);
+			OS_U8 toNav[1] = {0};
+            MsgToNAV(BUS_NAV_IGNATION, toNav, 0);
         }
             break;
 		default:
@@ -277,18 +283,22 @@ OS_U32 NavCmdHandler(STRU_422_MSG_INFO * frame)
 	return 0;
 }
 
+//ï¿½ï¿½ï¿½Õµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ýºó£¬»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ýµï¿½ï¿½ï¿½ï¿½Ý³Ø£ï¿½ï¿½ï¿½ï¿½Ú·É¿ï¿½Ê¹ï¿½Ãºï¿½Ò£ï¿½â£¬ï¿½Ô¼ï¿½ï¿½ï¿½ï¿½ï¿½Õ¾ï¿½ï¿½Ï¢Ó¦ï¿½ï¿½
 OS_U32 NavRtHandler(STRU_422_MSG_INFO * frame)	// RT_NAV
 {
 	OS_U8 msgID = frame->u8MsgID;
 	switch(msgID)
 	{
-	case BUS_IMU_INFO_REPORT://×éºÏµ¼º½°æ¶¨Ê±·¢ËÍÖ¡(5ms)
+	//ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ïµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¡ (ï¿½ï¿½ï¿½ï¿½5ms)
+	case BUS_IMU_INFO_REPORT:
 		{
+			//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ýµï¿½ï¿½ï¿½ï¿½Ý³Ø£ï¿½ï¿½ï¿½ï¿½Ú·É¿ï¿½Ê¹ï¿½Ãºï¿½Ò£ï¿½ï¿½
 			STRU_NAV_INFO navInfo;
 			memcpy(&navInfo, frame->au8Data, sizeof(navInfo));
-			SaveNavInDataPool(&navInfo);
+			SaveNavInDataPool(&navInfo);	//ï¿½æ´¢ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 			g_DeviceState.navCountDown = 200;
 
+			//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×¼
 			if(navInfo.navStatus == 0x44)
 			{
 				STRU_422_MSG_INFO frame;
@@ -296,14 +306,17 @@ OS_U32 NavRtHandler(STRU_422_MSG_INFO * frame)	// RT_NAV
 				NavCmdHandler(&frame);
 			}
 
-			//Ë®Æ½¼ÆËã¿´Ö¸ÁîÊÇ·ñ°Ñ¼ÆËãÊ±¼äÖØÖÃÁË£¬Èç¹ûÖØÖÃÁË¾ÍÖØ×ö£¬Èç¹ûÃ»ÖØÖÃ¾ÍÌø¹ý
+			//Ë®Æ½ï¿½ï¿½ï¿½ã¿´Ö¸ï¿½ï¿½ï¿½Ç·ï¿½Ñ¼ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ë£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ë¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã»ï¿½ï¿½ï¿½Ã¾ï¿½ï¿½ï¿½ï¿½ï¿½
 			DoHorizonCalc();
 		}
 		break;
+	//ï¿½ï¿½ï¿½ï¿½Ó¦ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¡
 	case CMD_GET_EPH_RSP:
 		CmdResponseHandler(msgID, frame->u16Len, frame->au8Data);
 		break;
 	}
+	
+	//ï¿½ï¿½ï¿½ï¿½Õ¾ï¿½ï¿½Ï¢Ó¦ï¿½ï¿½
 	if(msgID >= 0x60 && msgID <= 0x6F)
 	{
 		CmdResponseHandler(msgID, frame->u16Len, frame->au8Data);
@@ -311,128 +324,127 @@ OS_U32 NavRtHandler(STRU_422_MSG_INFO * frame)	// RT_NAV
 	return 0;
 }
 
-// NAV´«¹ýÀ´µÄÊý¾Ý£¬ÏÖÔÚÎÒÃÇÐèÒª°ÑÕâÐ©Êý¾Ý¸³Öµ¸øIMUµÄÊý¾Ý³Ø
+// NAVï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½Ð©ï¿½ï¿½ï¿½Ý¸ï¿½Öµï¿½ï¿½IMUï¿½ï¿½ï¿½ï¿½ï¿½Ý³ï¿½
 OS_U8 SaveNavInDataPool(STRU_NAV_INFO *navInfo)
 {
 	SETDATA(pDataPoolNav, "gpsMod", navInfo->GPSstate,	OS_U8);//GPS×´Ì¬
-	SETDATA(pDataPoolNav, "gpsLoCnt", navInfo->StanumberMaster>navInfo->StanumberSlave?navInfo->StanumberMaster:navInfo->StanumberSlave,	OS_U8);//GPS¶¨Î»ÐÇÊý
+	SETDATA(pDataPoolNav, "gpsLoCnt", navInfo->StanumberMaster>navInfo->StanumberSlave?navInfo->StanumberMaster:navInfo->StanumberSlave,	OS_U8);//GPSï¿½ï¿½Î»ï¿½ï¿½ï¿½ï¿½
 	SETDATA(pDataPoolNav, "gpsLoMas", navInfo->gpsDirEnable[0] == 'V'?1:0, OS_U8);
 	SETDATA(pDataPoolNav, "gpsLoSla", navInfo->gpsDirEnable[1] == 'V'?1:0, OS_U8);
-	SETDATA(pDataPoolNav, "gpsLon", navInfo->GPSlon,	OS_S32);//GPS¾­¶È
-	SETDATA(pDataPoolNav, "gpsLat", navInfo->GPSlat,	OS_S32);//GPSÎ³¶È
-	SETDATA(pDataPoolNav, "gpsHigh", navInfo->GPShigh * 1e-3,	OS_S16);//GPS¸ß¶È
-	SETDATA(pDataPoolNav, "gpsVn", navInfo->GPSVn,	OS_S16);//GPS±±ËÙ
-	SETDATA(pDataPoolNav, "gpsVs", navInfo->GPSVs,	OS_S16);//GPSÌìËÙ
-	SETDATA(pDataPoolNav, "gpsVe", navInfo->GPSVe,	OS_S16);//GPS¶«ËÙ
+	SETDATA(pDataPoolNav, "gpsLon", navInfo->GPSlon,	OS_S32);//GPSï¿½ï¿½ï¿½ï¿½
+	SETDATA(pDataPoolNav, "gpsLat", navInfo->GPSlat,	OS_S32);//GPSÎ³ï¿½ï¿½
+	SETDATA(pDataPoolNav, "gpsHigh", navInfo->GPShigh * 1e-3,	OS_S16);//GPSï¿½ß¶ï¿½
+	SETDATA(pDataPoolNav, "gpsVn", navInfo->GPSVn,	OS_S16);//GPSï¿½ï¿½ï¿½ï¿½
+	SETDATA(pDataPoolNav, "gpsVs", navInfo->GPSVs,	OS_S16);//GPSï¿½ï¿½ï¿½ï¿½
+	SETDATA(pDataPoolNav, "gpsVe", navInfo->GPSVe,	OS_S16);//GPSï¿½ï¿½ï¿½ï¿½
 	SETDATA(pDataPoolNav, "gpsPdop", navInfo->PDOP,		OS_U16);//PDOP
 	SETDATA(pDataPoolNav, "gpsGdop", navInfo->GDOP,		OS_U16);//GDOP
 	SETDATA(pDataPoolNav, "gpsDelay", navInfo->Deltime,	OS_U8);//PPS
-	SETDATA(pDataPoolNav, "gpsUload", navInfo->uploadEphStatus,	OS_U8);//ÐÇÀú×°¶©½á¹û
+	SETDATA(pDataPoolNav, "gpsUload", navInfo->uploadEphStatus,	OS_U8);//ï¿½ï¿½ï¿½ï¿½×°ï¿½ï¿½ï¿½ï¿½ï¿½
 
-	SETDATA(pDataPoolNav, "gpsYear", navInfo->year,	OS_U8);//GPSÄê
-	SETDATA(pDataPoolNav, "gpsMonth", navInfo->month,	OS_U8);//GPSÔÂ
-	SETDATA(pDataPoolNav, "gpsDay", navInfo->day,	OS_U8);//GPSÈÕ
+	SETDATA(pDataPoolNav, "gpsYear", navInfo->year,	OS_U8);//GPSï¿½ï¿½
+	SETDATA(pDataPoolNav, "gpsMonth", navInfo->month,	OS_U8);//GPSï¿½ï¿½
+	SETDATA(pDataPoolNav, "gpsDay", navInfo->day,	OS_U8);//GPSï¿½ï¿½
 	SETDATA(pDataPoolNav, "gpsHour", navInfo->hour,	OS_U8);//GPSÊ±
-	SETDATA(pDataPoolNav, "gpsMinit", navInfo->minite,	OS_U8);//GPS·Ö
-	SETDATA(pDataPoolNav, "gpsSec", navInfo->second,	OS_U8);//GPSÃë
-	SETDATA(pDataPoolNav, "gpsMs", navInfo->ms,	OS_U16);//GPSºÁÃë
-	SETDATA(pDataPoolNav, "gpsTrack", navInfo->gpsTrack,	OS_U16);//GPSº½¼£½Ç
-	SETDATA(pDataPoolNav, "gpsDir", navInfo->gpsDir,	OS_U16);//GPSº½Ïò½Ç
-	SETDATA(pDataPoolNav, "gpsDirOK", navInfo->gpsDirEffect,	OS_U8);//GPSº½ÏòÓÐÐ§±êÖ¾
+	SETDATA(pDataPoolNav, "gpsMinit", navInfo->minite,	OS_U8);//GPSï¿½ï¿½
+	SETDATA(pDataPoolNav, "gpsSec", navInfo->second,	OS_U8);//GPSï¿½ï¿½
+	SETDATA(pDataPoolNav, "gpsMs", navInfo->ms,	OS_U16);//GPSï¿½ï¿½ï¿½ï¿½
+	SETDATA(pDataPoolNav, "gpsTrack", navInfo->gpsTrack,	OS_U16);//GPSï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	SETDATA(pDataPoolNav, "gpsDir", navInfo->gpsDir,	OS_U16);//GPSï¿½ï¿½ï¿½ï¿½ï¿½
+	SETDATA(pDataPoolNav, "gpsDirOK", navInfo->gpsDirEffect,	OS_U8);//GPSï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð§ï¿½ï¿½Ö¾
+
+	SETDATA(pDataPoolImu, "gpsLon", navInfo->GPSlon,			OS_S32);//GPSï¿½ï¿½ï¿½ï¿½
+	SETDATA(pDataPoolImu, "gpsLat", navInfo->GPSlat,			OS_S32);//GPSÎ³ï¿½ï¿½
+	SETDATA(pDataPoolImu, "gpsAlt", navInfo->GPShigh * 1e-3,	OS_S16);//GPSï¿½ß¶ï¿½
+	SETDATA(pDataPoolImu, "gpsVn", navInfo->GPSVn,	OS_S16);//GPSï¿½ï¿½ï¿½ï¿½
+	SETDATA(pDataPoolImu, "gpsVs", navInfo->GPSVs,	OS_S16);//GPSï¿½ï¿½ï¿½ï¿½
+	SETDATA(pDataPoolImu, "gpsVe", navInfo->GPSVe,	OS_S16);//GPSï¿½ï¿½ï¿½ï¿½
+	SETDATA(pDataPoolImu, "dirEffec",	navInfo->gpsDirEffect,	OS_U8);//GPSï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð§ï¿½ï¿½Ö¾
+
+	SETDATA(pDataPoolImu, "gpsYear",  navInfo->year,   OS_U8);	//GPSï¿½ï¿½
+	SETDATA(pDataPoolImu, "gpsMonth", navInfo->month,  OS_U8);	//GPSï¿½ï¿½
+	SETDATA(pDataPoolImu, "gpsDay",   navInfo->day,    OS_U8);	//GPSï¿½ï¿½
+	SETDATA(pDataPoolImu, "gpsHour",  navInfo->hour,   OS_U8);	//GPSÊ±
+	SETDATA(pDataPoolImu, "gpsMinit", navInfo->minite, OS_U8);	//GPSï¿½ï¿½
+	SETDATA(pDataPoolImu, "gpsSec",   navInfo->second, OS_U8);	//GPSï¿½ï¿½
+	SETDATA(pDataPoolImu, "gpsMSec",  navInfo->ms,     OS_U8);	//GPSï¿½ï¿½ï¿½ï¿½
+	SETDATA(pDataPoolImu, "gpsDir", navInfo->gpsDir,  OS_U16);
+	SETDATA(pDataPoolImu, "gpsScCnt", navInfo->StanumberMaster>navInfo->StanumberSlave?navInfo->StanumberMaster:navInfo->StanumberSlave,	OS_U8);//GPSï¿½ï¿½Î»ï¿½ï¿½ï¿½ï¿½
+
+	if(g_DeviceState.hilCountDown > 0 && hilInput.useNav == 0)
+	{
+	}
+	else
+	{
+	SETDATA(pDataPoolImu, "imuWx", navInfo->imuWx16507,	OS_FLOAT);
+	SETDATA(pDataPoolImu, "imuWy", navInfo->imuWy16507,	OS_FLOAT);
+	SETDATA(pDataPoolImu, "imuWz", navInfo->imuWz16507,	OS_FLOAT);
+	SETDATA(pDataPoolImu, "imuAx", navInfo->imuAx16507,	OS_FLOAT);
+	SETDATA(pDataPoolImu, "imuAy", navInfo->imuAy16507,	OS_FLOAT);
+	SETDATA(pDataPoolImu, "imuAz", navInfo->imuAz16507,	OS_FLOAT);
+
+	SETDATA(pDataPoolImu, "navLon",  navInfo->s32navLon,			OS_S32	);
+	SETDATA(pDataPoolImu, "navLat",  navInfo->s32navLat,			OS_S32	);
+	SETDATA(pDataPoolImu, "navHigh", navInfo->s32navHigh * 1e-3,	OS_FLOAT);
+
+	SETDATA(pDataPoolImu, "navVn", navInfo->s32navVn * 1e-1,	OS_S16);
+	SETDATA(pDataPoolImu, "navVs", navInfo->s32navVs * 1e-1,	OS_S16);
+	SETDATA(pDataPoolImu, "navVe", navInfo->s32navVe * 1e-1,	OS_S16);
+
+	SETDATA(pDataPoolImu, "navPitch", navInfo->s16pitch,	OS_S16);	
+	SETDATA(pDataPoolImu, "navRoll", navInfo->s16roll,	OS_S16);  
+	SETDATA(pDataPoolImu, "navState", navInfo->navStatus,	OS_U8);
+	SETDATA(pDataPoolImu, "navDir", navInfo->s16dir,	OS_U16);
+
+	//ï¿½ï¿½ï¿½ï¿½ï¿½Ð¶Ïµï¿½ï¿½ï¿½×´Ì¬×¼ï¿½ï¿½ï¿½ï¿½ï¿½Òºï¿½ï¿½ï¿½ï¿½ï¿½Ð§ï¿½ï¿½Ö¾ï¿½ï¿½Ð§
+	if((navInfo->navStatus == 0) && (navInfo->gpsDirEffect == 1))
+	{
+		float navdirmid;
+		navdirmid = navInfo->gpsDir / 100 + 180;
+		if(navdirmid > 360)
+			navdirmid = navdirmid - 360;
+		SETDATA(pDataPoolImu, "navDir", navdirmid * 1e2,	OS_U16);
+		SETDATA(pDataPoolImu, "navLon", navInfo->GPSlon,	OS_S32);
+		SETDATA(pDataPoolImu, "navLat", navInfo->GPSlat,	OS_S32);
+		SETDATA(pDataPoolImu, "navHigh", navInfo->GPShigh * 1e-3,	OS_FLOAT);
+	}
+	}
+
+	SETDATA(pDataPoolNav, "navLon", navInfo->s32navLon,	OS_S32);//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	SETDATA(pDataPoolNav, "navLat", navInfo->s32navLat,	OS_S32);//ï¿½ï¿½ï¿½ï¿½Î³ï¿½ï¿½
+	SETDATA(pDataPoolNav, "navHigh", navInfo->s32navHigh * 1e-3,OS_FLOAT);//ï¿½ï¿½ï¿½ï¿½ï¿½ß¶ï¿½
+	SETDATA(pDataPoolNav, "navVn", navInfo->s32navVn * 1e-1,	OS_S16);//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	SETDATA(pDataPoolNav, "navVs", navInfo->s32navVs * 1e-1,	OS_S16);//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	SETDATA(pDataPoolNav, "navVe", navInfo->s32navVe * 1e-1,	OS_S16);//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+
+	SETDATA(pDataPoolNav, "navPitch", navInfo->s16pitch,	OS_S16);//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	SETDATA(pDataPoolNav, "navRoll", navInfo->s16roll,	OS_S16);//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×ª
+	SETDATA(pDataPoolNav, "navDir", navInfo->s16dir,	OS_U16);//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½
+
+	SETDATA(pDataPoolNav, "navWx", navInfo->imuWx16507,	OS_FLOAT);//Ô­Ê¼ï¿½ï¿½ï¿½Ù¶ï¿½X
+	SETDATA(pDataPoolNav, "navWy", navInfo->imuWy16507,	OS_FLOAT);//Ô­Ê¼ï¿½ï¿½ï¿½Ù¶ï¿½Y
+	SETDATA(pDataPoolNav, "navWz", navInfo->imuWz16507,	OS_FLOAT);//Ô­Ê¼ï¿½ï¿½ï¿½Ù¶ï¿½Z
+	SETDATA(pDataPoolNav, "navAx", navInfo->imuAx16507,	OS_FLOAT);//Ô­Ê¼ï¿½ï¿½ï¿½Ù¶ï¿½X
+	SETDATA(pDataPoolNav, "navAy", navInfo->imuAy16507,	OS_FLOAT);//Ô­Ê¼ï¿½ï¿½ï¿½Ù¶ï¿½Y
+	SETDATA(pDataPoolNav, "navAz", navInfo->imuAz16507,	OS_FLOAT);//Ô­Ê¼ï¿½ï¿½ï¿½Ù¶ï¿½Z
 
 
-SETDATA(pDataPoolImu, "gpsLon", navInfo->GPSlon,			OS_S32);//GPS¾­¶È
-SETDATA(pDataPoolImu, "gpsLat", navInfo->GPSlat,			OS_S32);//GPSÎ³¶È
-SETDATA(pDataPoolImu, "gpsAlt", navInfo->GPShigh * 1e-3,	OS_S16);//GPS¸ß¶È
-SETDATA(pDataPoolImu, "gpsVn", navInfo->GPSVn,	OS_S16);//GPS±±ËÙ
-SETDATA(pDataPoolImu, "gpsVs", navInfo->GPSVs,	OS_S16);//GPSÌìËÙ
-SETDATA(pDataPoolImu, "gpsVe", navInfo->GPSVe,	OS_S16);//GPS¶«ËÙ
-SETDATA(pDataPoolImu, "dirEffec",	navInfo->gpsDirEffect,	OS_U8);//GPSº½ÏòÓÐÐ§±êÖ¾
-
-SETDATA(pDataPoolImu, "gpsYear",  navInfo->year,   OS_U8);	//GPSÄê
-SETDATA(pDataPoolImu, "gpsMonth", navInfo->month,  OS_U8);	//GPSÔÂ
-SETDATA(pDataPoolImu, "gpsDay",   navInfo->day,    OS_U8);	//GPSÈÕ
-SETDATA(pDataPoolImu, "gpsHour",  navInfo->hour,   OS_U8);	//GPSÊ±
-SETDATA(pDataPoolImu, "gpsMinit", navInfo->minite, OS_U8);	//GPS·Ö
-SETDATA(pDataPoolImu, "gpsSec",   navInfo->second, OS_U8);	//GPSÃë
-SETDATA(pDataPoolImu, "gpsMSec",  navInfo->ms,     OS_U8);	//GPSºÁÃë
-SETDATA(pDataPoolImu, "gpsDir", navInfo->gpsDir,  OS_U16);
-SETDATA(pDataPoolImu, "gpsScCnt", navInfo->StanumberMaster>navInfo->StanumberSlave?navInfo->StanumberMaster:navInfo->StanumberSlave,	OS_U8);//GPS¶¨Î»ÐÇÊý
-
-if(g_DeviceState.hilCountDown > 0 && hilInput.useNav == 0)
-{
-}
-else
-{
-SETDATA(pDataPoolImu, "imuWx", navInfo->imuWx16507,	OS_FLOAT);
-SETDATA(pDataPoolImu, "imuWy", navInfo->imuWy16507,	OS_FLOAT);
-SETDATA(pDataPoolImu, "imuWz", navInfo->imuWz16507,	OS_FLOAT);
-SETDATA(pDataPoolImu, "imuAx", navInfo->imuAx16507,	OS_FLOAT);
-SETDATA(pDataPoolImu, "imuAy", navInfo->imuAy16507,	OS_FLOAT);
-SETDATA(pDataPoolImu, "imuAz", navInfo->imuAz16507,	OS_FLOAT);
-
-SETDATA(pDataPoolImu, "navLon",  navInfo->s32navLon,			OS_S32	);
-SETDATA(pDataPoolImu, "navLat",  navInfo->s32navLat,			OS_S32	);
-SETDATA(pDataPoolImu, "navHigh", navInfo->s32navHigh * 1e-3,	OS_FLOAT);
-
-SETDATA(pDataPoolImu, "navVn", navInfo->s32navVn * 1e-1,	OS_S16);
-SETDATA(pDataPoolImu, "navVs", navInfo->s32navVs * 1e-1,	OS_S16);
-SETDATA(pDataPoolImu, "navVe", navInfo->s32navVe * 1e-1,	OS_S16);
-
-SETDATA(pDataPoolImu, "navPitch", navInfo->s16pitch,	OS_S16);	
-SETDATA(pDataPoolImu, "navRoll", navInfo->s16roll,	OS_S16);  
-SETDATA(pDataPoolImu, "navState", navInfo->navStatus,	OS_U8);
-SETDATA(pDataPoolImu, "navDir", navInfo->s16dir,	OS_U16);
-
-//ÐÂÔöÅÐ¶Ïµ¼º½×´Ì¬×¼±¸ÖÐÇÒº½ÏòÓÐÐ§±êÖ¾ÓÐÐ§
-if((navInfo->navStatus == 0) && (navInfo->gpsDirEffect == 1))
-{
-	float navdirmid;
-	navdirmid = navInfo->gpsDir / 100 + 180;
-	if(navdirmid > 360)
-		navdirmid = navdirmid - 360;
-	SETDATA(pDataPoolImu, "navDir", navdirmid * 1e2,	OS_U16);
-	SETDATA(pDataPoolImu, "navLon", navInfo->GPSlon,	OS_S32);
-	SETDATA(pDataPoolImu, "navLat", navInfo->GPSlat,	OS_S32);
-	SETDATA(pDataPoolImu, "navHigh", navInfo->GPShigh * 1e-3,	OS_FLOAT);
-}
-}
-
-SETDATA(pDataPoolNav, "navLon", navInfo->s32navLon,	OS_S32);//µ¼º½¾­¶È
-	SETDATA(pDataPoolNav, "navLat", navInfo->s32navLat,	OS_S32);//µ¼º½Î³¶È
-	SETDATA(pDataPoolNav, "navHigh", navInfo->s32navHigh * 1e-3,OS_FLOAT);//µ¼º½¸ß¶È
-	SETDATA(pDataPoolNav, "navVn", navInfo->s32navVn * 1e-1,	OS_S16);//µ¼º½±±ËÙ
-	SETDATA(pDataPoolNav, "navVs", navInfo->s32navVs * 1e-1,	OS_S16);//µ¼º½ÌìËÙ
-	SETDATA(pDataPoolNav, "navVe", navInfo->s32navVe * 1e-1,	OS_S16);//µ¼º½¶«ËÙ
-
-	SETDATA(pDataPoolNav, "navPitch", navInfo->s16pitch,	OS_S16);//µ¼º½¸©Ñö
-	SETDATA(pDataPoolNav, "navRoll", navInfo->s16roll,	OS_S16);//µ¼º½¹ö×ª
-	SETDATA(pDataPoolNav, "navDir", navInfo->s16dir,	OS_U16);//µ¼º½·½Î»½Ç
-
-	SETDATA(pDataPoolNav, "navWx", navInfo->imuWx16507,	OS_FLOAT);//Ô­Ê¼½ÇËÙ¶ÈX
-	SETDATA(pDataPoolNav, "navWy", navInfo->imuWy16507,	OS_FLOAT);//Ô­Ê¼½ÇËÙ¶ÈY
-	SETDATA(pDataPoolNav, "navWz", navInfo->imuWz16507,	OS_FLOAT);//Ô­Ê¼½ÇËÙ¶ÈZ
-	SETDATA(pDataPoolNav, "navAx", navInfo->imuAx16507,	OS_FLOAT);//Ô­Ê¼¼ÓËÙ¶ÈX
-	SETDATA(pDataPoolNav, "navAy", navInfo->imuAy16507,	OS_FLOAT);//Ô­Ê¼¼ÓËÙ¶ÈY
-	SETDATA(pDataPoolNav, "navAz", navInfo->imuAz16507,	OS_FLOAT);//Ô­Ê¼¼ÓËÙ¶ÈZ
-
-
-	SETDATA(pDataPoolNav, "navWx2", navInfo->imuWx20689,	OS_FLOAT);//Ô­Ê¼½ÇËÙ¶ÈX
-	SETDATA(pDataPoolNav, "navWy2", navInfo->imuWy20689,	OS_FLOAT);//Ô­Ê¼½ÇËÙ¶ÈY
-	SETDATA(pDataPoolNav, "navWz2", navInfo->imuWz20689,	OS_FLOAT);//Ô­Ê¼½ÇËÙ¶ÈZ
-	SETDATA(pDataPoolNav, "navAx2", navInfo->imuAx20689,	OS_FLOAT);//Ô­Ê¼¼ÓËÙ¶ÈX
-	SETDATA(pDataPoolNav, "navAy2", navInfo->imuAy20689,	OS_FLOAT);//Ô­Ê¼¼ÓËÙ¶ÈY
-	SETDATA(pDataPoolNav, "navAz2", navInfo->imuAz20689,	OS_FLOAT);//Ô­Ê¼¼ÓËÙ¶ÈZ
+	SETDATA(pDataPoolNav, "navWx2", navInfo->imuWx20689,	OS_FLOAT);//Ô­Ê¼ï¿½ï¿½ï¿½Ù¶ï¿½X
+	SETDATA(pDataPoolNav, "navWy2", navInfo->imuWy20689,	OS_FLOAT);//Ô­Ê¼ï¿½ï¿½ï¿½Ù¶ï¿½Y
+	SETDATA(pDataPoolNav, "navWz2", navInfo->imuWz20689,	OS_FLOAT);//Ô­Ê¼ï¿½ï¿½ï¿½Ù¶ï¿½Z
+	SETDATA(pDataPoolNav, "navAx2", navInfo->imuAx20689,	OS_FLOAT);//Ô­Ê¼ï¿½ï¿½ï¿½Ù¶ï¿½X
+	SETDATA(pDataPoolNav, "navAy2", navInfo->imuAy20689,	OS_FLOAT);//Ô­Ê¼ï¿½ï¿½ï¿½Ù¶ï¿½Y
+	SETDATA(pDataPoolNav, "navAz2", navInfo->imuAz20689,	OS_FLOAT);//Ô­Ê¼ï¿½ï¿½ï¿½Ù¶ï¿½Z
     
-	// SETDATA(pDataPoolNav, "navWx3", navInfo->imuWx42688,	OS_FLOAT);//Ô­Ê¼½ÇËÙ¶ÈX
-	// SETDATA(pDataPoolNav, "navWy3", navInfo->imuWy42688,	OS_FLOAT);//Ô­Ê¼½ÇËÙ¶ÈY
-	// SETDATA(pDataPoolNav, "navWz3", navInfo->imuWz42688,	OS_FLOAT);//Ô­Ê¼½ÇËÙ¶ÈZ
-	// SETDATA(pDataPoolNav, "navAx3", navInfo->imuAx42688,	OS_FLOAT);//Ô­Ê¼¼ÓËÙ¶ÈX
-	SETDATA(pDataPoolNav, "navAy3", navInfo->imuAy42688,	OS_FLOAT);//Ô­Ê¼¼ÓËÙ¶ÈY
-	SETDATA(pDataPoolNav, "navAz3", navInfo->imuAz42688,	OS_FLOAT);//Ô­Ê¼¼ÓËÙ¶ÈZ
+	// SETDATA(pDataPoolNav, "navWx3", navInfo->imuWx42688,	OS_FLOAT);//Ô­Ê¼ï¿½ï¿½ï¿½Ù¶ï¿½X
+	// SETDATA(pDataPoolNav, "navWy3", navInfo->imuWy42688,	OS_FLOAT);//Ô­Ê¼ï¿½ï¿½ï¿½Ù¶ï¿½Y
+	// SETDATA(pDataPoolNav, "navWz3", navInfo->imuWz42688,	OS_FLOAT);//Ô­Ê¼ï¿½ï¿½ï¿½Ù¶ï¿½Z
+	// SETDATA(pDataPoolNav, "navAx3", navInfo->imuAx42688,	OS_FLOAT);//Ô­Ê¼ï¿½ï¿½ï¿½Ù¶ï¿½X
+	SETDATA(pDataPoolNav, "navAy3", navInfo->imuAy42688,	OS_FLOAT);//Ô­Ê¼ï¿½ï¿½ï¿½Ù¶ï¿½Y
+	SETDATA(pDataPoolNav, "navAz3", navInfo->imuAz42688,	OS_FLOAT);//Ô­Ê¼ï¿½ï¿½ï¿½Ù¶ï¿½Z
 
 	SETDATA(pDataPoolNav, "navState", navInfo->navStatus ,	OS_U8);
-	//cpu0ÔËËãºÄÊ±£¨µ¼º½°å£©
+	//cpu0ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½å£©
 	SETDATA(pDataPoolNav, "navUs", navInfo->navUs,	OS_U16);
 	SETDATA(pDataPoolNav, "navUsKa", navInfo->navUsKa,	OS_U16);
     SETDATA(pDataPoolSelf, "cpuTemp2", navInfo->cpuTemp,	OS_S16);
@@ -468,6 +480,7 @@ SETDATA(pDataPoolNav, "navLon", navInfo->s32navLon,	OS_S32);//µ¼º½¾­¶È
 	return 0;
 }
 
+//ï¿½ï¿½ï¿½Ýµï¿½ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ïµï¿½ï¿½ï¿½ï¿½
 OS_U8 CalcXYZ()
 {
 	double x = 0, y = 0, z = 0;
@@ -481,7 +494,7 @@ OS_U8 CalcXYZ()
 	OS_U8 navState = 0;
     if(g_DeviceState.imuCountDown == 0)
     {
-		// ÓëIMU¶ÏÁ¬£¬´ÓnavÊý¾Ý³ØÖÐÈ¡Êý¾Ý
+		// ï¿½ï¿½IMUï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½navï¿½ï¿½ï¿½Ý³ï¿½ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½
         GetDataFast(pDataPoolNav, "navLon",  &inavlon);
         GetDataFast(pDataPoolNav, "navLat",  &inavlat);
         GetDataFast(pDataPoolNav, "navHigh", &fnavhigh);
@@ -494,7 +507,7 @@ OS_U8 CalcXYZ()
     }
     else
     {
-		// ÓëIMUÁ¬½ÓÕý³££¬´ÓIMUÊý¾Ý³ØÖÐÈ¡Êý¾Ý
+		// ï¿½ï¿½IMUï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½IMUï¿½ï¿½ï¿½Ý³ï¿½ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½
         GetDataFast(pDataPoolImu, "navLon",  &inavlon);
         GetDataFast(pDataPoolImu, "navLat",  &inavlat);
         GetDataFast(pDataPoolImu, "navHigh", &fnavhigh);
@@ -522,7 +535,7 @@ OS_U8 CalcXYZ()
 	GetDataFast(pDataPoolFly, "DataHigh", &luanchHigh);//
 	GetDataFast(pDataPoolFly, "DataDir", &luanchDir);//
 
-	if(navState == 0x60 || navState == 0x64)//60×éºÏµ¼º½£¬64¹ßÐÔµ¼º½
+	if(navState == 0x60 || navState == 0x64)//60ï¿½ï¿½Ïµï¿½ï¿½ï¿½ï¿½ï¿½64ï¿½ï¿½ï¿½Ôµï¿½ï¿½ï¿½
 	{
 		DoCalcXYZ(	luanchLon * 1e-7, 
 					luanchLat*1e-7, 

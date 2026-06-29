@@ -226,33 +226,35 @@ uint32_t angle_to_ccr(double angle_deg) {
  ***********************************************************/
 OS_U8 MsgToSrv(OS_DOUBLE ctrlDeg[6], OS_U8 ctrlMode/*control = 0x02, 0x44=setZero*/)//04 存入数据池 控制舵机
 {
-	//舵机
-    SETDATA(pDataPoolSrv, "Sr5Cmd", ctrlDeg[0] * 100, OS_S16); 
-	SETDATA(pDataPoolSrv, "Sr1Cmd", ctrlDeg[1] * 100, OS_S16);
-    SETDATA(pDataPoolSrv, "Sr3Cmd", ctrlDeg[2] * 100, OS_S16);
-    SETDATA(pDataPoolSrv, "Sr4Cmd", ctrlDeg[3] * 100, OS_S16);
-    SETDATA(pDataPoolSrv, "Sr2Cmd", ctrlDeg[4] * 100, OS_S16);
+    // ctrlDeg[0]=-1.02248;
+    // ctrlDeg[1]=1.02448;
+    // ctrlDeg[2]=0.254778;
+    // ctrlDeg[3]=0.258698;
+    // ctrlDeg[4]=0.160908;
+    // ctrlDeg[5]=0.150381;
+    SETDATA(pDataPoolSrv, "Sr1Cmd", ctrlDeg[2] * 100, OS_S16); 
+	SETDATA(pDataPoolSrv, "Sr2Cmd", ctrlDeg[3] * 100, OS_S16);
+    SETDATA(pDataPoolSrv, "Sr3Cmd", ctrlDeg[0] * 100, OS_S16);
+    SETDATA(pDataPoolSrv, "Sr4Cmd", ctrlDeg[1] * 100, OS_S16);
+    SETDATA(pDataPoolSrv, "Sr5Cmd", ctrlDeg[4] * 100, OS_S16);
     SETDATA(pDataPoolSrv, "Sr6Cmd", ctrlDeg[5] * 100, OS_S16);
 
 	if (ctrlMode == 0x02) 
 	{
 		// 正常控制模式
-#ifdef SERVO_CAN
-		Servo_SetAngle_CAN(SERVO_NODE_1, ctrlDeg[1]);       // 左副翼舵，设计要求2
-		Servo_SetAngle_CAN(SERVO_NODE_3, ctrlDeg[2]);       // 左俯仰舵，设计要求3
-		Servo_SetAngle_CAN(SERVO_NODE_4, ctrlDeg[3]);       // 右俯仰舵，设计要求4
-		Servo_SetAngle_CAN(SERVO_NODE_2, ctrlDeg[4]);       // 右副翼舵，设计要求5
-#endif
+		Servo_SetAngle_CAN(SERVO_NODE_1, ctrlDeg[1]);       
+		Servo_SetAngle_CAN(SERVO_NODE_2, ctrlDeg[2]);       
+		Servo_SetAngle_CAN(SERVO_NODE_3, ctrlDeg[3]);       
+		Servo_SetAngle_CAN(SERVO_NODE_4, ctrlDeg[4]);      
+        Servo_SetAngle_CAN(SERVO_NODE_5, ctrlDeg[5]);       
+		Servo_SetAngle_CAN(SERVO_NODE_6, ctrlDeg[6]);      
 
-#ifdef SERVO_PWM
-        AngleServo_SetAngle(SERVO_PWM2, (float)ctrlDeg[1]);	// 左副翼舵，设计要求2
-        AngleServo_SetAngle(SERVO_PWM3, (float)ctrlDeg[2]);	// 左俯仰舵，设计要求3
-        AngleServo_SetAngle(SERVO_PWM4, (float)ctrlDeg[3]);	// 右俯仰舵，设计要求4
-        AngleServo_SetAngle(SERVO_PWM5, (float)ctrlDeg[4]);	// 右副翼舵，设计要求5
-#endif
-
-        AngleServo_SetAngle(SERVO_PWM1, (float)ctrlDeg[0]);	// 左航向舵，设计要求1
-        AngleServo_SetAngle(SERVO_PWM6, (float)ctrlDeg[5]);	// 右航向舵，设计要求6
+        // AngleServo_SetAngle(SERVO_PWM1, (float)ctrlDeg[1]);	
+        // AngleServo_SetAngle(SERVO_PWM2, (float)ctrlDeg[2]);	
+        // AngleServo_SetAngle(SERVO_PWM3, (float)ctrlDeg[3]);	
+        // AngleServo_SetAngle(SERVO_PWM4, (float)ctrlDeg[4]);	
+        // AngleServo_SetAngle(SERVO_PWM5, (float)ctrlDeg[0]);	
+        // AngleServo_SetAngle(SERVO_PWM6, (float)ctrlDeg[5]);	
     }
 	else if (ctrlMode == 0x44) 
 	{
@@ -264,7 +266,6 @@ OS_U8 MsgToSrv(OS_DOUBLE ctrlDeg[6], OS_U8 ctrlMode/*control = 0x02, 0x44=setZer
         Servo_SetMidpoint_CAN(SERVO_NODE_3);
         Servo_SetMidpoint_CAN(SERVO_NODE_4);
 #endif
-
 #ifdef SERVO_PWM
         AngleServo_SetAngle(SERVO_PWM2, 0.0f);
         AngleServo_SetAngle(SERVO_PWM3, 0.0f);

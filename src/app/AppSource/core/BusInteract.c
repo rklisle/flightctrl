@@ -2,7 +2,7 @@
  * BusInteract.c
  *
  *  Created on: 2022年1月21日
- *      Author: ChengHongjing
+ *      Author: 成宏璟
  *
  * 本模块作为箭上总线功能的所有处理集合。
  * 总线通信为箭上各单机设备之间的联系方式，常见方式包括1553b,can,spacewire,LVDS,422,1394,以太网等
@@ -20,18 +20,17 @@
 #include "../modules/modOnceBattery.h"
 #include "../modules/modMEMS.h"
 #include "../modules/modEngine.h"
-#include "../payload/scout.h"
+#include "../payload/scout.h"//导引头
 #include "../payload/fuse.h"
 #include "../../app_can.h"
-#include "Telecontrol.h"
+#include "Telecontrol.h"//数据链，地面站消息响应处理
 //#include "../support/os_bufferLoop.h"
 #include <string.h>
 #include <stdio.h>
 #include <unistd.h>  // 需要包含此头文件
 
-RT rtList[MODULE_COUNT];
-RT_CAN rtCan[CAN_COUNT];
-
+RT rtList[MODULE_COUNT];//串口通讯对象，通道号及链路层校验，消息梳理函数
+RT_CAN rtCan[CAN_COUNT];//总线接收数据，初始化、消息处理
 /***********************************************************
  * 函数名称:InitCanRts()
  * 函数功能: 本函数在main函数初始化硬件设备前调用，其功能包括:
@@ -135,7 +134,7 @@ void InitRts()
 	rtList[RT_HIL].ckIndex = 0;//0
 	rtList[RT_HIL].chIndex = 5;//仿真口——UART6
 	rtList[RT_HIL].devID = 0x04;
-	rtList[RT_HIL].devBuad = 230400;	/** 	280:	921600; */  
+	rtList[RT_HIL].devBuad = 921600;	/** 	280:	921600; */  
 	rtList[RT_HIL].devStopLen = 1;
 	rtList[RT_HIL].oddCheckEnable = FALSE;
     rtList[RT_HIL].evenCheckEnable = FALSE;
@@ -236,7 +235,7 @@ void BusDataHandle()	// 1ms调用一次
 			rtList[k].ptr_RtHandler(NULL);
 		}
 	}
-/*
+	/*
 	STRU_CAN_MSG *msg = NULL;
 	while ((msg = (STRU_CAN_MSG *)PeekCanMessage()))//数据已经过校验
 	{

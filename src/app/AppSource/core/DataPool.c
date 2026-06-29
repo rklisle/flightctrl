@@ -8,15 +8,15 @@
 #include "DataPool.h"
 #include "../support/os_error.h"
 struct DataPool DataPoolALL[MAX_MODULE_COUNT];
-p_DataPool pDataPoolNav;
-p_DataPool pDataPoolFly;
-p_DataPool pDataPoolMcu;
-p_DataPool pDataPoolSrv;
-p_DataPool pDataPoolPwr;
-p_DataPool pDataPoolSelf;
-p_DataPool pDataPoolSD;
-p_DataPool pDataPoolMsn;
-p_DataPool pDataPoolImu;
+p_DataPool pDataPoolNav;	//导航数据
+p_DataPool pDataPoolFly;	//飞控数据
+p_DataPool pDataPoolMcu;	//未用到
+p_DataPool pDataPoolSrv;	//舵机数据
+p_DataPool pDataPoolPwr;	//电源数据
+p_DataPool pDataPoolSelf;	//飞控计算机及软件数据
+p_DataPool pDataPoolSD;	//SD存储
+p_DataPool pDataPoolMsn;	//地面站
+p_DataPool pDataPoolImu;	
 
 static OS_U32 GetData(struct DataPool* const this_obj, DataPoolKey key, DataPoolValue* const value, DataPoolType * const type );
 static OS_U32 SetData(struct DataPool* const this_obj, DataPoolKey key, DataPoolValue value, DataPoolType type);

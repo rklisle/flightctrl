@@ -238,21 +238,23 @@ static OS_U8 SaveImuInDataPool(STRU_IMU_INFO* buf)  //014不用
         SETDATA(pDataPoolImu, "navVe", ve * 1e2,	OS_S16);
         
         SETDATA(pDataPoolImu, "navPitch", pitch * 1e2,	OS_S16);			
-			  SETDATA(pDataPoolImu, "navRoll", roll * 1e2,	OS_S16);       
+		SETDATA(pDataPoolImu, "navRoll", roll * 1e2,	OS_S16);       
         SETDATA(pDataPoolImu, "navState", navState,	OS_U8);
-				SETDATA(pDataPoolImu, "navDir", dir * 1e2,	OS_U16);
-				//新增判断导航状态准备中且航向有效标志有效
-				if((navState == 0) && (DirMar == 1))
-				{
-					float navdirmid;
-					navdirmid = gpsdir + 180;
-					if(navdirmid > 360)
-						navdirmid = navdirmid - 360;
-					SETDATA(pDataPoolImu, "navDir", navdirmid * 1e2,	OS_U16);
-					SETDATA(pDataPoolImu, "navLon", gpslon * 1e7,	OS_S32);
-					SETDATA(pDataPoolImu, "navLat", gpslat * 1e7,	OS_S32);
-					SETDATA(pDataPoolImu, "navHigh", gpsalt,	OS_FLOAT);
-				}
+		SETDATA(pDataPoolImu, "navDir", dir * 1e2,	OS_U16);
+
+		//新增判断导航状态准备中且航向有效标志有效
+		if((navState == 0) && (DirMar == 1))
+		{
+			//由0~360deg转到-180~180deg范围，北偏东为正，北偏西为负
+			float navdirmid;
+			navdirmid = gpsdir + 180;
+			if(navdirmid > 360)
+				navdirmid = navdirmid - 360;
+			SETDATA(pDataPoolImu, "navDir", navdirmid * 1e2,	OS_U16);
+			SETDATA(pDataPoolImu, "navLon", gpslon * 1e7,	OS_S32);
+			SETDATA(pDataPoolImu, "navLat", gpslat * 1e7,	OS_S32);
+			SETDATA(pDataPoolImu, "navHigh", gpsalt,	OS_FLOAT);
+		}
     }
 	return 0;
 }

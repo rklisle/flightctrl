@@ -2,15 +2,15 @@
 #include "../src_control_unit_math/control_main.h"
 #include "flightPort.h"
 
-// ÊäÈë
+// ï¿½ï¿½ï¿½ï¿½
 Stru_Data_INS_To_Controller        g_ins_data = {0};
 Stru_Data_Engine_To_Controller     g_engine_data = {0};
 Stru_Data_Baro_To_Controller       g_baro_data = {0};
-// Stru_Data_Seeker_To_Controller     g_seeker_data = {0};
+Stru_Data_Seeker_To_Controller     g_seeker_data = {0};
 //Stru_Data_Datalink_To_Controller   g_datalink_data = {0};
 // Stru_Data_RadioAlt_To_Controller   g_radioalt_data = {0};
 
-// Êä³ö
+// ï¿½ï¿½ï¿½
 Stru_Data_Controller_To_Engine        g_controller_to_engine = {0};
 Stru_Data_Controller_To_Actuator      g_controller_to_actuator = {0};
 Stru_Data_Controller_To_Switch_Output g_controller_to_switch = {0};
@@ -18,12 +18,12 @@ Stru_Data_Controller_To_DatalinkTel     g_CtrltoDL_tel = {0};
 // Stru_Data_Controller_To_Seeker        g_controller_to_seeker = {0};
 // Stru_Data_Controller_To_Datalink      g_controller_to_datalink = {0};
 
-// º½µã
-Stru_Initial_Data   g_initial_data = {0};//³õÊ¼·¢ÉäÊý¾Ý£»
-Stru_Route_Data     g_route_data = {0};//³õÊ¼Ô¤×°¶©º½µãÐÅÏ¢
-Stru_Data_Datalink_To_ControllerSig     g_DLtoCtrl_sig = {0};//Êý¾ÝÁ´£¬ÔÚÏß¸üÐÂº½µãÐÅÏ¢
+// ï¿½ï¿½ï¿½ï¿½
+Stru_Initial_Data   g_initial_data = {0};//ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý£ï¿½
+Stru_Route_Data     g_route_data = {0};//ï¿½ï¿½Ê¼Ô¤×°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
+Stru_Data_Datalink_To_ControllerSig     g_DLtoCtrl_sig = {0};//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß¸ï¿½ï¿½Âºï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
 
-// ÐÂÔö£ºÊ±¼äÈ«¾Ö±äÁ¿¶¨Òå
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½È«ï¿½Ö±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 double   g_flight_time = 0.0;
 int      g_time_tick = 0;
 
@@ -43,7 +43,7 @@ extern "C"{
         // s_pre_cb = pre_cb;
         // s_post_cb = post_cb;
 
-        // ÊäÈë
+        // ï¿½ï¿½ï¿½ï¿½
         p->p_st_data_ins_to_controller      = &g_ins_data;
         p->p_st_data_engine_to_controller   = &g_engine_data;
         p->p_st_data_baro_to_controller     = &g_baro_data;
@@ -51,7 +51,7 @@ extern "C"{
         // p->p_st_data_datalink_to_controller = &g_datalink_data;
         // p->p_st_data_radioalt_to_controller = &g_radioalt_data;
         
-        // Êä³ö
+        // ï¿½ï¿½ï¿½
         p->p_st_data_controller_to_engine       = &g_controller_to_engine;
         p->p_st_data_controller_to_actuator     = &g_controller_to_actuator;
         p->p_st_data_controller_to_switch_output= &g_controller_to_switch;
@@ -59,16 +59,18 @@ extern "C"{
         // p->p_st_data_controller_to_seeker = &g_controller_to_seeker;
         // p->p_st_data_controller_to_datalink = &g_controller_to_datalink;
         
-        // º½µã
+        // ï¿½ï¿½ï¿½ï¿½
         p->p_st_route_data_preflight = &g_route_data;
         p->p_st_initial_data = &g_initial_data;
         p->p_st_data_datalink_to_controllersig = &g_DLtoCtrl_sig;
 
-        // ÐÂÔö£º°ó¶¨Ê±¼ä±äÁ¿£¨Ö±½ÓÊ¹ÓÃÈ«¾Ö±äÁ¿µØÖ·£©
-        p->flight_time = g_flight_time;  // ×¢Òâ£ºÕâÖ»ÊÇ³õÊ¼»¯Ê±¸³Öµ
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö±ï¿½ï¿½Ê¹ï¿½ï¿½È«ï¿½Ö±ï¿½ï¿½ï¿½ï¿½ï¿½Ö·ï¿½ï¿½
+        p->flight_time = g_flight_time;  // ×¢ï¿½â£ºï¿½ï¿½Ö»ï¿½Ç³ï¿½Ê¼ï¿½ï¿½Ê±ï¿½ï¿½Öµ
         p->time_tick = g_time_tick;
         
         p->Initial();
+
+		return p;
     }
     
     void ControlRun(void *v){
@@ -82,7 +84,7 @@ extern "C"{
 //        {   // prepare control input data
 //            s_pre_cb();
 //        }
-        // ¹Ø¼ü£ºÃ¿´ÎÔËÐÐÇ°´ÓÈ«¾Ö±äÁ¿Í¬²½µ½ÊµÀý
+        // ï¿½Ø¼ï¿½ï¿½ï¿½Ã¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç°ï¿½ï¿½È«ï¿½Ö±ï¿½ï¿½ï¿½Í¬ï¿½ï¿½ï¿½ï¿½Êµï¿½ï¿½
         pinst->flight_time = g_flight_time;
         pinst->time_tick = g_time_tick;
         

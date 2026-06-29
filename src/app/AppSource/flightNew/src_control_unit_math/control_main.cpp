@@ -13,7 +13,7 @@ CMathControlMain::CMathControlMain()
 	p_st_data_baro_to_controller = NULL;
 	p_st_data_radioalt_to_controller = NULL;
 	p_st_data_controller_to_seeker = NULL;
-	p_st_data_controller_to_datalink = NULL;
+	//p_st_data_controller_to_datalink = NULL;
 	p_st_data_controller_to_datalinktel = NULL;
 	p_st_data_controller_to_engine = NULL;
 	p_st_data_controller_to_actuator = NULL;
@@ -68,7 +68,12 @@ void CMathControlMain::Initial()
 	
 	m_math_control_roll.Initial();
 	m_math_control_yaw.Initial();
+	
+	m_math_control_pitch.p_st_pitch_control_input->ktheta_lauch_enc = m_st_flight_basic_output.ktheta_lauch_enc;
+	m_math_control_pitch.p_st_pitch_control_input->ktheta_climb_enc = m_st_flight_basic_output.ktheta_climb_enc;
+	m_math_control_pitch.p_st_pitch_control_input->ktheta_hight_enc = m_st_flight_basic_output.ktheta_hight_enc;
 	m_math_control_pitch.Initial();
+	
 	m_math_control_engine.Initial();
 
 	m_math_control_out.Initial();
@@ -110,6 +115,7 @@ void CMathControlMain::Update_Input_Data(MODULE_TYPE MODULE_NAME)
 		m_math_control_flight_basic.flight_time = flight_time;
 		m_math_control_flight_basic.time_tick = time_tick;
 		
+		//发动机控制 给 基础控制参数解算
 		m_st_flight_basic_input.engine_cmd_Kc = 
 			m_st_engine_control_output.control_Kc;
 		m_st_flight_basic_input.engine_cmd_rpm = 
@@ -172,6 +178,10 @@ void CMathControlMain::Update_Input_Data(MODULE_TYPE MODULE_NAME)
 			m_st_flight_basic_output.st_control_time.time_separate_booster;
 		m_st_roll_control_input.time_engine_start =
 			m_st_flight_basic_output.st_control_time.time_engine_start_finish;
+		m_st_roll_control_input.time_missile_takeoff = 
+			m_st_flight_basic_output.st_control_time.time_missile_takeoff;
+		m_st_roll_control_input.time_altitude_control =
+			m_st_flight_basic_output.st_control_time.time_altitude_control;
 		m_st_roll_control_input.time_combat_status = 
 			m_st_flight_basic_output.st_control_time.time_combat_status;
 		m_st_roll_control_input.time_turn_in_start =
@@ -187,6 +197,7 @@ void CMathControlMain::Update_Input_Data(MODULE_TYPE MODULE_NAME)
 		m_math_control_yaw.flight_time = flight_time;
 		m_math_control_yaw.time_tick = time_tick;
 		m_st_yaw_control_input.mass = m_st_flight_basic_output.mass_calc;
+		m_st_yaw_control_input.hz = m_st_flight_basic_output.hz;
 		m_st_yaw_control_input.gama = m_st_flight_basic_output.gama;
 		m_st_yaw_control_input.wy	= m_st_flight_basic_output.wy;
 		m_st_yaw_control_input.v	= m_st_flight_basic_output.v;
@@ -202,7 +213,8 @@ void CMathControlMain::Update_Input_Data(MODULE_TYPE MODULE_NAME)
 		{
 			m_st_yaw_control_input.dqh	= m_st_flight_basic_output.dqh;
 		}
-		m_st_yaw_control_input.nbz	= m_st_flight_basic_output.nbz;
+		m_st_yaw_control_input.nbz = m_st_flight_basic_output.nbz;
+		m_st_yaw_control_input.nby = m_st_flight_basic_output.nby;
 		m_st_yaw_control_input.distance_target = m_st_flight_basic_output.distance_target;
 		m_st_yaw_control_input.time_separate_booster = 
 			m_st_flight_basic_output.st_control_time.time_separate_booster;
@@ -216,7 +228,10 @@ void CMathControlMain::Update_Input_Data(MODULE_TYPE MODULE_NAME)
 	case ENUM_CONTROL_PITCH:		//更新俯仰控制模块输入
 		m_math_control_pitch.flight_time = flight_time;
 		m_math_control_pitch.time_tick = time_tick;
+		//m_st_pitch_control_input.ktheta_lauch_enc = m_st_flight_basic_output.ktheta_lauch_enc;
+		//m_st_pitch_control_input.ktheta_climb_enc = m_st_flight_basic_output.ktheta_climb_enc;
 		m_st_pitch_control_input.mass = m_st_flight_basic_output.mass_calc;
+		m_st_pitch_control_input.q = m_st_flight_basic_output.dynamic_pressure;
 		m_st_pitch_control_input.gama = m_st_flight_basic_output.gama;
 		m_st_pitch_control_input.zeta = m_st_flight_basic_output.zeta;
 		m_st_pitch_control_input.wz   = m_st_flight_basic_output.wz;
@@ -224,7 +239,6 @@ void CMathControlMain::Update_Input_Data(MODULE_TYPE MODULE_NAME)
 		m_st_pitch_control_input.v    = m_st_flight_basic_output.v;
 		m_st_pitch_control_input.vs   = m_st_flight_basic_output.vs;
 		m_st_pitch_control_input.g    = m_st_flight_basic_output.g;
-		//m_st_pitch_control_input.mass = m_st_flight_basic_output.
 		if (p_st_data_seeker_to_controller[m_target_attack_ID].flag_combat_status
 			/*&&(m_st_flight_basic_output.num_way_point_target == (p_st_route_data_preflight->num_rows - 1))*/)
 		{
@@ -246,6 +260,8 @@ void CMathControlMain::Update_Input_Data(MODULE_TYPE MODULE_NAME)
 			m_st_flight_basic_output.st_control_time.time_control;
 		m_st_pitch_control_input.time_separate_booster = 
 			m_st_flight_basic_output.st_control_time.time_separate_booster;
+		m_st_pitch_control_input.time_missile_takeoff = 
+			m_st_flight_basic_output.st_control_time.time_missile_takeoff;
 		m_st_pitch_control_input.time_altitude_control =
 			m_st_flight_basic_output.st_control_time.time_altitude_control;
 		m_st_pitch_control_input.time_combat_status = 
@@ -275,6 +291,10 @@ void CMathControlMain::Update_Input_Data(MODULE_TYPE MODULE_NAME)
 		m_st_engine_control_input.flag_alltitude_climb = m_st_flight_basic_output.flag_altitude_climb;
 		m_st_engine_control_input.flag_alltitude_decline = m_st_flight_basic_output.flag_altitude_decline;
 		m_st_engine_control_input.flag_velocity_control = m_st_flight_basic_output.flag_velocity_control;
+
+		m_st_engine_control_input.flag_engine_start = m_st_flight_basic_output.st_command.flag_engine_start;
+		m_st_engine_control_input.flag_engine_stop = m_st_flight_basic_output.st_command.flag_engine_shutdown;
+		m_st_engine_control_input.flag_missile_takeoff = m_st_flight_basic_output.st_command.flag_missile_takeoff;
 		break;
 	case ENUM_CONTROL_OUT:			//更新舵分配模块输入
 		m_math_control_out.flight_time = flight_time;
@@ -283,6 +303,7 @@ void CMathControlMain::Update_Input_Data(MODULE_TYPE MODULE_NAME)
 		m_st_control_out_input.u25g	= m_st_roll_control_output.u25g;
 		m_st_control_out_input.u4g	= m_st_roll_control_output.u4g;
 		m_st_control_out_input.ug_adrc = m_st_roll_control_output.ug_adrc;
+		m_st_control_out_input.uqkf	= m_st_pitch_control_output.uqkf;
 		m_st_control_out_input.u2f	= m_st_pitch_control_output.u2f;
 		m_st_control_out_input.u5f	= m_st_pitch_control_output.u5f;
 		m_st_control_out_input.ugf	= m_st_pitch_control_output.ugf;
@@ -357,24 +378,42 @@ void CMathControlMain::Update_Output_Data()
 	p_st_data_controller_to_datalinktel->beta_ins = m_st_flight_basic_output.beita_vg;	//地速侧滑角
 	p_st_data_controller_to_datalinktel->MaxRpm = 0.0; 		//最大转速
 	p_st_data_controller_to_datalinktel->DFT_freq_max = 0.0;//辨识运动频率
+
+	//补充，用于仿真显示等功能补充
+	p_st_data_controller_to_datalinktel->rudder_I_cmd = m_st_control_out_output.u1;//物理舵
+	p_st_data_controller_to_datalinktel->rudder_II_cmd = m_st_control_out_output.u2;
+	p_st_data_controller_to_datalinktel->rudder_III_cmd = m_st_control_out_output.u3;
+	p_st_data_controller_to_datalinktel->rudder_IV_cmd = m_st_control_out_output.u4;
+	p_st_data_controller_to_datalinktel->rudder_V_cmd = m_st_control_out_output.u5;
+	p_st_data_controller_to_datalinktel->rudder_VI_cmd = m_st_control_out_output.u6;
+
+	p_st_data_controller_to_datalinktel->Kc_cmd = m_st_engine_control_output.control_Kc;//油门
 	
+	p_st_data_controller_to_datalinktel->curLon = m_st_flight_basic_input.st_ins_data.longitude;//经度、纬度、高度
+	p_st_data_controller_to_datalinktel->curLat = m_st_flight_basic_input.st_ins_data.latitude;
+	p_st_data_controller_to_datalinktel->curAlt = m_st_flight_basic_input.st_ins_data.height;
 	
 	//输出发动机数据
-	p_st_data_controller_to_engine->control_rpm = m_st_engine_control_output.control_rpm;
-	p_st_data_controller_to_engine->ECU_work_cmd = m_st_flight_basic_output.ECU_work_cmd;
+	p_st_data_controller_to_engine->control_Kc = m_st_engine_control_output.control_Kc;//油门控制输出
+	p_st_data_controller_to_engine->control_rpm = m_st_engine_control_output.control_rpm;//发动机转速指令，未使用
+	p_st_data_controller_to_engine->ECU_work_cmd = m_st_flight_basic_output.ECU_work_cmd;//发动机控制指令，未使用
 
 	//输出舵控数据
 	p_st_data_controller_to_actuator->control_voltage_I   = m_st_control_out_output.u1;
 	p_st_data_controller_to_actuator->control_voltage_II  = m_st_control_out_output.u2;
 	p_st_data_controller_to_actuator->control_voltage_III = m_st_control_out_output.u3;
 	p_st_data_controller_to_actuator->control_voltage_IV  = m_st_control_out_output.u4;
+	p_st_data_controller_to_actuator->control_voltage_V  = m_st_control_out_output.u5;
+	p_st_data_controller_to_actuator->control_voltage_VI  = m_st_control_out_output.u6;
 	
 	//输出开关量数据
-	p_st_data_controller_to_switch_output->flag_engine_start = m_st_flight_basic_output.st_command.flag_engine_start;//发动机开机
 	p_st_data_controller_to_switch_output->flag_launch_missile_wing = m_st_flight_basic_output.st_command.flag_launch_missile_wing;//弹翼展开
 	p_st_data_controller_to_switch_output->flag_separate_booster = m_st_flight_basic_output.st_command.flag_separate_booster;//助推器分离
+	p_st_data_controller_to_switch_output->flag_engine_start = m_st_flight_basic_output.st_command.flag_engine_start;//发动机开机
+	
 	//开关量输出
 	p_st_data_controller_to_switch_output->flag_missle_takeoff = m_st_flight_basic_output.st_command.flag_missile_takeoff;//起飞
 	p_st_data_controller_to_switch_output->flag_engine_shutdown = m_st_flight_basic_output.st_command.flag_engine_shutdown;//发动机关机
 	p_st_data_controller_to_switch_output->flag_separate_booster = m_st_flight_basic_output.st_command.flag_separate_booster;//开伞
+	p_st_data_controller_to_switch_output->flag_fuze_unlock = m_st_flight_basic_output.st_command.flag_fuze_unlock;//引信解锁
 }

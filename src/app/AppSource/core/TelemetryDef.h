@@ -26,10 +26,10 @@ telemetryParam tm_flight[] =
 	{&DataPoolALL[MSN_DATAPOOL_INDEX],	"msnDevID",	1},
 	{&DataPoolALL[MSN_DATAPOOL_INDEX],	"msnLead",	1},
 	{&DataPoolALL[MSN_DATAPOOL_INDEX],	"autoStep",	1},
-	//µ¼ÒýÍ·£º3Á¬½Ó£¬2¶ÏÁ¬
+	//???????3?????2????
 	{&DataPoolALL[MSN_DATAPOOL_INDEX],	"paylodtp",	1},
-	{&DataPoolALL[MSN_DATAPOOL_INDEX],	"WP_cur",	1},	//µ±Ç°º½µãºÅ
-	{&DataPoolALL[MSN_DATAPOOL_INDEX],	"tarLon",	4},	//µ±Ç°º½µã¾­¶È
+	{&DataPoolALL[MSN_DATAPOOL_INDEX],	"WP_cur",	1},	//????????
+	{&DataPoolALL[MSN_DATAPOOL_INDEX],	"tarLon",	4},	//?????????
 	{&DataPoolALL[MSN_DATAPOOL_INDEX],	"tarLat",	4},
 	{&DataPoolALL[MSN_DATAPOOL_INDEX],	"tarAlt",	2},
 	{&DataPoolALL[MSN_DATAPOOL_INDEX],	"msnComm1",	1},
@@ -40,7 +40,7 @@ telemetryParam tm_flight[] =
 	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"imuAx",	4},
 	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"imuAy",	4},
 	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"imuAz",	4},
-	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"gpsLon",	4}, //GPSÔ­Ê¼¾­¶È
+	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"gpsLon",	4}, //GPS??????
 	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"gpsLat",	4},
 	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"gpsAlt",	2},
 	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"gpsVn",	2},
@@ -53,10 +53,10 @@ telemetryParam tm_flight[] =
 	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"gpsMinit",	1},
 	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"gpsSec",	1},
 	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"gpsMSec",	1},
-	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"dirEffec",	1}, //GPSº½ÏòÓÐÐ§±êÖ¾
-	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"gpsDir",	2}, //GPSË«ÌìÏß¶¨Î»º½Ïò½Ç
-	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"gpsScCnt",	1},	// ¶¨Î»ÐÇÊý
-	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"navLon",	4}, //×éºÏµ¼º½¾­¶È
+	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"dirEffec",	1}, //GPS???????????
+	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"gpsDir",	2}, //GPS?????????????
+	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"gpsScCnt",	1},	// ????????
+	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"navLon",	4}, //??????????
 	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"navLat",	4},
 	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"navHigh",	4},
 	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"navVn",	2},
@@ -65,39 +65,39 @@ telemetryParam tm_flight[] =
 	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"navPitch",	2},
 	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"navDir",	2},
 	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"navRoll",	2},
- //0x00×¼±¸       0x20¶Ô×¼ÖÐ     0x3F¶Ô×¼Íê³É      0x2F¶Ô×¼Ê§°Ü£¨ÆæÒì½Ç¡¢»ò¶Ô×¼¹ý³ÌÖÐ³öÏÖ½Ï´ó·ù¶È»Î¶¯£©
-//0x60×éºÏµ¼º½Ä£Ê½       0x64´¿¹ßÐÔµ¼º½Ä£Ê½  
+ //0x00???       0x20?????     0x3F??????      0x2F?????????????????????????????????????
+//0x60????????       0x64???????????  
 	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"navState",	1},
-//·¢ÉäÏµÎ»ÖÃx£¬µ¥Î» Ã×
+//?????????x?????? ??
 	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"navX",	4},
 	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"navY",	4},
 	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"navZ",	4},
-//·¢ÉäÏµËÙ¶Èx *10±¶£¬µ¥Î» Ã×/Ãë
+//????????x *10???????? ??/??
 	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"navVx",	2},
 	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"navVy",	2},
 	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"navVz",	2},
-// ¾²Ñ¹ *100±¶£¬µ¥Î» kpa
+// ??? *100???????? kpa
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"AirPress",	2},
-// ¿ÕËÙ *10±¶£¬ µ¥Î» Ã×/Ãë
+// ???? *10???? ???? ??/??
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"AirSpd",	2},
-// µØËÙ *10±¶£¬ µ¥Î» Ã×/Ãë
+// ???? *10???? ???? ??/??
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"GrdSpd",	2},
-// ÆøÑ¹¸ß¶È£¬µ¥Î» Ã×
+// ??????????? ??
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"AirHigh",	2},
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"seqUmb",	1},
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"seqDrop",	1},
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"seqSac1",	1},
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"seqSac2",	1},
 	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"adrc_Mx",	2},
-	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"EngineRp",	2},	//014 ÓÍÃÅ°Ù·Ö±È*10 È¡Öµ[0~1000]£»  280 ×ªËÙ
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"EngineRp",	2},	//014 ???????*10 ??[0~1000]??  280 ???
 	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"gamaCmd",	2},
 	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"thetaCmd",	2},
 	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"nycCmd",	2},
 	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"highCmd",	4},
 	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"ac_dL",	4},
 	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"ac_dZ",	2},
-	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"tokenlon",	1}, //×ÝÏòÁîÅÆ
-	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"tokenlat",	1}, //²àÏòÁîÅÆ
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"tokenlon",	1}, //????????
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"tokenlat",	1}, //????????
 	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"ac_dR",	2},
 	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"thetav",	2},
 	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"Vcmd",	2},
@@ -110,47 +110,46 @@ telemetryParam tm_flight[] =
 	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"sctLock",	1},
 	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"sctPitch",	2},
 	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"sctYaw",	2},
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"viewPitc",	2},
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"viewYaw",	2},
 	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"vPitchSp",	2},
 	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"vYawSp",	2},
-	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"fPitchSp",	2},
-	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"fYawSp",	2},
 	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"pitchCmd",	2},
 	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"rollCmd",	2},
 	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"yawCmd",	2},
-	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"deltaR",	4},	// µ¯Ä¿¾àÀë
-	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"dRn",	2},	// µ¯Ä¿±±Ïò¾àÀë
-	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"dRu",	2},	// µ¯Ä¿ÌìÏò¾àÀë
-	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"dRe",	2},	// µ¯Ä¿¶«Ïò¾àÀë
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"dRn",	2},	// ï¿½ï¿½Ä¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"dRu",	2},	// ??????????
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"dRe",	2},	// ??????????
 	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"PitchPre",	2},
 	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"YawPre",	2},
-	// ¶æ»ú½Ç¶ÈÖµ£¬Ò»×é6¸ö£¬´æµÄ¶¼ÊÇ¿ØÖÆÊµ¼ÊÊä³ö½Ç¶ÈµÄ100±¶
+	// ????????????6???????????????????????100??
 	{&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr1Cmd",	2}, // roll left
 	{&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr2Cmd",	2}, // roll right
 	{&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr3Cmd",	2}, // pitch left
 	{&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr4Cmd",	2}, // pitch right
 	{&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr5Cmd",	2}, // yaw left
 	{&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr6Cmd",	2}, // yaw right
-	// ¶æ»ú½Ç¶ÈÖµ£¬Ò»×é6¸ö£¬´æµÄ¶¼ÊÇ½Ç¶ÈµÄ100±¶
-	// {&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr1Read",	2}, //¶æÆ«·´À¡
-	// {&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr2Read",	2},
-	// {&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr3Read",	2},
-	// {&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr4Read",	2},
-	// {&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr5Read",	2},
-	// {&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr6Read",	2},
+	// ????????????6?????????????100??
+	{&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr1Read",	2},
+	{&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr2Read",	2},
+	{&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr3Read",	2},
+	{&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr4Read",	2},
+	{&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr5Read",	2},
+	{&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr6Read",	2},
 };
 telemetryParam tm_200hz[] =
 {
-	/** Ô¤·¢Éä×´Ì¬£º0xCC ¡ª¡ª ·¢¶¯»úÆô¶¯Íê³É£¬×ªËÙ´ï±ê
-	 *  ¿ØÖÆÊä³öÆð·ÉÍê³É£º	0xEE
-	 *  ²»·¢ÉäÁË£¬·¢¶¯»úÍ£»ú£º0x00
+	/** ?????????0xCC ???? ???????????????????
+	 *  ??????????????	0xEE
+	 *  ????????????????????0x00
 	 */
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"RecvLunc",	1},
-	//	1£ºµØÃæ°´ÏÂÆð·É£¬0£ºÃ»°´ÏÂ
+	//	1????????????0???????
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"startFly",	1},
-	/** Æð·ÉÄ£Ê½
-	 * 1£º¼ÓËÙ¶È > 30m/s?
-	 * 2£ºµØÃæµã»÷Æð·É
-	 * 3£º×éºÏµ¼º½×´Ì¬ ÇÒ ËÙ¶È > 10
+	/** ?????
+	 * 1??????? > 30m/s?
+	 * 2???????????
+	 * 3?????????? ?? ??? > 10
 	 */
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"luanMode",	1},
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"luncTime",	4},
@@ -163,43 +162,33 @@ telemetryParam tm_200hz[] =
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"commSrv",	1},
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"commFuse",	1},
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"tcCmd",	1},
-	// ·¢Éäµã¾­¶È£¬µ¥Î» ¡ã£¬´æµÄÊ±ºò£¬³ýÒÔ1e-7
+	// ???????????? ???????????1e-7
 	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"DataLon",	4},
-	// ·¢ÉäµãÎ³¶È£¬µ¥Î» ¡ã£¬´æµÄÊ±ºò£¬³ýÒÔ1e-7
+	// ?????????????? ???????????1e-7
 	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"DataLat",	4},
-	// ·¢Éäµã¸ß¶È£¬µ¥Î» Ã×£¬µ±Á¿1
+	// ???????????? ???????1
 	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"DataHigh",	2},
-	// ·¢ÉäµãÉäÏò£¬µ¥Î» ±±Æ«¶«¶àÉÙ¶È£¬µ±Á¿0.01
+	// ???????????? ???????????????0.01
 	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"DataDir",	2},
-// 1£ºSD¿¨³õÊ¼»¯³É¹¦£» 0xEE»ò0xFF£ºSD¿¨³õÊ¼»¯Ê§°Ü
+// 1??SD???????????? 0xEE??0xFF??SD??????????
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"sdState",	1},
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"scout1",	2},
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"scout2",	2},
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"scout3",	2},
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"scout4",	2},
-	// {&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuseMode",	1},
-	// {&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuse24V",	1},
-	// {&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuseActv",	1},
-	// {&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuseBIT",	1},
-	// {&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuse5V",	2},
-	// {&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuseuf",	2},
-	// {&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuseTemp",	2},
-	// {&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuseax",	4},
-	// {&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuseay",	4},
-	// {&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuseaz",	4},
-	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fzFeedbk",	1},
-	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fzTask",	1},
-	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fzFirV",	2},
-	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fzPrxA",	2},
-	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fzIC12V",	2},
-	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fzDetV",	2},
-	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fzDcfA",	2},
-	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fzC1Stat",	2},
-	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fzUnitNo",	2},
-	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fzImpSt",	1},
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuseMode",	1},
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuse24V",	1},
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuseActv",	1},
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuseBIT",	1},
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuse5V",	2},
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuseuf",	2},
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuseTemp",	2},
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuseax",	4},
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuseay",	4},
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuseaz",	4},
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"cpuTemp",	2},
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"cpuTemp2",	2},
-	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"mcuTemp",	2},	// ÕâÀïµÄ²ÎÊý¶ÔÓ¦Ò£²â±í
+	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"mcuTemp",	2},	// ???????????????
 	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"Batt28V",	2},
 	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"Batt28A",	2},
 	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"VCombin",	2},
@@ -246,45 +235,45 @@ telemetryParam tm_200hz[] =
 	{&DataPoolALL[NAV_DATAPOOL_INDEX],	"navLon",	4},
 	{&DataPoolALL[NAV_DATAPOOL_INDEX],	"navLat",	4},
 	{&DataPoolALL[NAV_DATAPOOL_INDEX],	"navHigh",	4},
-	//µ¼º½±±ËÙ * 100
+	//???????? * 100
 	{&DataPoolALL[NAV_DATAPOOL_INDEX],	"navVn",	2},
-	//µ¼º½ÌìËÙ * 100
+	//???????? * 100
 	{&DataPoolALL[NAV_DATAPOOL_INDEX],	"navVs",	2},
-	//µ¼º½¶«ËÙ * 100
+	//???????? * 100
 	{&DataPoolALL[NAV_DATAPOOL_INDEX],	"navVe",	2},
-	//¸©Ñö½Ç
+	//??????
 	{&DataPoolALL[NAV_DATAPOOL_INDEX],	"navPitch",	2},
 	{&DataPoolALL[NAV_DATAPOOL_INDEX],	"navRoll",	2},
 	{&DataPoolALL[NAV_DATAPOOL_INDEX],	"navDir",	2},
- //0x00×¼±¸       0x20¶Ô×¼ÖÐ     0x3F¶Ô×¼Íê³É      0x2F¶Ô×¼Ê§°Ü£¨ÆæÒì½Ç¡¢»ò¶Ô×¼¹ý³ÌÖÐ³öÏÖ½Ï´ó·ù¶È»Î¶¯£©
-//0x60×éºÏµ¼º½Ä£Ê½       0x64´¿¹ßÐÔµ¼º½Ä£Ê½  
+ //0x00???       0x20?????     0x3F??????      0x2F?????????????????????????????????????
+//0x60????????       0x64???????????  
 	{&DataPoolALL[NAV_DATAPOOL_INDEX],	"navState",	1},
 // HACK: TEST ECU dataPool Define
-//280£º×ªËÙ
-//014£º·¢¶¯»úÖ¸Áî9£ºÊµ¼ÊÓÍÑ¹£¬µ¥Î»mbar
+//280?????
+//014???????????9??????????????mbar
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"engSetRp",	2},
-// ·¢¶¯»úÉèÖÃ×ªËÙ(not used)
-//014£º·¢¶¯»úÖ¸Áî86£ºÆÚÍûµÄÓÍÃÅÎ»ÖÃ
+// ?????????????(not used)
+//014???????????86????????????????
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"ecuSetRp",	2},
-//014£ºÖ¸Áî69£¬Êµ¼Ê×ªËÙ£¬[0~9999]	
+//014?????69?????????[0~9999]	
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"ecuGetRp",	2},
-//280£º·¢¶¯»úÎÂ¶È * 10	
+//280??????????? * 10	
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"ecuTemp",	2},
-//280£º·¢¶¯»úµç³ØµçÑ¹ * 10
-//014£ºÖ¸Áî19£¬Êµ¼ÊÅçÓÍ1Âö¿í£¬µ¥Î»us
+//280????????????? * 10
+//014?????19?????????1??????????us
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"ecu24V",	2},
-//280£º·¢¶¯»úµç³ØµçÁ÷ * 10
-//014£ºÖ¸Áî39£¬Êµ¼ÊÅçÓÍ2Âö¿í£¬µ¥Î»us
+//280?????????????? * 10
+//014?????39?????????2??????????us
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"ecu24A",	2},
-//280£º·¢¶¯»ú×´Ì¬£º0Í£»ú£¬1Æô¶¯ÖÐ£¬2É¢ÈÈ 3¹ÊÕÏ 4ÍÑ»ú 5ÔËÐÐ
-//014£º·¢¶¯»ú×´Ì¬£º0Í£»ú£¬1Æô¶¯ÖÐ£¬2Í£»úÖÐ 5ÔËÐÐ
+//280????????????0?????1????????2??? 3???? 4??? 5????
+//014????????????0?????1????????2????? 5????
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"ecuState",	1},
-//014£º·¢¶¯»ú´íÎóÂë¶¨Òå£º0ÎÞÒì³£ 1ÓÍÑ¹Òì³£ 
+//014?????????????????0???? 1????? 
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"ecuError",	1},
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuelRate",	2},//
-// 0Õý³£·ÉÐÐ£¬3¾àÀëÉ¡½µµã<150£¬4Õý³£¿ªÉ¡£¬0xCC³ö°²È«Çø±êÖ¾
+// 0??????????3??????????<150??4??????????0xCC??????????
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"flyError",	1},
-// ´æµÄÊÇ1000±¶µÄÊµ¼ÊµçÁ÷Öµ
+// ?????1000???????????
 	{&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr1A",	2},
 	{&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr2A",	2},
 	{&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr3A",	2},

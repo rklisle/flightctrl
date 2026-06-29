@@ -180,13 +180,14 @@ void CFlightGlobalFun::Vincenty_Backward(IN double vin_l1,
 	double sin_sigma,cos_sigma,c_2sigma;
 	double temp;
 
-	/*	
-	if(fabs(vin_b1-vin_b2)<0.000001 && fabs(vin_l1-vin_l2)<0.000001)
+	//相对距离很近，小于1m，特殊处理	
+	if(fabs(vin_b1-vin_b2)<0.00001 && fabs(vin_l1-vin_l2)<0.00001)
 	{
-	(*S_ptr)=0.0; (*Alfa12_ptr)=0.0; 
-	return;
+		(*S_ptr)= 1.0; (*Alfa12_ptr)=0.0; 
+		return;
 	}
-	*/	
+
+	//相对距离较远
 	u1=RTOA*atan((1-e)*tan(vin_b1/RTOA));
 	u2=RTOA*atan((1-e)*tan(vin_b2/RTOA));
 	dlamda=vin_l2-vin_l1;

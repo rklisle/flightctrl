@@ -12,7 +12,7 @@
 
 extern void *pControl;
 
-extern void RunInitialInit();
-extern void RunStageMachineStep();
+extern void RunInitialInit();//流程调度，初始化
+extern void RunStageMachineStep();//流程调度，运行
 
 #endif /* SRC_STATEMACHINE_H_ */

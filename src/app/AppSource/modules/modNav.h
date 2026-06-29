@@ -1,4 +1,4 @@
-
+//ï¿½ï¿½ï¿½ï¿½Í¨Ñ¶
 #ifndef SRC_MODNAV_H_
 #define SRC_MODNAV_H_
 
@@ -6,26 +6,26 @@
 
 #define IMU_G0				(9.794265)
 
-#define InstalMod1 0x6A6B//°²×°Ä£Ê½
+#define InstalMod1 0x6A6B//ï¿½ï¿½×°Ä£Ê½
 #define InstalMod2 0x6C6D
 
-#define SimalMod1 0x5A5B//·ÂÕæÄ£Ê½
+#define SimalMod1 0x5A5B//ï¿½ï¿½ï¿½ï¿½Ä£Ê½
 #define SimalMod2 0x5C5D
 
 
 
-#define StartAlign_H 0x8A8B//Æô¶¯Ë®Æ½¶Ô×¼
-#define StartAlign_V 0x8C8D//Æô¶¯´¹Ö±¶Ô×¼
+#define StartAlign_H 0x8A8B//ï¿½ï¿½ï¿½ï¿½Ë®Æ½ï¿½ï¿½×¼
+#define StartAlign_V 0x8C8D//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö±ï¿½ï¿½×¼
 
-#define InertialNav   0x7A7B //¹ßÐÔµ¼º½
-#define IntegratNav   0x8C8D //×éºÏµ¼º½
+#define InertialNav   0x7A7B //ï¿½ï¿½ï¿½Ôµï¿½ï¿½ï¿½
+#define IntegratNav   0x8C8D //ï¿½ï¿½Ïµï¿½ï¿½ï¿½
 
 
 #pragma pack(1)
 typedef struct
 {
-	OS_U32 u32Counter;		// data[0]  2Î»¼ÆÊýÆ÷
-	OS_U8 GPSstate;			// data[4]  gnss_recv_422.posType
+	OS_U32 u32Counter;		// data[0]  2Î»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	OS_U8 GPSstate;		// data[4]  gnss_recv_422.posType
 	OS_U8 StanumberMaster;	// data[5]  gnss_recv_422.TrackStart1
 	OS_U8 StanumberSlave;	// data[6]  gnss_recv_422.TrackStart2
 	OS_S32 GPSlon;			// data[7]  gnss_recv_422.lon * 1e7
@@ -37,6 +37,7 @@ typedef struct
 	OS_U16 PDOP;			// data[25] gnss_recv_422.pdop * 1e2
 	OS_U16 GDOP;			// data[27] gnss_recv_422.hdop * 1e2
 	OS_U8  Deltime;			// data[29] 0
+	
 	float imuWx16507;		// data[30] imuSourceData.imuExpensive_wx
 	float imuWy16507;		// data[34] imuSourceData.imuExpensive_wy
 	float imuWz16507;		// data[38] imuSourceData.imuExpensive_wz
@@ -58,31 +59,32 @@ typedef struct
 	float imuAy42688;		// data[94] imuSourceData.imuCheap42688_ay
 	float imuAz42688;		// data[98] imuSourceData.imuCheap42688_az
 	
-//0x44 ³õÊ¼»¯ 0x45 ÉÏ×¢ÈÎÎñ 0x20 ¶Ô×¼ÖÐ 0x3F ¶Ô×¼Íê³É 0x64 ´¿¹ßÐÔ 0x60 ×éºÏµ¼º½	
+	//ï¿½ï¿½Ïµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×´Ì¬ï¿½ï¿½0x44 ï¿½ï¿½Ê¼ï¿½ï¿½ 0x45 ï¿½ï¿½×¢ï¿½ï¿½ï¿½ï¿½ 0x20 ï¿½ï¿½×¼ï¿½ï¿½ 0x3F ï¿½ï¿½×¼ï¿½ï¿½ï¿½ 0x64 ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 0x60 ï¿½ï¿½Ïµï¿½ï¿½ï¿½	
 	OS_U8 navStatus;		// data[102]
-    
+	
+    //ï¿½ï¿½Ïµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	OS_S32 s32navLon;		// data[103]  nav_output.lon * d2r * 1e7
 	OS_S32 s32navLat;		// data[107]  nav_output.lat * d2r * 1e7
 	OS_S32 s32navHigh;		// data[111]  nav_output.alt * 1e3
 	OS_S32 s32navVn;		// data[115]  nav_output.v_n * 1e3
 	OS_S32 s32navVs;		// data[119]  nav_output.v_d * 1e3
 	OS_S32 s32navVe;		// data[123]  nav_output.v_e * 1e3
-    
-	OS_U16 s16dir;			// data[127]  nav_output.fai * 1e2
-	OS_S16 s16pitch;		// data[129]  nav_output.pich * 1e2
-	OS_S16 s16roll;			// data[131]  nav_output.roll * 1e2
-    
-   	OS_S8 navInstallMode[3];// data[133]  installMode
-	OS_U8 simuMode;			// data[136]  0
-	OS_U8 uploadEphStatus;	// data[137]  ephUpdateState	//ÐÇÀú¼Ó×¢·´À¡
+	OS_U16 s16dir;			// data[127]  nav_output.fai * 1e2ï¿½ï¿½ï¿½ï¿½ï¿½
+	OS_S16 s16pitch;		// data[129]  nav_output.pich * 1e2ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	OS_S16 s16roll;			// data[131]  nav_output.roll * 1e2ï¿½ï¿½×ªï¿½ï¿½
+
+	//ï¿½Å»ï¿½Îªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä£Ê½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä£ï¿½ï¿½×ªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Êµï¿½ï¿½ï¿½ï¿½ï¿½(×ªÌ¨ï¿½ï¿½ï¿½ï¿½Ù¶Èµï¿½ï¿½ï¿½)ï¿½ï¿½Ó²ï¿½ï¿½ï¿½Ú»ï¿½ï¿½ï¿½ï¿½Ô£ï¿½ï¿½ï¿½ï¿½Ù¶È¡ï¿½ï¿½ï¿½ï¿½Ù¶Èµï¿½ï¿½Ó£ï¿½
+   	OS_S8 navInstallMode[3];// data[133]  installMode Î´ï¿½Ãµï¿½
+	OS_U8 simuMode;		// data[136]  0 Î´ï¿½Ãµï¿½
+	OS_U8 uploadEphStatus;	// data[137]  ephUpdateState	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×¢ï¿½ï¿½ï¿½ï¿½
 	
-	OS_U16 magDir;			// data[138]  magdir * 1e2
-    OS_U16 magRealDir;		// data[140]  estimatedir * 1e2
-    
+	OS_U16 magDir;			// data[138]  magdir * 1e2 ï¿½Åºï¿½ï¿½ï¿½
+    OS_U16 magRealDir;		// data[140]  estimatedir * 1e2 ï¿½ï¿½ï¿½æº½ï¿½ï¿½
 	OS_S16 magX;			// data[142]  x * 1e2
 	OS_S16 magY;			// data[144]  y * 1e2
 	OS_S16 magZ;			// data[146]  z * 1e2
-	OS_U8 year;				// data[148]  
+	
+	OS_U8 year;				// data[148]  ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½
 	OS_U8 month;			// data[149]  
 	OS_U8 day;				// data[150]  
 	OS_U8 hour;				// data[151]  
@@ -90,52 +92,57 @@ typedef struct
 	OS_U8 second;			// data[153]  
 	OS_U8 ms;				// data[154]  
    
-	OS_U16 gpsDir;			// data[155]  gnss_recv_422.heading * 100  º½Ïò
-	char   gpsDirEnable[2];	// data[157]  
+	OS_U16 gpsDir;			// data[155]  gnss_recv_422.heading * 100  ï¿½ï¿½ï¿½ï¿½
+	char   gpsDirEnable[2];// data[157]  
 	OS_U8 gpsupdate;		// data[159]  gnss_recv_422.posType
-	OS_U8 gpsDirEffect;		// data[160]  gnss_recv_422.heading_type
-	OS_U16 gpsTrack;		// data[161]  gnss_recv_422.track * 100   º½¼£½Ç
+	OS_U8 gpsDirEffect;	// data[160]  gnss_recv_422.heading_type
+	OS_U16 gpsTrack;		// data[161]  gnss_recv_422.track * 100   ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	
 	OS_U16 navUs;			// data[163]  calcTimeCpu0 * 1000
-	OS_U16 navUsKa;			// data[165]  cpu0usKa
-    OS_S16 cpuTemp;			// data[167]  System_GetCoreTemperature() * 100  NAV°å×ÓµÄtemp
+	OS_U16 navUsKa;			// data[165]  cpu0usKa ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½
+    OS_S16 cpuTemp;			// data[167]  System_GetCoreTemperature() * 100  ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â¶ï¿½
 }STRU_NAV_INFO;
 
+//ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½ï¿½ï¿½ï¿½Ý°ï¿½
 typedef struct
 {
 	OS_DOUBLE InitLon;
 	OS_DOUBLE InitLat;
 	OS_DOUBLE InitHigh;
 	OS_DOUBLE InitYaw;
-	OS_U8 cmd;	//1:¶Ô×¼ 2:×ªµ¼º½ 3:·¢Éä
+	OS_U8     navAlignMode;   // 0æ°´å¹³ 1åž‚ç›´
+    OS_U16    navAlignTime;
+	OS_U8 cmd;	///1:ï¿½ï¿½×¼ 2:×ªï¿½ï¿½ï¿½ï¿½ 3:ï¿½ï¿½ï¿½ï¿½
 } STRU_NAV_INPUT;
 #pragma pack()
 
-extern OS_U16 Startalign;//Æô¶¯¶Ô×¼
-extern OS_U16 Startnav;//Æô¶¯µ¼º½
-extern OS_U16 Simstate;//·ÂÕæÄ£Ê½
-extern OS_U16 InstallMode_Lunch;
-extern OS_BOOL IsToNAV;//ÊÇ·ñÒÑ¾­×ªµ¼º½
-extern STRU_NAV_INPUT navInput;
+extern OS_U16 Startalign;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×¼ï¿½ï¿½Î´ï¿½Ãµï¿½
+extern OS_U16 Startnav;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î´ï¿½Ãµï¿½
+extern OS_U16 Simstate;//ï¿½ï¿½ï¿½ï¿½Ä£Ê½ï¿½ï¿½Î´ï¿½Ãµï¿½
+extern OS_BOOL IsToNAV;//ï¿½Ç·ï¿½ï¿½Ñ¾ï¿½×ªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î´ï¿½Ãµï¿½
+extern OS_U16 IMUEncp;//Î´ï¿½Ãµï¿½
+extern OS_U8  En_SIMIMUIN;//Î´ï¿½Ãµï¿½
+extern OS_U8 imuModuleSetCount;//Î´ï¿½Ãµï¿½
 
-extern OS_U16 IMUEncp;
-extern OS_U8  En_SIMIMUIN;
-extern OS_U8 imuModuleSetCount;
+extern OS_U16 InstallMode_Lunch;//ï¿½ï¿½ï¿½ï¿½Ä£Ê½ï¿½ï¿½Î´ï¿½Ãµï¿½
+extern STRU_NAV_INPUT navInput;//ï¿½òµ¼ºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý°ï¿½
 
-extern OS_U8 NavStatusUpdata();
+//extern OS_U8 NavStatusUpdata();
+extern double toDeg(double rad);//ï¿½Ú²ï¿½ï¿½ï¿½ï¿½ï¿½
+extern OS_U8 CalcXYZ();//ï¿½ï¿½ï¿½Ý±ï¿½ï¿½ì¶¯ï¿½Ù¶È¡ï¿½ï¿½ï¿½Î³ï¿½ß£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ XYZÎ»ï¿½Ã¼ï¿½ï¿½Ù¶ï¿½
+extern OS_U8 SaveNavInDataPool(STRU_NAV_INFO *navInfo);//ï¿½Ú²ï¿½ï¿½ï¿½ï¿½ï¿½
 
-extern OS_U32 NavRtHandler(STRU_422_MSG_INFO * frame);
-extern OS_U32 NavCmdHandler(STRU_422_MSG_INFO * frame);
-extern double toDeg(double rad);
-extern OS_U8 MsgToNAV(OS_U8 msgID, OS_U8 *data, OS_U8 len);
-extern OS_U8 NavStatusUpdata();
-extern OS_U8 NavInit();
-extern OS_U8 ToNavModel();
-extern OS_U8 AutoSendToNav();
-extern OS_U8 StartEncpEphToNav(OS_U8 *data, OS_U16 len);
-extern OS_U8 CalcXYZ();
- OS_U8 SendDataToNav();
- OS_U8 SetNavInstallMode(OS_U16 mode);
- OS_U8 SetNavSimalMode(OS_U16 mode);
+extern OS_U32 NavRtHandler(STRU_422_MSG_INFO * frame);//ï¿½ï¿½ï¿½Õµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+extern OS_U32 NavCmdHandler(STRU_422_MSG_INFO * frame);//ï¿½ï¿½×¼ï¿½ï¿½×ªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Èµï¿½ï¿½ï¿½Ö¸ï¿½î´¦ï¿½ï¿½ï¿½ï¿½Ó¦ï¿½Ã²ï¿½
+extern OS_U8 MsgToNAV(OS_U8 msgID, OS_U8 *data, OS_U8 len);//ï¿½òµ¼ºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý°ï¿½ï¿½ï¿½ï¿½ï¿½Â·ï¿½ï¿½
+
+extern OS_U8 NavStatusUpdata();//Î´ï¿½Ãµï¿½
+extern OS_U8 NavInit();//Î´ï¿½Ãµï¿½
+extern OS_U8 ToNavModel();//Î´ï¿½Ãµï¿½
+extern OS_U8 AutoSendToNav();//Î´ï¿½Ãµï¿½
+extern OS_U8 StartEncpEphToNav(OS_U8 *data, OS_U16 len);;//Î´ï¿½Ãµï¿½
+ OS_U8 SendDataToNav();//Î´ï¿½Ãµï¿½
+ OS_U8 SetNavInstallMode(OS_U16 mode);//Î´ï¿½Ãµï¿½
+ OS_U8 SetNavSimalMode(OS_U16 mode);//Î´ï¿½Ãµï¿½
 
 #endif /* SRC_MODIMU_H_ */

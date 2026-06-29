@@ -5,41 +5,42 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-/** 舵机编号定义 */
+#define SERVO_PWM
+/** ????????? */
 #ifdef SERVO_CAN
 typedef enum {
-    SERVO_PWM1 = 0, //左翅膀，左航向舵
-    SERVO_PWM6,     //右翅膀，右航向舵
-    SERVO_PWM7,     //开伞舵机
-    ECU_PWM8,       //发动机启动信号
+    SERVO_PWM1 = 0, //?????????
+    SERVO_PWM6,     //??????????
+    SERVO_PWM7,     //??ɡ???
+    ECU_PWM8,       //?????????????
     PWM_CH_MAX,
 } Servo_ID_t;
 #endif
 
 #ifdef SERVO_PWM
 typedef enum {
-    SERVO_PWM1 = 0, //左翅膀，左航向舵
-    SERVO_PWM2,     //左副翼
-    SERVO_PWM3,     //左俯仰
-    SERVO_PWM4,     //右俯仰
-    SERVO_PWM5,     //右副翼
-    SERVO_PWM6,     //右翅膀，右航向舵
-    SERVO_PWM7,     //开伞舵机
-    ECU_PWM8,       //发动机启动信号
+    SERVO_PWM1 = 0, //?????????
+    SERVO_PWM2,     //????
+    SERVO_PWM3,     //????
+    SERVO_PWM4,     //?????
+    SERVO_PWM5,     //?????
+    SERVO_PWM6,     //??????????
+    SERVO_PWM7,     //??ɡ???
+    ECU_PWM8,       //?????????????
     PWM_CH_MAX,
 } Servo_ID_t;
 #endif
 
-/** PWM配置结构体 */
+/** PWM??????? */
 typedef struct {
-    float frequency_hz;   // PWM频率(Hz)    333
-    float resolution_us;     // TIMER的精度（us）  1
-    float init_duty_ratio;     // 占空比（0.0~1.0）  初始0.4995
-    float min_duty_ratio; // 最小占空比(0.0~1.0)    0.333
-    float max_duty_ratio; // 最大占空比(0.0~1.0)    0.666
+    float frequency_hz;   // PWM???(Hz)    333
+    float resolution_us;     // TIMER??????us??  1
+    float init_duty_ratio;     // ?????0.0~1.0??  ???0.4995
+    float min_duty_ratio; // ??С????(0.0~1.0)    0.333
+    float max_duty_ratio; // ???????(0.0~1.0)    0.666
 } PWM_Config_t;
 
-// 驱动层API
+// ??????API
 bool Driver_PWM_Init(Servo_ID_t servo_id, PWM_Config_t* pconfig);
 bool Driver_PWM_SetDutyRatio(Servo_ID_t servo_id, float duty_ratio);
 bool Driver_PWM_Deinit(Servo_ID_t servo_id);

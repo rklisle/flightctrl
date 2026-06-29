@@ -120,6 +120,7 @@ static void prv_engine_task(ULONG thread_input)
 
         if(rxlen > 0)
         {
+            g_DeviceState.ecuCountDown = 200;
             // 此时数组里有 (rxlen + wt_idx) 个数
             wt_idx = prv_analyse(msg_buf, (rxlen + wt_idx));
         }

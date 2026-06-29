@@ -11,13 +11,14 @@ void Init7020Code()
 	 ResetCurTime();
 }
 
-// 鐨?
+// 1ms周期查询接口数据
 void periodic_function_1ms()
 {
     BusDataHandle();
-		//ADC_GetVoltage();
+	//ADC_GetVoltage();
 }
 
+// 5ms周期仿真运行
 void periodic_function_5ms()
 {
     curTime += TIME_STEP;

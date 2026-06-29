@@ -1,7 +1,7 @@
 /*
  * modEngineEle.c
  *
- *  Created on: 2024Äê4ÔÂ19ÈÕ
+ *  Created on: 2024ï¿½ï¿½4ï¿½ï¿½19ï¿½ï¿½
  *      Author: lenovo
  */
 
@@ -11,42 +11,42 @@
 #include "../core/BusInteract.h"
 #include "../Interface/interface_uart.h"
 
-OS_U32 CurEngineRpm = 0;    //014 ÓÍÃÅ°Ù·Ö±È*10 È¡Öµ[0~1000]£»  280 ×ªËÙ
+OS_U32 CurEngineRpm = 0;    //014 ï¿½ï¿½ï¿½Å°Ù·Ö±ï¿½*10 È¡Öµ[0~1000]ï¿½ï¿½  280 ×ªï¿½ï¿½
 OS_U32 EngineRpmCmd = 0;
 OS_U8 EngineStartStatus = 0;
-OS_U8 SyncToGround = 0;     //µØÃæ¿ØÖÆµÄ£º¿ØÖÆÊÇ·ñ¸øµØÃæ´«ÊäÊý¾Ý
+OS_U8 SyncToGround = 0;     //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÆµÄ£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½ï¿½ï¿½ï¿½æ´«ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
 void EngineInit()
 {
     modECU_EngineInit();
 }
 
-/** ÉèÖÃÓÍÃÅ
- * Èë²Î£ºÓÍÃÅ°Ù·Ö±È È¡Öµ0~100.0
+/** ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+ * ï¿½ï¿½Î£ï¿½ï¿½ï¿½ï¿½Å°Ù·Ö±ï¿½ È¡Öµ0~100.0
  */
 void SetEngineThrot(float percent)
 {
-    // unsigned int rpm = percent * 10.0f;//ÎªÁËÓÃÉÏÒ£²â±í£¬ÎÒÃÇ½«Êý¾ÝÀàÐÍ×ª»¯Ò»ÏÂ
+    // unsigned int rpm = percent * 10.0f;//Îªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½Ò»ï¿½ï¿½
     // SETDATA(pDataPoolSelf,	"engSetRp",	rpm,  OS_U16);
     modECU_setThrottle_percent(percent);
 }
 
-/** Æô¶¯·¢¶¯»ú */
+/** ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ */
 void StartEngine()
 {
     modECU_startEngine();
 }
 
-/** ·¢¶¯»úÍ£»ú */
+/** ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í£ï¿½ï¿½ */
 void StopEngine()
 {
     modECU_stopEngine();
 }
 
-/** ´¦ÀíÊý¾ÝÁ´´«À´µÄÃüÁî£¬Ò²¾ÍÊÇµØÃæµÄÒ£¿ØÖ¸Áî
- * ¿ØÖÆ×ªËÙÖ¸Áî£º´æÊý¾Ý³Ø¡¢¿Ø·¢¶¯»ú×ªËÙ
- * »ñÈ¡Æô¶¯²ÎÊý£º·¢ËÍÏàÓ¦ÃüÁî
- * »ñÈ¡ÔËÐÐ²ÎÊý£º
+/** ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½î£¬Ò²ï¿½ï¿½ï¿½Çµï¿½ï¿½ï¿½ï¿½Ò£ï¿½ï¿½Ö¸ï¿½ï¿½
+ * ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½Ö¸ï¿½î£ºï¿½ï¿½ï¿½ï¿½ï¿½Ý³Ø¡ï¿½ï¿½Ø·ï¿½ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½
+ * ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó¦ï¿½ï¿½ï¿½ï¿½
+ * ï¿½ï¿½È¡ï¿½ï¿½ï¿½Ð²ï¿½ï¿½ï¿½ï¿½ï¿½
  */
 OS_U32 EngineCmdHandler(STRU_422_MSG_INFO * frame)
 {
@@ -54,7 +54,7 @@ OS_U32 EngineCmdHandler(STRU_422_MSG_INFO * frame)
 	{
         case CMD_ECU_RPM_SETTING:
         {
-            OS_U32 thro;   //014 ÓÍÃÅ°Ù·Ö±È*10 È¡Öµ[0~1000]£»  280 ×ªËÙ
+            OS_U32 thro;   //014 ï¿½ï¿½ï¿½Å°Ù·Ö±ï¿½*10 È¡Öµ[0~1000]ï¿½ï¿½  280 ×ªï¿½ï¿½
             memcpy(&thro, frame->au8Data, 4);
             if(thro < 0) {thro = 0;}
             if(thro > 1000) {thro = 1000;}
@@ -62,17 +62,17 @@ OS_U32 EngineCmdHandler(STRU_422_MSG_INFO * frame)
 			SetEngineThrot(thro / 10.0f);
             break;
         }
-        case CMD_GET_START_PARAM: // ÓÍ±ÃÍ£Ö¹
+        case CMD_GET_START_PARAM: // ï¿½Í±ï¿½Í£Ö¹
         {
             modECU_pumpOff();
             break;
         }
-        case CMD_GET_RUNNING_PARAM: // ÓÍ±Ã¿ªÆô
+        case CMD_GET_RUNNING_PARAM: // ï¿½Í±Ã¿ï¿½ï¿½ï¿½
         {
             modECU_pumpOn();
             break;
         }
-        case CMD_GET_RUNNING_INFO://µØÃæ¿ØÖÆµÄ£º¿ØÖÆÊÇ·ñ¸øµØÃæ´«ÊäÊý¾Ý
+        case CMD_GET_RUNNING_INFO://ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÆµÄ£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½ï¿½ï¿½ï¿½æ´«ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         {
             if(frame->au8Data[0] == 0x11)
             {
@@ -84,7 +84,7 @@ OS_U32 EngineCmdHandler(STRU_422_MSG_INFO * frame)
             }
             break;
         }
-        case CMD_START_STOP_ENGINE://µØÃæ·¢¹ýÀ´µÄÆô¶¯ÃüÁî
+        case CMD_START_STOP_ENGINE://ï¿½ï¿½ï¿½æ·¢ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         {
             if(frame->au8Data[0] == 0x11)
             {
@@ -103,20 +103,19 @@ OS_U32 EngineCmdHandler(STRU_422_MSG_INFO * frame)
 	return 0;
 }
 
-/** ½âÎöÊý¾Ý£º·¢¶¯»ú ¡ª¡ª> ·É¿Ø  ´æ´¢Êý¾Ý & ·¢¸øÊý¾ÝÁ´ */
+/** ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½> ï¿½É¿ï¿½  ï¿½æ´¢ï¿½ï¿½ï¿½ï¿½ & ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ */
 void EngineHandler()   // HACK: TEST ECU restore & display
 {
-    g_DeviceState.ecuCountDown = 200;
-/** ****************014 ÐÂÔö******************* */
+/** ****************014 ï¿½ï¿½ï¿½ï¿½******************* */
     static STRU_RUNNING_INFO param30 = {0};
     // static STRU_START_PARAM_INFO param31 = {0};
     // static STRU_RUNNING_PARAM_INFO param32 = {0};
     struct EngineStatus engineStatus = {0};
 
-    if((g_DeviceState.CurrTick) % 20 == 0)  // Ã¿100ms±£´æÒ»´ÎÊý¾Ý
+    if((g_DeviceState.CurrTick) % 20 == 0)  // Ã¿100msï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     {
         modECU_GetEngineStatus(&engineStatus);
-    /** **************** ´æÊý¾Ý³Ø ******************* */
+    /** **************** ï¿½ï¿½ï¿½ï¿½ï¿½Ý³ï¿½ ******************* */
         SETDATA(pDataPoolSelf, "engSetRp",	engineStatus.fuel_pressure,	OS_U16);
         // SETDATA(pDataPoolSelf, "ecuSetRp",	engineStatus.actual_throttle,	OS_U16);//97
         SETDATA(pDataPoolSelf, "ecuSetRp",	engineStatus.expect_throttle,	OS_U16);//86
@@ -133,7 +132,7 @@ void EngineHandler()   // HACK: TEST ECU restore & display
         SETDATA(pDataPoolSelf, "ecuState",	engineStatus.CntState,	OS_U8);
         SETDATA(pDataPoolSelf, "ecuError",	engineStatus.ecuError,	OS_U8);
 
-    /** **************** ·¢Êý¾ÝÁ´£¬ÏÔÊ¾ ******************* */
+    /** **************** ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾ ******************* */
         param30.runningStatus = engineStatus.CntState;
         param30.fuel_pressure = engineStatus.fuel_pressure;
         param30.jet1_duty = engineStatus.jet1_duty;
@@ -159,20 +158,20 @@ void EngineHandler()   // HACK: TEST ECU restore & display
     }
 }
 
-OS_U8 AutoDriveEnginePwm()//Ã¿100ms½øÀ´¿ØÖÆÒ»´ÎengineÓÍÃÅ
+OS_U8 AutoDriveEnginePwm()//Ã¿100msï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½engineï¿½ï¿½ï¿½ï¿½
 {
     if(g_DeviceState.CurrTick % 20 == 0)
     {
         // GetCurEngineRpm();
 
     }
-    if((g_DeviceState.CurrTick + 10) % 20 == 0)//Ã¿5ms * 20 = 100ms£¬½øÒ»´Îif
+    if((g_DeviceState.CurrTick + 10) % 20 == 0)//Ã¿5ms * 20 = 100msï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½if
     {
         if(((DOM_AUTOMATIC & g_DeviceState.workStage) == DOM_AUTOMATIC) && flightSeq.umOpen != 1)
         {
-            // ×´Ì¬£ºÕý³£·ÉÐÐ£¬ÇÒÎ´ÊÕµ½É¡½µÃüÁî¡£        ¿ØÖÆ·¢¶¯»úµÄÓÍÃÅ
+            // ×´Ì¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð£ï¿½ï¿½ï¿½Î´ï¿½Õµï¿½É¡ï¿½ï¿½ï¿½ï¿½ï¿½î¡£        ï¿½ï¿½ï¿½Æ·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             GetDataFast(pDataPoolFly, "EngineRp", &CurEngineRpm);
-			SetEngineThrot(CurEngineRpm *0.1f);// È«¾Ö±äÁ¿ÖÐ´æµÄÓ¦¸ÃÊÇ¿ØÖÆ¸ø³öµÄÓÍÃÅ¿ª¶È * 10
+			SetEngineThrot(CurEngineRpm *0.1f);// È«ï¿½Ö±ï¿½ï¿½ï¿½ï¿½Ð´ï¿½ï¿½Ó¦ï¿½ï¿½ï¿½Ç¿ï¿½ï¿½Æ¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å¿ï¿½ï¿½ï¿½ * 10
         }
     }
 	return 0;

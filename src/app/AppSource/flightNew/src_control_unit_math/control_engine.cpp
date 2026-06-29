@@ -1,5 +1,6 @@
 #include <cstring>
 #include "control_engine.h"
+#include "../data_protocol.h"
 #include "../global_function.h"
 //#include "../../timer.h"
 
@@ -19,13 +20,14 @@ CMathControlEngine::CMathControlEngine()
 	//m_n3 = 0.0;
 	m_dltKc_time = 0.0;
 #ifdef __VEL__CONTROL__MODE__KC__
-	m_Kc0 = 70.0;//满载150kg，起飞状态；
+	m_Kc0 = 70.0;//????150kg?????????
 	m_Kc1 = 0;
 	m_Kc2 = 0;
 	m_Kc3 = 0;
+	m_Kc4 = 0;
 	m_control_Kc = 70.0;
 #else
-	m_n0 = 5500;//满载150kg，起飞状态；
+	m_n0 = 5500;//????150kg?????????
 	m_n1 = 0;
 	m_n2 = 0;
 	m_n3 = 0;
@@ -44,69 +46,122 @@ CMathControlEngine::CMathControlEngine()
 	m_turn_radius = 0.0;
 	m_velocity_integrator = 0.0;
 	m_flag_velocity_control = false;
+	m_flag_flightime_ctrl = false;
 	m_flag_launch_turn = false;
 	m_flag_alltitude_change = false;
 	m_flag_waypoint_turn = false;
 	m_flag_alltitude_climb = false;
 	m_flag_alltitude_decline = false;
+
+	m_flag_engine_start = false;//????????????????????????????????
+	m_flag_missile_takeoff = false;//????????????????
+	m_flag_engine_stop = false;//?????????????????????
 }
 void CMathControlEngine::Initial()
 {
+}
 
-}
-void CMathControlEngine::Run()
-{
-	Get_Data();
-#ifdef __VEL__CONTROL__MODE__KC__
-	Calc_Data_Kc();
-#else
-	Calc_Data_Rpm();
-#endif
-	//根据质量估计油门
-	
-	//Calc_Data();
-	Calc_Data_Kc();
-	Send_Data();
-}
 
 void CMathControlEngine::Get_Data()
 {
-	//根据高度计算空气密度比，一维插值
+	//??????????????????????
 	double hight_array[7] = {0, 1000, 2000, 3000, 4000, 4500,5000};
-	double Vsonic_array[7] = {340.3, 336.4, 332.5, 328.6, 324.6, 322.6 ,320.5};//高度，空气密度比
+	double Vsonic_array[7] = {340.3, 336.4, 332.5, 328.6, 324.6, 322.6 ,320.5};//????????????
 
 	m_mass_calc = p_st_engine_control_input->mass;
 	m_mach = p_st_engine_control_input->mach;
 	m_missile_height = p_st_engine_control_input->h;
 	m_missile_height_initial = p_st_engine_control_input->h_ini;
 	m_target_velocity = p_st_engine_control_input->target_velocity;
-	m_missile_velocity = p_st_engine_control_input->missile_average_velocity;
+	
 	m_target_time = p_st_engine_control_input->target_time;
 	m_temperature_ground = p_st_engine_control_input->temperature_ground;
 	m_turn_radius = p_st_engine_control_input->radius_zw;
 	
-	m_flag_launch_turn = p_st_engine_control_input->flag_launch_turn;		//扇面转弯
-	m_flag_alltitude_change = p_st_engine_control_input->flag_alltitude_change;//高度 机动
-	m_flag_waypoint_turn = p_st_engine_control_input->flag_waypoint_turn;	//航迹转弯
-	m_flag_alltitude_climb = p_st_engine_control_input->flag_alltitude_climb;	//爬升
-	m_flag_alltitude_decline = p_st_engine_control_input->flag_alltitude_decline;//下降
+	m_flag_launch_turn = p_st_engine_control_input->flag_launch_turn;		//???????
+	m_flag_waypoint_turn = p_st_engine_control_input->flag_waypoint_turn;	//???????
+	m_flag_alltitude_change = p_st_engine_control_input->flag_alltitude_change;//??? ????
+	m_flag_alltitude_climb = p_st_engine_control_input->flag_alltitude_climb;	//????
+	m_flag_alltitude_decline = p_st_engine_control_input->flag_alltitude_decline;//???
+	
+	m_flag_velocity_control = p_st_engine_control_input->flag_velocity_control;//??????????1???????????锟斤拷???
+	m_missile_velocity = p_st_engine_control_input->missile_average_velocity;//????
+	m_flag_flightime_ctrl = p_st_engine_control_input->flag_flightime_ctrl;//?????????
+	
+	m_flag_engine_start = p_st_engine_control_input->flag_engine_start;
+	m_flag_engine_stop = p_st_engine_control_input->flag_engine_stop;
+	m_flag_missile_takeoff = p_st_engine_control_input->flag_missile_takeoff;
 
-	//根据高度插值计算声速
+	/*?????????...
+	m_mass_calc = 150.0;
+	m_mach = 0.15;
+	m_missile_height = 120.0;
+	m_missile_height_initial = 100.0;
+	m_target_velocity = 50.0;
+	m_missile_velocity = 50.0;
+	m_target_time = 10.0;
+	m_temperature_ground = 15.0;
+	m_turn_radius = 500.0;
+	
+	m_flag_launch_turn = 0;		//???????
+	m_flag_alltitude_change = 1;//??? ????
+	m_flag_waypoint_turn = 0;	//???????
+	m_flag_alltitude_climb = 0;	//????????锟斤拷
+	m_flag_alltitude_decline = 0;//???????锟斤拷
+
+	m_flag_engine_start = 1;
+	m_flag_engine_stop = 0;
+	m_flag_missile_takeoff = 1;*/
+	
+	//????????????????,?????????????
 	m_Vsonic = CFlightGlobalFun::LAQL1(7,  hight_array,  Vsonic_array, m_missile_height);
-	m_air_velocity = m_mach*m_Vsonic;//空速
+	m_air_velocity = m_mach*m_Vsonic;//????
 }
-
+void CMathControlEngine::Run()
+{
+	Get_Data();
+	
 #ifdef __VEL__CONTROL__MODE__KC__
+	//?????????????????
+	if(!m_flag_engine_start)
+	{
+		m_control_Kc = KC_COMMAND_MIN_LIMIT;
+	}
+	//??????????????????锟斤拷?????????
+	else if(!m_flag_missile_takeoff)
+	//??????????????????????????????????
+	{
+		m_control_Kc = KC_COMMAND_CRUISE;
+	}
+	else if(!m_flag_engine_stop)
+	{
+		Calc_Data_Kc();
+	}
+	//???????????????
+	else
+	{
+		m_control_Kc = 0.0;
+	}
+#else
+	Calc_Data_Rpm();
+#endif
+	//Calc_Data();
+	//Calc_Data_Kc();
+	
+	Send_Data();
+}
+#ifdef __VEL__CONTROL__MODE__KC__
+//??????????????
 void CMathControlEngine::Calc_Data_Kc()
 {
-	double target_velocity = VEL_COMMAND_CRUISE;//初值
+	double target_velocity = VEL_COMMAND_CRUISE;//???
 	double dlt_velocity = 0.0;
 	double dlt_velocity_cmd = 0.0;
 	double target_velocity_cmd = VEL_COMMAND_CRUISE;
 	
-	//转速限制及推力当量
-	double kp = 10;
-	double ki = 1.3;
+	//????????????????
+	double kp = 2.0;
+	double ki = 0.2;
 	double m_array[3] = {100.0, 125.0, 150.0};
 	double h_array[6] = {0, 1000, 2000, 3000, 4000, 5000};
 	double Kc0_matrix[3][6] = {{71.6599, 72.3680, 73.0528, 74.0607, 75.2552, 77.1943},
@@ -119,14 +174,14 @@ void CMathControlEngine::Calc_Data_Kc()
 						{0.6616, 0.7171, 0.7719, 0.8309, 0.8899, 0.9518},
 						{0.7655, 0.8192, 0.8761, 0.9359, 1.0223, 1.1421}};
 
-	//当前只有空速控制
-	//如果当前指令空速大于最大速度，等于最大速度
-	//如果当前指令空速小于最小速度，等于最小速度
+	//?????锟斤拷??????
+	//????????????????????????????????
+	//????????????锟斤拷????锟斤拷??????????锟斤拷???
 	if(m_target_velocity > VEL_COMMAND_MAX_LIMIT)
 	{
 		target_velocity = VEL_COMMAND_MAX_LIMIT;
 	}
-	else if(m_target_velocity > VEL_COMMAND_MIN_LIMIT)
+	else if(m_target_velocity < VEL_COMMAND_MIN_LIMIT)
 	{
 		target_velocity = VEL_COMMAND_MIN_LIMIT;
 	}
@@ -134,55 +189,54 @@ void CMathControlEngine::Calc_Data_Kc()
 	{
 		target_velocity = m_target_velocity;
 	}
-	dlt_velocity = target_velocity - m_missile_velocity;
 	
-	//根据当前质量，高度，插值计算基准油门
+	
+	//?????????????????????????????
 	m_Kc0 = CFlightGlobalFun::LAQL2(3,  6,  m_array,  h_array, &Kc0_matrix[0][0], m_mass_calc, m_missile_height);
+	m_Kc0 = m_Kc0 - 20.0;
 
-	//转弯过程补偿转速
+	//????????????
 	if (m_flag_waypoint_turn || m_flag_launch_turn)
 	{
-		m_Kc1 = 20;
+		m_Kc1 = 20.0;
 	} 
 	else
 	{
 		m_Kc1 = 0.0;
 	}
 
-	//求高度机动补偿转速
+	//??????????????
 	if (m_flag_alltitude_change)
 	{
-		//爬升
+		//????
 		if (m_flag_alltitude_climb)
 		{
 			m_Kc2 = 30;
 		}
-		//下滑
+		//???
 		if (m_flag_alltitude_decline)
 		{
 			m_Kc2 = 0.0;
 		}
 	} 
-	//无高度机动
+	//???????
 	else
 	{
 		m_Kc2 = 0.0;
 	}
 
-	//时间控制，增加指令速度补偿，即增加空速，待增加
-	//实际地速 与 期望地速度=剩余距离/(到达时间 - 飞行时间)比较
-	//大于2.5m/s时，指令空速 减小2.5m/s
-	//小于-2.5m/s时，指令空速 增大2.5m/s
-	//绝对值小于2.5m/s时，指令空速 补偿对应值
-	if(m_flag_velocity_control == 1)
+	//??????????????????????????????????????
+	//?????? ?? ?????????=??????/(??????? - ???????)???
+	//????2.5m/s????????? ??锟斤拷2.5m/s
+	//锟斤拷??-2.5m/s????????? ????2.5m/s
+	//?????锟斤拷??2.5m/s????????? ????????
+	if(m_flag_flightime_ctrl == 1)
 	{
-		if(fabs((m_target_time - flight_time)) > 5.0)
-		{
-			target_velocity_cmd = (m_target_time - flight_time);
-
-			
-		}
-		//保持前一次速度不变
+		//if(fabs((m_target_time - flight_time)) > 5.0)
+		//{
+		//	target_velocity_cmd = (m_target_time - flight_time);
+		//}
+		//??????????????
 		//else
 		//{
 		//	target_velocity_cmd = 
@@ -193,11 +247,24 @@ void CMathControlEngine::Calc_Data_Kc()
 	}
 	
 
-	//方法一：半开环控制，每5s，观察空速与指令速度之间关系
-	//如果空速大于指令空速2.5m/s，减小5%油门；
-	//如果空速小于指令空速2.5m/s，增大5%油门；
-	//如果空速与指令空速小于2.5m/s，保持当前油门不变；
-	if(flight_time > m_dltKc_time + 2.5)
+	//??????????????????? = ???????/??????????锟斤拷???????? = (????????? - ??????)??
+	if (m_flag_flightime_ctrl)
+	{
+		dlt_velocity = target_velocity - m_missile_velocity;//????????????
+	}
+	else
+	{
+		dlt_velocity = target_velocity - m_air_velocity;
+	}
+	if(flight_time > 50.0)
+	{
+		double temp_a = 1.0;
+	}
+	//?????????????????5s?????????????????????
+	//????????????????2.5m/s????锟斤拷5%?????
+	//???????锟斤拷????????2.5m/s??????5%?????
+	//???????????????锟斤拷??2.5m/s???????????????
+	if(flight_time > m_dltKc_time + 5.0)
 	{
 		m_dltKc_time = flight_time;
 		
@@ -211,45 +278,56 @@ void CMathControlEngine::Calc_Data_Kc()
 		}
 		else
 		{
-			//m_Kc3 = m_Kc3;
+			//m_Kc3 = m_Kc3 + dlt_velocity*2.0;
+			//m_Kc3 = 0.0;
+
+			//???PI????
+			//double kp = 0.5;
+			//double ki = 0.005;
+			//m_velocity_integrator +=dlt_velocity * STEP_5ms;
+			//m_velocity_integrator = CFlightGlobalFun::Range(m_velocity_integrator, 10.0/ki);
+			//m_Kc4 = kp*dlt_velocity + ki * m_velocity_integrator;
 		}
 	}
-	//方法二：闭环PI控制
-	/*if(m_flag_velocity_control_init == 1)//初始化
+	
+	//???????????PI????
+	if(fabs(dlt_velocity) > 2.5)//?????
 	{
-		m_flag_velocity_control_init = 2;
-		m_Kc3 = 0.0;
 		m_velocity_integrator = 0.0;
+		m_Kc4 = 0.0;
 	}
 	else
 	{
-		dlt_velocity = target_velocity - m_missile_velocity;
 		m_velocity_integrator +=dlt_velocity * STEP_5ms;
 		m_velocity_integrator = CFlightGlobalFun::Range(m_velocity_integrator, 10.0/ki);
-		m_Kc3 = kp*dlt_velocity + ki * m_velocity_integrator;
+		m_Kc4 = kp * dlt_velocity + ki * m_velocity_integrator;
+
+		m_Kc4 = CFlightGlobalFun::Range(m_Kc4, 5.0);
+
+		//?????????...
+		m_Kc4 = 0.0;
 	}
-	*/
+	
+	//?????
+	m_control_Kc = m_Kc0 + m_Kc1 + m_Kc2 + m_Kc3 + m_Kc4;
 
-	//合转速
-	m_control_Kc = m_Kc0 + m_Kc1 + m_Kc2 + m_Kc3;
-
-	//转速控制
-	if(m_control_Kc < 20)
-		m_control_Kc = 20; 
-	if(m_control_Kc > 100)
-		m_control_Kc = 100; 
+	//??????
+	if(m_control_Kc < KC_COMMAND_MIN_LIMIT)
+		m_control_Kc = KC_COMMAND_MIN_LIMIT; 
+	if(m_control_Kc > KC_COMMAND_MAX_LIMIT)
+		m_control_Kc = KC_COMMAND_MAX_LIMIT; 
 }
 #else
 void CMathControlEngine::Calc_Data_Rpm()
 {
-	double target_velocity = VEL_COMMAND_CRUISE;//初值
+	double target_velocity = VEL_COMMAND_CRUISE;//???
 	
-	//转速限制及推力当量
+	//????????????????
 	double k0 = 700;
 	double kp = 1.0;
 	double ki = 0.13;
 
-	//指令速度限幅
+	//?????????
 	if(m_target_velocity > VEL_COMMAND_MAX_LIMIT)
 	{
 		target_velocity = VEL_COMMAND_MAX_LIMIT;
@@ -263,60 +341,63 @@ void CMathControlEngine::Calc_Data_Rpm()
 		target_velocity = m_target_velocity;
 	}
 	
-	//求基准装订转速
+	//??????????
 	m_n0 = RPM_COMMAND_CRUISE + (m_target_velocity - VEL_COMMAND_CRUISE)*14.2;
 
-	//转弯过程补偿转速
+	//????????????
 	if (m_flag_waypoint_turn
 		|| m_flag_launch_turn)
 	{
-		m_n1 = 300;
+		m_n1 = 1500;
 	} 
 	else
 	{
 		m_n1 = 0.0;
 	}
 
-	//求高度机动补偿转速
+	//??????????????
 	if (m_flag_alltitude_change)
 	{
-		//爬升
+		m_n2 = 0.0;
+		//????
 		if (m_flag_alltitude_climb)
 		{
-			m_n2 = 500;
+			m_n2 = 1500.0;
 		}
-		//下滑
+		//???
 		if (m_flag_alltitude_decline)
 		{
 			m_n2 = 0.0;
 		}
 	} 
-	//无高度机动
+	//???????
 	else
 	{
 		m_n2 = 0.0;
 	}
 
-	//时间控制，即地速跟踪，PI控制
+	//?????????????????PI????
 	double dlt_velocity = 0.0;
-	if (m_flag_velocity_control)
+	if (m_flag_flightime_ctrl)
 	{
 		dlt_velocity = target_velocity - m_missile_velocity;
 		m_velocity_integrator +=dlt_velocity * STEP_5ms;
 		m_velocity_integrator = CFlightGlobalFun::Range(m_velocity_integrator, (-100.0/(k0*ki)));
 		m_n3 = k0*(kp*dlt_velocity + ki * m_velocity_integrator);
+		
+		m_n3 = CFlightGlobalFun::Range(m_n3, 1500.0);
 	}
 
-	//合转速
+	//?????
 	m_control_rpm = m_n0 + m_n1 + m_n2 + m_n3;
 
-	//转速控制
+	//??????
 	if(m_control_rpm < RPM_COMMAND_MIN_LIMIT)
 		m_control_rpm = RPM_COMMAND_MIN_LIMIT; 
 	if(m_control_rpm > RPM_COMMAND_MAX_LIMIT)
 		m_control_rpm = RPM_COMMAND_MAX_LIMIT; 
 
-	//指令转速估计状态转速
+	//??????????????
 	//m_state_rpm = m_control_rpm;
 }
 #endif
