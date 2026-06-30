@@ -878,105 +878,57 @@ void UpdatePredictMsnByGround(STRU_422_MSG_INFO * frame)
         {
 			//RoutePointIn rp[AUTO_MSN_PT_MAX_COUNT];
 			//MSN_CMD tempPt[AUTO_MSN_PT_MAX_COUNT];
+			short dir_of_wp0;
 			for (int i = 0; i < ptCount; i++)
 			{
 				int lon,lat;
-				short alt,dir;
-				unsigned short speed,t;
+				short alt,dir,radis;
+				unsigned short speed;
 				unsigned char type;
 				memcpy(&lon,	ptBuffer + 17 * i + 0, 4);	// ????basic ling194
 				memcpy(&lat,	ptBuffer + 17 * i + 4, 4);
 				memcpy(&alt,	ptBuffer + 17 * i + 8, 2);
 				memcpy(&dir,	ptBuffer + 17 * i + 10, 2);
-				memcpy(&t,		ptBuffer + 17 * i + 12, 2);
+				memcpy(&radis,	ptBuffer + 17 * i + 12, 2);
 				memcpy(&type,	ptBuffer + 17 * i + 14, 1);
 				memcpy(&speed,	ptBuffer + 17 * i + 15, 2);
-//						tempPt[i].targetLon = lon * 1e-7;
-//						tempPt[i].targetLat = lat * 1e-7;
-//						tempPt[i].targetHigh = alt;
-//						tempPt[i].inTrack = dir * 0.01;
-//						tempPt[i].outTrack = dir * 0.01;
-//						tempPt[i].radis = radis;
-//						tempPt[i].MsnCmdType = type;
-//						tempPt[i].speed = speed;
-//						tempPt[i].delayType = 0;
+
 				g_route_data.p_route_data[i * 11 + 0] = i;  // ???
 				g_route_data.p_route_data[i * 11 + 1] = lon * 1e-7;  // ????
 				g_route_data.p_route_data[i * 11 + 2] = lat * 1e-7;  // ????
 				g_route_data.p_route_data[i * 11 + 3] = alt;
 				g_route_data.p_route_data[i * 11 + 4] = type;		//????????
 				g_route_data.p_route_data[i * 11 + 5] = 0;			//??????????????
-				g_route_data.p_route_data[i * 11 + 6] = t;			//???????
-				g_route_data.p_route_data[i * 11 + 7] = dir *0.01;	//?????????? ?? ??????????? ?? ??????
-				g_route_data.p_route_data[i * 11 + 8] = 0;			//???????????????????
-				g_route_data.p_route_data[i * 11 + 9] = speed;		//??????
+				g_route_data.p_route_data[i * 11 + 6] = 0;			//???????
+				g_route_data.p_route_data[i * 11 + 7] = speed;	//?????????? ?? ??????????? ?? ??????
+				g_route_data.p_route_data[i * 11 + 8] = dir*0.01;			//???????????????????
+				g_route_data.p_route_data[i * 11 + 9] = radis;		//??????
 				g_route_data.p_route_data[i * 11 + 10]= 0;			//????????????
-
-				Arp[i].sn 	= i;	// ????????0??????
-				Arp[i].lon 	= lon * 1e-7;
-				Arp[i].lat 	= lat * 1e-7;
-				Arp[i].h 	= alt;
-				Arp[i].outTrack = dir *0.01;
-				Arp[i].t 	= t;
-				Arp[i].w 	= type;
-				Arp[i].V_cmd = speed;                                                         
-				Arp[i].if_airspeed_used = 0;
+				
+				if(i==0)
+					dir_of_wp0=dir;
 			}
 			// updateRP(Arp, ptCount);	// 014 ?????
-/*				
-			memcpy(autoMsnPt, &tempPt[1], sizeof(tempPt) - sizeof(MSN_CMD));
-			RoutePointIn rp[2];
-			rp[0].sn     =  0;
-			rp[0].lon    =  tempPt[0].targetLon;
-			rp[0].lat    =  tempPt[0].targetLat;
-			rp[0].h      =  tempPt[0].targetHigh;
-			rp[0].w      =  10;
-			rp[0].ma_cmd =  0;
-
-			//double lon1;
-			//double lat1;
-
-			//calcNextPt(tempPt[0].targetLon,tempPt[0].targetLat,tempPt[0].outTrack,10000,&lat1,&lon1);
-			
-			rp[1].sn     =  1;
-			rp[1].lon    =  tempPt[1].targetLon;//lon1;
-			rp[1].lat    =  tempPt[1].targetLat;//lat1;
-			rp[1].h      =  tempPt[1].targetHigh;
-			rp[1].w      =  4;
-			rp[1].ma_cmd =  tempPt[1].speed / 340.0;
-			//rp[1].if_airspeed_used = 1;
-			updateRP(rp, 2);
-			
-			navInput.InitLon = tempPt[0].targetLon;
-			navInput.InitLat = tempPt[0].targetLat;
-			navInput.InitHigh =tempPt[0].targetHigh;
-			navInput.InitYaw = tempPt[0].outTrack;
-
-			pInput->initLon = tempPt[0].targetLon;
-			pInput->initLat = tempPt[0].targetLat;
-			pInput->initHigh = tempPt[0].targetHigh;
-			pInput->initDir = tempPt[0].outTrack;
-*/
 			navInput.InitLon  = g_route_data.p_route_data[1];
 			navInput.InitLat  = g_route_data.p_route_data[2];
 			navInput.InitHigh = g_route_data.p_route_data[3];
-			navInput.InitYaw  = g_route_data.p_route_data[7];
+			navInput.InitYaw  = dir_of_wp0*0.01;
 
 			g_initial_data.missile_ID		= 0;
 			g_initial_data.longitude_launch = g_route_data.p_route_data[1];
 			g_initial_data.latitude_launch  = g_route_data.p_route_data[2];
 			g_initial_data.height_launch    = g_route_data.p_route_data[3];
-			g_initial_data.initial_parameter1 = 20;
-			g_initial_data.initial_parameter2 = 0;
+			g_initial_data.initial_parameter1 = 15;
+			g_initial_data.initial_parameter2 = 85;
 			g_initial_data.launch_time		= 0;
-			g_initial_data.lauch_azimuth	= g_route_data.p_route_data[7];
+			g_initial_data.lauch_azimuth	= dir_of_wp0 * 0.01;
 			g_initial_data.lauch_pitch		= 12;
-			g_initial_data.lauch_booster_pitch = 20;
+			g_initial_data.lauch_booster_pitch = 32;
 
-			SETDATA(pDataPoolFly, "DataLon", (g_route_data.p_route_data[1] * 1e7), OS_S32); //
-			SETDATA(pDataPoolFly, "DataLat", (g_route_data.p_route_data[2] * 1e7), OS_S32); //
-			SETDATA(pDataPoolFly, "DataHigh", g_route_data.p_route_data[3], 	   OS_S16);//
-			SETDATA(pDataPoolFly, "DataDir", (g_route_data.p_route_data[7] * 1e2), OS_U16); //
+			SETDATA(pDataPoolFly, "DataLon", (g_route_data.p_route_data[1] * 1e7), OS_S32); 
+			SETDATA(pDataPoolFly, "DataLat", (g_route_data.p_route_data[2] * 1e7), OS_S32); 
+			SETDATA(pDataPoolFly, "DataHigh", g_route_data.p_route_data[3], 	   OS_S16);
+			SETDATA(pDataPoolFly, "DataDir", (OS_U16)dir_of_wp0, OS_U16); 
 
 			// pInput->initLon = Arp[0].lon;	// 014 ?????
 			// pInput->initLat = Arp[0].lat;

@@ -36,7 +36,7 @@ OS_U8 LunchDetective();
 float Read_CPU_Temperature(void) ;
 extern long calcTimeCpu0;
 extern int sd_card_fault;
-OS_U8 EngineStartCmd = 0;    //���Ե���Ŀ��Ʋ�����??? 1��������������0��ֹͣ������
+OS_U8 EngineStartCmd = 0;    //���Ե���Ŀ��Ʋ�����???? 1��������������0��ֹͣ������
 float System_GetCoreTemperature();
 extern void ReConnectUart();
 extern void *g_pControl;
@@ -100,7 +100,7 @@ OS_U8 CalcAirSpd()
 
 /***********************************************************
  * ��������:AutoLuanchProcess()
- * ��������: �豸�ϵ���Զ���ʼ�����ϵ�???�Լ졢��׼��׼�����������???
+ * ��������: �豸�ϵ���Զ���ʼ�����ϵ�????�Լ졢��׼��׼�����������????
  *			 ������ɺ�ȴ����շ��䣬���й��������κ���Ϊ��Ԥ
  * ����:	�ɺ�Z
  ***********************************************************/
@@ -109,7 +109,7 @@ OS_U8 AutoLuanchProcess()  // 5ms����һ��
 	int testCmd=0;
 	if(testCmd==1)
 	{
-		//PowerOn(DEVICE_FUSE28V);
+		PowerOn(DEVICE_FUSE28V);
 		PowerOn(DEVICE_FUSE_ISO5V);
 	}
 	//���̵��Ȳ��裬��ʼΪ0
@@ -117,11 +117,11 @@ OS_U8 AutoLuanchProcess()  // 5ms����һ��
 	if(AutoStep == 14)
 	return 0;
 
-	//��ɺ�???��ִ�����̵���
+	//��ɺ�????��ִ�����̵���
 	// if((g_DeviceState.workStage & DOM_AUTOMATIC) == DOM_AUTOMATIC)
 	// 		return 0;    
 	//EngineStartCmd = 1; //����������ָ��
-	//IgnitionMark = TRUE;//���������ָ��???
+	//IgnitionMark = TRUE;//���������ָ��????
 	
 	///1.�Ը��豸�ϵ�
 	//�ɿ������в���ʼ�����ȴ�5s�󣬶Թ��顢����ͷ�ϵ�
@@ -256,14 +256,14 @@ OS_U8 AutoLuanchProcess()  // 5ms����һ��
 		NavCmdHandler(&msg);
 		msg.u8MsgID = CMD_HOR_CALC_REQ;//���������յ���ʼ��Ԫ����Ҫ������׼����
 		NavCmdHandler(&msg);
-		ImuCmdHandler(&msg); //TODO: IMU 014���Ӧ����û���ˡ�???
+		ImuCmdHandler(&msg); //TODO: IMU 014���Ӧ����û���ˡ�????
 		AutoStep = 6;
 	}
 	///4.�ж϶�׼��ɣ���ɺ�ת����
 	if(AutoStep == 6)
 	{
     	//AutoStep = 7;
-		//��׼���???
+		//��׼���????
 		//ToImu();
 		OS_U8 imuStatus, navStatus;
 		GetDataFast(pDataPoolImu, "navState", &imuStatus);
@@ -287,7 +287,7 @@ OS_U8 AutoLuanchProcess()  // 5ms����һ��
 			AutoStep = 7;
 		}
 	}
-	///5.����װ��(��ȱ)/ �Զ�ת���???
+	///5.����װ��(��ȱ)/ �Զ�ת���????
 	if(AutoStep == 7)
 	{
 		// AutoStep = 8;
@@ -295,7 +295,7 @@ OS_U8 AutoLuanchProcess()  // 5ms����һ��
 		GetDataFast(pDataPoolNav, "navState", &navStatus);
 		if(navStatus == 0x64)
 		{
-			// �Զ�ת���???
+			// �Զ�ת���????
 			STRU_422_MSG_INFO msg;
 			msg.u8MsgID = CMD_TO_AFTER_LUANCH;
 			NavCmdHandler(&msg);
@@ -335,10 +335,10 @@ OS_U8 AutoLuanchProcess()  // 5ms����һ��
 				//���жϷ������Ƿ��ѽ�������״̬
 				// struct EngineStatus engineStatus = {0};
 				// modECU_GetEngineStatus(&engineStatus);
-				// switch(engineStatus.CntState)//0ͣ����1�����У�2ɢ�� 3���� 4�ѻ� 5���У���϶����?����ģ�???
+				// switch(engineStatus.CntState)//0ͣ����1�����У�2ɢ�� 3���� 4�ѻ� 5���У���϶����?����ģ�????
 				OS_U8 cntState;
 				GetDataFast(pDataPoolSelf, "ecuState", &cntState);
-				switch(cntState)//0ͣ����1�����У�2ɢ�� 3���� 4�ѻ� 5���У���϶����?����ģ�???
+				switch(cntState)//0ͣ����1�����У�2ɢ�� 3���� 4�ѻ� 5���У���϶����?����ģ�????
 				{
 					case ENGINE_STOPED://��������ָ��
 							StartEngine();//Ӧ������������
@@ -382,9 +382,9 @@ OS_U8 AutoLuanchProcess()  // 5ms����һ��
 		}
 	}
 	
-	//9.��������Ѿ���ɣ��ȴ����������???
+	//9.��������Ѿ���ɣ��ȴ����������????
 	//���ݵ���ָ�ȡ������/������ֹͣ��;
-	//�����������������һ��������???
+	//�����������������һ��������????
 	if(AutoStep == 12)
 	{
 		//�յ��˵���վ��ȡ������ָ�������ֹͣ���˻ص����ȴ�������������
@@ -398,12 +398,12 @@ OS_U8 AutoLuanchProcess()  // 5ms����һ��
 			SETDATA(pDataPoolSelf,	"RecvLunc",	0x00,	OS_U8);//���Ԥ�������
 		}
 
-		//DoIgnition() �ڲ���"startFly"����1�������???
+		//DoIgnition() �ڲ���"startFly"����1�������????
 		OS_U8 startFly = 0;
 		GetDataFast(pDataPoolSelf,	"startFly",	&startFly);
 		if(startFly == 1)
 		{
-			FuseSend(ARM_I);	//�Ѿ�����ˣ�����һ���Ᵽָ��???����2g���أ�
+			FuseSend(ARM_I);	//�Ѿ�����ˣ�����һ���Ᵽָ��????����2g���أ�
 			// �жϵ�8�ֽ�Ϊ0x40
 			OS_U8 fzFeedbk;
 			GetDataFast(pDataPoolSelf, "fzFeedbk", &fzFeedbk);
@@ -413,7 +413,7 @@ OS_U8 AutoLuanchProcess()  // 5ms����һ��
 			}
 		}
 	}    
-	//10.����?�󣬷ɳ�2km����Ը߶ȴ���???2m�󣬸����ŵ�������Դ�ϵ�
+	//10.����?�󣬷ɳ�2km����Ը߶ȴ���????2m�󣬸����ŵ�������Դ�ϵ�
 	if(AutoStep == 13)
 	{
 		//���Ź��缰�����Ᵽ�������ϵ�
@@ -423,7 +423,7 @@ OS_U8 AutoLuanchProcess()  // 5ms����һ��
 			OS_S32 launchLon,launchLat,curLon,curLat;
 			OS_S16 launchHigh;
 			OS_FLOAT curHigh;
-			GetDataFast(pDataPoolFly, "DataLon", &launchLon);//���λ�õľ�γ��???
+			GetDataFast(pDataPoolFly, "DataLon", &launchLon);//���λ�õľ�γ��????
 			GetDataFast(pDataPoolFly, "DataLat", &launchLat);//
 			GetDataFast(pDataPoolFly, "DataHigh", &launchHigh);//
 			launchLon = launchLon * 1e-7;
@@ -442,7 +442,7 @@ OS_U8 AutoLuanchProcess()  // 5ms����һ��
 			
 			//�߶Ȳ�
 			double h_m = curHigh - launchHigh;
-			//�������???
+			//�������????
 			double dist = sqrt(lat_m*lat_m + lon_m*lon_m);
 
 			if((dist > 2000)&&(h_m > 200))
@@ -459,7 +459,7 @@ OS_U8 AutoLuanchProcess()  // 5ms����һ��
 				}
 			}
 		}
-		//������Դ�ϵ���ӳ�???2s��ʼ�жϣ���Ŀ����С��2km�������Ᵽָ��
+		//������Դ�ϵ���ӳ�????2s��ʼ�жϣ���Ŀ����С��2km�������Ᵽָ��
 		else
 		{
 			// ����-������Դ�Ѿ��ϵ�
@@ -532,7 +532,7 @@ OS_U8 ControllerStatusUpdata()	// 5ms����һ��
  ***********************************************************/
 static OS_U8 SelfCheckCollpse()
 {
-	//����ж�???
+	//����ж�????
     LunchDetective();
 	
 	//����ʱ��
@@ -554,7 +554,7 @@ static OS_U8 SelfCheckCollpse()
 	g_DeviceState.scoutCountDown = g_DeviceState.scoutCountDown >0? g_DeviceState.scoutCountDown-1:0;
 
 	SETDATA(pDataPoolSelf,	"commHil",	g_DeviceState.hilCountDown,	OS_U8);//����
-	SETDATA(pDataPoolSelf,	"commBatt",	g_DeviceState.battCountDown,	OS_U8);//���???
+	SETDATA(pDataPoolSelf,	"commBatt",	g_DeviceState.battCountDown,	OS_U8);//���????
 	SETDATA(pDataPoolSelf,	"commPwr",	g_DeviceState.powerCountDown,	OS_U8);//����
 	SETDATA(pDataPoolSelf,	"commEcu",	g_DeviceState.ecuCountDown,	OS_U8);//������
 	SETDATA(pDataPoolSelf,	"commNav",	g_DeviceState.navCountDown,	OS_U8);//����
@@ -651,25 +651,25 @@ OS_U32 ControllerCmdHandler(STRU_422_MSG_INFO * frame)	// ��������
 		EngineStartCmd = 0;//�������ػ�
 		break;
 	}
-	case CMD_FORE_LAUNCH_REQ://ǿ�Ʒ���׼�����??? �� ȡ������(׼��δ���???)
+	case CMD_FORE_LAUNCH_REQ://ǿ�Ʒ���׼�����???? �� ȡ������(׼��δ���????)
 	{
-		//�յ�����ָ�ǰ�÷���׼�����???
+		//�յ�����ָ�ǰ�÷���׼�����????
 		if(0x11==frame->au8Data[0])
 		{
 			g_DeviceState.luanchStart = 1;
 			SETDATA(pDataPoolSelf,	"RecvLunc",	0xCC,	OS_U8);
 		}
-		//���������ǰ��ȡ������???
+		//���������ǰ��ȡ������????
 		else
 		{
 			g_DeviceState.luanchStart = 0;
 			SETDATA(pDataPoolSelf,	"RecvLunc",	0,	OS_U8);
-			//������ϲ�δ����ǰҲ�����˳�Ԥ��������ֹ��������???
+			//������ϲ�δ����ǰҲ�����˳�Ԥ��������ֹ��������????
 			IgnitionMark = FALSE;
 		}
 	}
 		break;
-	case CMD_LAUNCH_REQ:	//0xFA ��ҳ - ȫ�����������һ��������׼�������������ǿ�Ʒ���׼����ɣ�???
+	case CMD_LAUNCH_REQ:	//0xFA ��ҳ - ȫ�����������һ��������׼�������������ǿ�Ʒ���׼����ɣ�????
 	{
 		if( 0xAA == frame->au8Data[0]
 		 && 0xBB == frame->au8Data[1]
@@ -677,7 +677,7 @@ OS_U32 ControllerCmdHandler(STRU_422_MSG_INFO * frame)	// ��������
 		 && 0xDD == frame->au8Data[3]
 		 && 0xEE == frame->au8Data[4])
 		{
-			//�������׼������ˣ����???
+			//�������׼������ˣ����????
 			if(g_DeviceState.luanchStart == 1)
 			{
 				//g_DeviceState.luanchStart = 1;//��Ч
@@ -687,12 +687,12 @@ OS_U32 ControllerCmdHandler(STRU_422_MSG_INFO * frame)	// ��������
 				//�ظ�����
 				//Ignition();
 				//�ڲ������ˣ�IgnitionMark = TRUE;
-				//�ڲ������ˣ��򵼺����ͣ����ָ��???
+				//�ڲ������ˣ��򵼺����ͣ����ָ��????
 			}
 		}
 	}
 		break;
-	case CMD_LUANCH_FORCE:	// 0xFB ��ҳ - ���???
+	case CMD_LUANCH_FORCE:	// 0xFB ��ҳ - ���????
 		if( 0xAA == frame->au8Data[0]
 		 && 0xBB == frame->au8Data[1]
 		 && 0xCC == frame->au8Data[2]
@@ -702,7 +702,7 @@ OS_U32 ControllerCmdHandler(STRU_422_MSG_INFO * frame)	// ��������
 			//
 			if(IgnitionMark == TRUE && ((g_DeviceState.workStage & DOM_AUTOMATIC) != DOM_AUTOMATIC))
 			{
-				SETDATA(pDataPoolSelf, "luanMode",	2,	OS_U8); //���ģʽ��������ɵķ�ʽ 0 ���� 1 ���ٶ����� 2 ���Է��䣨�ۺϲ��Ի����ָ��???3 �ٶ�����
+				SETDATA(pDataPoolSelf, "luanMode",	2,	OS_U8); //���ģʽ��������ɵķ�ʽ 0 ���� 1 ���ٶ����� 2 ���Է��䣨�ۺϲ��Ի����ָ��????3 �ٶ�����
 				
 				IgnitionMark = FALSE;
 				DoIgnition();
@@ -737,9 +737,9 @@ OS_U8 SeqCalc()
 }
 
 
-OS_U8 DoIgnition()// 1�����������������ɡ��������ã�/ 2�����أ������������???/ 3���ٶ���ɣ���������???/ 4��������ɣ������ã�???
+OS_U8 DoIgnition()// 1�����������������ɡ��������ã�/ 2�����أ������������????/ 3���ٶ���ɣ���������????/ 4��������ɣ������ã�????
 {
-	MsgToNAV(BUS_NAV_IGNATION,PTR_NULL,0);//�������ͣ��������������ָ��???
+	MsgToNAV(BUS_NAV_IGNATION,PTR_NULL,0);//�������ͣ��������������ָ��????
 	
 	g_DeviceState.workStage &= ~((unsigned int)DOM_INTERACTIVE);
 	g_DeviceState.workStage |= DOM_AUTOMATIC;
@@ -747,12 +747,12 @@ OS_U8 DoIgnition()// 1�����������������ɡ��
 	g_DeviceState.CurrTick = 0;
 
 	SETDATA(pDataPoolSelf, "startFly",	1,	OS_U8);//��ɱ��?
-	SETDATA(pDataPoolSelf, "luncTime",	g_DeviceState.BJTimeSecond,	OS_U32);//��ϵ���ʱ��???�����ա�ʱ����
+	SETDATA(pDataPoolSelf, "luncTime",	g_DeviceState.BJTimeSecond,	OS_U32);//��ϵ���ʱ��????�����ա�ʱ����
 	SETDATA(pDataPoolSelf, "flyError", 0,	OS_U8);//��������   
 	return 0;
 }
 
-OS_U8 IgnitionMark = FALSE;  // ����ȫ��������ť�����־����ɺ������???
+OS_U8 IgnitionMark = FALSE;  // ����ȫ��������ť�����־����ɺ������????
 
 /***********************************************************
  * ��������:Ignition()
@@ -762,7 +762,7 @@ OS_U8 IgnitionMark = FALSE;  // ����ȫ��������ť���
  ***********************************************************/
 OS_U8 Ignition()
 {
-	//����ϵ�������??? ���???
+	//����ϵ�������???? ���????
 	MsgToNAV(BUS_NAV_IGNATION, PTR_NULL, 0);
 	
 	//���Խ׶Σ�ֱ�ӷ���
@@ -776,7 +776,7 @@ OS_U8 LunchDetective()	// �ж�������������
 	if(IgnitionMark == TRUE && ((g_DeviceState.workStage & DOM_AUTOMATIC) != DOM_AUTOMATIC))
 	{
 		OS_FLOAT fAx;
-		GetDataFast(pDataPoolImu, "imuAx", &fAx);//������ٶ�???
+		GetDataFast(pDataPoolImu, "imuAx", &fAx);//������ٶ�????
         
 		OS_S16 vn,ve;
 		GetDataFast(pDataPoolImu, "navVe", &ve);

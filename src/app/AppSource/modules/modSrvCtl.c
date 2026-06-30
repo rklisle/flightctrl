@@ -218,7 +218,7 @@ uint32_t angle_to_ccr(double angle_deg) {
     
     return ccr;
 }
-
+//#define SERVO_CAN
 /***********************************************************
  * 函数名称: MsgToSrv()
  * 函数功能: 伺服额外要求指令计数及发送帧计数，因此剥离一层控制数据，再发送
@@ -232,29 +232,39 @@ OS_U8 MsgToSrv(OS_DOUBLE ctrlDeg[6], OS_U8 ctrlMode/*control = 0x02, 0x44=setZer
     // ctrlDeg[3]=0.258698;
     // ctrlDeg[4]=0.160908;
     // ctrlDeg[5]=0.150381;
+#ifdef SERVO_CAN
     SETDATA(pDataPoolSrv, "Sr1Cmd", ctrlDeg[2] * 100, OS_S16); 
 	SETDATA(pDataPoolSrv, "Sr2Cmd", ctrlDeg[3] * 100, OS_S16);
     SETDATA(pDataPoolSrv, "Sr3Cmd", ctrlDeg[0] * 100, OS_S16);
     SETDATA(pDataPoolSrv, "Sr4Cmd", ctrlDeg[1] * 100, OS_S16);
     SETDATA(pDataPoolSrv, "Sr5Cmd", ctrlDeg[4] * 100, OS_S16);
     SETDATA(pDataPoolSrv, "Sr6Cmd", ctrlDeg[5] * 100, OS_S16);
-
+#else
+    SETDATA(pDataPoolSrv, "Sr1Read", ctrlDeg[2] * 100, OS_S16); 
+	SETDATA(pDataPoolSrv, "Sr2Read", ctrlDeg[3] * 100, OS_S16);
+    SETDATA(pDataPoolSrv, "Sr3Read", ctrlDeg[0] * 100, OS_S16);
+    SETDATA(pDataPoolSrv, "Sr4Read", ctrlDeg[1] * 100, OS_S16);
+    SETDATA(pDataPoolSrv, "Sr5Read", ctrlDeg[4] * 100, OS_S16);
+    SETDATA(pDataPoolSrv, "Sr6Read", ctrlDeg[5] * 100, OS_S16);
+#endif
 	if (ctrlMode == 0x02) 
 	{
 		// 正常控制模式
+#ifdef SERVO_CAN
 		Servo_SetAngle_CAN(SERVO_NODE_1, ctrlDeg[1]);       
 		Servo_SetAngle_CAN(SERVO_NODE_2, ctrlDeg[2]);       
 		Servo_SetAngle_CAN(SERVO_NODE_3, ctrlDeg[3]);       
 		Servo_SetAngle_CAN(SERVO_NODE_4, ctrlDeg[4]);      
         Servo_SetAngle_CAN(SERVO_NODE_5, ctrlDeg[5]);       
 		Servo_SetAngle_CAN(SERVO_NODE_6, ctrlDeg[6]);      
-
-        // AngleServo_SetAngle(SERVO_PWM1, (float)ctrlDeg[1]);	
-        // AngleServo_SetAngle(SERVO_PWM2, (float)ctrlDeg[2]);	
-        // AngleServo_SetAngle(SERVO_PWM3, (float)ctrlDeg[3]);	
-        // AngleServo_SetAngle(SERVO_PWM4, (float)ctrlDeg[4]);	
-        // AngleServo_SetAngle(SERVO_PWM5, (float)ctrlDeg[0]);	
-        // AngleServo_SetAngle(SERVO_PWM6, (float)ctrlDeg[5]);	
+#else
+        AngleServo_SetAngle(SERVO_PWM1, (float)ctrlDeg[1]);	
+        AngleServo_SetAngle(SERVO_PWM2, (float)ctrlDeg[2]);	
+        AngleServo_SetAngle(SERVO_PWM3, (float)ctrlDeg[3]);	
+        AngleServo_SetAngle(SERVO_PWM4, (float)ctrlDeg[4]);	
+        AngleServo_SetAngle(SERVO_PWM5, (float)ctrlDeg[0]);	
+        AngleServo_SetAngle(SERVO_PWM6, (float)ctrlDeg[5]);	
+#endif
     }
 	else if (ctrlMode == 0x44) 
 	{
@@ -265,8 +275,7 @@ OS_U8 MsgToSrv(OS_DOUBLE ctrlDeg[6], OS_U8 ctrlMode/*control = 0x02, 0x44=setZer
         Servo_SetMidpoint_CAN(SERVO_NODE_2);
         Servo_SetMidpoint_CAN(SERVO_NODE_3);
         Servo_SetMidpoint_CAN(SERVO_NODE_4);
-#endif
-#ifdef SERVO_PWM
+#else
         AngleServo_SetAngle(SERVO_PWM2, 0.0f);
         AngleServo_SetAngle(SERVO_PWM3, 0.0f);
         AngleServo_SetAngle(SERVO_PWM4, 0.0f);
