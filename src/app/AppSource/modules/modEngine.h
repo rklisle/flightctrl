@@ -38,7 +38,7 @@ typedef struct
 {
 	OS_U8 head;	            // 0xFF
     OS_U8 head1;            // 0x00
-    OS_U8 runningStatus;    // 运行状态         // CntState
+    OS_U8 runningStatus;    // 运行状态         // CurState
     OS_U8 error;            // 错误码           //  
     OS_U32 fuel_pressure;   // 实际油压         // fuel_pressure 
     OS_U32 jet1_duty;       // 实际喷油1脉宽    // jet1_duty *         **014 cmd64**

@@ -17,7 +17,6 @@ OS_U32 CurEngineRpm = 0;    //014 ���Űٷֱ�*10 ȡֵ[0~1000]��  280 
 OS_U32 EngineRpmCmd = 0;
 OS_U8 EngineStartStatus = 0;
 OS_U8 SyncToGround = 0;     //������Ƶģ������Ƿ�����洫������
-OS_U8 EngineRunningFlag = 0;
 
 void EngineInit()
 {
@@ -132,11 +131,11 @@ void EngineHandler()   // HACK: TEST ECU restore & display
         SETDATA(pDataPoolSelf, "scout3", engineStatus.ch3_temp,	OS_S16);
         SETDATA(pDataPoolSelf, "scout4", engineStatus.ch4_temp,	OS_S16);
 
-        SETDATA(pDataPoolSelf, "ecuState",	engineStatus.CntState,	OS_U8);
+        SETDATA(pDataPoolSelf, "ecuState",	engineStatus.CurState,	OS_U8);
         SETDATA(pDataPoolSelf, "ecuError",	engineStatus.ecuError,	OS_U8);
 
     /** **************** ������������ʾ ******************* */
-        param30.runningStatus = engineStatus.CntState;         //当前发动机的状�?
+        param30.runningStatus = engineStatus.CurState;         //当前发动机的状�?
         param30.error = engineStatus.ecuError;                 // 发动机错�?�?
         param30.fuel_pressure = engineStatus.fuel_pressure;    //实际油压
         param30.jet1_duty = engineStatus.jet1_duty;            // 实际喷油1脉�??
@@ -152,11 +151,8 @@ void EngineHandler()   // HACK: TEST ECU restore & display
         param30.ch3_temp = engineStatus.ch3_temp;
         param30.ch4_temp = engineStatus.ch4_temp;
         param30.outputW = 0;
-				if(engineStatus.fuel_pressure != 0)
-				{
-					g_DeviceState.ecuCountDown = 200;
-				}
-        if((SyncToGround==1)||(EngineRunningFlag==5))
+
+        if(SyncToGround)
         {
             MsgToDevice(RT_DATA_LINK, 0x30, sizeof(STRU_RUNNING_INFO), (OS_U8 *)&param30);
     //         MsgToDevice(RT_DATA_LINK, 0x31, sizeof(STRU_START_PARAM_INFO), (OS_U8 *)&param31);
@@ -178,17 +174,6 @@ OS_U8 AutoDriveEnginePwm()//ÿ100ms��������һ��engine���
         {
             GetDataFast(pDataPoolFly, "EngineRp", &CurEngineRpm);
 			SetEngineThrot(CurEngineRpm *0.1f);
-        }
-        else if(flightSeq.umOpen != 1)
-        {
-            OS_U8 autoStep = 0;
-
-            GetDataFast(pDataPoolMsn, "autoStep", &autoStep);
-            if(autoStep >= 9 && autoStep <= 13)
-            {
-                GetDataFast(pDataPoolFly, "EngineRp", &CurEngineRpm);
-                SetEngineThrot(CurEngineRpm * 0.1f);
-            }
         }
     }
 	return 0;

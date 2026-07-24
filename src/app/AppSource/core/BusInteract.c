@@ -118,17 +118,17 @@ void InitRts()
     rtList[RT_FUSE].ptr_Init = InitFuse;			
     rtList[RT_FUSE].ptr_ChkFrameSum = ChkFuseStandardFrame;// 根据外设协议，往标准帧里填数，目的是组成标准帧
 
-	rtList[PRINTF_UART_CHANNEL].ckIndex = 0;
-	rtList[PRINTF_UART_CHANNEL].chIndex = 4;	// UART5 —— 输出log信息
-	rtList[PRINTF_UART_CHANNEL].devID = 0;
-	rtList[PRINTF_UART_CHANNEL].flags = 0;
-	rtList[PRINTF_UART_CHANNEL].oddCheckEnable = 0;
-	rtList[PRINTF_UART_CHANNEL].evenCheckEnable = 0;
-	rtList[PRINTF_UART_CHANNEL].devStopLen = 0;
-	rtList[PRINTF_UART_CHANNEL].devBuad = 115200;
-	rtList[PRINTF_UART_CHANNEL].ptr_RtHandler = NULL;
-	rtList[PRINTF_UART_CHANNEL].ptr_ChkFrameSum = NULL;
-	rtList[PRINTF_UART_CHANNEL].ptr_Init = NULL;
+	rtList[RT_LOG].ckIndex = 0;
+	rtList[RT_LOG].chIndex = 4;	// UART5 —— 输出log信息
+	rtList[RT_LOG].devID = 0;
+	rtList[RT_LOG].flags = 0;
+	rtList[RT_LOG].oddCheckEnable = 0;
+	rtList[RT_LOG].evenCheckEnable = 0;
+	rtList[RT_LOG].devStopLen = 0;
+	rtList[RT_LOG].devBuad = 115200;
+	rtList[RT_LOG].ptr_RtHandler = NULL;
+	rtList[RT_LOG].ptr_ChkFrameSum = NULL;
+	rtList[RT_LOG].ptr_Init = NULL;
 
 	rtList[RT_HIL].ckIndex = 0;//0
 	rtList[RT_HIL].chIndex = 5;//仿真口——UART6
@@ -257,7 +257,7 @@ OS_U8 PrintDebug(char *str)
 {
 	OS_U16 strLen = strlen(str);
 	// UART_PutBuff((int)rtList[RT_HIL].chIndex, (OS_U8*)str, strLen);
-	UART_PutBuff(PRINTF_UART_CHANNEL, (OS_U8*)str, strLen);
+	UART_PutBuff(RT_LOG, (OS_U8*)str, strLen);
 	return 0;
 }
 
@@ -284,7 +284,7 @@ int _write(int fd, char *ptr, int len)
 	// 忽略文件描述符fd
     // 一次性将整个字符串写入环形缓冲区
     // 注意：UART_PutBuff 的第三个参数是 unsigned short，需要强制转换
-    UART_PutBuff(PRINTF_UART_CHANNEL, (unsigned char*)ptr, (unsigned short)len);
+    UART_PutBuff(RT_LOG, (unsigned char*)ptr, (unsigned short)len);
     
     return len;  // 必须返回实际写入的字节数
 }

@@ -19,7 +19,7 @@
 #define RT_DATA_LINK	(2)	//数据链
 #define RT_FUSE			(3)	//引信
 // #define NOT_USED		(4)	//备用
-#define PRINTF_UART_CHANNEL	(4)//调试打印输出
+#define RT_LOG	(4)//调试打印输出
 #define RT_HIL          (5) //仿真
 #define RT_ENGINE       (6)//发动机
 #define RT_NAV  		(7)	//导航

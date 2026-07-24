@@ -40,7 +40,7 @@ OS_U8 MsgToNAV(OS_U8 msgID, OS_U8 *data, OS_U8 len)
 /***********************************************************
  * ��������: DoHorizonCalc()
  * ��������: ˮƽ�����㷨������
- * �����Ϣ�������ǡ�����ǡ���ת�ǡ���γ�ߡ��ͼ��ٶȡ��ͽ��ٶ�
+ * ������?�������ǡ�����ǡ����?�ǡ���γ�ߡ��ͼ��ٶȡ��ͽ��ٶ�
  * ����:	���Ʋ���
  ***********************************************************/
 static OS_S32 HorizontalCalc(OS_DOUBLE ax,
@@ -89,7 +89,7 @@ static OS_S32 HorizontalCalc(OS_DOUBLE ax,
 		s_Lonsum= s_Latsum= s_Heightsum=0;
 		break;
 	default: 
-		//������ٶȡ����ٶȡ���γ�߾�ֵ
+		//������ٶȡ����ٶȡ���γ�߾��?
 		s_AxsumIMU += ax;
 		s_AysumIMU += ay;
 		s_AzsumIMU += az;
@@ -100,7 +100,7 @@ static OS_S32 HorizontalCalc(OS_DOUBLE ax,
 		s_Latsum += lat;
 		s_Heightsum += height;
 
-		s_AxsumRocket = s_AxsumIMU; //��������ϵ����������ϵ��ת���������ͺ��Լ���װ�����Ӧ
+		s_AxsumRocket = s_AxsumIMU; //��������ϵ����������ϵ��ת���������ͺ��Լ���װ������?
 		s_AysumRocket = s_AysumIMU;
 		s_AzsumRocket = s_AzsumIMU;
 		s_WxsumRocket = s_WxsumIMU;
@@ -125,12 +125,12 @@ static OS_S32 HorizontalCalc(OS_DOUBLE ax,
 		if(pSigma0) *pSigma0 = sqrt(wxAverage * wxAverage + wyAverage * wyAverage + wzAverage * wzAverage)*3600;
 
 		///1���޳�����
-		d_pitch = - asin(ayAverage / globalIn); //������ = ������ٶ�/�ϼ��ٶ�
+		d_pitch = - asin(ayAverage / globalIn); //������ = ������ٶ�?/�ϼ��ٶ�
 		pitch = d_pitch + PI / 2;
-		yaw = asin(azAverage / globalIn / sin(pitch)); //�����
+		yaw = asin(azAverage / globalIn / sin(pitch)); //�����?
 
 		///3���޳�����
-		//d_pitch = asin(ayAverage / globalIn); //���ݷ�������ϵ���������ϵ��ϵȷ������
+		//d_pitch = asin(ayAverage / globalIn); //���ݷ�������ϵ���������ϵ��ϵȷ������?
 		//pitch = d_pitch + PI / 2;
 		//yaw = - asin(azAverage / globalIn / sin(pitch)); //ͬ��
 
@@ -140,7 +140,7 @@ static OS_S32 HorizontalCalc(OS_DOUBLE ax,
 		if(pNorth) *pNorth = toDeg(atan2(wzAverage, wyAverage));//Y1 3���޳����򣬲���Ҫ�ټ�pi
 		if(*pNorth < 0)
 			*pNorth += 360;
-		//Y6 if(pNorth) *pNorth = toDeg(atan2(wzAverage, wyAverage)+ PI); //g_HorizontalCalc_north �����ΧΪ-pi/2~pi/2,��Է�λ�Ƿ�ĸ�������0 2021521 ��
+		//Y6 if(pNorth) *pNorth = toDeg(atan2(wzAverage, wyAverage)+ PI); //g_HorizontalCalc_north ������?Ϊ-pi/2~pi/2,��Է�λ�Ƿ�ĸ�������0 2021521 ��
 		break;
 	}
 	return 1;
@@ -148,14 +148,14 @@ static OS_S32 HorizontalCalc(OS_DOUBLE ax,
 
 /***********************************************************
  * ��������: DoHorizonCalc()
- * ��������: ˮƽ���������������������Ϊ:
+ * ��������: ˮƽ����������������������?:
  * 			(1)hCalcCnt	ˮƽ���㵱ǰ�ļ���
  * 			(2)hCalcTotalCnt ˮƽ����Ľ��������
  * 			����������Ϊ0ʱ������Ҫ����ˮƽ���㡣
- * 			���յ�����ˮƽ��������󣬻ὫhCalcTotalCnt��Ϊ180��hCalcCnt��Ϊ0������ʼ�����ۼӼ���������ˮƽ���㡣
+ * 			���յ�����ˮƽ���������?�ὫhCalcTotalCnt��Ϊ180��hCalcCnt��Ϊ0������ʼ�����ۼӼ���������ˮƽ���㡣
  * ����:	�ɺ�Z
  ***********************************************************/
-static OS_U32 hCalcCnt = 0;//ˮƽ��̬�������
+static OS_U32 hCalcCnt = 0;//ˮƽ��̬�������?
 static OS_U32 hCalcTotalCnt = 0;//ת������46s = 46 * 200 * 5ms
 static OS_U8 DoHorizonCalc()
 {
@@ -171,7 +171,7 @@ static OS_U8 DoHorizonCalc()
 		}
 		//ÿ1s = 5ms*200������һ������
 		else if(hCalcCnt % 200 == 0)
-		{//�ڳ�������Ĺ����У�Ҳÿ��1���´�һ�μ�������
+		{//�ڳ�������Ĺ����У�Ҳÿ��?1���´�һ�μ�������
 			SETDATA(pDataPoolNav, "Global", Global, OS_DOUBLE);//���ؼ��ٶ�
 			SETDATA(pDataPoolNav, "Sigma0", Sigma0, OS_DOUBLE);//�ϳɽ��ٶ�
 		}
@@ -259,7 +259,7 @@ OS_U32 NavCmdHandler(STRU_422_MSG_INFO * frame)
 			MsgToDevice(RT_NAV, BUS_NAV_FOCUS, 0, (OS_U8*)&toNav);
 		}
 		break;
-		case CMD_TO_NAV_REQ: //������ϵ�������
+		case CMD_TO_NAV_REQ: //������ϵ�������?
 		{
 			OS_U8 toNav[1];
 			MsgToDevice(RT_NAV, BUS_NAV_START_NAV, 0, (OS_U8*)&toNav);
@@ -289,7 +289,7 @@ OS_U32 NavRtHandler(STRU_422_MSG_INFO * frame)	// RT_NAV
 	OS_U8 msgID = frame->u8MsgID;
 	switch(msgID)
 	{
-	//��ʱ������ϵ�������֡ (����5ms)
+	//��ʱ������ϵ��������? (����5ms)
 	case BUS_IMU_INFO_REPORT:
 		{
 			//�������ݵ����ݳأ����ڷɿ�ʹ�ú�ң��
@@ -306,7 +306,7 @@ OS_U32 NavRtHandler(STRU_422_MSG_INFO * frame)	// RT_NAV
 				NavCmdHandler(&frame);
 			}
 
-			//ˮƽ���㿴ָ���Ƿ�Ѽ���ʱ�������ˣ���������˾����������û���þ�����
+			//ˮƽ���㿴ָ���Ƿ�Ѽ���ʱ�������ˣ���������˾����������û���þ�����?
 			DoHorizonCalc();
 		}
 		break;
@@ -330,7 +330,7 @@ OS_U8 SaveNavInDataPool(STRU_NAV_INFO *navInfo)
 	SETDATA(pDataPoolNav, "gpsMod", navInfo->GPSstate,	OS_U8);//GPS״̬
 	SETDATA(pDataPoolNav, "gpsLoCnt", navInfo->StanumberMaster>navInfo->StanumberSlave?navInfo->StanumberMaster:navInfo->StanumberSlave,	OS_U8);//GPS��λ����
 	SETDATA(pDataPoolNav, "gpsLoMas", navInfo->gpsDirEnable[0] == 'V'?1:0, OS_U8);
-	SETDATA(pDataPoolNav, "gpsLoSla", navInfo->gpsDirEnable[1] == 'V'?1:0, OS_U8);
+	SETDATA(pDataPoolNav, "gpsLoSla", navInfo->gpsDirEnable[1], OS_U8);
 	SETDATA(pDataPoolNav, "gpsLon", navInfo->GPSlon,	OS_S32);//GPS����
 	SETDATA(pDataPoolNav, "gpsLat", navInfo->GPSlat,	OS_S32);//GPSγ��
 	SETDATA(pDataPoolNav, "gpsHigh", navInfo->GPShigh * 1e-3,	OS_S16);//GPS�߶�
@@ -340,7 +340,7 @@ OS_U8 SaveNavInDataPool(STRU_NAV_INFO *navInfo)
 	SETDATA(pDataPoolNav, "gpsPdop", navInfo->PDOP,		OS_U16);//PDOP
 	SETDATA(pDataPoolNav, "gpsGdop", navInfo->GDOP,		OS_U16);//GDOP
 	SETDATA(pDataPoolNav, "gpsDelay", navInfo->Deltime,	OS_U8);//PPS
-	SETDATA(pDataPoolNav, "gpsUload", navInfo->uploadEphStatus,	OS_U8);//����װ�����
+	SETDATA(pDataPoolNav, "gpsUload", navInfo->uploadEphStatus,	OS_U8);//����װ�����?
 
 	SETDATA(pDataPoolNav, "gpsYear", navInfo->year,	OS_U8);//GPS��
 	SETDATA(pDataPoolNav, "gpsMonth", navInfo->month,	OS_U8);//GPS��
@@ -350,7 +350,7 @@ OS_U8 SaveNavInDataPool(STRU_NAV_INFO *navInfo)
 	SETDATA(pDataPoolNav, "gpsSec", navInfo->second,	OS_U8);//GPS��
 	SETDATA(pDataPoolNav, "gpsMs", navInfo->ms,	OS_U16);//GPS����
 	SETDATA(pDataPoolNav, "gpsTrack", navInfo->gpsTrack,	OS_U16);//GPS������
-	SETDATA(pDataPoolNav, "gpsDir", navInfo->gpsDir,	OS_U16);//GPS�����
+	SETDATA(pDataPoolNav, "gpsDir", navInfo->gpsDir,	OS_U16);//GPS�����?
 	SETDATA(pDataPoolNav, "gpsDirOK", navInfo->gpsDirEffect,	OS_U8);//GPS������Ч��־
 
 	if((g_DeviceState.workStage & DOM_HILSMODE) && hilInput.useNav == 0)
@@ -444,7 +444,7 @@ OS_U8 SaveNavInDataPool(STRU_NAV_INFO *navInfo)
 	SETDATA(pDataPoolNav, "navAz3", navInfo->imuAz42688,	OS_FLOAT);//ԭʼ���ٶ�Z
 
 	SETDATA(pDataPoolNav, "navState", navInfo->navStatus ,	OS_U8);
-	//cpu0�����ʱ�������壩
+	//cpu0�����ʱ��������?
 	SETDATA(pDataPoolNav, "navUs", navInfo->navUs,	OS_U16);
 	SETDATA(pDataPoolNav, "navUsKa", navInfo->navUsKa,	OS_U16);
     SETDATA(pDataPoolSelf, "cpuTemp2", navInfo->cpuTemp,	OS_S16);
@@ -535,7 +535,7 @@ OS_U8 CalcXYZ()
 	GetDataFast(pDataPoolFly, "DataHigh", &luanchHigh);//
 	GetDataFast(pDataPoolFly, "DataDir", &luanchDir);//
 
-	if(navState == 0x60 || navState == 0x64)//60��ϵ�����64���Ե���
+	if(navState == 0x60 || navState == 0x64)//60��ϵ�����?64���Ե���
 	{
 		DoCalcXYZ(	luanchLon * 1e-7, 
 					luanchLat*1e-7, 

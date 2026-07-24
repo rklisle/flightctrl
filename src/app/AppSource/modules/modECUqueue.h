@@ -9,6 +9,7 @@ typedef enum {
     ENGINE_WARMUP = 1,      // 启动中
     ENGINE_RUNNING = 5,     // 运行
     ENGINE_SHUTTING_DOWN = 2,// 散热
+    ENGINE_ERROR = 3, //启动失败，故障
 } SM_Engine_t;
 
 /** 发动机错误码定义 */
@@ -17,11 +18,10 @@ typedef enum {
     ERROR_FUEL_PRESSURE = 1,// 启动流程中，油压异常，油压<=2800即为异常
 } SM_EngineError_t;
 
-// HACK: TEST ECU 参数定义
 /** 发动机状态参数 */
 struct EngineStatus
 {
-    int16_t ambient_temp;      // 指令6 ，环境温度，整数，有符号实际数值，[0~9999]
+    uint16_t ambient_temp;      // 指令6 ，环境温度，整数，有符号实际数值，[0~9999]
     uint16_t air_pressure;      // 指令8 ，环境气压，无符号，单位mbar，[0~9999]
     uint16_t fuel_pressure; //*指令9 ，实际油压，单位mbar，[0~9999]
 
@@ -46,7 +46,7 @@ struct EngineStatus
     uint16_t version;           // cmd100:系统固件版本
     uint16_t totalMinite;       // cmd117：系统总时间（min）
     uint16_t runningMinite;     // cmd119：油泵总时间（min）
-    SM_Engine_t CntState;       //*当前发动机的状态
+    SM_Engine_t CurState;       //*当前发动机的状态
     SM_EngineError_t ecuError; // 发动机错误码
 };
 

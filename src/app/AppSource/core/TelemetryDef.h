@@ -178,7 +178,8 @@ telemetryParam tm_200hz[] =
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fzC1Stat",	2},	// Capacitor 1 Charging Status = 2byte value X 0.0023
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fzUnitNo",	2},	// Unit Number
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fzImpSt",	1},	// Impact / Proximity Status
-	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"res3",	4},
+	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"GST-V",	2},
+	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"GST-I",	2},
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"res4",	1},
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"cpuTemp",	2},
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"cpuTemp2",	2},
@@ -187,8 +188,8 @@ telemetryParam tm_200hz[] =
 	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"Batt28A",	2},
 	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"VCombin",	2},
 	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"ACombin",	2},
-	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"groundV",	2},
-	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"groundA",	2},
+	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"STEER-V",	2},
+	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"STEER-I",	2},
 	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"PwrCmd",	1},
 	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"FireCmd",	1},
 	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"pwrTemp",	2},

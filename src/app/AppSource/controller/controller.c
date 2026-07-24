@@ -38,7 +38,7 @@ OS_U8 LunchDetective();
 float Read_CPU_Temperature(void) ;
 extern long calcTimeCpu0;
 extern int sd_card_fault;
-OS_U8 EngineStartCmd = 0;    //æ¥è‡ªåœ°é¢çš„æ§åˆ¶å‚æ•°ï¼Œ 1ï¼šå¯åŠ¨å‘åŠ¨æœºï¼›0ï¼šåœæ­¢å‘åŠ¨æœº
+OS_U8 EngineStartCmd = 0;    //æ¥è‡ªåœ°é¢çš„æ§åˆ¶å‚æ•°ï¼Œ 1ï¼šå¯åŠ¨å‘åŠ¨æœºï¼?0ï¼šåœæ­¢å‘åŠ¨æœº
 float System_GetCoreTemperature();
 extern void ReConnectUart();
 extern void *g_pControl;
@@ -50,69 +50,6 @@ OS_DOUBLE AirSpdHistory[150];
 #define LAUNCH_RPM_START_HOLD_MS     10000u
 #define LAUNCH_RPM_THROTTLE_HOLD_MS  5000u
 #define LAUNCH_PRE_THROTTLE_PCT      30.0f
-
-static OS_U16 LaunchGetEngineRpm(void)
-{
-	OS_U16 rpm = 0;
-
-	GetDataFast(pDataPoolSelf, "ecuGetRp", &rpm);
-	return rpm;
-}
-
-static OS_U8 LaunchHoldRpmAbove(OS_U16 threshold, OS_U32 holdMs, OS_U32 *pElapsedMs)
-{
-	if (LaunchGetEngineRpm() >= threshold) {
-		*pElapsedMs += 5U;
-		if (*pElapsedMs >= holdMs) {
-			*pElapsedMs = 0U;
-			return 1U;
-		}
-	} else {
-		*pElapsedMs = 0U;
-	}
-	return 0U;
-}
-
-static void LaunchApplyPreLaunchThrottle(void)
-{
-	SETDATA(pDataPoolFly, "EngineRp", (OS_U16)300, OS_U16);
-	SetEngineThrot(LAUNCH_PRE_THROTTLE_PCT);
-}
-
-static void LaunchApplyStartHoldThrottle(void)
-{
-	SETDATA(pDataPoolFly, "EngineRp", (OS_U16)250, OS_U16);
-	SetEngineThrot(25.0f);
-}
-
-static void LaunchAbortEngineStart(int *pAutoStep, OS_U32 *pStartHoldMs, OS_U32 *pThrottleHoldMs)
-{
-	StopEngine();
-	SetEngineThrot(0.0f);
-	*pStartHoldMs = 0U;
-	*pThrottleHoldMs = 0U;
-	*pAutoStep = 7;
-	g_DeviceState.luanchStart = 0;
-	IgnitionMark = FALSE;
-	SETDATA(pDataPoolSelf, "RecvLunc", 0x00, OS_U8);
-}
-
-static void EnsureLaunchControl(void)
-{
-	static OS_U8 controlReady = 0;
-
-	if(controlReady != 0)
-		return;
-
-	if(g_pControl != NULL)
-	{
-		deleteCMathControlMain(g_pControl);
-		g_pControl = NULL;
-	}
-	g_pControl = ControlInitial();
-	if(g_pControl != NULL)
-		controlReady = 1;
-}
 
 OS_DOUBLE Average(OS_DOUBLE array[], int len)
 {
@@ -149,58 +86,52 @@ OS_U8 CalcAirSpd()
 	float curAirSpd = Average(AirSpdHistory, airHistoryCount);
     
     SETDATA(pDataPoolSelf,	"AirPress",	curPress*0.1,	OS_U16);//?ï¿½ï¿½
-    SETDATA(pDataPoolSelf,	"AirHigh",	press_height*10,	OS_S16);//ï¿½ï¿½?ï¿½??ï¿½?
+    SETDATA(pDataPoolSelf,	"AirHigh",	press_height*10,	OS_S16);//ï¿½ï¿½?ï¿???ï¿??
     SETDATA(pDataPoolSelf,	"AirSpd",	curAirSpd*10, OS_S16);//ï¿½ï¿½?ï¿½ï¿½ï¿½ï¿½
     
     return 0;
 }
 
 /***********************************************************
- * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½:AutoLuanchProcess()
- * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½: ï¿½??ï¿½??ï¿½ï¿½ï¿½??ï¿½ï¿½ï¿½??ï¿½ï¿½ï¿½ï¿½ï¿½??ï¿½?????ï¿½???ï¿½ï¿½?ï¿½ï¿½?ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½?????
- *			 ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½?ï¿½??ï¿½ï¿½ï¿½ï¿½?ï¿½ï¿½?ï¿½ï¿½ï¿½??ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½?ï¿½ï¿½ï¿½??ï¿½ï¿½?
- * ï¿½ï¿½ï¿½ï¿½:	ï¿½??ï¿½Z
+ * º¯ÊıÃû³Æ:AutoLuanchProcess()
+ * º¯Êı¹¦ÄÜ: Éè±¸ÉÏµçºó×Ô¶¯¿ªÊ¼½øÈëÉÏµç¡¢×Ô¼ì¡¢¶Ô×¼¡¢×¼±¸·¢ÉäµÈÁ÷³Ì
+ *			 Á÷³ÌÍê³ÉºóµÈ´ı×îÖÕ·¢Éä£¬ÆäÖĞ¹ı³ÌÎŞĞèÈÎºÎÈËÎª¸ÉÔ¤
+ * ×÷Õß:	³Éºê­Z
  ***********************************************************/
-OS_U8 AutoLuanchProcess()  /* 5 ms period */
+OS_U8 AutoLuanchProcess()  // 5msÔËĞĞÒ»´Î
 {
-	int testCmd=0;
-	if(testCmd==1)
-	{
-		PowerOn(DEVICE_FUSE28V);
-		PowerOn(DEVICE_FUSE_ISO5V);
-	}
 	static int AutoStep = 0;
-	static OS_U32 launchStartHoldMs = 0;
-	static OS_U32 launchThrottleHoldMs = 0;
+	static int powerSend = 0;
+	static int sendFlag = 0;
+	static int powerSend1 = 0;
+	static int powerSend2 = 0;
+	OS_U8 msnID;
+	STRU_422_MSG_INFO msg;
+	OS_U8 navStatus;
+	OS_U8 curState;
+	uint16_t rpm;
+	static bool ThrFlag = true;
+	static uint32_t startStamp = 0;
+	OS_U8 startFly = 0;
+	OS_U8 fzFeedbk;
+	OS_U8 fzTask;
+	static uint8_t FzOnFlag = 0;
+	OS_S32 launchLon,launchLat,curLon,curLat;
+	OS_S16 launchHigh;
+	OS_FLOAT curHigh;
+	double dist;
+	double h_m;
+	const char* msg_log;
 
-	if(AutoStep == LAUNCH_AUTO_STEP_DONE)
+	if(AutoStep == 14)
 	return 0;
-
-	/* AutoStep launch sequence (takeoff PPT v2):
-	 *   0-3  Power-on sequence (scout / fuse / servo / ECU)
-	 *   4    Wait mission upload (msnDevID != 0xFF)
-	 *   5    Nav alignment start (CMD_NAV_INIT + CMD_HOR_CALC_REQ)
-	 *   6    Wait nav alignment done (navState == 0x3F), then
-	 *        CMD_TO_NAV_REQ + CMD_TO_AFTER_LUANCH (è½¬å¯¼èˆªæå‰, ç´§éšè½¬å°„å)
-	 *   7    Wait engine start command (CMD_ENGINE_START)
-	 *   8    ECU crank until ENGINE_RUNNING
-	 *   9    Start complete: RPM >= 2300 for 10 s at 25% throttle
-	 *  10    Pre-launch 30% throttle, RPM >= 3400 for 5 s
-	 *  11    Wait takeoff unlock (CMD_FORE_LAUNCH_REQ, data[0]==0x11)
-	 *  12    Wait INU ready (navState == 0x64), enter standby-for-launch
-	 *  13    Wait launch command (CMD_LAUNCH_REQ -> IgnitionMark)
-	 *  14    Fuse arm stage I after startFly
-	 *  15    Fuse arm stage II/III in flight
-	 *  16    Launch sequence complete
-	 */
-
-	/* Step 0: at T+5 s, power on scout head (DEVICE_SCOUT_E28V) */
+	//1.¶Ô¸÷Éè±¸ÉÏµç
+	//5sÊ±¶Ô¹ß×é¡¢µ¼ÒıÍ·ÉÏµç
 	if(g_DeviceState.currTime > 5.0 && AutoStep == 0)
 	{
-		// Skip scout power-on if IMU link is already alive
+		//ÅĞÅäµç°åºÏÂ·¹©µçµçÑ¹£¬Ğ¡ÓÚ20·üÊ±·¢ËÍ¿ªÆôÃüÁî
 		if(g_DeviceState.imuCountDown == 0)
 		{
-			static int powerSend = 0;
 			if(powerSend == 0)
 			{
 				PowerOn(DEVICE_SCOUT_E28V);
@@ -216,15 +147,14 @@ OS_U8 AutoLuanchProcess()  /* 5 ms period */
 			AutoStep = 1;
 		}
 	}
-	/* Step 1: at T+7 s, power on fuse isolation (DEVICE_FUSE_ISO5V) */
+	//7sÊ±¶ÔÒıĞÅÉÏµç
 	if(g_DeviceState.currTime > 7.0 && AutoStep == 1)
 	{
+		//ÒıĞÅ¹©µçÎŞ²É¼¯µã£¬ÅĞ¶ÏÒıĞÅÍ¨ĞÅ×´Ì¬
 		if(g_DeviceState.fuseCountDown == 0)
 		{
-			static int sendFlag = 0;
 			if(sendFlag == 0)
 			{
-				// PowerOn(DEVICE_FUSE28V);	
 				PowerOn(DEVICE_FUSE_ISO5V);
 				sendFlag = 1;
 			}
@@ -237,36 +167,37 @@ OS_U8 AutoLuanchProcess()  /* 5 ms period */
 			AutoStep = 2;
 		}
 	}
-	/* Step 2: at T+9 s, power on servo bus (DEVICE_SRV_PWR28V) */
+	//9sÊ±¶ÔËÅ·şÉÏµç
 	if(g_DeviceState.currTime > 9.0 && AutoStep == 2)
-	{		
+	{
+		//ËÅ·ş¹©µçÎŞ²É¼¯µã£¬ÅĞ¶ÏËÅ·şÍ¨ĞÅ×´Ì¬
 		if(g_DeviceState.srvCountDown == 0)
 		{
-			static int powerSend1 = 0;
 			if(powerSend1 == 0)
 			{
 				PowerOn(DEVICE_SRV_PWR28V);
-// /******************** Test Servo (CAN & PWM)***************************/	
-				// double angleStep = 10.0;
-				// for(double angle = -30.0; angle <= 30.0; angle += angleStep) {
-				// 	ServoCtlOnce_6Rudder(angle, angle, angle, angle, angle, angle);
-				// 	tx_thread_sleep(1000);
-				// }
-				// for(double angle = 30.0; angle >= -30.0; angle -= angleStep) {
-				// 	ServoCtlOnce_6Rudder(angle, angle, angle, angle, angle, angle);
-				// 	tx_thread_sleep(1000);
-				// }	
-// /******************** Test umbrella Servo (PWM)***************************/
-				// AngleServo_SetAngle(SERVO_PWM7, 50.0f);
-				// /******************** Test ECU(PWM)***************************/
-				// PulseServo_Init(ECU_PWM8, 1.0f);
-				// PulseServo_SetPulseWidth(ECU_PWM8, 2.0f);
-// /*****************************************************/
 				powerSend1 = 1;
+// /******************** Test Servo (CAN & PWM)***************************/
+// double angleStep = 10.0;
+
+// for(double angle = -30.0; angle <= 30.0; angle += angleStep) {
+// 	ServoCtlOnce_6Rudder(angle, angle, angle, angle, angle, angle);
+// 	tx_thread_sleep(1000);
+// }
+// for(double angle = 30.0; angle >= -30.0; angle -= angleStep) {
+// 	ServoCtlOnce_6Rudder(angle, angle, angle, angle, angle, angle);
+// 	tx_thread_sleep(1000);
+// }
+// /******************** Test umbrella Servo (PWM)***************************/
+// AngleServo_SetAngle(SERVO_PWM7, 50.0f);
+// /******************** Test ECU(PWM)***************************/
+// PulseServo_Init(ECU_PWM8, 1.0f);
+// PulseServo_SetPulseWidth(ECU_PWM8, 2.0f);
+// /*****************************************************/
 			}
 			else
 			{
-					AutoStep = 3;
+				AutoStep = 3;
 			}
 		}
 		else
@@ -274,22 +205,21 @@ OS_U8 AutoLuanchProcess()  /* 5 ms period */
 			AutoStep = 3;
 		}
 	}
-	/* Step 3: at T+11 s, ECU power sequence (placeholder) */
+	//11sÊ±¶Ô·¢¶¯»úÉÏµç
 	if(g_DeviceState.currTime > 11.0 && AutoStep == 3)
 	{
-		// ECU battery power-on is optional here
+		//²»ÅĞ¶Ï¹©µç£¬Ö±½ÓÅĞ¶Ï·¢¶¯»úÍ¨ĞÅ
 		if(g_DeviceState.ecuCountDown == 0)
 		{
-			static int powerSend2 = 0;
 			if(powerSend2 == 0)
 			{
-					// PowerOn(DEVICE_BATT_ENGINE);	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-					// PowerOn(DEVICE_BATT_BATT2);
-					powerSend2 = 1;
+				// PowerOn(DEVICE_BATT_ENGINE);	// 014·¢¶¯»ú²»ÊÜÅäµç°å¿ØÖÆÉÏÏÂµç
+				// PowerOn(DEVICE_BATT_BATT2);
+				powerSend2 = 1;
 			}
 			else
 			{
-					AutoStep = 4;
+				AutoStep = 4;
 			}
 		}
 		else
@@ -297,263 +227,287 @@ OS_U8 AutoLuanchProcess()  /* 5 ms period */
 			AutoStep = 4;
 		}
 	}
-	/* Step 4: wait mission upload from ground (PPT: mission load) */
+    //2.µÈ´ıµØÃæ¼ÓÔØÈÎÎñĞÅÏ¢
 	if(AutoStep == 4)
 	{
-		OS_U8 msnID;
 		GetDataFast(pDataPoolMsn, "msnDevID", &msnID);
 
-		//
 		if(g_DeviceStatus.msgFromGCS != 0x00)
 		{
 			InitSD();
 		}
 
+		if(g_DeviceState.CurrTick % 200 == 0)
+		{
+			msg_log = "waiting for CMD_MSN_UPDATE\n";
+			fcs_uart_send(RT_LOG, (const uint8_t*)msg_log, strlen(msg_log));    
+		}
+
 		if(msnID != 0xFF)
 		{
-			// InitPwrSeq();	//MML ï¿½ï¿½ï¿½ï¿½?4
+			// InitPwrSeq();	//MML ¿ª»ğ¹¤Æ·4
 			// InitSD();
 			AutoStep = 5;
 		}
 	}
-	/* Step 5: start nav alignment (PPT: nav alignment) */
+	//3.¹ß×é¶Ô×¼
 	if(AutoStep == 5)
 	{
-		STRU_422_MSG_INFO msg;
+		//Æô¶¯¶Ô×¼
 		msg.u8MsgID = CMD_NAV_INIT;
 		NavCmdHandler(&msg);
-		msg.u8MsgID = CMD_HOR_CALC_REQ; /* horizontal alignment request */
+		msg.u8MsgID = CMD_HOR_CALC_REQ;
 		NavCmdHandler(&msg);
-		ImuCmdHandler(&msg); /* TODO: IMU alignment for 014 variant */
 		AutoStep = 6;
 	}
-	/* Step 6: wait nav alignment complete, then switch-to-nav + post-launch nav */
+	//4.ÅĞ¶Ï¶Ô×¼Íê³É£¬Íê³Éºó×ªµ¼º½
 	if(AutoStep == 6)
 	{
-		OS_U8 imuStatus, navStatus;
-		STRU_422_MSG_INFO msg;
-		GetDataFast(pDataPoolImu, "navState", &imuStatus);
 		GetDataFast(pDataPoolNav, "navState", &navStatus);
+
+		if(navStatus == 0x20)
+		{
+			if(g_DeviceState.CurrTick % 200 == 0)
+			{
+				msg_log = "FOCUSING\n";
+				fcs_uart_send(RT_LOG, (const uint8_t*)msg_log, strlen(msg_log));    
+			}
+		}
 
 		if(navStatus == 0x3F)
 		{
-			/* PPT v2: æ?ç€µè‰°åŸ… after alignment, before engine start */
+			// ×Ô¶¯×ªµ¼º½
 			msg.u8MsgID = CMD_TO_NAV_REQ;
 			NavCmdHandler(&msg);
+
+			if(g_DeviceState.CurrTick % 200 == 0)
+			{
+				msg_log = "FOCUS DONE\n";
+				fcs_uart_send(RT_LOG, (const uint8_t*)msg_log, strlen(msg_log));    
+			}
 		}
 		
 		if(navStatus == 0x64)
 		{
-			/* Immediately send æ?çå‹«æ‚— */
+			// ×Ô¶¯×ªÉäºó
 			msg.u8MsgID = CMD_TO_AFTER_LUANCH;
 			NavCmdHandler(&msg);
+			// ³õÊ¼»¯¿ØÖÆ´úÂë
+			if((DOM_HILSMODE & g_DeviceState.workStage) != DOM_HILSMODE)
+			{
+				g_pControl = ControlInitial();
+			}
 			AutoStep = 7;
 		}
 	}
-	/* Step 7: wait engine start command from ground (PPT: engine start) */
+	//5.ĞÇÀú×°¶©(¿ÕÈ±)
 	if(AutoStep == 7)
 	{
-		EnsureLaunchControl();
+		AutoStep = 8;
+	}
+	//6.µÈ´ı·¢¶¯»úÆô¶¯Ö¸Áî·¢³ö
+	if(AutoStep == 8)
+	{
+        if(g_DeviceState.CurrTick % 200 == 0)
+        {
+            msg_log = "waiting for ECU Start\n";
+            fcs_uart_send(RT_LOG, (const uint8_t*)msg_log, strlen(msg_log));    
+        }
 
 		if(EngineStartCmd == 1)
 		{
-			AutoStep = 8;
+			AutoStep = 9;
 		}
 	}
-	/* Step 8: crank ECU until ENGINE_RUNNING */
-	if(AutoStep == 8)
-	{
-		if(EngineStartCmd == 0)
-		{
-			LaunchAbortEngineStart(&AutoStep, &launchStartHoldMs, &launchThrottleHoldMs);
-		}
-		else if(g_DeviceState.CurrTick % 4 == 0)
-		{
-			OS_U8 cntState;
-
-			GetDataFast(pDataPoolSelf, "ecuState", &cntState);
-			switch(cntState)
-			{
-			case ENGINE_STOPED:
-				StartEngine();
-				break;
-			case ENGINE_WARMUP:
-			case ENGINE_SHUTTING_DOWN:
-				break;
-			case ENGINE_RUNNING:
-				launchStartHoldMs = 0U;
-				AutoStep = 9;
-				break;
-			default:
-				break;
-			}
-		}
-	}
-	/* Step 9: start complete - hold RPM >= 2300 for 10 s*/
+	//6.·¢¶¯»úÆô¶¯
 	if(AutoStep == 9)
 	{
 		if(EngineStartCmd == 0)
 		{
-			LaunchAbortEngineStart(&AutoStep, &launchStartHoldMs, &launchThrottleHoldMs);
+			//ÓÃ»§ÊÖ¶¯ÓÖ·¢ËÍÁËÍ£»úÖ¸Áî
+			StopEngine();
+			AutoStep = 8;
 		}
 		else
 		{
-			//LaunchApplyStartHoldThrottle();
-			if(LaunchHoldRpmAbove(LAUNCH_RPM_START_MIN, LAUNCH_RPM_START_HOLD_MS, &launchStartHoldMs))
+			if(g_DeviceState.CurrTick % 20 == 0)// Ã¿100ms£¬½øif
 			{
-				launchThrottleHoldMs = 0U;
-				AutoStep = 10;
+				//ÏÈÅĞ¶Ï·¢¶¯»úÊÇ·ñÒÑ½øÈëÔËĞĞ×´Ì¬
+				GetDataFast(pDataPoolSelf, "ecuState", &curState);
+				GetDataFast(pDataPoolSelf, "ecuGetRp", &rpm);
+				switch(curState)//0Í£»ú£¬1Æô¶¯ÖĞ£¬2É¢ÈÈ 3¹ÊÕÏ 4ÍÑ»ú 5ÔËĞĞ£¨Õâ¿Ï¶¨ÊÇĞ­ÒéÀïµÄ£©
+				{
+					case ENGINE_STOPED://·¢ËÍÆô¶¯Ö¸Áî
+							StartEngine();
+							break;
+					case ENGINE_WARMUP://µÈ´ıÆô¶¯
+							if(g_DeviceState.CurrTick % 200 == 0)
+							{
+								msg_log = "ENGINE_WARMUP\n";
+								fcs_uart_send(RT_LOG, (const uint8_t*)msg_log, strlen(msg_log));    
+							}
+							break;
+					case ENGINE_SHUTTING_DOWN:
+							break;
+					case ENGINE_ERROR:
+							if(g_DeviceState.CurrTick % 200 == 0)
+							{
+								msg_log = "ENGINE_ERROR\n";
+								fcs_uart_send(RT_LOG, (const uint8_t*)msg_log, strlen(msg_log));    
+							}
+							break;
+					case ENGINE_RUNNING:
+							if(g_DeviceState.CurrTick % 200 == 0)
+							{
+								msg_log = "ENGINE_RUNNING\n";
+								fcs_uart_send(RT_LOG, (const uint8_t*)msg_log, strlen(msg_log));    
+							}
+							/* ÔËĞĞµ½ÕâÀï±íÊ¾£º
+							1¡¢Æô¶¯³É¹¦*/
+							/* 2¡¢×ªËÙÎÈ¶¨ÔÚ2300ÒÔÉÏ³¬¹ı10s
+							3¡¢·¢ÁËÒ»¸ö30%ÓÍÃÅ
+							4¡¢×ªËÙÎÈ¶¨ÔÚ3400ÒÔÉÏ³¬¹ı5s*/
+							SetEngineThrot(30.0f);
+							if(rpm > 3400)
+							{
+								if(ThrFlag)
+								{
+									startStamp = tx_time_get();
+									ThrFlag = false;
+								}
+								else
+								{
+									// ÅĞ¶ÏÊ±¼äÊÇ·ñ´óÓÚ5s
+									if((tx_time_get() - startStamp) > 5000)
+									{
+										ThrFlag = true;
+										AutoStep = 10;
+									}
+								}
+							}
+							break;
+				}
 			}
 		}
 	}
-	/* Step 10: pre-launch 30% throttle, hold RPM >= 3400 for 5 s (PPT: throttle stable) */
+	//7.×Ô¶¯½øÈëÔ¤·¢Éä
 	if(AutoStep == 10)
 	{
-		if(EngineStartCmd == 0)
-		{
-			LaunchAbortEngineStart(&AutoStep, &launchStartHoldMs, &launchThrottleHoldMs);
-		}
-		else
-		{
-			LaunchApplyPreLaunchThrottle();
-			if(LaunchHoldRpmAbove(LAUNCH_RPM_THROTTLE_MIN, LAUNCH_RPM_THROTTLE_HOLD_MS, &launchThrottleHoldMs))
-			{
-				AutoStep = 11;
-			}
-		}
+		g_DeviceState.luanchStart = 1;
+		SETDATA(pDataPoolSelf,	"RecvLunc",	0xCC,	OS_U8);//Ô¤·¢ÉäÍê³É£¬µÈ´ı·¢Éä½âËøÖ¸Áî
+		AutoStep = 11;
 	}
-	/* Step 11: wait takeoff unlock from ground (PPT: takeoff unlock) */
+	//8.Ô¤·¢ÉäÍê³É£¬µÈ´ıµØÃæ½âËøÖ¸Áî
 	if(AutoStep == 11)
 	{
 		if(EngineStartCmd == 0)
 		{
-			LaunchAbortEngineStart(&AutoStep, &launchStartHoldMs, &launchThrottleHoldMs);
+			//ÓÃ»§ÊÖ¶¯ÓÖ·¢ËÍÁËÍ£»úÖ¸Áî         
+			StopEngine();
+			AutoStep = 8;
+			g_DeviceState.luanchStart = 0;
+			SETDATA(pDataPoolSelf,	"RecvLunc",	0x00,	OS_U8);
 		}
-		else if(g_DeviceState.luanchStart == 1)
+		if(IgnitionMark == TRUE)//µØÃæ·¢ËÍÈ«²¿½âËøÖ¸Áî
 		{
 			AutoStep = 12;
 		}
 	}
-	/* Step 12: wait INU ready (navState == 0x64), then enter standby-for-launch */
+	//9.µØÃæ½âËøÒÑ¾­Íê³É£¬µÈ´ı»ğ¼ı¼¤·¢
 	if(AutoStep == 12)
 	{
-		OS_U8 navStatus;
-
-		GetDataFast(pDataPoolNav, "navState", &navStatus);
-		if(navStatus == 0x64)
-		{
-			SETDATA(pDataPoolSelf, "RecvLunc", 0xCC, OS_U8);
-			AutoStep = 13;
-		}
-	}
-	/* Step 13: wait launch command (PPT: standby for launch, CMD_LAUNCH_REQ) */
-	if(AutoStep == 13)
-	{
 		if(EngineStartCmd == 0)
 		{
-			LaunchAbortEngineStart(&AutoStep, &launchStartHoldMs, &launchThrottleHoldMs);
+			//ÓÃ»§ÊÖ¶¯ÓÖ·¢ËÍÁËÍ£»úÖ¸Áî
+			StopEngine();
+			AutoStep = 8;
+			IgnitionMark = FALSE;
+			g_DeviceState.luanchStart = 0;
+			SETDATA(pDataPoolSelf,	"RecvLunc",	0x00,	OS_U8);
 		}
-		else if(IgnitionMark == TRUE)
+		GetDataFast(pDataPoolSelf,	"startFly",	&startFly);
+		if(startFly == 1)//DoIgnitionº¯Êı½«startFlyÖÃ1£¬µØÃæ ·¢¿ØÊ×Ò³ - Æğ·É/¹ıÔØ/ËÙ¶È/hil
 		{
-			AutoStep = 14;
-		}
-	}
-	/* Step 14: fuse arm stage I after flight has started */
-	if(AutoStep == 14)
-	{
-		if(EngineStartCmd == 0)
-		{
-			LaunchAbortEngineStart(&AutoStep, &launchStartHoldMs, &launchThrottleHoldMs);
-		}
-
-		OS_U8 startFly = 0;
-		GetDataFast(pDataPoolSelf, "startFly", &startFly);
-		if(startFly == 1)
-		{
-			FuseSend(ARM_I);
-			OS_U8 fzFeedbk;
+			FuseSend(ARM_I);	//ÒÑ¾­Æğ·ÉÁË£¬·¢ËÍÒ»¼¶½â±£Ö¸Áî£¨Ìõ¼ş2g¹ıÔØ£©
+			// ÅĞ¶ÏµÚ8×Ö½ÚÎª0x40
 			GetDataFast(pDataPoolSelf, "fzFeedbk", &fzFeedbk);
 			if(fzFeedbk & 0x40)
 			{
-				AutoStep = 15;
+				AutoStep = 13;
 			}
 		}
-	}
-	/* Step 15: fuse arm stage II/III when range/altitude criteria met in flight */
-	if(AutoStep == 15)
+	}    
+	//10.Æğ·ÉÖ®ºó£¬·É³ö2kmºó¸øÒıĞÅµÄÒı±¬µçÔ´ÉÏµç
+	if(AutoStep == 13)
 	{
-		static uint8_t FzOnFlag = 0;
 		if (0 == FzOnFlag)
 		{
-			OS_S32 launchLon,launchLat,curLon,curLat;
-			OS_S16 launchHigh;
-			OS_FLOAT curHigh;
-			GetDataFast(pDataPoolFly, "DataLon", &launchLon);
-			GetDataFast(pDataPoolFly, "DataLat", &launchLat);
-			GetDataFast(pDataPoolFly, "DataHigh", &launchHigh);
+			GetDataFast(pDataPoolFly, "DataLon", &launchLon);//Æğ·ÉÎ»ÖÃµÄ¾­Î³¸ß
+			GetDataFast(pDataPoolFly, "DataLat", &launchLat);//
+			GetDataFast(pDataPoolFly, "DataHigh", &launchHigh);//
+
 			launchLon = launchLon * 1e-7;
 			launchLat = launchLat * 1e-7;
 
-			GetDataFast(pDataPoolImu, "navLon", &curLon);
-			GetDataFast(pDataPoolImu, "navLat", &curLat);
-			GetDataFast(pDataPoolImu, "navHigh", &curHigh);
+			GetDataFast(pDataPoolImu, "navLon", &curLon);//µ±Ç°Î»ÖÃµÄ¾­Î³¸ß
+			GetDataFast(pDataPoolImu, "navLat", &curLat);//
+			GetDataFast(pDataPoolImu, "navHigh", &curHigh);//
+
 			curLon = curLon * 1e-7;
 			curLat = curLat * 1e-7;
 
-			double dist = haversine_distance(launchLat, launchLon, curLat, curLon);
-			double h_m = curHigh - launchHigh;
+			dist = haversine_distance(launchLat, launchLon, curLat, curLon);
+			h_m = curHigh - launchHigh;
 
-			/* Arm fuse stage II when horizontal range > 2 km and altitude > 200 m */
 			if((dist > 2000)&&(h_m > 200))
 			{
-				FuseSend(ARM_II);
-				OS_U8 fzFeedbk;
+				FuseSend(ARM_II);// ·¢ËÍ¶ş¼¶½â±£
+
 				GetDataFast(pDataPoolSelf, "fzFeedbk", &fzFeedbk);
 				if(fzFeedbk & 0xC0)
 				{
 					PowerOn(DEVICE_FUSE28V);
-					g_DeviceStatus.FzOnStamp_s = GetCurTime();	// tx_time_get();
+					g_DeviceStatus.FzOnStamp_s = tx_time_get();
 					FzOnFlag = 1;
 				}
 			}
 		}
 		else
 		{
-			/* After fuse 28 V on, wait 2 s then arm stage III if deltaR < 2 km */
-			if((GetCurTime() - g_DeviceStatus.FzOnStamp_s) > 2)
+			// ÒıĞÅ-Òı±¬µçÔ´ÒÑ¾­ÉÏµç
+			// ÑÓÊ±2s
+			if((tx_time_get() - g_DeviceStatus.FzOnStamp_s) > 2000)
 			{
-				//å¼€å§‹è¿›å…¥æ”»å‡»ç‚¹æ—¶ï¼Œç»™å¼•ä¿¡å‘é€ä¸‰çº§è§£ä¿
-				//æ–¹æ³•1ï¼šæ ¹æ®æ§åˆ¶è¾“å‡ºæ ‡å¿—ä½åˆ¤æ–­
+				//¿ªÊ¼½øÈë¹¥»÷µãÊ±£¬¸øÒıĞÅ·¢ËÍÈı¼¶½â±£
+				//·½·¨Ò»£º¸ù¾İ¿ØÖÆÊä³ö±êÖ¾Î»ÅĞ¶Ï
 				if(g_controller_to_switch.flag_fuze_unlock == 1)
-				// //æ–¹æ³•2ï¼šæ ¹æ®æ§åˆ¶è¾“å‡ºå½“å‰èˆªç‚¹å·åˆ¤æ–­
+				// //·½·¨¶ş£º¸ù¾İ¿ØÖÆÊä³öµ±Ç°º½µãºÅÅĞ¶Ï
 				// OS_U8 curPtNo;
 				// GetDataFast(pDataPoolMsn, "WP_cur", &curPtNo);
 				// if(Arp[curPtNo].w == MSN_CMD_ATTACK)
-				// //æ–¹æ³•3ï¼šæ ¹æ®æ§åˆ¶è¾“å‡ºå½“å‰èˆªç‚¹å·åˆ¤æ–­
-				// OS_FLOAT deltaR;
-				// GetDataFast(pDataPoolFly, "deltaR", &deltaR);
-				// if(deltaR != 0)
-				// {
-				// 	if(deltaR < 2000)
-
 				{
-					FuseSend(ARM_III);//å‘é€ä¸‰çº§è§£ä¿
+					FuseSend(ARM_III);//·¢ËÍÈı¼¶½â±£
 					
-					// åˆ¤æ–­ç¬¬9å­—èŠ‚ä¸º0x80
-					OS_U8 fzTask;
+					// ÅĞ¶ÏµÚ9×Ö½ÚÎª0x80
 					GetDataFast(pDataPoolSelf, "fzTask", &fzTask);
 					if(fzTask & 0x80)
 					{
-						AutoStep = LAUNCH_AUTO_STEP_DONE;
+						AutoStep = 14;
 					}
 				}
 			}
 		}
 	}
-	/* Publish autoStep for telemetry */
-	SETDATA(pDataPoolMsn,	"autoStep",	AutoStep, OS_U8);
-	
-	/* Payload type: 3 = scout link alive, 2 = scout link down */
+	SETDATA(pDataPoolMsn,	"autoStep",	AutoStep,	OS_U8);	
+    if(g_DeviceState.CurrTick % 200 == 0)
+    {
+		char info[50] = {0};
+		sprintf(info,"AutoStep = %d, NAVnavState = 0x%x, ecuState = %d\n", 
+						AutoStep, 			navStatus,		curState);
+        fcs_uart_send(RT_LOG, (const uint8_t*)info, strlen(info));
+    }
+
+	//ÅĞ¶Ïµ¼ÒıÍ·ÊÇ·ñÁ¬½Ó£¬Èç¹ûÁ¬½ÓÔòÀàĞÍÎª0b11 = 3£¬Èç¹ûÎ´Á¬½ÓÀàĞÍÎª0b10 = 2
 	if(g_DeviceState.scoutCountDown != 0)
 	{
 		SETDATA(pDataPoolMsn,	"paylodtp",	3,	OS_U8);
@@ -562,29 +516,28 @@ OS_U8 AutoLuanchProcess()  /* 5 ms period */
 	{
 		SETDATA(pDataPoolMsn,	"paylodtp",	2,	OS_U8);
 	}
-	
-	return 0;
+  return 0;
 }
 
 
 
 /***********************************************************
  * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½:ControllerStatusUpdata()
- * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½: ï¿½ï¿½ï¿½??ï¿½ï¿½ï¿½ï¿½ï¿½?5msï¿½ï¿½?ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½?ï¿½ï¿½ï¿½??ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½??ï¿½??ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½?ï¿½ï¿½ï¿½??ï¿½??ï¿½??ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½?
- * 	1.ï¿½??ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½?ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½?ï¿½ï¿½ï¿½??ï¿½ï¿½
- * 	2.ï¿½ï¿½ï¿½ï¿½?ï¿½ï¿½ï¿½ï¿½ï¿½??ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½?ï¿½ï¿½ï¿½ï¿½
- * ï¿½ï¿½ï¿½ï¿½:	ï¿½??ï¿½Z
+ * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½: ï¿½ï¿½ï¿???ï¿½ï¿½ï¿½ï¿½ï¿??5msï¿½ï¿½?ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½?ï¿½ï¿½ï¿???ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿???ï¿???ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½?ï¿½ï¿½ï¿???ï¿???ï¿???ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿??
+ * 	1.ï¿???ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½?ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½?ï¿½ï¿½ï¿???ï¿½ï¿½
+ * 	2.ï¿½ï¿½ï¿½ï¿½?ï¿½ï¿½ï¿½ï¿½ï¿???ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½?ï¿½ï¿½ï¿½ï¿½
+ * ï¿½ï¿½ï¿½ï¿½:	ï¿???ï¿½Z
  ***********************************************************/
 OS_U8 ControllerStatusUpdata()	// 5msï¿½ï¿½ï¿½ï¿½?ï¿½ï¿½
 {
-	//ï¿½??ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½??ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½?ï¿½ï¿½??
-	SelfCheckCollpse();//ï¿½ï¿½ï¿½ï¿½?ï¿½ï¿½ï¿½??ï¿½?????ï¿½ï¿½SDï¿½ï¿½ï¿½????
+	//ï¿???ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿???ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½?ï¿½ï¿½??
+	SelfCheckCollpse();//ï¿½ï¿½ï¿½ï¿½?ï¿½ï¿½ï¿???ï¿??????ï¿½ï¿½SDï¿½ï¿½ï¿?????
 
 	/* Full sim (useNav==0): air data from simulator; otherwise onboard sensor */
-	if (((g_DeviceState.workStage & DOM_HILSMODE) == 0) || hilInput.useNav != 0) {
+	if((g_DeviceState.workStage & DOM_HILSMODE) != DOM_HILSMODE)
+	{
 		CalcAirSpd();
 	}
-	
 	ReConnectUart();	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	return 0;
 }
@@ -592,22 +545,22 @@ OS_U8 ControllerStatusUpdata()	// 5msï¿½ï¿½ï¿½ï¿½?ï¿½ï¿½
 
 /***********************************************************
  * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½:SelfCheckCollpse()
- * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½: ï¿½ï¿½ï¿½??ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½???ï¿½??ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½??ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½?ï¿½ï¿½ï¿½ï¿½?ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½?ï¿½??ï¿½ï¿½ï¿½??ï¿½ï¿½ï¿½?
- * ï¿½ï¿½ï¿½ï¿½:	ï¿½??ï¿½Z
+ * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½: ï¿½ï¿½ï¿???ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½???ï¿???ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿???ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½?ï¿½ï¿½ï¿½ï¿½?ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½?ï¿???ï¿½ï¿½ï¿???ï¿½ï¿½ï¿??
+ * ï¿½ï¿½ï¿½ï¿½:	ï¿???ï¿½Z
  ***********************************************************/
 static OS_U8 SelfCheckCollpse()
 {
-	//ï¿½ï¿½ï¿½ï¿½?ï¿½?????
+	//ï¿½ï¿½ï¿½ï¿½?ï¿??????
     LunchDetective();
 	
 	//ï¿½ï¿½ï¿½ï¿½?ï¿½ï¿½
 	//SETDATA(pDataPoolSelf,	"BJTime",	g_DeviceState.BJTimeSecond,	OS_U32);
 
-	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½?
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿??
 	float t = System_GetCoreTemperature();
 	g_DeviceState.temperature = t;
 
-	//ï¿½??ï¿½ï¿½ï¿½ï¿½??ï¿½ï¿½??
+	//ï¿???ï¿½ï¿½ï¿½ï¿½??ï¿½ï¿½??
 	g_DeviceState.hilCountDown = g_DeviceState.hilCountDown > 0?g_DeviceState.hilCountDown-1:0;
 	g_DeviceState.ecuCountDown  = g_DeviceState.ecuCountDown > 0?g_DeviceState.ecuCountDown-1:0;
 	g_DeviceState.battCountDown  = g_DeviceState.battCountDown > 0?g_DeviceState.battCountDown-1:0;
@@ -619,18 +572,18 @@ static OS_U8 SelfCheckCollpse()
 	g_DeviceState.scoutCountDown = g_DeviceState.scoutCountDown >0? g_DeviceState.scoutCountDown-1:0;
 
 	SETDATA(pDataPoolSelf,	"commHil",	g_DeviceState.hilCountDown,	OS_U8);//ï¿½ï¿½ï¿½ï¿½
-	SETDATA(pDataPoolSelf,	"commBatt",	g_DeviceState.battCountDown,	OS_U8);//ï¿½ï¿½ï¿½?????
+	SETDATA(pDataPoolSelf,	"commBatt",	g_DeviceState.battCountDown,	OS_U8);//ï¿½ï¿½ï¿??????
 	SETDATA(pDataPoolSelf,	"commPwr",	g_DeviceState.powerCountDown,	OS_U8);//ï¿½ï¿½ï¿½ï¿½
 	SETDATA(pDataPoolSelf,	"commEcu",	g_DeviceState.ecuCountDown,	OS_U8);//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	SETDATA(pDataPoolSelf,	"commNav",	g_DeviceState.navCountDown,	OS_U8);//ï¿½ï¿½ï¿½ï¿½
 
-	SETDATA(pDataPoolSelf,	"commSrv",	g_DeviceState.srvCountDown,		OS_U8);//ï¿½??ï¿½?
-	SETDATA(pDataPoolSelf,	"commImu",	g_DeviceState.imuCountDown,		OS_U8);//ï¿½????
+	SETDATA(pDataPoolSelf,	"commSrv",	g_DeviceState.srvCountDown,		OS_U8);//ï¿???ï¿??
+	SETDATA(pDataPoolSelf,	"commImu",	g_DeviceState.imuCountDown,		OS_U8);//ï¿?????
 	SETDATA(pDataPoolSelf,	"commFuse",	g_DeviceState.fuseCountDown,	OS_U8);//ï¿½ï¿½ï¿½ï¿½
 	SETDATA(pDataPoolSelf,	"commScot",	g_DeviceState.scoutCountDown,	OS_U8);//ï¿½ï¿½ï¿½ï¿½???
 
-	SETDATA(pDataPoolSelf,	"cpuTemp",	g_DeviceState.temperature * 100,		OS_S16);//ï¿½??ï¿½ï¿½ï¿½ï¿½
-	SETDATA(pDataPoolSelf,	"selfMode",	g_DeviceState.workStage,		OS_U8);//ï¿½ï¿½ï¿½ï¿½ï¿½??ï¿½?
+	SETDATA(pDataPoolSelf,	"cpuTemp",	g_DeviceState.temperature * 100,		OS_S16);//ï¿???ï¿½ï¿½ï¿½ï¿½
+	SETDATA(pDataPoolSelf,	"selfMode",	g_DeviceState.workStage,		OS_U8);//ï¿½ï¿½ï¿½ï¿½ï¿???ï¿??
 
 	OS_U8 sdState;
 	if(SD_Enable == FALSE)
@@ -642,7 +595,7 @@ static OS_U8 SelfCheckCollpse()
 			sdState = sd_card_fault==0?1:0xEE;
 	}
 
-	SETDATA(pDataPoolSelf,	"sdState",	sdState,	OS_U8);//ï¿½??SDï¿½ï¿½??
+	SETDATA(pDataPoolSelf,	"sdState",	sdState,	OS_U8);//ï¿???SDï¿½ï¿½??
 
 	return 0;
 }
@@ -659,8 +612,8 @@ OS_U8 InitReportParam()
 
 /***********************************************************
  * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½:BCCmdHandler()
- * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½: ï¿½ï¿½?ï¿½ï¿½ï¿½??ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½??ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
- * ï¿½ï¿½ï¿½ï¿½:	ï¿½??ï¿½Z
+ * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½: ï¿½ï¿½?ï¿½ï¿½ï¿???ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿???ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+ * ï¿½ï¿½ï¿½ï¿½:	ï¿???ï¿½Z
  ***********************************************************/
 OS_U32 ControllerCmdHandler(STRU_422_MSG_INFO * frame)	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½?ï¿½ï¿½
 {
@@ -683,9 +636,9 @@ OS_U32 ControllerCmdHandler(STRU_422_MSG_INFO * frame)	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï
 	/*
 	case CMD_DATA_SET:
 	{
-		//ï¿½ï¿½ï¿½??ï¿½ï¿½?ï¿½?
+		//ï¿½ï¿½ï¿???ï¿½ï¿½?ï¿??
 		FLIGHT_CMD cmd;
-		cmd.cmdType = 0;//ï¿½ï¿½ï¿½ï¿½ï¿½??ï¿½?
+		cmd.cmdType = 0;//ï¿½ï¿½ï¿½ï¿½ï¿???ï¿??
 		cmd.paramID = frame->au8Data[0];
 		cmd.paramValue = *(OS_FLOAT *)(&frame->au8Data[1]);
 		SETDATA(pDataPoolSelf, "tcCmd", cmd.paramID,	OS_U8);
