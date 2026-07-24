@@ -76,14 +76,9 @@ extern "C"{
     void ControlRun(void *v){
         CMathControlMain *pinst = (CMathControlMain *)v;
         if(pinst == NULL)
-        {   // empty
+        {   
             return;
         }
-        // 
-//        if(s_pre_cb != NULL)
-//        {   // prepare control input data
-//            s_pre_cb();
-//        }
         // �ؼ���ÿ������ǰ��ȫ�ֱ���ͬ����ʵ��
         pinst->flight_time = g_flight_time;
         pinst->time_tick = g_time_tick;

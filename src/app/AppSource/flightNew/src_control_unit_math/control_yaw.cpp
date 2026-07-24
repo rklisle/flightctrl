@@ -9,7 +9,7 @@ CMathControlYaw::CMathControlYaw()
 {
 	p_st_yaw_control_input = NULL;
 	p_st_yaw_control_output = NULL;
-	// p_st_debug_monitor = NULL;
+	//p_st_debug_monitor = NULL;
 	m_k5h = 0.0;
 	m_knih = 0.0;
 	m_kwih = 0.0;
@@ -20,10 +20,14 @@ CMathControlYaw::CMathControlYaw()
 	m_urh_record_begin_combat = 0.0;
 	//m_time_record_separate_booster = 0.0;
 	//m_time_record_begin_combat = 0.0;
+	m_wx = 0.0;
 	m_wy = 0.0;
 	m_wy_command = 0.0;
+	m_wy_command_comp = 0.0;
+	m_wy_command_comp_record = 0.0;
 	m_distance_target = 0.0;
 	m_nz_command = 0.0;
+	m_nz_command_guidance = 0.0;
 	m_nbz = 0.0;
 	m_nvz = 0.0;
 	m_dqh = 0.0;
@@ -58,17 +62,19 @@ void CMathControlYaw::Run()
 	Get_Data();
 	Calc_Data();
 	Send_Data();
-	// Monitor_Data();
+	//Monitor_Data();
 };
 void CMathControlYaw::Get_Data()
 {
 	m_time_separate_booster = p_st_yaw_control_input->time_separate_booster;
 	m_time_combat_status = p_st_yaw_control_input->time_combat_status;
 	m_time_combat_delay = p_st_yaw_control_input->time_combat_delay;
+	m_wx = p_st_yaw_control_input->wx;
 	m_wy = p_st_yaw_control_input->wy;
 	m_distance_target = p_st_yaw_control_input->distance_target;
 	m_nby = p_st_yaw_control_input->nby;
 	m_nbz = p_st_yaw_control_input->nbz;
+	m_nz_command_guidance = p_st_yaw_control_input->nz_command_guidance;
 	m_dqh = p_st_yaw_control_input->dqh;
 	m_qh = p_st_yaw_control_input->qh;
 	m_tgo = p_st_yaw_control_input->tgo;
@@ -85,34 +91,37 @@ void CMathControlYaw::Get_Data()
 void CMathControlYaw::Send_Data()
 {
 	p_st_yaw_control_output->u5h = m_u5h;
-	p_st_yaw_control_output->urh_zd = m_urh_zd;// °üº¬×èÄáÏî
+	p_st_yaw_control_output->urh_zd = m_urh_zd;// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+
+	p_st_yaw_control_output->wy_command = m_wy_command;
+	p_st_yaw_control_output->nz_command = m_nz_command;// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 }
 void CMathControlYaw::Calc_Data()
 {
 	double k1 = 4.996e-3;
-	double k2 = 0.9985;		//Î±²à»¬½Ç·´À¡»ØÂ·´«º¯1/(s+b4)ÀëÉ¢»¯ÏµÊý£¬b4=0.3
+	double k2 = 0.9985;		//Î±ï¿½à»¬ï¿½Ç·ï¿½ï¿½ï¿½ï¿½ï¿½Â·ï¿½ï¿½ï¿½ï¿½1/(s+b4)ï¿½ï¿½É¢ï¿½ï¿½Ïµï¿½ï¿½ï¿½ï¿½b4=0.3
 	double temp_urh_zd = 0.0;
 	
 	Calc_Control_Gain();
 	Calc_Control_Commond();
 
-	//Ôö¼Ó×èÄá
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	m_u5h = m_k5h * (m_wy - m_wy_command);
 	if(flight_time < m_time_separate_booster)
 		m_u5h = CFlightGlobalFun::Range(m_u5h, 6.0);
 
-	//²âÊÔµ¯µÀ½×Ô¾ÏìÓ¦²âÊÔ
+	//ï¿½ï¿½ï¿½Ôµï¿½ï¿½ï¿½ï¿½ï¿½Ô¾ï¿½ï¿½Ó¦ï¿½ï¿½ï¿½ï¿½
 // 	m_nz_command = 0.0;
 // 	if (flight_time > (m_time_combat_status + 3.0)) m_nz_command = 0.2;	
 
-	//±ê×¼Èý»ØÂ·¹ýÔØ¿ØÖÆ
+	//ï¿½ï¿½×¼ï¿½ï¿½ï¿½ï¿½Â·ï¿½ï¿½ï¿½Ø¿ï¿½ï¿½ï¿½
 // 	m_unwih += (RTOA * m_knih * (m_nz_command + m_nbz) + m_kwih * (m_wy - m_wy_command)) * STEP_5ms;
 // 	m_unwih = CFlightGlobalFun::Range(m_unwih, 5.0);
 // 	m_urh_zd = m_unwih + m_u5h;
 // 	m_urh_zd = CFlightGlobalFun::Range(m_urh_zd, 6.0);
-	if(flight_time < m_time_combat_status + m_time_combat_delay + 1.0)
+	if(flight_time < m_time_combat_status + m_time_combat_delay)// + 1.0)
 	{
-		//×èÄáÆ÷ºÍ²à»¬½ÇÎªÁã¿ØÖÆ
+		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í²à»¬ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½ï¿½
 		//m_nvz = -m_nby*sin(m_gama/RTOA) + m_nbz*cos(m_gama/RTOA);
 		m_nvz = m_nbz;
 		m_unih += RTOA * m_knih * (0.0 + m_nvz) * STEP_5ms; 
@@ -120,191 +129,246 @@ void CMathControlYaw::Calc_Data()
 	}
 	else
 	{
-		//»ý·ÖÐÎÊ½µÄÎ±²à»¬½ÇÈý»ØÂ·¹ýÔØ¿ØÖÆ 
+		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê½ï¿½ï¿½Î±ï¿½à»¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â·ï¿½ï¿½ï¿½Ø¿ï¿½ï¿½ï¿½ 
 		m_unih += RTOA * m_knih * (m_nz_command + m_nbz) * STEP_5ms; 
-		m_unih = CFlightGlobalFun::Range(m_unih, 10.0);
+		m_unih = CFlightGlobalFun::Range(m_unih, 12.0);
 	}
 	
 	m_ubh = k2 * m_ubh_record + m_kwih * k1 * m_wy_record;
 	m_ubh_record = m_ubh;
-	m_wy_record = m_wy - m_wy_command;//Ð¡Æ«²îÏßÐÔ»¯Ä£ÐÍ
+	m_wy_record = m_wy - m_wy_command;//Ð¡Æ«ï¿½ï¿½ï¿½ï¿½ï¿½Ô»ï¿½Ä£ï¿½ï¿½
 
 	temp_urh_zd = m_unih + m_ubh + m_u5h;
 
-	//¹ýÔØ¸ú×Ù
+	//ï¿½ï¿½ï¿½Ø¸ï¿½ï¿½ï¿½
 	if(flight_time < m_time_separate_booster)
 	{
 		m_urh_zd = temp_urh_zd;
 		m_urh_record_separate_booster = m_urh_zd;
 	}
-	//¹ý¶Éµ½Ñ²º½
+	//ï¿½ï¿½ï¿½Éµï¿½Ñ²ï¿½ï¿½
 	else if (flight_time < m_time_separate_booster + 3.0)
 	{
 		m_urh_zd = m_urh_record_separate_booster * (3.0 - flight_time + m_time_separate_booster)/3.0 + temp_urh_zd *(flight_time - m_time_separate_booster)/3.0;
 	}
-	//Ñ²º½¶Î
+	//Ñ²ï¿½ï¿½ï¿½ï¿½
 	else if(flight_time < m_time_combat_status + m_time_combat_delay)
 	{
 		m_urh_zd = temp_urh_zd;
 		m_urh_record_begin_combat = m_urh_zd;
 	}
-	//¹ý¶Éµ½Ä©ÖÆµ¼
+	//ï¿½ï¿½ï¿½ï¿½ï¿½(ï¿½ï¿½ï¿½à»¬ï¿½ï¿½) ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ä©ï¿½Æµï¿½ï¿½ï¿½Ä©ï¿½Æµï¿½ï¿½ï¿½Ö®ï¿½ï¿½1s
 	else if (flight_time < m_time_combat_status + m_time_combat_delay + 1.0)
 	{
 		m_urh_zd = m_urh_record_begin_combat * (1.0 - flight_time + (m_time_combat_status + m_time_combat_delay))/1.0 + temp_urh_zd *(flight_time - (m_time_combat_status + m_time_combat_delay))/1.0;
 	}
 	else
 	{
-		//ËµÃ÷: ÓÉm_nz_command ÓÐ±ÈÀýµ¼ÒýÊÓÏß½ÇËÙ¶È¼ÆËãµÃµ½£¬Îª¸º¼´-|m_nz_command|£¬¸º¶æ²úÉúÕýÁ¦¾Ø¡¢Õý¹ýÔØ£¬µ¼ÒýÏòÄ¿±ê
-		m_urh_zd = temp_urh_zd;
+		//Ëµï¿½ï¿½: ï¿½ï¿½m_nz_command ï¿½Ð±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß½ï¿½ï¿½Ù¶È¼ï¿½ï¿½ï¿½Ãµï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½-|m_nz_command|ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½
+		//m_urh_zd = temp_urh_zd;
+
+		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½ï¿½Ê¹ï¿½ï¿½BTTÄ©ï¿½Æµï¿½ï¿½ï¿½Ð¡ï¿½ï¿½ï¿½ï¿½Ê¹ï¿½ï¿½STTÄ©ï¿½Æµï¿½???...
+		//Ëµï¿½ï¿½ï¿½ï¿½Ä¬ï¿½Ï½ï¿½ï¿½ï¿½Ä©ï¿½Æµï¿½Ç°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¶ï¿½×¼Ä¿ï¿½ê£¬ï¿½Ò²ï¿½Æ«ï¿½ï¿½Ð¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä©ï¿½Æµï¿½Ê±ï¿½Ì¡ï¿½ï¿½ï¿½×ªï¿½Ç¡ï¿½ï¿½ï¿½Ó¦ï¿½ï¿½ï¿½ï¿½Ì¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø¡ï¿½ï¿½ï¿½ï¿½Å£ï¿½
+		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å½Ï´ó£¬³ï¿½ï¿½ï¿½STTÄ©ï¿½Æµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½BTTÄ©ï¿½Æµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø¼ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½Ö¸ï¿½ï¿½gama_cmdï¿½ï¿½ï¿½ï¿½ï¿½Ð»ï¿½STTÄ©ï¿½Æµï¿½
+		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å½ï¿½Ð¡ï¿½ï¿½ï¿½ï¿½ï¿½ò£©£ï¿½ï¿½Ð»ï¿½ÎªSTTÄ©ï¿½Æµï¿½ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½Ö¸ï¿½ï¿½gama_cmdÎªï¿½ï¿½
+
+		//Ä©ï¿½ï¿½ï¿½Æµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í·Ã¤ï¿½ï¿½
+		if((m_distance_target > 25.0)&&(m_hz > 100.0 + 5.0))
+			//ï¿½ï¿½ï¿½ï¿½Ï´ï¿½Ê±ï¿½ï¿½ï¿½ï¿½
+			m_urh_zd = temp_urh_zd;
+		//else
+			//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½
 	}
 }
 
 void CMathControlYaw::Calc_Control_Gain()
 {
-	//ÏÞ·ùºó´¦Àí±äÁ¿
-	double temp_velocity = 50.0;//³õÖµ m/s
-	double temp_hight = 1500.0;//³õÖµ m
-	double temp_mass = 133.0;//³õÖµ kg
-	double temp_q = 1500.0;//³õÖµ Pa	
+	//ï¿½Þ·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	double temp_velocity = 50.0;//ï¿½ï¿½Öµ m/s
+	double temp_hight = 1500.0;//ï¿½ï¿½Öµ m
+	double temp_mass = 133.0;//ï¿½ï¿½Öµ kg
+	double temp_q = 1500.0;//ï¿½ï¿½Öµ Pa	
 
-	//Æð·É¶Î¿ØÖÆ²ÎÊý£º
-	double knih_staget1 = -0.10;//×ª»¯Îª½Ç¶È£¬¶ÔÓ¦4.011
-	double kwih_staget1 = -0.55;//½ÇËÙ¶È»ý·Ö£¬Î±¹¥½Ç¿ØÖÆ
-	double k5h_staget1	 = -0.14;//½ÇËÙ¶È¿ØÖÆ
+	//ï¿½ï¿½É¶Î¿ï¿½ï¿½Æ²ï¿½ï¿½ï¿½ï¿½ï¿½
+	double knih_staget1 = -0.10;//×ªï¿½ï¿½Îªï¿½Ç¶È£ï¿½ï¿½ï¿½Ó¦4.011
+	double kwih_staget1 = -0.55;//ï¿½ï¿½ï¿½Ù¶È»ï¿½ï¿½Ö£ï¿½Î±ï¿½ï¿½ï¿½Ç¿ï¿½ï¿½ï¿½
+	double k5h_staget1	 = -0.14;//ï¿½ï¿½ï¿½Ù¶È¿ï¿½ï¿½ï¿½
 	/******************************************************************
-	 * ¿ØÖÆ²ÎÊý±í¹æÔò
-	 * £¨1£©ËÙ¶È < 30m/s  ¡ú Ê¹ÓÃ 30m/s ¶ÔÓ¦²ÎÊý£¨µÚ0ÁÐ£©
-	 * £¨2£©ËÙ¶ÈµµÎ»£º30¡¢40¡¢50¡¢70 m/s ¡ú ¶ÔÓ¦ÁÐË÷Òý 0¡¢1¡¢2¡¢3
-	 * £¨3£©¸ß¶È > 3km    ¡ú Ê¹ÓÃ 3km ¶ÔÓ¦²ÎÊý£¨µÚ3ÐÐ£©
-	 * £¨4£©¸ß¶ÈµµÎ»£º0¡¢1000¡¢2000¡¢3000 m ¡ú ¶ÔÓ¦ÐÐË÷Òý 0¡¢1¡¢2¡¢3
+	 * ï¿½ï¿½ï¿½Æ²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	 * ï¿½ï¿½1ï¿½ï¿½ï¿½Ù¶ï¿½ < 30m/s  ï¿½ï¿½ Ê¹ï¿½ï¿½ 30m/s ï¿½ï¿½Ó¦ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½0ï¿½Ð£ï¿½
+	 * ï¿½ï¿½2ï¿½ï¿½ï¿½Ù¶Èµï¿½Î»ï¿½ï¿½30ï¿½ï¿½40ï¿½ï¿½50ï¿½ï¿½70 m/s ï¿½ï¿½ ï¿½ï¿½Ó¦ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 0ï¿½ï¿½1ï¿½ï¿½2ï¿½ï¿½3
+	 * ï¿½ï¿½3ï¿½ï¿½ï¿½ß¶ï¿½ > 3km    ï¿½ï¿½ Ê¹ï¿½ï¿½ 3km ï¿½ï¿½Ó¦ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½3ï¿½Ð£ï¿½
+	 * ï¿½ï¿½4ï¿½ï¿½ï¿½ß¶Èµï¿½Î»ï¿½ï¿½0ï¿½ï¿½1000ï¿½ï¿½2000ï¿½ï¿½3000 m ï¿½ï¿½ ï¿½ï¿½Ó¦ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 0ï¿½ï¿½1ï¿½ï¿½2ï¿½ï¿½3
 	 *****************************************************************/
-	static double hight_stage1_array[4] = {0.0, 1000.0, 2000.0, 3000.0};//¸ß¶È
-	static double vel_stage1_array[4] = {30.0, 40.0, 50.0, 70.0};//ËÙ¶È
-	// ¹ýÔØ»ý·ÖÔöÒæ kni[¸ß¶ÈÐÐ][ËÙ¶ÈÁÐ]
-	double knih_stage1_matrix[4][4] = {
+	static double hight_uh_stage1_array[4] = {0.0, 1000.0, 2000.0, 3000.0};//ï¿½ß¶ï¿½
+	static double vel_uh_stage1_array[4] = {30.0, 40.0, 50.0, 70.0};//ï¿½Ù¶ï¿½
+	// ï¿½ï¿½ï¿½Ø»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ kni[ï¿½ß¶ï¿½ï¿½ï¿½][ï¿½Ù¶ï¿½ï¿½ï¿½]
+	/*double knih_stage1_matrix[4][4] = {
 	    {-0.4806, -0.2027, -0.1038, -0.0378},
 	    {-0.5295, -0.2234, -0.1144, -0.0417},
 	    {-0.5848, -0.2467, -0.1263, -0.0460},
-	    {-0.6474, -0.2731, -0.1398, -0.0510}    // ¸ß¶È 3000m
+	    {-0.6474, -0.2731, -0.1398, -0.0510}    // ï¿½ß¶ï¿½ 3000m
 	};
 
-	// ²à»¬½ÇÔöÒæ kwi[¸ß¶ÈÐÐ][ËÙ¶ÈÁÐ]
+	// ï¿½à»¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ kwi[ï¿½ß¶ï¿½ï¿½ï¿½][ï¿½Ù¶ï¿½ï¿½ï¿½]
 	double kwih_stage1_matrix[4][4] = {
 	    {-2.0709, -0.9505, -0.4365,  0.0055},
 		{-2.3391, -1.1013, -0.5328, -0.0435},
 		{-2.6418, -1.2715, -0.6417, -0.0988},
-		{-2.9844, -1.4641, -0.7649, -0.1615}    // ¸ß¶È 3000m
+		{-2.9844, -1.4641, -0.7649, -0.1615}    // ï¿½ß¶ï¿½ 3000m
 	};
 
-	// ½ÇËÙ¶ÈÔöÒæ k5[¸ß¶ÈÐÐ][ËÙ¶ÈÁÐ]
+	// ï¿½ï¿½ï¿½Ù¶ï¿½ï¿½ï¿½ï¿½ï¿½ k5[ï¿½ß¶ï¿½ï¿½ï¿½][ï¿½Ù¶ï¿½ï¿½ï¿½]
 	double k5h_stage1_matrix[4][4] = {
 	    {-0.1208, -0.0904, -0.0720, -0.0507},
 	    {-0.1208, -0.0904, -0.0720, -0.0508},
 	    {-0.1207, -0.0904, -0.0721, -0.0509},
-	    {-0.1207, -0.0904, -0.0721, -0.0509}    // ¸ß¶È 3000m
+	    {-0.1207, -0.0904, -0.0721, -0.0509}    // ï¿½ß¶ï¿½ 3000m
 	};
-	//»ý·ÖÊ±¼ä³£Êý£¬0.30s
-
-	//Ñ²·É¹ý³ÌÖÐ¿ØÖÆ²ÎÊý£º
-	double knih_staget2 = -0.10;//×ª»¯Îª½Ç¶È£¬¶ÔÓ¦4.011
-	double kwih_staget2 = -0.46;//½ÇËÙ¶È»ý·Ö£¬Î±¹¥½Ç¿ØÖÆ
-	double k5h_staget2  = -0.083;//½ÇËÙ¶È¿ØÖÆ
-	/******************************************************************
-	 * ÊäÈë£ºÖÊÁ¿ mass(kg)¡¢¶¯Ñ¹ q(Pa)
-	 * ÖÊÁ¿²åÖµµã£º102, 133, 165 kg
-	 * ¶¯Ñ¹²åÖµµã£º500, 1000, 1500, 2000, 2500, 3000 Pa
-	 * Êä³ö£ºKp£¨±ÈÀýÔöÒæ£©¡¢Kd£¨Î¢·ÖÔöÒæ£©
-	 * Êý×é½á¹¹£ºKp[ÖÊÁ¿ÐÐ][¶¯Ñ¹ÁÐ]¡¢Kd[ÖÊÁ¿ÐÐ][¶¯Ñ¹ÁÐ]
-	 *****************************************************************/
-	// ÖÊÁ¿²åÖµ±í£¨ÐÐË÷Òý 0,1,2£©
-	static double mass_stage2_array[3] = {102.0, 133.0, 165.0};
-	// ¶¯Ñ¹²åÖµ±í£¨ÁÐË÷Òý 0~5£©
-	static double q_stage2_array[6] = {500.0, 1000.0, 1500.0, 2000.0, 2500.0, 3000.0};
-	//¾­½øÒ»²½·ÖÎö£¬¶¯Ñ¹¶Ô¿ØÖÆ²ÎÊýÓ°Ïì²»´ó£¬²ÉÓÃÖÊÁ¿×÷ÎªÊäÈë£¬½øÐÐÒ»Î¬¿ØÖÆ²ÎÊý²åÖµ£»
-	double knih_stage2_array[3] = {-0.10, -0.10, -0.10};
-	double kwih_stage2_array[3] = {-0.4363, -0.4630, -0.4799};
-	double k5h_stage2_array[3] = {-0.1090, -0.0830, -0.0667};
-	//»ý·ÖÊ±¼ä³£Êý£¬0.25s
-
-	//Ä©ÖÆµ¼¶Î¿ØÖÆ²ÎÊý£º¹Ì¶¨´ø¿íÎ±¹¥½ÇÈý»ØÂ·¹ýÔØ¿ØÖÆ£¬¼´ 5rad-1±Õ»·´ø¿í£¬1.5rad-1³¤ÖÜÆÚ×ªÕÛÆµÂÊ£»
-	//¹ýÔØÔöÒæ knih
-	//½ÇËÙ¶ÈÔöÒæ kwih
-	//Î±²à»¬½ÇÔöÒæ k5h
-	double knih_staget3 = 0.12;//×ª»¯Îª½Ç¶È£¬¶ÔÓ¦4.011
-	double kwih_staget3 = 0.55;//½ÇËÙ¶È»ý·Ö£¬Î±¹¥½Ç¿ØÖÆ
-	double k5h_staget3  = 0.10;//½ÇËÙ¶È¿ØÖÆ
-	/******************************************************************
-	 * ¿ØÖÆ²ÎÊý±í¹æÔò
-	 * £¨1£©ËÙ¶È < 40m/s  ¡ú Ê¹ÓÃ 40m/s ¶ÔÓ¦²ÎÊý£¨µÚ0ÁÐ£©
-	 * £¨2£©ËÙ¶ÈµµÎ»£º40¡¢50¡¢60¡¢70 m/s ¡ú ¶ÔÓ¦ÁÐË÷Òý 0¡¢1¡¢2¡¢3
-	 * £¨3£©¸ß¶È > 3km    ¡ú Ê¹ÓÃ 3km ¶ÔÓ¦²ÎÊý£¨µÚ3ÐÐ£©
-	 * £¨4£©¸ß¶ÈµµÎ»£º0¡¢1000¡¢2000¡¢3000 m ¡ú ¶ÔÓ¦ÐÐË÷Òý 0¡¢1¡¢2¡¢3
-	 *****************************************************************/
-	static double hight_stage3_array[4] = {0.0, 1000.0, 2000.0, 3000.0};//¸ß¶È
-	static double vel_stage3_array[4] = {40.0, 50.0, 60.0, 70.0};//ËÙ¶È
-	// ¹ýÔØ»ý·ÖÔöÒæ kni[¸ß¶ÈÐÐ][ËÙ¶ÈÁÐ]
-	double knih_stage3_matrix[4][4] = {
-	    {-0.2002, -0.1025, -0.0593, -0.0374},
-	    {-0.2206, -0.1129, -0.0654, -0.0412},
-	    {-0.2436, -0.1247, -0.0722, -0.0455},
-	    {-0.2697, -0.1381, -0.0799, -0.0503}    // ¸ß¶È 3000m
+	//ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ä³£ï¿½ï¿½ï¿½ï¿½0.30s*/
+	double knih_stage1_matrix[4][4] = {
+	    {-0.3470, -0.1236, -0.0537, -0.0148},
+    	{-0.4107, -0.1476, -0.0645, -0.0178},
+    	{-0.4870, -0.1768, -0.0777, -0.0216},
+    	{-0.5787, -0.2124, -0.0940, -0.0263}    // ï¿½ß¶ï¿½ 3000m
 	};
 
-	// ²à»¬½ÇÔöÒæ kwi[¸ß¶ÈÐÐ][ËÙ¶ÈÁÐ]
-	double kwih_stage3_matrix[4][4] = {
-	    {-0.8938, -0.3943, -0.1266,  0.0326},
-	    {-1.0427, -0.4894, -0.1925, -0.0157},
-	    {-1.2107, -0.5969, -0.2670, -0.0703},
-	    {-1.4010, -0.7186, -0.3513, -0.1321}   // ¸ß¶È 3000m
+	// ï¿½à»¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ kwi[ï¿½ß¶ï¿½ï¿½ï¿½][ï¿½Ù¶ï¿½ï¿½ï¿½]
+	double kwih_stage1_matrix[4][4] = {
+	    {-2.2938,  0.2142,  1.0220,  1.3157},
+    	{-3.1392, -0.0936,  0.9353,  1.3721},
+    	{-4.1899, -0.5005,  0.8003,  1.4194},
+    	{-5.4922, -1.0334,  0.6017,  1.4527}    // ï¿½ß¶ï¿½ 3000m
 	};
-	// ½ÇËÙ¶ÈÔöÒæ k5[¸ß¶ÈÐÐ][ËÙ¶ÈÁÐ]
-	double k5h_stage3_matrix[4][4] = {
-	    {-0.1291, -0.1030, -0.0855, -0.0728},
-	    {-0.1290, -0.1029, -0.0855, -0.0728},
-	    {-0.1289, -0.1029, -0.0854, -0.0728},
-	    {-0.1287, -0.1028, -0.0854, -0.0720}    // ¸ß¶È 3000m
+
+	// ï¿½ï¿½ï¿½Ù¶ï¿½ï¿½ï¿½ï¿½ï¿½ k5[ï¿½ß¶ï¿½ï¿½ï¿½][ï¿½Ù¶ï¿½ï¿½ï¿½]
+	double k5h_stage1_matrix[4][4] = {
+	    {-0.6896, -0.3825, -0.2411, -0.1191},
+    	{-0.7633, -0.4240, -0.2677, -0.1327},
+    	{-0.8465, -0.4709, -0.2977, -0.1480},
+    	{-0.9407, -0.5240, -0.3317, -0.1654}    // ï¿½ß¶ï¿½ 3000m
 	};
-	//»ý·ÖÊ±¼ä³£Êý£¬0.30s
+	//ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ä³£ï¿½ï¿½ï¿½ï¿½0.30s
 	
-	//ÖúÍÆÆ÷·ÖÀëÇ°£¬Î¢·Ö¿ØÖÆ
+
+	//Ñ²ï¿½É¹ï¿½ï¿½ï¿½ï¿½Ð¿ï¿½ï¿½Æ²ï¿½ï¿½ï¿½ï¿½ï¿½
+	double knih_staget2 = -0.10;//×ªï¿½ï¿½Îªï¿½Ç¶È£ï¿½ï¿½ï¿½Ó¦4.011
+	double kwih_staget2 = -0.46;//ï¿½ï¿½ï¿½Ù¶È»ï¿½ï¿½Ö£ï¿½Î±ï¿½ï¿½ï¿½Ç¿ï¿½ï¿½ï¿½
+	double k5h_staget2  = -0.083;//ï¿½ï¿½ï¿½Ù¶È¿ï¿½ï¿½ï¿½
+	/******************************************************************
+	 * ï¿½ï¿½ï¿½ë£ºï¿½ï¿½ï¿½ï¿½ mass(kg)ï¿½ï¿½ï¿½ï¿½Ñ¹ q(Pa)
+	 * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öµï¿½ã£º102, 133, 165 kg
+	 * ï¿½ï¿½Ñ¹ï¿½ï¿½Öµï¿½ã£º500, 1000, 1500, 2000, 2500, 3000 Pa
+	 * ï¿½ï¿½ï¿½ï¿½ï¿½Kpï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½æ£©ï¿½ï¿½Kdï¿½ï¿½Î¢ï¿½ï¿½ï¿½ï¿½ï¿½æ£©
+	 * ï¿½ï¿½ï¿½ï¿½á¹¹ï¿½ï¿½Kp[ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½][ï¿½ï¿½Ñ¹ï¿½ï¿½]ï¿½ï¿½Kd[ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½][ï¿½ï¿½Ñ¹ï¿½ï¿½]
+	 *****************************************************************/
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 0,1,2ï¿½ï¿½
+	static double mass_uh_stage2_array[3] = {102.0, 133.0, 165.0};
+	// ï¿½ï¿½Ñ¹ï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 0~5ï¿½ï¿½
+	static double q_uh_stage2_array[6] = {500.0, 1000.0, 1500.0, 2000.0, 2500.0, 3000.0};
+	//ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¹ï¿½Ô¿ï¿½ï¿½Æ²ï¿½ï¿½ï¿½Ó°ï¿½ì²»ï¿½ó£¬²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½ë£¬ï¿½ï¿½ï¿½ï¿½Ò»Î¬ï¿½ï¿½ï¿½Æ²ï¿½ï¿½ï¿½ï¿½ï¿½Öµï¿½ï¿½
+	//double knih_stage2_array[3] = {-0.10, -0.10, -0.10};
+	//double kwih_stage2_array[3] = {-0.4363, -0.4630, -0.4799};
+	//double k5h_stage2_array[3] = {-0.1090, -0.0830, -0.0667};
+	//ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ä³£ï¿½ï¿½ï¿½ï¿½0.25s
+	// ï¿½ï¿½ï¿½Ø»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ [ï¿½ï¿½ï¿½ï¿½][ï¿½ï¿½Ñ¹]
+	double knih_stage2_matrix[3][6] = {
+	    {-0.1249f, -0.0977f, -0.0828f, -0.0731f, -0.0662f, -0.0609f},
+    	{-0.1538f, -0.1233f, -0.1054f, -0.0935f, -0.0849f, -0.0783f},
+    	{-0.1805f, -0.1480f, -0.1277f, -0.1139f, -0.1037f, -0.0959f}    // mass = 165kg
+	};
+	// ï¿½à»¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ [ï¿½ï¿½ï¿½ï¿½][ï¿½ï¿½Ñ¹]
+	double kwih_stage2_matrix[3][6] = {
+	    {-0.0000f, -0.0114f, -0.0231f, -0.0270f, -0.0283f, -0.0287f},
+    	{-0.0763f, -0.1163f, -0.1162f, -0.1112f, -0.1057f, -0.1006f},
+    	{-0.1865f, -0.2194f, -0.2094f, -0.1963f, -0.1843f, -0.1740f}    // mass = 165kg
+	};
+	// ï¿½ï¿½ï¿½Ù¶ï¿½ï¿½ï¿½ï¿½ï¿½ [ï¿½ï¿½ï¿½ï¿½][ï¿½ï¿½Ñ¹]
+	double k5h_stage2_matrix[3][6] = {
+	    {-0.5722f, -0.4038f, -0.3284f, -0.2834f, -0.2525f, -0.2297f},
+    	{-0.5780f, -0.4079f, -0.3317f, -0.2862f, -0.2550f, -0.2320f},
+    	{-0.5818f, -0.4105f, -0.3338f, -0.2880f, -0.2566f, -0.2334f}    // mass = 165kg
+	};
+
+	//Ä©ï¿½Æµï¿½ï¿½Î¿ï¿½ï¿½Æ²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì¶ï¿½ï¿½ï¿½ï¿½ï¿½Î±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â·ï¿½ï¿½ï¿½Ø¿ï¿½ï¿½Æ£ï¿½ï¿½ï¿½ 5rad-1ï¿½Õ»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½1.5rad-1ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½Æµï¿½Ê£ï¿½
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ knih
+	//ï¿½ï¿½ï¿½Ù¶ï¿½ï¿½ï¿½ï¿½ï¿½ kwih
+	//Î±ï¿½à»¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ k5h
+	double knih_staget3 = 0.12;//×ªï¿½ï¿½Îªï¿½Ç¶È£ï¿½ï¿½ï¿½Ó¦4.011
+	double kwih_staget3 = 0.55;//ï¿½ï¿½ï¿½Ù¶È»ï¿½ï¿½Ö£ï¿½Î±ï¿½ï¿½ï¿½Ç¿ï¿½ï¿½ï¿½
+	double k5h_staget3  = 0.10;//ï¿½ï¿½ï¿½Ù¶È¿ï¿½ï¿½ï¿½
+	/******************************************************************
+	 * ï¿½ï¿½ï¿½Æ²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	 * ï¿½ï¿½1ï¿½ï¿½ï¿½Ù¶ï¿½ < 40m/s  ï¿½ï¿½ Ê¹ï¿½ï¿½ 40m/s ï¿½ï¿½Ó¦ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½0ï¿½Ð£ï¿½
+	 * ï¿½ï¿½2ï¿½ï¿½ï¿½Ù¶Èµï¿½Î»ï¿½ï¿½40ï¿½ï¿½50ï¿½ï¿½60ï¿½ï¿½70 m/s ï¿½ï¿½ ï¿½ï¿½Ó¦ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 0ï¿½ï¿½1ï¿½ï¿½2ï¿½ï¿½3
+	 * ï¿½ï¿½3ï¿½ï¿½ï¿½ß¶ï¿½ > 3km    ï¿½ï¿½ Ê¹ï¿½ï¿½ 3km ï¿½ï¿½Ó¦ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½3ï¿½Ð£ï¿½
+	 * ï¿½ï¿½4ï¿½ï¿½ï¿½ß¶Èµï¿½Î»ï¿½ï¿½0ï¿½ï¿½1000ï¿½ï¿½2000ï¿½ï¿½3000 m ï¿½ï¿½ ï¿½ï¿½Ó¦ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 0ï¿½ï¿½1ï¿½ï¿½2ï¿½ï¿½3
+	 *****************************************************************/
+	static double hight_uh_stage3_array[4] = {0.0, 1000.0, 2000.0, 3000.0};//ï¿½ß¶ï¿½
+	static double vel_uh_stage3_array[4] = {40.0, 50.0, 60.0, 70.0};//ï¿½Ù¶ï¿½
+	// ï¿½ï¿½ï¿½Ø»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ kni[ï¿½ß¶ï¿½ï¿½ï¿½][ï¿½Ù¶ï¿½ï¿½ï¿½]
+	double knih_stage3_matrix[4][4] = {
+	        {-0.1102f, -0.0920f, -0.0786f, -0.0684f},
+			{-0.1142f, -0.0958f, -0.0820f, -0.0714f},
+			{-0.1184f, -0.0997f, -0.0855f, -0.0746f},
+			{-0.1226f, -0.1038f, -0.0893f, -0.0781f}    // ï¿½ß¶ï¿½ 3000m
+	};
+
+	// ï¿½à»¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ kwi[ï¿½ß¶ï¿½ï¿½ï¿½][ï¿½Ù¶ï¿½ï¿½ï¿½]
+	double kwih_stage3_matrix[4][4] = {
+	    {-0.0179f, -0.0285f, -0.0306f, -0.0299f},
+    	{-0.0337f, -0.0438f, -0.0448f, -0.0429f},
+    	{-0.0516f, -0.0615f, -0.0612f, -0.0579f},
+    	{-0.0718f, -0.0817f, -0.0801f, -0.0753f}   // ï¿½ß¶ï¿½ 3000m
+	};
+	// ï¿½ï¿½ï¿½Ù¶ï¿½ï¿½ï¿½ï¿½ï¿½ k5[ï¿½ß¶ï¿½ï¿½ï¿½][ï¿½Ù¶ï¿½ï¿½ï¿½]
+	double k5h_stage3_matrix[4][4] = {
+	    {-0.4012f, -0.3216f, -0.2683f, -0.2301f},
+    	{-0.4225f, -0.3387f, -0.2826f, -0.2424f},
+    	{-0.4453f, -0.3570f, -0.2979f, -0.2555f},
+    	{-0.4698f, -0.3767f, -0.3143f, -0.2696f}    // ï¿½ß¶ï¿½ 3000m
+	};
+	//ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ä³£ï¿½ï¿½ï¿½ï¿½0.30s
+	
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç°ï¿½ï¿½Î¢ï¿½Ö¿ï¿½ï¿½ï¿½
 	if(flight_time < m_time_separate_booster)
 	{
-		temp_velocity = CFlightGlobalFun::Range2(m_v, vel_stage1_array[3], vel_stage1_array[0]);
-		temp_hight = CFlightGlobalFun::Range2(m_hz, vel_stage1_array[3], vel_stage1_array[0]);
+		temp_velocity = CFlightGlobalFun::Range2(m_v, vel_uh_stage1_array[3], vel_uh_stage1_array[0]);
+		temp_hight = CFlightGlobalFun::Range2(m_hz, hight_uh_stage1_array[3], hight_uh_stage1_array[0]);
 
-		m_knih = CFlightGlobalFun::LAQL2(4, 4, hight_stage1_array, vel_stage1_array, &knih_stage1_matrix[0][0], temp_hight, temp_velocity);
-		m_kwih = CFlightGlobalFun::LAQL2(4, 4, hight_stage1_array, vel_stage1_array, &kwih_stage1_matrix[0][0], temp_hight, temp_velocity); 
-		m_k5h = CFlightGlobalFun::LAQL2(4, 4, hight_stage1_array, vel_stage1_array, &k5h_stage1_matrix[0][0], temp_hight, temp_velocity);
+		m_knih = CFlightGlobalFun::LAQL2(4, 4, hight_uh_stage1_array, vel_uh_stage1_array, &knih_stage1_matrix[0][0], temp_hight, temp_velocity);
+		m_kwih = CFlightGlobalFun::LAQL2(4, 4, hight_uh_stage1_array, vel_uh_stage1_array, &kwih_stage1_matrix[0][0], temp_hight, temp_velocity); 
+		m_k5h = CFlightGlobalFun::LAQL2(4, 4, hight_uh_stage1_array, vel_uh_stage1_array, &k5h_stage1_matrix[0][0], temp_hight, temp_velocity);
 		
-		m_k5h *= 2.0;//ÖúÍÆ¶ÎÕñµ´£¬Ôö¼Ó×èÄá
+		m_k5h *= 2.0;//ï¿½ï¿½ï¿½Æ¶ï¿½ï¿½ñµ´£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	}
-	//Ñ²º½¶Î£¬ÖúÍÆÆ÷·ÖÀëºó£¬½øÈëÄ©ÖÆµ¼Ç°
+	//Ñ²ï¿½ï¿½ï¿½Î£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ó£¬½ï¿½ï¿½ï¿½Ä©ï¿½Æµï¿½Ç°
 	else if(flight_time < m_time_combat_status + m_time_combat_delay)
+	//else if(flight_time < m_time_combat_status)
 	{
-		temp_q = CFlightGlobalFun::Range2(m_mass, q_stage2_array[5], q_stage2_array[0]);
-		temp_mass = CFlightGlobalFun::Range2(m_mass, mass_stage2_array[2], mass_stage2_array[0]);
+		temp_q = CFlightGlobalFun::Range2(m_mass, q_uh_stage2_array[5], q_uh_stage2_array[0]);
+		temp_mass = CFlightGlobalFun::Range2(m_mass, mass_uh_stage2_array[2], mass_uh_stage2_array[0]);
 
-		m_knih = CFlightGlobalFun::LAQL1(3,  mass_stage2_array, knih_stage2_array, temp_mass);
-		m_kwih = CFlightGlobalFun::LAQL1(3,  mass_stage2_array, kwih_stage2_array, temp_mass);
-		m_k5h = CFlightGlobalFun::LAQL1(3,  mass_stage2_array, knih_stage2_array, temp_mass);
+		m_knih = CFlightGlobalFun::LAQL2(3, 6, mass_uh_stage2_array, q_uh_stage2_array, &knih_stage3_matrix[0][0], temp_mass, temp_q);
+		m_kwih = CFlightGlobalFun::LAQL2(3, 6, mass_uh_stage2_array, q_uh_stage2_array, &kwih_stage3_matrix[0][0], temp_mass, temp_q);
+		m_k5h = CFlightGlobalFun::LAQL2(3, 6, mass_uh_stage2_array, q_uh_stage2_array, &k5h_stage3_matrix[0][0], temp_mass, temp_q);
 		
-		//m_knih =  0.3;	//ÈýÍ¨µÀ¹ýÔØ»ØÂ·£¬¹ýÔØ»ý·Ö
-		//m_kwih =  -0.8;	//ÈýÍ¨µÀ¹ýÔØ»ØÂ·£¬½ÇËÙ¶È»ý·Ö
-		//m_k5h  =  0.25;	//ÈýÍ¨µÀ¹ýÔØ»ØÂ·£¬½ÇËÙ¶È±ÈÀý(ÔöÎÈ)
+		//m_knih =  0.3;	//ï¿½ï¿½Í¨ï¿½ï¿½ï¿½ï¿½ï¿½Ø»ï¿½Â·ï¿½ï¿½ï¿½ï¿½ï¿½Ø»ï¿½ï¿½ï¿½
+		//m_kwih =  -0.8;	//ï¿½ï¿½Í¨ï¿½ï¿½ï¿½ï¿½ï¿½Ø»ï¿½Â·ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶È»ï¿½ï¿½ï¿½
+		//m_k5h  =  0.25;	//ï¿½ï¿½Í¨ï¿½ï¿½ï¿½ï¿½ï¿½Ø»ï¿½Â·ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶È±ï¿½ï¿½ï¿½(ï¿½ï¿½ï¿½ï¿½)
 	}
-	//Ä©ÖÆµ¼¹ý³Ì
+	//Ä©ï¿½Æµï¿½ï¿½ï¿½ï¿½ï¿½
 	else
 	{
-		temp_velocity = CFlightGlobalFun::Range2(m_v, vel_stage3_array[3], vel_stage3_array[0]);
-		temp_hight = CFlightGlobalFun::Range2(m_hz, vel_stage3_array[3], vel_stage3_array[0]);
+		temp_velocity = CFlightGlobalFun::Range2(m_v, vel_uh_stage3_array[3], vel_uh_stage3_array[0]);
+		temp_hight = CFlightGlobalFun::Range2(m_hz, vel_uh_stage3_array[3], vel_uh_stage3_array[0]);
 
-		m_knih = CFlightGlobalFun::LAQL2(4, 4, hight_stage3_array, vel_stage3_array, &knih_stage3_matrix[0][0], temp_hight, temp_velocity);
-		m_kwih = CFlightGlobalFun::LAQL2(4, 4, hight_stage3_array, vel_stage3_array, &kwih_stage3_matrix[0][0], temp_hight, temp_velocity); 
-		m_k5h = CFlightGlobalFun::LAQL2(4, 4, hight_stage3_array, vel_stage3_array, &k5h_stage3_matrix[0][0], temp_hight, temp_velocity);
+		m_knih = CFlightGlobalFun::LAQL2(4, 4, hight_uh_stage3_array, vel_uh_stage3_array, &knih_stage3_matrix[0][0], temp_hight, temp_velocity);
+		m_kwih = CFlightGlobalFun::LAQL2(4, 4, hight_uh_stage3_array, vel_uh_stage3_array, &kwih_stage3_matrix[0][0], temp_hight, temp_velocity); 
+		m_k5h = CFlightGlobalFun::LAQL2(4, 4, hight_uh_stage3_array, vel_uh_stage3_array, &k5h_stage3_matrix[0][0], temp_hight, temp_velocity);
 	}
 
-	//Âß¼­¶æÒÑ¾­ÊÇ¸º·´À¡
+	//ï¿½ß¼ï¿½ï¿½ï¿½ï¿½Ñ¾ï¿½ï¿½Ç¸ï¿½ï¿½ï¿½ï¿½ï¿½
 	m_knih = m_knih;
 	m_kwih = - m_kwih;
 	m_k5h = - m_k5h;
@@ -312,21 +376,57 @@ void CMathControlYaw::Calc_Control_Gain()
 
 void CMathControlYaw::Calc_Control_Commond()
 {
-	//Çóº½Ïò³ÌÐò½ÇËÙ¶È: ÖúÍÆº½ÏòÎÈ¶¨£¬BTT×ªÍä(º½Ïò½ÇËÙ¶È¡¢½ÇËÅ·þ)¼°Ä©¶Ë×ËÌ¬ÎÈ¶¨
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½: ï¿½ï¿½ï¿½Æºï¿½ï¿½ï¿½ï¿½È¶ï¿½ï¿½ï¿½BTT×ªï¿½ï¿½(ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶È¡ï¿½ï¿½ï¿½ï¿½Å·ï¿½)ï¿½ï¿½Ä©ï¿½ï¿½ï¿½ï¿½Ì¬ï¿½È¶ï¿½
 	if(flight_time <= (m_time_separate_booster + 1.0))
 	{
 		m_wy_command = 0.0;
 	}
-	//Ñ²º½¶Î£¬¹ö×ª½Ç²úÉú²àÏò¹ýÔØ£¬²úÉúµ¯µÀÆ«½Ç±ä»¯ÂÊ£¬¼´º½Ïò½Ç±ä»¯ÂÊÖ¸Áî
+	//Ñ²ï¿½ï¿½ï¿½Î£ï¿½ï¿½ï¿½×ªï¿½Ç²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ«ï¿½Ç±ä»¯ï¿½Ê£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç±ä»¯ï¿½ï¿½Ö¸ï¿½ï¿½
 	else
 	{
-		//¹ö×ª½Ç¹À¼Æ²àÏò¹ýÔØ£¬½øÒ»²½¹À¼Æµ¯µÀÆ«½Ç±ä»¯ÂÊ
-		//m_wy_command = - m_g * RTOA * sin(m_gama / RTOA) / m_v;//µ¯µÀÇã½Ç±ä»¯ÂÊÖ¸Áî£¬ºöÂÔ×ËÌ¬ÏàÓ¦Ê±¼ä£¬¼´Î´º½Ïò½ÇËÙ¶È
+		//ï¿½ï¿½×ªï¿½Ç¹ï¿½ï¿½Æ²ï¿½ï¿½ï¿½ï¿½ï¿½Ø£ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½Æµï¿½ï¿½ï¿½Æ«ï¿½Ç±ä»¯ï¿½ï¿½
+		//m_wy_command = - m_g * RTOA * sin(m_gama / RTOA) / m_v;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç±ä»¯ï¿½ï¿½Ö¸ï¿½î£¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì¬ï¿½ï¿½Ó¦Ê±ï¿½ä£¬ï¿½ï¿½Î´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½
 		m_wy_command = - m_g * RTOA * sin(m_gama_command_compensate / RTOA) / m_v;
+		
+		//ï¿½ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½ï¿½Ù¶ï¿½
+		//Ëµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß·ï¿½ï¿½Ð²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½alpha_b
+		//BTTË®Æ½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½1)ï¿½Ë¶ï¿½Ñ§ï¿½ï¿½Ï²ï¿½ï¿½ï¿½ï¿½Ä²à»¬ï¿½Ç£ï¿½ï¿½ï¿½ï¿½ï¿½beita_dot = wx*alpha
+		//               2)ï¿½ï¿½ï¿½ï¿½Ñ§ï¿½ï¿½Ï²ï¿½ï¿½ï¿½ï¿½Ä²à»¬ï¿½Ç£ï¿½ï¿½ï¿½ï¿½ï¿½beita_dot = Kwx_alpha*wx*alpha;
+		double temp_Kwx_comp = -0.1;
+		if(fabs(m_wx) > 5.0)
+		{	
+			m_wy_command_comp = temp_Kwx_comp * m_wx;
+		}
+		else
+		{
+			m_wy_command_comp = 0.0;
+		}
+		//Í»ï¿½ï¿½Æ½ï¿½ï¿½ï¿½ï¿½5msï¿½ï¿½ï¿½Ù¶È±ä»¯ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½0.05deg/sï¿½ï¿½ï¿½ï¿½10deg/s^2
+		if( m_wy_command_comp - m_wy_command_comp_record < -0.05)
+		{
+			m_wy_command_comp_record -= 0.05;
+		}
+		else if( m_wy_command_comp - m_wy_command_comp_record > 0.05)
+		{
+			m_wy_command_comp_record += 0.05;
+		}
+		else
+		{
+			m_wy_command_comp_record = m_wy_command_comp;
+		}
+		
+		//Îªï¿½Ë²ï¿½ï¿½ï¿½???...
+		m_wy_command_comp_record = 0.0;
+		
+		m_wy_command = m_wy_command + m_wy_command_comp_record; 
+		//ï¿½ï¿½ï¿½Ù¶È½ï¿½Ð¡Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	}
 
-	//Çóº½Ïò³ÌÐò¹ýÔØ:  ½øÈëµ¼ÒýÇ°£¬¹ýÔØÖ¸ÁîÎªÁã£¬¼´Ö»½øÐÐ²àÏòÔöÎÈ
+	
+
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½:  ï¿½ï¿½ï¿½ëµ¼ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½Îªï¿½ã£¬ï¿½ï¿½Ö»ï¿½ï¿½ï¿½Ð²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	if(flight_time < (m_time_combat_status + m_time_combat_delay))
+	//if(flight_time < m_time_combat_status)
 	{
 		m_nz_command = 0.0;
 	}
@@ -349,26 +449,11 @@ void CMathControlYaw::Calc_Control_Commond()
 // 		}	
 // 		m_nz_command = CFlightGlobalFun::Range(m_nz_command, 0.15);
 
-		//¶¯Ä¿±ê±ÈÀýµ¼Òý£¬STTÖÆµ¼¼ÆËã¹ýÔØ£¬´ý¸ü¸ÄÎªBTTÖÆµ¼
-		double knz = 3.0;	
-		m_nz_command = knz * m_v * m_dqh / RTOA / m_g;
-		m_nz_command = CFlightGlobalFun::Range(m_nz_command, 4.0);
+//		//ï¿½ï¿½Ä¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½STTï¿½Æµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÎªBTTï¿½Æµï¿½
+//		double knz = 3.0;	
+//		m_nz_command = knz * m_v * m_dqh / RTOA / m_g;
+//		m_nz_command = CFlightGlobalFun::Range(m_nz_command, 2.0);
+		m_nz_command = m_nz_command_guidance;
 	}
 }
 
-// void CMathControlYaw::Monitor_Data()
-// {
-// 	extern CSimMonitor sim_monitor;
-// 	if (sim_monitor.flag_monitor2_valid)
-// 	{
-// 		sim_monitor.Get_Variable(m_wy_command,"wycx",ENUM_FILE_CONTROL1);
-// 		sim_monitor.Get_Variable(-m_nz_command,"nzc",ENUM_FILE_CONTROL1);
-// 		sim_monitor.Get_Variable(m_urh_zd,"m_urh_zd",ENUM_FILE_CONTROL1);
-// 	}
-// 	if (sim_monitor.flag_monitor3_valid)
-// 	{
-// 		sim_monitor.Get_Variable(m_k5h,"k5h",ENUM_FILE_AERO1);
-// 		sim_monitor.Get_Variable(m_knih,"knih",ENUM_FILE_AERO1);
-// 		sim_monitor.Get_Variable(m_kwih,"kwih",ENUM_FILE_AERO1);
-// 	}
-// }

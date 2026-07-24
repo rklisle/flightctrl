@@ -1,7 +1,7 @@
 /*
  * scout.c
  *
- *  Created on: 2023Äê5ÔÂ19ÈÕ
+ *  Created on: 2023ï¿½ï¿½5ï¿½ï¿½19ï¿½ï¿½
  *      Author: lenovo
  */
 #include "fuse.h"
@@ -14,17 +14,19 @@
 #include "../support/common.h"
 #include "../support/os_bufferLoop.h"
 
+#define SWAP_U16(x)  ((OS_U16)(((x) >> 8) | ((x) << 8)))
+
 FUSE_RCV_FRAME fuseFrame = {0};
 
 OS_U8 InitFuse()
 {
 	buffLoop[RT_FUSE].syncHead_A = 0xEB;
 	buffLoop[RT_FUSE].syncHead_B = 0x90;
-	buffLoop[RT_FUSE].lenExtern = 0;	// Êý¾ÝÖ¡ÖÐ±íÊ¾³¤¶È×Ö½Ú£¬Ö®Íâ»¹ÓÐlenExtern¸ö×Ö½Ú£¬×Ü¹²¹¹³ÉÒ»Ö¡Êý¾Ý	//ÆÕÍ¨422ÏûÏ¢£¬Í·²¿6×Ö½Ú£¬Ð£ÑéºÍ2×Ö½Ú²»ËãÈë³¤¶È×Ö¶Î
+	buffLoop[RT_FUSE].lenExtern = 0;	// ï¿½ï¿½ï¿½ï¿½Ö¡ï¿½Ð±ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½ï¿½Ö½Ú£ï¿½Ö®ï¿½â»¹ï¿½ï¿½lenExternï¿½ï¿½ï¿½Ö½Ú£ï¿½ï¿½Ü¹ï¿½ï¿½ï¿½ï¿½ï¿½Ò»Ö¡ï¿½ï¿½ï¿½ï¿½	//ï¿½ï¿½Í¨422ï¿½ï¿½Ï¢ï¿½ï¿½Í·ï¿½ï¿½6ï¿½Ö½Ú£ï¿½Ð£ï¿½ï¿½ï¿½2ï¿½Ö½Ú²ï¿½ï¿½ï¿½ï¿½ë³¤ï¿½ï¿½ï¿½Ö¶ï¿½
 	buffLoop[RT_FUSE].head = 0;
 	buffLoop[RT_FUSE].tail = 0;
-	buffLoop[RT_FUSE].lenPos = 0;	//0;	//³ýÁËHead_AºÍHead_BÖ®ÍâÔÙÆ«ÒÆ¶àÉÙ×Ö½Ú²Åµ½³¤¶È×Ö½Ú	//Í¬²½Í·ºóµÚn¸ö×Ö½ÚÎª³¤¶È
-	buffLoop[RT_FUSE].fixedLen = 27;	//0£ºÈ¡HeadA¡¢HeadBºóÃæµÄÁ½¸ö×Ö½Ú×÷Îª³¤¶È£»-1£ºÔÝ²»Çå³þ£»¾ßÌåÊýÖµ£º¹Ì¶¨³¤¶È
+	buffLoop[RT_FUSE].lenPos = 0;	//0;	//ï¿½ï¿½ï¿½ï¿½Head_Aï¿½ï¿½Head_BÖ®ï¿½ï¿½ï¿½ï¿½Æ«ï¿½Æ¶ï¿½ï¿½ï¿½ï¿½Ö½Ú²Åµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö½ï¿½	//Í¬ï¿½ï¿½Í·ï¿½ï¿½ï¿½nï¿½ï¿½ï¿½Ö½ï¿½Îªï¿½ï¿½ï¿½ï¿½
+	buffLoop[RT_FUSE].fixedLen = 27;	//0ï¿½ï¿½È¡HeadAï¿½ï¿½HeadBï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö½ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½È£ï¿½-1ï¿½ï¿½ï¿½Ý²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öµï¿½ï¿½ï¿½Ì¶ï¿½ï¿½ï¿½ï¿½ï¿½
 	buffLoop[RT_FUSE].inited = TRUE;
 	return 0;
 }
@@ -36,18 +38,28 @@ OS_U16 ChkFuseStandardFrame(OS_MEM* pmData)
 	OS_U8 data[100];
 	memcpy(data,pmData, 100);
 
-	// if(pmData[1] != 0xAA || pmData[2] != 0x55)
 	if(pmData[1] != buffLoop[RT_FUSE].syncHead_A || pmData[2] != buffLoop[RT_FUSE].syncHead_B || pmData[3] != 0xFC)
 	{
 		return 0;
 	}
     
+    static uint32_t s_frm_index = 0;
+		static uint32_t s_error_cnt = 0;
+		static uint32_t s_total_cnt = 0;
+		s_total_cnt++;
+		uint32_t temp_index = pmData[4] * 0x10000 + pmData[5] * 0x100 + pmData[6];
+    if((s_frm_index + 1) != temp_index)
+    {
+        s_frm_index = temp_index;
+        s_error_cnt++;
+    }
+
 	// pmData[26] * 0x100 + pmData[27]
-    OS_U16 checkSumRecv = pmData[buffLoop[RT_FUSE].fixedLen - 1] * 0x100 + pmData[buffLoop[RT_FUSE].fixedLen];	//´ó¶ËÐò
+    OS_U16 checkSumRecv = pmData[buffLoop[RT_FUSE].fixedLen - 1] * 0x100 + pmData[buffLoop[RT_FUSE].fixedLen];	//ï¿½ï¿½ï¿½ï¿½ï¿½
     OS_U16 checkSumCalc = crc16_xmodem(pmData + 1, buffLoop[RT_FUSE].fixedLen - 2);
     
    if(checkSumRecv != checkSumCalc)
-	{//Ð£Ñé²»Í¨¹ý
+	{//Ð£ï¿½é²»Í¨ï¿½ï¿½
 		static int errorCount32 = 0;
         errorCount32++;
 		OS_U8 errorCount = (errorCount32 & 0xFF);
@@ -55,16 +67,16 @@ OS_U16 ChkFuseStandardFrame(OS_MEM* pmData)
 		return 0;
 	}
 
-	/** ÖØÐÂ×éÖ¡ */
-	pmData[3] = 17;		//au8Data³¤¶È
-	pmData[4] = 0;		// ³¤¶È
+	/** ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¡ */
+	pmData[3] = 17;		//au8Dataï¿½ï¿½ï¿½ï¿½
+	pmData[4] = 0;		// ï¿½ï¿½ï¿½ï¿½
 	pmData[5] = 0;		// u8Seq
-	pmData[6] = 0x11;	// u8MsgID  // ´Ë´¦·ÂÕÕÁË280
+	pmData[6] = 0x11;	// u8MsgID  // ï¿½Ë´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½280
 	memcpy(pmData+7, pmData+9, 17);// au8Data 
 	return pmData[3] + 7 + 2;
 
-	// /** Ô­À´280³ÌÐò */
-    // memmove(pmData + 7, pmData + 6, pmData[3]);	// BUG ´Ë´¦ÊÇ·ñ»áÖ¸Õë²ÈÁË±ðµÄÇøÓò£¿
+	// /** Ô­ï¿½ï¿½280ï¿½ï¿½ï¿½ï¿½ */
+    // memmove(pmData + 7, pmData + 6, pmData[3]);	// BUG ï¿½Ë´ï¿½ï¿½Ç·ï¿½ï¿½Ö¸ï¿½ï¿½ï¿½ï¿½Ë±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     // memcpy(data,pmData, 100);
 	// pmData[4] = 0;
 	// pmData[5] = 0;
@@ -86,13 +98,13 @@ OS_U32 FuseRtHandler(STRU_422_MSG_INFO *data)
 
     SETDATA(pDataPoolSelf, "fzFeedbk", fuseFrame.feedbk,OS_U8 );
     SETDATA(pDataPoolSelf, "fzTask",   fuseFrame.task,	OS_U8 );
-    SETDATA(pDataPoolSelf, "fzFirV",   fuseFrame.firV,	OS_U16);
-    SETDATA(pDataPoolSelf, "fzPrxA",   fuseFrame.prxA,	OS_U16);
-    SETDATA(pDataPoolSelf, "fzIC12V",  fuseFrame.ic12V,	OS_U16);
-    SETDATA(pDataPoolSelf, "fzDetV",   fuseFrame.detV,	OS_U16);
-    SETDATA(pDataPoolSelf, "fzDcfA",   fuseFrame.dcfA,	OS_U16);
-    SETDATA(pDataPoolSelf, "fzC1Stat", fuseFrame.c1Stat,OS_U16);
-    SETDATA(pDataPoolSelf, "fzUnitNo", fuseFrame.unitNo,OS_U16);
+    SETDATA(pDataPoolSelf, "fzFirV",   (SWAP_U16(fuseFrame.firV)),	OS_U16);
+    SETDATA(pDataPoolSelf, "fzPrxA",   (SWAP_U16(fuseFrame.prxA)),	OS_U16);
+    SETDATA(pDataPoolSelf, "fzIC12V",  (SWAP_U16(fuseFrame.ic12V)),	OS_U16);
+    SETDATA(pDataPoolSelf, "fzDetV",   (SWAP_U16(fuseFrame.detV)),	OS_U16);
+    SETDATA(pDataPoolSelf, "fzDcfA",   (SWAP_U16(fuseFrame.dcfA)),	OS_U16);
+    SETDATA(pDataPoolSelf, "fzC1Stat", (SWAP_U16(fuseFrame.c1Stat)),OS_U16);
+    SETDATA(pDataPoolSelf, "fzUnitNo", (SWAP_U16(fuseFrame.unitNo)),OS_U16);
     SETDATA(pDataPoolSelf, "fzImpSt",  fuseFrame.impSt,	OS_U8 );
 
 
@@ -114,7 +126,7 @@ OS_U32 FuseRtHandler(STRU_422_MSG_INFO *data)
     SETDATA(pDataPoolSelf, "fuseay", ay,	    OS_FLOAT);
     SETDATA(pDataPoolSelf, "fuseaz", az,	    OS_FLOAT);
     SETDATA(pDataPoolSelf, "fuseg", g,	    OS_FLOAT);
-    SETDATA(pDataPoolSelf, "fuseTemp", fuseStatus.temp,	    OS_U16);
+    SETDATA(pDataPoolSelf, "fuseTemp", fuseStatus.temp,	    OS_S16);
 */    
 	g_DeviceState.fuseCountDown = 200;
 	return 0;
@@ -143,15 +155,15 @@ static OS_U8 GenFuseBuf(OS_U8 *buf, FuzeCmdType cmd)
         command[7] = 0x55;  // EB 90 FC 00 00 00 00 55
         break;
     default:
-        return 0;  // ÎÞÐ§ÃüÁî
+        return 0;  // ï¿½ï¿½Ð§ï¿½ï¿½ï¿½ï¿½
     }
 
-    // ¼ÆËã CRC16£¨Ç°8×Ö½Ú£©
+    // ï¿½ï¿½ï¿½ï¿½ CRC16ï¿½ï¿½Ç°8ï¿½Ö½Ú£ï¿½
     OS_U16 checksum = crc16_xmodem(command, 8);
     command[8] = ((checksum >> 8) & 0xFF);
     command[9] = (checksum & 0xFF);
 
-    // ÖØ¸´10´Î£¬¹²100×Ö½Ú
+    // ï¿½Ø¸ï¿½10ï¿½Î£ï¿½ï¿½ï¿½100ï¿½Ö½ï¿½
     for (int i = 0; i < 10; i++)
     {
         memcpy(buf + i * 10, command, 10);

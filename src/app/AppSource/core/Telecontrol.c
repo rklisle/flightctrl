@@ -1,7 +1,7 @@
 /*
  * Telecontrol.c
  *
- *  Created on: 2022Äê1ÔÂ21ÈÕ
+ *  Created on: 2022ï¿½ï¿½1ï¿½ï¿½21ï¿½ï¿½
  *      Author: ChengHongjing
  */
 
@@ -22,77 +22,75 @@ OS_U32 CmdHandler(STRU_422_MSG_INFO * frame)//02 //	RT_DATA_LINK
 {
 	OS_U8 msgId = frame->u8MsgID;
 	SETDATA(pDataPoolSelf,	"gmsgId",	msgId,		OS_U8);
-	g_DeviceStatus.msgFromGCS = 0x01;//SD¿¨¿ªÊ¼´æ´¢
+	g_DeviceStatus.msgFromGCS = 0x01;//SDï¿½ï¿½ï¿½ï¿½Ê¼ï¿½æ´¢
 	
-	//·Ç½»»¥Ä£Ê½Ê±£¬²»´¦ÀíµØÃæÖ¸Áî
+	//ï¿½Ç½ï¿½ï¿½ï¿½Ä£Ê½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½
 	if((g_DeviceState.workStage & DOM_INTERACTIVE) !=  DOM_INTERACTIVE)
 	{
-		// ÔËÐÐµ½ÕâÀï£¬ËµÃ÷µØÃæÈí¼þµã»÷¡°Æð·É¡±£¬´ËÊ±Ö»ÄÜ´¦Àí¡°½ô¼±É¡½µ¡±¡¢¡°½ô¼±·µº½¡±¡¢¡°¿ª¹Ø·¢¶¯»ú¡±...µÈÖ¸Áî
+		// ï¿½ï¿½ï¿½Ðµï¿½ï¿½ï¿½ï¿½ï£¬Ëµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É¡ï¿½ï¿½ï¿½ï¿½ï¿½Ê±Ö»ï¿½Ü´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½...ï¿½ï¿½Ö¸ï¿½ï¿½
 		if(msgId != CMD_URGENT_LAND && msgId != CMD_URGENT_RETURN && msgId != CMD_START_STOP_ENGINE && msgId != CMD_MSN_NEWPT && msgId != CMD_USER_SETTARGET && msgId != CMD_SET_IMAGEMODE)
 		{
 			return -1;
 		}
 	}
-	//¼ýµØÐ­ÒéÊÇ×Ô¼ºÐ´µÄ£¬ÄÜ¹»±£Ö¤msgIDµÄÓÐÐ§ÐÔ¼°»¥³âÐÔ
-	// ½»»¥Ä£Ê½Ê±£¬ÄÜ´¦ÀíÏÂÁÐswitchÖÐµÄÖ¸Áî
+	//ï¿½ï¿½ï¿½ï¿½Ð­ï¿½ï¿½ï¿½ï¿½ï¿½Ô¼ï¿½Ð´ï¿½Ä£ï¿½ï¿½Ü¹ï¿½ï¿½ï¿½Ö¤msgIDï¿½ï¿½ï¿½ï¿½Ð§ï¿½Ô¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	// ï¿½ï¿½ï¿½ï¿½Ä£Ê½Ê±ï¿½ï¿½ï¿½Ü´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½switchï¿½Ðµï¿½Ö¸ï¿½ï¿½
 	switch(msgId)
 	{
 	case BUS_SLAVER_REPORT:
 	case BUS_SLAVER_CMD:
 		SlaverHandler(frame);
 		break;
-    case CMD_MSN_UPDATE://¸üÐÂÈÎÎñ
-    case CMD_MSN_NEWPT://ÏÂÔØÈÎÎñ
+    case CMD_MSN_UPDATE://ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    case CMD_MSN_NEWPT://ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         MsnCmdHandler(frame);
         //UpdatePredictMsnByGround(frame);
         break;
-	//×´Ì¬ÉèÖÃÖ¸Áî
-	case CMD_MODULE_SET_REQ:		//Ä£Ê½ÉèÖÃ
-	case CMD_BJTIME_SET:		//ÉèÖÃÊ±¼ä
-		//·¢ÉäÖ¸Áî
-    case CMD_ENGINE_START:		//Æô¶¯·¢¶¯»ú
+	//×´Ì¬ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½
+	case CMD_MODULE_SET_REQ:		//Ä£Ê½ï¿½ï¿½ï¿½ï¿½
+	case CMD_BJTIME_SET:		//ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½
+		//ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½
+    case CMD_ENGINE_START:		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     case CMD_ENGINE_STOP:		//Í£Ö¹
-	case CMD_FORE_LAUNCH_REQ:		//·¢Éä	//Ô¤·¢Éä£¨Î´Ê¹ÓÃ£©
-	case CMD_LAUNCH_REQ:		//0xFA È«²¿½âÖ¸Áî
+	case CMD_FORE_LAUNCH_REQ:		//ï¿½ï¿½ï¿½ï¿½	//Ô¤ï¿½ï¿½ï¿½ä£¨Î´Ê¹ï¿½Ã£ï¿½
+	case CMD_LAUNCH_REQ:		//0xFA È«ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½
 	case CMD_LUANCH_FORCE:
 	//case CMD_DATA_REQ:
 	//case CMD_DATA_SET:
-	case CMD_URGENT_LAND:			//½ô¼±É¡½µ   zhang 20230608
-	case CMD_URGENT_RETURN:			//½ô¼±·µº½   zhang 20230608
-	//case CMD_INSTANT_RECOVER:		//½ô¼±»ØÊÕ   zhang 20230608
+	case CMD_URGENT_LAND:			//ç´§æ€¥ä¼žé™
+	case CMD_URGENT_RETURN:			//ç´§æ€¥è¿”èˆª
+	//case CMD_INSTANT_RECOVER:		//å³æ—¶å›žæ”¶
 		ControllerCmdHandler(frame);
 		break;
-	//Ê±ÐòÅäµçÖ¸Áî
-	case CMD_POWER_REQ:				//µ¥»úÅäµç
-	case CMD_SEQ_POWER_REQ:			//ÎÞÏßÅäµç
+	//Ê±ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½
+	case CMD_POWER_REQ:				//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	case CMD_SEQ_POWER_REQ:			//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		PwrCmdHandler(frame);
 		break;
-	//¹ß×éÖ¸Áî
-	case CMD_HOR_CALC_REQ:			//Ë®Æ½¼ÆËãÇëÇó
-	case CMD_TO_NAV_REQ:			//×ªµ¼º½ÇëÇó
-	case CMD_POLAR_TEST_REQ:		//¼«ÐÔ²âÊÔ
+	//ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½
+	case CMD_HOR_CALC_REQ:			//Ë®Æ½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	case CMD_TO_NAV_REQ:			//×ªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	case CMD_POLAR_TEST_REQ:		//ï¿½ï¿½ï¿½Ô²ï¿½ï¿½ï¿½
 		NavCmdHandler(frame);
         ImuCmdHandler(frame);
 		break;
     case CMD_TO_AFTER_LUANCH:
         NavCmdHandler(frame);
         break;
-	//FLASHÖ¸Áî
-	case CMD_FLASH_CTRL_REQ:		//flahsÉÕÐ´ÇëÇó
-	case CMD_FLASH_ENCAP_REQ:		//flashÉÕÐ´ÄÚÈÝ
-	case CMD_FLASH_CHECK_REQ:		//flashÉÕÐ´Ð£Ñé
-	case CMD_FLASH_LOAD_REQ:		//ÖîÔªÊý¾Ý¼ÓÔØ
+	//FLASHÖ¸ï¿½ï¿½
+	case CMD_FLASH_CTRL_REQ:		//flahsï¿½ï¿½Ð´ï¿½ï¿½ï¿½ï¿½
+	case CMD_FLASH_ENCAP_REQ:		//flashï¿½ï¿½Ð´ï¿½ï¿½ï¿½ï¿½
+	case CMD_FLASH_CHECK_REQ:		//flashï¿½ï¿½Ð´Ð£ï¿½ï¿½
+	case CMD_FLASH_LOAD_REQ:		//ï¿½ï¿½Ôªï¿½ï¿½ï¿½Ý¼ï¿½ï¿½ï¿½
 	case CMD_FLASH_QUERY_REQ:
 	case CMD_FLASH_CLEAR_REQ:
 		FlashCmdHandler(frame);
 		break;
-	//ËÅ·þÖ¸Áî
-	case CMD_SRV_ZERO_ENCAP_REQ:	//ÁãÎ»×°¶©£¨Ä¿Ç°Ã»ÓÃ£©
-	case CMD_SRV_CTRL_REQ:			//ËÅ·þ¿ØÖÆ
-	case CMD_SRV_MINLOOP_REQ:		//ËÅ·þÐ¡»ØÂ·
-	case CMD_SRV_BOOKMODE:			//ÈÃ¶æ»úÉèÖÃÁãÎ»
-	case CMD_SRV_SET_ID:			//£¨Ä¿Ç°Ã»ÓÃ£©
-	case CMD_SRV_SAVE:				//£¨Ä¿Ç°Ã»ÓÃ£©
+	//ï¿½Å·ï¿½Ö¸ï¿½ï¿½
+	case CMD_SRV_ZERO_ENCAP_REQ:	//ï¿½ï¿½Î»×°ï¿½ï¿½ï¿½ï¿½Ä¿Ç°Ã»ï¿½Ã£ï¿½
+	case CMD_SRV_CTRL_REQ:			//ï¿½Å·ï¿½ï¿½ï¿½ï¿½ï¿½
+	case CMD_SRV_MINLOOP_REQ:		//ï¿½Å·ï¿½Ð¡ï¿½ï¿½Â·
+	case CMD_SRV_BOOKMODE:			//ï¿½Ã¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î»
 		ServoCmdHandler(frame);
 		break;
 	case CMD_START_STOP_ENGINE:
@@ -102,9 +100,9 @@ OS_U32 CmdHandler(STRU_422_MSG_INFO * frame)//02 //	RT_DATA_LINK
 	case CMD_ECU_RPM_SETTING:
 		EngineCmdHandler(frame);
 		break;
-		//SD¿¨Ö¸Áî
-	case CMD_SD_READ_FILE:	// 280 ´Ë´¦Ã»´¦ÀíÕâÌõcase
-	case CMD_SD_INIT:		// 280 ´Ë´¦Ã»´¦ÀíÕâÌõcase
+		//SDï¿½ï¿½Ö¸ï¿½ï¿½
+	case CMD_SD_READ_FILE:	// 280 ï¿½Ë´ï¿½Ã»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½case
+	case CMD_SD_INIT:		// 280 ï¿½Ë´ï¿½Ã»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½case
 		ControllerCmdHandler(frame);
 		break;
 	case CMD_GET_EPH:
@@ -121,19 +119,19 @@ OS_U32 CmdHandler(STRU_422_MSG_INFO * frame)//02 //	RT_DATA_LINK
 	    break;
 	}
 	
-	//·¢ËÍ¸øµ¼º½°åµÄÉÕÐ´Ö¸Áî£¬Ö±½ÓÍ¸´«ÖÁµ¼º½°å
+	//ï¿½ï¿½ï¿½Í¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð´Ö¸ï¿½î£¬Ö±ï¿½ï¿½Í¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	if(msgId >= 0x70 && msgId <= 0x7F)
 	{
 		MsgToDevice(RT_NAV, msgId- 0x10, frame->u16Len, frame->au8Data);
 	}
-	//ÔØºÉÏà¹Ø¼ýµØÍ¨Ñ¶Ð­Òé
+	//ï¿½Øºï¿½ï¿½ï¿½Ø¼ï¿½ï¿½ï¿½Í¨Ñ¶Ð­ï¿½ï¿½
 	//{
 
 	//}
 	return 0;
 }
 
-//Ó¦´ðÏûÏ¢´¦Àí
+//Ó¦ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½ï¿½
 OS_U8 CmdResponseHandler(OS_U8 msgID, OS_U16 msgLen, OS_U8* buf)
 {
 	MsgToDevice(RT_DATA_LINK, msgID, msgLen, buf);

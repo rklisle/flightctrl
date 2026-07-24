@@ -28,108 +28,90 @@ telemetryParam tm_flight[] =
 	{&DataPoolALL[MSN_DATAPOOL_INDEX],	"autoStep",	1},
 	//???????3?????2????
 	{&DataPoolALL[MSN_DATAPOOL_INDEX],	"paylodtp",	1},
-	{&DataPoolALL[MSN_DATAPOOL_INDEX],	"WP_cur",	1},	//????????
-	{&DataPoolALL[MSN_DATAPOOL_INDEX],	"tarLon",	4},	//?????????
-	{&DataPoolALL[MSN_DATAPOOL_INDEX],	"tarLat",	4},
-	{&DataPoolALL[MSN_DATAPOOL_INDEX],	"tarAlt",	2},
-	{&DataPoolALL[MSN_DATAPOOL_INDEX],	"msnComm1",	1},
-	{&DataPoolALL[MSN_DATAPOOL_INDEX],	"msnComm2",	1},
+	{&DataPoolALL[MSN_DATAPOOL_INDEX],	"curPtNo",	1},//当前航点号
+	{&DataPoolALL[MSN_DATAPOOL_INDEX],	"tarLon",	4},//当前目标航点经度
+	{&DataPoolALL[MSN_DATAPOOL_INDEX],	"tarLat",	4},//当前目标航点纬度
+	{&DataPoolALL[MSN_DATAPOOL_INDEX],	"tarAlt",	2},//当前目标航点高度
+	{&DataPoolALL[MSN_DATAPOOL_INDEX],	"msnComm1",	1},//与飞机ID1通信状态
+	{&DataPoolALL[MSN_DATAPOOL_INDEX],	"msnComm2",	1},//与飞机ID2通信状态
 	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"imuWx",	4},
 	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"imuWy",	4},
 	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"imuWz",	4},
 	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"imuAx",	4},
 	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"imuAy",	4},
 	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"imuAz",	4},
-	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"gpsLon",	4}, //GPS??????
-	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"gpsLat",	4},
-	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"gpsAlt",	2},
-	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"gpsVn",	2},
-	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"gpsVs",	2},
-	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"gpsVe",	2},
-	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"gpsYear",	1},
-	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"gpsMonth",	1},
-	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"gpsDay",	1},
-	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"gpsHour",	1},
-	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"gpsMinit",	1},
-	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"gpsSec",	1},
-	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"gpsMSec",	1},
-	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"dirEffec",	1}, //GPS???????????
-	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"gpsDir",	2}, //GPS?????????????
-	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"gpsScCnt",	1},	// ????????
-	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"navLon",	4}, //??????????
-	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"navLat",	4},
-	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"navHigh",	4},
-	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"navVn",	2},
-	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"navVs",	2},
-	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"navVe",	2},
-	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"navPitch",	2},
-	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"navDir",	2},
-	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"navRoll",	2},
- //0x00???       0x20?????     0x3F??????      0x2F?????????????????????????????????????
-//0x60????????       0x64???????????  
-	{&DataPoolALL[IMU_DATAPOOL_INDEX],	"navState",	1},
-//?????????x?????? ??
-	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"navX",	4},
-	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"navY",	4},
-	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"navZ",	4},
-//????????x *10???????? ??/??
-	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"navVx",	2},
-	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"navVy",	2},
-	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"navVz",	2},
-// ??? *100???????? kpa
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"AirPress",	2},
-// ???? *10???? ???? ??/??
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"AirSpd",	2},
-// ???? *10???? ???? ??/??
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"GrdSpd",	2},
-// ??????????? ??
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"AirHigh",	2},
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"seqUmb",	1},
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"seqDrop",	1},
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"seqSac1",	1},
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"seqSac2",	1},
-	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"adrc_Mx",	2},
-	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"EngineRp",	2},	//014 ???????*10 ??[0~1000]??  280 ???
-	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"gamaCmd",	2},
-	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"thetaCmd",	2},
-	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"nycCmd",	2},
-	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"highCmd",	4},
-	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"ac_dL",	4},
-	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"ac_dZ",	2},
-	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"tokenlon",	1}, //????????
-	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"tokenlat",	1}, //????????
-	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"ac_dR",	2},
-	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"thetav",	2},
-	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"Vcmd",	2},
-	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"nyCmd",	2},
-	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"nzCmd",	2},
-	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"DbsLen",	4},
-	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"ADRC",	2},
-	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"sctMoLd",	1},
-	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"sctCheck",	1},
-	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"sctLock",	1},
-	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"sctPitch",	2},
-	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"sctYaw",	2},
-	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"viewPitc",	2},
-	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"viewYaw",	2},
-	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"vPitchSp",	2},
-	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"vYawSp",	2},
-	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"pitchCmd",	2},
-	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"rollCmd",	2},
-	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"yawCmd",	2},
-	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"dRn",	2},	// ��Ŀ�������
-	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"dRu",	2},	// ??????????
-	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"dRe",	2},	// ??????????
-	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"PitchPre",	2},
-	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"YawPre",	2},
-	// ????????????6???????????????????????100??
-	{&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr1Cmd",	2}, // roll left
-	{&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr2Cmd",	2}, // roll right
-	{&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr3Cmd",	2}, // pitch left
-	{&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr4Cmd",	2}, // pitch right
-	{&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr5Cmd",	2}, // yaw left
-	{&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr6Cmd",	2}, // yaw right
-	// ????????????6?????????????100??
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"res1",	2},//HIL序号，此字段不要动
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"res2",	1},//预留2
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"EngineRp",	2},
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"rollCmd",	2},//通道舵副翼
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"pitchCmd",	2},//通道舵升降	
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"yawCmd",	2},//通道舵航向
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"gamaCmd",	2},//滚转角指令
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"varthCmd",	2},//俯仰角指令
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"nycCmd",	2},//升力面过载指令
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"highCmd",	2},//高度指令
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"vyCmd",	2},//垂速指令
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"ac_dL",	4},//待飞距
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"ac_dZ",	2},//侧边距
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"fcstate",	4},//飞行状态 
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"thrusCmd",	2},//推力指令，例如油门开度Kc 无符号
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"rpmState",	2},//发动机状态转速
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"ac_Vx",	2},//射向速度
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"ac_Vy",	2},//天向速度	
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"ac_Vz",	2},//侧向速度
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"ac_dR",	2},//圆轨迹侧边距，未去掉转弯半径
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"azimuth",	2},//航段方位角
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"thetav",	2},//轨迹倾角
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"psicv",	2},//轨迹偏角
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"Vcmd",		2},//速度指令 
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"nyCmd",	2},//末制导纵向过载指令
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"nzCmd",	2},//末制导侧向过载指令
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"wyCmd",	2},//航向角速度指令
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"pitch_nT",	2},//俯仰视线角速度滤波
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"yaw_nT",	2},//偏航视线角速度滤波
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"deltaR",	4},//弹目距离，打击点
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"dRn",		2},//弹目北向距离
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"dRu",		2},//弹目天向距离
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"dRe",		2},//弹目东向距离
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"PitchPre",	2},//理论俯仰框架角
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"YawPre",	2},//理论偏航框架角
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"DusState",	4},//杜宾斯段
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"DusType1",	4},//杜宾斯类型1
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"DusType2",	4},//杜宾斯类型2
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"DusType3",	4},//杜宾斯类型3
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"DbsLen",	4},//杜宾斯段航程
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"gamacCom",	2},//滚转角指令补偿量
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"uz_gamac",	2},//侧偏控制量
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"mx_ESO",	2},//干扰估计状态量z2
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"ADRC",		2},//ADRC舵偏
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"Qv",		4},//动压
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"alphaIns",	2},//地速攻角
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"betaIns",	2},//地速侧滑角	
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"nyflt",	2},//体轴法向过载
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"nzflt",	2},//体轴侧向过载
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"cnt_alti",	4},//高度机动次数
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"mass_cal",	2},//质量估计
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"ugfZetac",	2},//高度控制量
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"uqkf",		2},//前馈控制量
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"fliCount",	4},//飞控帧计数
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"curLon",	4},//当前经度
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"curLat",	4},//当前纬度
+	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"curAlt",	2},//当前高度
+	// 舵机指令+回读（modSrvCtl.c 写入 pDataPoolSrv）
+	{&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr1Cmd",	2},//pitch left  俯仰左
+	{&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr2Cmd",	2},//pitch right 俯仰右
+	{&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr3Cmd",	2},//roll left   副翼左
+	{&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr4Cmd",	2},//roll right  副翼右
+	{&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr5Cmd",	2},//yaw left    航向左
+	{&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr6Cmd",	2},//yaw right   航向右
 	{&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr1Read",	2},
 	{&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr2Read",	2},
 	{&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr3Read",	2},
@@ -176,16 +158,28 @@ telemetryParam tm_200hz[] =
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"scout2",	2},
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"scout3",	2},
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"scout4",	2},
-	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuseMode",	1},
-	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuse24V",	1},
-	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuseActv",	1},
-	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuseBIT",	1},
-	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuse5V",	2},
-	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuseuf",	2},
-	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuseTemp",	2},
-	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuseax",	4},
-	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuseay",	4},
-	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuseaz",	4},
+	// {&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuseMode",	1},
+	// {&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuse24V",	1},
+	// {&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuseActv",	1},
+	// {&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuseBIT",	1},
+	// {&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuse5V",	2},
+	// {&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuseuf",	2},
+	// {&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuseTemp",	2},
+	// {&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuseax",	4},
+	// {&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuseay",	4},
+	// {&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuseaz",	4},
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fzFeedbk",	1},	// feed back & control signals
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fzTask",	1},	// tasks executed
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fzFirV",	2},	// fire 12V = 2byte value X 0.0004
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fzPrxA",	2},	// Proxy Current = 2byte value X 0.00122
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fzIC12V",	2},	// +12V IC Supply Status = 2byte value X 0.003
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fzDetV",	2},	// +12V DETO Supply Status = 2byte value X 0.0004
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fzDcfA",	2},	// Solenoid Current = 2byte value X 0.000065
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fzC1Stat",	2},	// Capacitor 1 Charging Status = 2byte value X 0.0023
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fzUnitNo",	2},	// Unit Number
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fzImpSt",	1},	// Impact / Proximity Status
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"res3",	4},
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"res4",	1},
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"cpuTemp",	2},
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"cpuTemp2",	2},
 	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"mcuTemp",	2},	// ???????????????
@@ -193,8 +187,8 @@ telemetryParam tm_200hz[] =
 	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"Batt28A",	2},
 	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"VCombin",	2},
 	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"ACombin",	2},
-	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"VFire",	2},
-	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"Afire",	2},
+	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"groundV",	2},
+	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"groundA",	2},
 	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"PwrCmd",	1},
 	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"FireCmd",	1},
 	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"pwrTemp",	2},
@@ -208,8 +202,8 @@ telemetryParam tm_200hz[] =
 	{&DataPoolALL[NAV_DATAPOOL_INDEX],	"navWy2",	4},
 	{&DataPoolALL[NAV_DATAPOOL_INDEX],	"navWz2",	4},
 	{&DataPoolALL[NAV_DATAPOOL_INDEX],	"navAx2",	4},
-	{&DataPoolALL[NAV_DATAPOOL_INDEX],	"navAy2",	4},
-	{&DataPoolALL[NAV_DATAPOOL_INDEX],	"navAz2",	4},
+	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"engineV",	4},
+	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"engineA",	4},
 	{&DataPoolALL[NAV_DATAPOOL_INDEX],	"gpsMod",	1},
 	{&DataPoolALL[NAV_DATAPOOL_INDEX],	"gpsLon",	4},
 	{&DataPoolALL[NAV_DATAPOOL_INDEX],	"gpsLat",	4},
@@ -300,4 +294,3 @@ telemetryParam tm_10hz_pack[][TM_PKT_PARAM_COUNT_40hz_10hz] =
 };
 
 #endif
-

@@ -27,20 +27,34 @@
 #define SERVO_ZEROENCAP_PAYLOAD_LEN	(23)
 #define SERVO_CHECK_REQ_LEN			(23)
 
-// CAN~{6f;zO`9X6(Re~}
-#define CAN_CMD_ID_BASE     0x00000600UL  // ~{V8An~}ID~{;yV7~}
-#define CAN_RESP_ID_BASE    0x00000580UL  // ~{OlS&~}ID~{;yV7~}
+// KST 舵机 CAN 协议（扩展帧 V3.72，014）
+#define KST_CAN_BAUD_HZ             (500000UL)
+#define KST_CAN_ID_SDO_TX_BASE      0x00000600UL
+#define KST_CAN_ID_SDO_RX_BASE      0x00000580UL
+#define KST_CAN_ID_MGMT_TX_BASE     0x00000000UL
+#define KST_CAN_ID_ALARM_BASE       0x00000380UL
+#define KST_CAN_ID_GUARD_BASE       0x00000700UL
+
+#define CAN_CMD_ID_BASE             KST_CAN_ID_SDO_TX_BASE
+#define CAN_RESP_ID_BASE            KST_CAN_ID_SDO_RX_BASE
+
+#define KST_CAN_SDO_TX_ID(node)     ((OS_U32)(KST_CAN_ID_SDO_TX_BASE | (OS_U8)(node)))
+#define KST_CAN_SDO_RX_ID(node)     ((OS_U32)(KST_CAN_ID_SDO_RX_BASE | (OS_U8)(node)))
+#define KST_CAN_IS_SDO_TX_ID(id)    (((id) & 0xFFFFFE00UL) == KST_CAN_ID_SDO_TX_BASE)
+#define KST_CAN_IS_SDO_RX_ID(id)    (((id) & 0xFFFFFE00UL) == KST_CAN_ID_SDO_RX_BASE)
+#define KST_CAN_IS_ALARM_ID(id)     (((id) & 0xFFFFFE00UL) == KST_CAN_ID_ALARM_BASE)
+#define KST_CAN_IS_GUARD_ID(id)     (((id) & 0xFFFFFE00UL) == KST_CAN_ID_GUARD_BASE)
 #define SERVO_MIN_ANGLE     (-100.0)      // ~{WnP!=G6H~}
 #define SERVO_MAX_ANGLE     (100.0)       // ~{Wn4s=G6H~}
 
 // ~{6f;z=Z5c~}ID~{6(Re~}
 typedef enum {
-    SERVO_NODE_1 = 0x25,  // CAN?? 0x25	
-    SERVO_NODE_2 = 0x26,  // CAN?? 0x26	
-    SERVO_NODE_3 = 0x27,  // CAN?? 0x27	
-    SERVO_NODE_4 = 0x28,  // CAN?? 0x28	
-	SERVO_NODE_5 = 0x29,  // CAN?? 0x29	
-    SERVO_NODE_6 = 0x30,  // CAN?? 0x30	
+    SERVO_NODE_1 = 0x25,  
+    SERVO_NODE_2 = 0x26,  	
+    SERVO_NODE_3 = 0x27,  
+    SERVO_NODE_4 = 0x28, 
+	SERVO_NODE_5 = 0x29,  
+    SERVO_NODE_6 = 0x2A,  
 } ServoNodeID;
 
 // CAN~{C|An=a99~}
@@ -127,6 +141,7 @@ typedef struct
 	OS_U8 LevelTwoAcuator_Enb;
 	OS_U8 LevelThreeAcuator_Enb;
 }STRU_SERVO_MinLoopTest_REQUEST;
+
 #pragma pack()
 
 OS_U8 CanRtServoHandler(OS_U32 id, OS_BOOL ext_id, const OS_U8* data, OS_U8 len);
@@ -136,7 +151,6 @@ OS_U8 SrvStatusUpdata();
 
 // CAN~{O`9X:/J}~}
 OS_U8 Servo_SetAngle_CAN(ServoNodeID node, double angle);
-OS_U8 Servo_ReadAngle_CAN(ServoNodeID node, double *angle);
 OS_U8 Servo_SetTorqueZero_CAN(ServoNodeID node);
 OS_U8 Servo_SetMidpoint_CAN(ServoNodeID node);
 OS_U8 Servo_SendCANFrame(OS_U32 id, OS_U8 *data, OS_U8 len);
@@ -149,7 +163,9 @@ extern OS_U8 ServoCtlOnce_6Rudder(double actDeg_1, double actDeg_2, double actDe
     double actDeg_4, double actDeg_5, double actDeg_6);
 extern OS_U32 ServoCmdHandler(STRU_422_MSG_INFO * frame);
 extern OS_U32 SrvRtHandler(STRU_422_MSG_INFO * frame);
-extern OS_U8 MsgToSrv(OS_DOUBLE ctrlDeg[6], OS_U8 ctrlMode/*control = 0x02, 0x44=setZero*/);
+#define SRV_CHANNEL_COUNT   (7)
+
+extern OS_U8 MsgToSrv(OS_DOUBLE ctrlDeg[SRV_CHANNEL_COUNT], OS_U8 ctrlMode, OS_U8 srvCount);/*control=0x02, setZero=0x44*/
 
 // extern OS_U8 InitSrv();
 extern OS_U16 ChkSrvFrame(OS_MEM* pmData);

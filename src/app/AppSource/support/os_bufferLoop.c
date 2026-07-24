@@ -131,11 +131,14 @@ OS_S32 PopFrameLoopMem(OS_U8 rtIndex, OS_U8 *memFrame, OS_U16* u16len)
         while(len >= FRAME_MIN_LEN)
         {
             int head_1 = (buffLoop[rtIndex].head + 1) % BUFFER_LOOP_POOL_MAX;
-            int temp_len_low = (buffLoop[rtIndex].head + 2 + buffLoop[rtIndex].lenPos) % BUFFER_LOOP_POOL_MAX;
+			int head_2 = (buffLoop[rtIndex].head + 2) % BUFFER_LOOP_POOL_MAX;
   
-            if((buffLoop[rtIndex].BUFFER[buffLoop[rtIndex].head] == buffLoop[rtIndex].syncHead_A) && (buffLoop[rtIndex].BUFFER[head_1] == buffLoop[rtIndex].syncHead_B))//0xAA55
+            if((buffLoop[rtIndex].BUFFER[buffLoop[rtIndex].head] == buffLoop[rtIndex].syncHead_A)
+			&& (buffLoop[rtIndex].BUFFER[head_1] == buffLoop[rtIndex].syncHead_B)
+			&& (buffLoop[rtIndex].BUFFER[head_2] == 0xFC))//0xEB 90 FC
             {
-                OS_U16 msgLen = 4 + buffLoop[rtIndex].BUFFER[temp_len_low];	// 4 + (0x0B = 11 Byte) = 总共15Byte
+                // OS_U16 msgLen = 4 + buffLoop[rtIndex].BUFFER[temp_len_low];	// 4 + (0x0B = 11 Byte) = 总共15Byte
+				OS_U16 msgLen = buffLoop[rtIndex].fixedLen;
                 if(len < msgLen)//return NULL的重要标志，说明本次接收仍未接收够整包数
                 {
                     return ERROR_LENGTH_LESS_ZERO;//head，tail指针保留位置不动，等待下一帧

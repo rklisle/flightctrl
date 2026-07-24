@@ -1,111 +1,101 @@
 #ifndef _DATA_PROTOCOL_H_
 #define _DATA_PROTOCOL_H_
 //==================================================================/
-// Copyright (c) 2016 
-// All rights reserved.
-//
-// ÕªÒª: ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä£ï¿½ï¿½ï¿½Í¨Ñ¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-//        
-//
-// ï¿½ï¿½Ç°ï¿½æ±¾: 1.0
-// ï¿½ï¿½ï¿½ï¿½: wym
-// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½: 
+// ÕªÒª: ¶¨Òå·ÂÕæËùĞè¸÷Ä£¿é¼äÍ¨Ñ¶Êı¾İÄÚÈİ
 //==================================================================/
 //#include "..\load_data.h"
 //#include "..\datalink_sim_main.h"
 //#include "..\target_sim_main.h"
 #include <stdbool.h>
 // #include "port/flightPort.h"
-//==================================================================================
-//
-//						ï¿½ï¿½ï¿½ä¶¨ï¿½ï¿½
-//
-//==================================================================================
 
 #define E_CONST		(1.0/298.257)
 #define RE			(6378137.0)
-
-// ï¿½ï¿½Ô­ï¿½ï¿½ï¿½ï¿½ const int ï¿½ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½
-#define MAX_ROUTE_NUMBER 64      // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Û¿Ø»ï¿½ï¿½ï¿½ï¿½Â·ï¿½ï¿½ï¿½ï¿½ï¿½
-#define MAX_CONNECT_NUMBER 16    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Óµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-#define MAX_TARGET_NUMBER 16     // Ã¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½16ï¿½ï¿½Ä¿ï¿½ï¿½
-#define MAX_TIME 9999.0
+//***************** Íâ²¿·ÂÕæ¿ØÖÆ¸øµ¼µ¯ÊäÈëÊı¾İ ********************//
+#define MAX_ROUTE_NUMBER 64 
+#define MAX_CONNECT_NUMBER 16
+#define MAX_TARGET_NUMBER 16
+#define MAX_TIME 99999.0
 #define STEP_5ms 0.005
-
-// const int MAX_ROUTE_NUMBER = 64;	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Û¿Ø»ï¿½ï¿½ï¿½ï¿½Â·ï¿½ï¿½ï¿½ï¿½ï¿½
-// const int MAX_CONNECT_NUMBER = 16;	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Óµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-// const int MAX_TARGET_NUMBER = 16;	//Ã¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½16ï¿½ï¿½Ä¿ï¿½ï¿½
-// const double MAX_TIME = 9999.0;
-// const double STEP_5ms = 0.005;
-
 typedef struct _Stru_Initial_Data
 {
-	int	missile_ID;			//ï¿½ï¿½ï¿½ï¿½ï¿½
-	double longitude_launch;	//ï¿½ï¿½ï¿½ï¿½ï¿½
+	int	missile_ID;			//µ¯±àºÅ
+	double longitude_launch;	//·¢Éäµã¾­¡¢Î³¡¢¸ß¶È
 	double latitude_launch;	
 	double height_launch;
-	double initial_parameter1;//Ô¤ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½1ï¿½ï¿½ï¿½ï¿½ï¿½ç·¢ï¿½ï¿½ï¿½ï¿½Â¶ÈµÈ£ï¿½ï¿½É¹ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ù¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä£ï¿½ï¿½
-	double initial_parameter2;//Ô¤ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½2ï¿½ï¿½ï¿½ï¿½ï¿½Ğ·ï¿½ï¿½ï¿½Ä£Ê½
-	double launch_time;		//ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½	
-	double lauch_azimuth;		//ï¿½ï¿½ï¿½ä·½Î»ï¿½ï¿½
-	double lauch_pitch;		//ï¿½ï¿½ï¿½ä¸©ï¿½ï¿½ï¿½ï¿½
-	double lauch_booster_pitch;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-	//double type_target;		//Ä¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-	//double longitude_target;	//Ä¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Î³ï¿½ï¿½ï¿½ß¶ï¿½
+	double initial_parameter1;//Ô¤Áô³õÊ¼²ÎÊı1£¬ÀıÈç·¢ÉäµãÎÂ¶ÈµÈ£¬ÓÃÓÚ¹ÀËã ÉùËÙ¡¢´óÆøµÈÄ£ĞÍ
+	double initial_parameter2;//Ô¤Áô³õÊ¼²ÎÊı2£¬·ÉĞĞ·ÂÕæÄ£Ê½
+	double launch_time;		//·¢ÉäÊ±¼ä	
+	double lauch_azimuth;		//·¢Éä·½Î»½Ç
+	double lauch_pitch;		//·¢Éä¸©Ñö½Ç
+	double lauch_booster_pitch;//ÖúÍÆÆ÷¸©Ñö½Ç
+
+	//³õÊ¼¶ÎÅÀÉı½Ç¡¢Æğ·ÉÍê³ÉºóÆ½·É¹¥½Ç
+	double climb_ktheta_enc;	//µäĞÍÖµ£¬8.0deg
+	double cruise_ktheta_enc;	//µäĞÍÖµ£¬2.0deg
+	//´ı²¹³äÆäËû×°¶©Öµ???...
+	
+	//double type_target;		//Ä¿±êµãÀàĞÍ
+	//double longitude_target;	//Ä¿±êµã ¾­¡¢Î³¼°¸ß¶È
 	//double latitude_target;	
 	//double height_target;	
-}Stru_Initial_Data;	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼×´Ì¬×°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+}Stru_Initial_Data;	//µ¼µ¯³õÊ¼×´Ì¬×°¶©Êı¾İ
 
 typedef struct  _Stru_Way_Point
 {
-	int num;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	int num;//º½µã±àºÅ
 	
-	double longitude;	//ï¿½ï¿½ï¿½ã¾­ï¿½ï¿½
-	double latitude;	//ï¿½ï¿½ï¿½ï¿½Î³ï¿½ï¿½
-	double height;		//ï¿½ï¿½ï¿½ï¿½ß¶ï¿½
-	int    route_mode; //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-	int    formation_mode;	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½Î´Ê¹ï¿½ï¿½
-	double dltTime;//ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½
-	double velocity;	//ï¿½Ù¶ï¿½Ö¸ï¿½ï¿½
-	double turn_angle;//ï¿½Ğ³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ×ªï¿½ï¿½Ç¶È£ï¿½ï¿½ï¿½ï¿½Ã£ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-	double turn_radius;//×ªï¿½ï¿½ë¾¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ë¾¶ï¿½ï¿½Î´Ê¹ï¿½ï¿½
-	double accept_radius;//ï¿½ï¿½ï¿½Ü°ë¾¶ï¿½ï¿½Î´Ê¹ï¿½ï¿½
+	double longitude;	//º½µã¾­¶È
+	double latitude;	//º½µãÎ³¶È
+	double height;		//º½µã¸ß¶È
+	int    route_mode; //º½µãÀàĞÍ
+	int    formation_mode;	//º½µãĞÅÏ¢£¬Î´Ê¹ÓÃ
+	double dltTime;		//º½¶ÎÊ±¼ä
+	double velocity;	//ËÙ¶ÈÖ¸Áî
+	//Ò»¡¢³õÊ¼×°¶©Ê±£¨´¦ÀíÇ°£©£¬²»Í¬º½µãÀàĞÍ£¬¸´ÓÃÎª²»Í¬¹¦ÄÜ
+	//·¢Éäµã£¬³õÊ¼º½Ïò½Ç(±±Æ«Î÷ÎªÕı) 
+	//ÆÕÍ¨º½µã»òÖ¸µã·ÉĞĞ£¬ÇĞ³öº½¼£½Ç£¨±±Æ«Î÷ÎªÕı180.0~180.0£©
+	//ÅÌĞıµã£¬ÅÌĞıÈ¦Êı£¨±±Æ«Î÷ÎªÕı£¬±±Æ«¶«Îª¸º£©
+	//´ò»÷µã»òĞéÄâ´ò»÷µã£¬´ò»÷Âä½Ç£¨¸ºÎªÓĞĞ§Öµ£¬Áã/ÕıÎªÎŞĞ§Öµ£©
+	//¶ş¡¢×ªÍä½Ç¶È£¨´¦Àíºó£¬±±Æ«¶«ÎªÕı180.0~180.0£© »ò ÅÌĞıÈ¦Êı »ò ÎŞĞ§
+	double turn_angle;
+	double turn_radius;//×ªÍä°ë¾¶»òÅÌĞı°ë¾¶£¬Î´Ê¹ÓÃ
+	double accept_radius;//½ÓÊÜ°ë¾¶£¬Î´Ê¹ÓÃ
 	
-	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½İ£ï¿½ï¿½ï¿½Ê¶
-	bool if_flightime_ctrl;	//[ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½Ê¶ï¿½ï¿½1ï¿½ï¿½Ğ§ï¿½ï¿½0ï¿½ï¿½Ğ§ï¿½ï¿½]
-	bool if_groundspeed_ctrl;	//[ï¿½ï¿½ï¿½Ù¿ï¿½ï¿½Æ±ï¿½Ê¶ï¿½ï¿½1ï¿½ï¿½ï¿½Ù£ï¿½0ï¿½ï¿½ï¿½Ù£ï¿½]
+	//´¦ÀíºóÊı¾İ£¬±êÊ¶
+	bool if_flightime_ctrl;	//[µ½´ïÊ±¼ä±êÊ¶£»1ÓĞĞ§£¬0ÎŞĞ§£»]
+	bool if_groundspeed_ctrl;	//[µØËÙ¿ØÖÆ±êÊ¶£º1µØËÙ£¬0¿ÕËÙ£»]
 
-	bool if_heading_hold;  	//[Ö¸ï¿½ï¿½ï¿½ï¿½Ğ±ï¿½Ê¶ï¿½ï¿½1ï¿½ï¿½Ğ§ï¿½ï¿½0ï¿½ï¿½Ğ§ï¿½ï¿½]
-	bool if_turndir_set;		//[ï¿½ï¿½ï¿½ï¿½×ªï¿½ä£ºï¿½ï¿½×ªï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½Ê¶ï¿½ï¿½]
-	bool if_prepare_hover;	//[Ô¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¶ï¿½ï¿½1ï¿½ï¿½Ğ§ï¿½ï¿½0ï¿½ï¿½Ğ§ï¿½ï¿½]
-	bool if_relativehigh_ctrl;//[ï¿½ï¿½Ô¸ß¶È£ï¿½ï¿½ï¿½ï¿½ï¿½ß¶È£ï¿½ï¿½ï¿½ï¿½Æ±ï¿½Ê¶ï¿½ï¿½1ï¿½ï¿½Ğ§ï¿½ï¿½0ï¿½ï¿½Ğ§]
-	bool if_attackangle_ctrl;	//[ï¿½ï¿½ï¿½ï¿½ï¿½Ç±ï¿½Ê¶ï¿½ï¿½1Ö¸ï¿½ï¿½ï¿½ï¿½Ç£ï¿½0ï¿½ï¿½Ô¼ï¿½ï¿½ï¿½ï¿½]				
-	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-	double outtrack_angle;	//[Ö¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ğ³ï¿½ï¿½Ç¶È£ï¿½ï¿½ï¿½Æ«ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½ï¿½Ô£ï¿½ï¿½Ğ³ï¿½ï¿½Ç¶ï¿½deg]
-	int hover_round;		//[ï¿½ï¿½ï¿½ï¿½È¦ï¿½ï¿½]
-	double attack_angle;	//[ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½]
-	double recycle_ground_hight;//ï¿½ï¿½ï¿½Õµï¿½ï¿½ï¿½ï¿½ß¶ï¿½
+	bool if_heading_hold;  	//[Ö¸µã·ÉĞĞ±êÊ¶£º1ÓĞĞ§£¬0ÎŞĞ§£»]
+	bool if_turndir_set;		//[ÅÌĞı×ªÍä£º×ó×ª¡¢ÓÒ×ª±êÊ¶£»]
+	bool if_prepare_hover;	//[Ô¤ÅÌĞı±êÊ¶£º1ÓĞĞ§£¬0ÎŞĞ§£»]
+	
+	bool if_relativehigh_ctrl;//[Ïà¶Ô¸ß¶È£¨»òÕæ¸ß¶È£©¿ØÖÆ±êÊ¶£º1ÓĞĞ§£¬0ÎŞĞ§]
+	bool if_attackangle_ctrl;	//[´ò»÷Âä½Ç±êÊ¶£º1Ö¸¶¨Âä½Ç£¬0ÎŞÔ¼Êø£»]				
+	//´¦ÀíºóÊı¾İ
+	double outtrack_angle;	//[Ö¸µã·ÉĞĞÇĞ³ö½Ç¶È£¬±±Æ«Î÷ÎªÕı¾ø¶Ô£¬ÇĞ³ö½Ç¶Èdeg]
+	int hover_round;		//[ÅÌĞıÈ¦Êı]
+	double attack_angle;	//[´ò»÷Âä½Ç]
+	double recycle_ground_hight;//»ØÊÕµãµØÃæ¸ß¶È
 }Stru_Way_Point;
-
 typedef struct _Stru_Route_Data
 {
-	int num_rows;	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-	int num_columns;	// ï¿½ï¿½ï¿½ï¿½	11
-	char ** p_str_title; 	// ï¿½ï¿½ï¿½ï¿½
-	// Ö¸ï¿½ï¿½Stru_Way_Point[num_rowsï¿½ï¿½Ì¬ï¿½ï¿½ï¿½ï¿½]
-	double * p_route_data;		//ï¿½ï¿½Îªï¿½ï¿½Í¬ï¿½ï¿½ï¿½ï¿½ï¿½Å£ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½: ï¿½ï¿½Å¡ï¿½ï¿½ï¿½ï¿½È¡ï¿½Î³ï¿½È¡ï¿½×ªï¿½ï¿½ë¾¶ï¿½ï¿½ï¿½Ç¶È¡ï¿½ï¿½Ù¶È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¡ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½ß¶ï¿½
-	// ï¿½ï¿½ï¿½Ğ£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú²ï¿½ï¿½ï¿½ï¿½ï¿½
+	int num_rows;	
+	int num_columns;
+	char ** p_str_title; 
+
+	double * p_route_data;
+
 	double longitude_target;
 	double latitude_target;
 	double height_target;
-}Stru_Route_Data;	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ğºï¿½Â·ï¿½ï¿½ï¿½ï¿½
-
+}Stru_Route_Data;
 typedef struct _Stru_Mission_Update_Data
 {
 	int missile_ID;
 	int	target_ID;
-	int	update_count;//ï¿½ï¿½ï¿½Â´ï¿½ï¿½ï¿½
-	int	num_waypoint_updated;	//ï¿½ï¿½Ç°ï¿½ï¿½ï¿½Â£ï¿½ï¿½ï¿½Ğ§ï¿½Äºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¿
+	int	update_count;
+	int	num_waypoint_updated;
 	double longitude  [MAX_ROUTE_NUMBER];
 	double latitude   [MAX_ROUTE_NUMBER];
 	double height     [MAX_ROUTE_NUMBER];
@@ -114,8 +104,7 @@ typedef struct _Stru_Mission_Update_Data
 	double velocity   [MAX_ROUTE_NUMBER];
 	int    route_mode [MAX_ROUTE_NUMBER];
 	int    formation_mode[MAX_ROUTE_NUMBER];
-}Stru_Mission_Update_Data;		//ï¿½ï¿½ï¿½ßºï¿½ï¿½ï¿½×°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½(ï¿½É¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½æ»®ï¿½ã·¨ï¿½ï¿½ï¿½É£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½)
-
+}Stru_Mission_Update_Data;
 typedef struct _Stru_Missile_State_Data
 {
 	int missile_ID;
@@ -139,8 +128,7 @@ typedef struct _Stru_Missile_State_Data
 	double pitch_LOS;
 	double yaw_LOS;
 	double time_to_go;
-}Stru_Missile_State_Data;		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½â²¿ï¿½ï¿½ï¿½ÍµÄ·ï¿½ï¿½ï¿½×´Ì¬ï¿½ï¿½Ï¢
-
+}Stru_Missile_State_Data;
 typedef struct _Stru_Target_State_Data
 {
 	int target_ID;
@@ -151,60 +139,17 @@ typedef struct _Stru_Target_State_Data
 	double longitude_target;
 	double latitude_target;
 	double rcs_target;
-}Stru_Target_State_Data;		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½â²¿ï¿½ï¿½ï¿½ÍµÄ·ï¿½ï¿½ï¿½×´Ì¬ï¿½ï¿½Ï¢
-/*
-typedef struct _Stru_Data_Send_To_Missile
-{
-	Stru_Mission_Update_Data	st_mission_update_data[MAX_CONNECT_NUMBER];	//ï¿½ï¿½ï¿½ï¿½
-	Stru_Missile_State_Data		st_missile_state_data[MAX_CONNECT_NUMBER];		//ï¿½ï¿½ï¿½ï¿½
-	Stru_Target_State_Data		st_target_state_data[MAX_TARGET_NUMBER];		//Ä¿ï¿½ï¿½
-}Stru_Data_Send_To_Missile;		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½â²¿ï¿½ï¿½ï¿½ÍµÄ·ï¿½ï¿½ï¿½×´Ì¬ï¿½ï¿½Ï¢ ï¿½ï¿½ï¿½ï¿½Ó¦ï¿½ï¿½Stru_Data_Datalink_To_Controllerï¿½ï¿½ï¿½ï¿½Ò»ï¿½Â£ï¿½Í¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-
-typedef struct _Stru_Target_Initial_Data_In
-{
-	double longitude_target;	//Ä¿ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½
-	double latitude_target;		//Ä¿ï¿½ï¿½ï¿½Ê¼Î³ï¿½ï¿½
-	double height_target;		//Ä¿ï¿½ï¿½ï¿½Ê¼ï¿½ß¶ï¿½
-	int target_type;			//Ä¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-	double time_run;			//Ä¿ï¿½ê¿ªÊ¼ï¿½Ë¶ï¿½Ê±ï¿½ï¿½
-	double velocity_target;		//Ä¿ï¿½ï¿½ï¿½Ë¶ï¿½ï¿½Ù¶ï¿½
-	double theta_target;		//Ä¿ï¿½ï¿½ï¿½Ë¶ï¿½ï¿½ï¿½ï¿½
-	double psi_target;			//Ä¿ï¿½ï¿½ï¿½Ë¶ï¿½ï¿½ï¿½Î»ï¿½ï¿½
-	double radius_target;		//Ä¿ï¿½ï¿½ï¿½Ë¶ï¿½ï¿½ë¾¶	
-}Stru_Target_Initial_Data_In;	//Ä¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-
-typedef struct _Stru_Target_Status
-{
-	int target_ID;
-	double longitude_target;	
-	double latitude_target;		
-	double height_target;		
-	double vtx_target;
-	double vty_target;
-	double vtz_target;
-}Stru_Target_Status;	//Ä¿ï¿½ï¿½ÊµÊ±ï¿½ï¿½ï¿½ï¿½
-
-typedef enum _TARGET_TYPE
-{
-	ENUM_FIXED_POSITION = 0,			//ï¿½Ì¶ï¿½Ä¿ï¿½ï¿½		
-	ENUM_LINEAR_MOTION = 1,			//Ö±ï¿½ï¿½ï¿½Ë¶ï¿½
-	ENUM_CIRCULAR_MOTION = 2,			//Ô²ï¿½ï¿½ï¿½Ë¶ï¿½
-	ENUM_LINEAR_ACCELERATE = 3,		//Ö±ï¿½ß¼ï¿½ï¿½ï¿½
-	ENUM_SNAKE_MOTION = 4			//ï¿½ï¿½ï¿½Î»ï¿½ï¿½ï¿½
-}TARGET_TYPE;
-
-*/
-
-//***************** ï¿½â²¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ********************//
+}Stru_Target_State_Data;
 typedef struct _Stru_Jamming_Data_In
 {
-	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 0
-	double temperature_environment;
-	int    flag_wind;//ï¿½ï¿½ï¿½ï¿½Æ«
+	//¸ÉÈÅÌõ¼ş±àºÅ 0
+	double temperature_environment;//·¢ÉäÎÂ¶È£¬¼´ÖúÍÆÆ÷Æ½¾ùÍÆÁ¦¼°Ê±³¤À­Æ«ok
+	int    flag_wind;//Í»±ä·çÀ­Æ« ok£¬Ôİ²»²ÎÓëÆäËûñîºÏ
 	double velocity_wind;
 	double psi_wind;
-	double theta_wind;
-	double lp_pitch;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ« ok
+	double theta_wind;///5
+	
+	double lp_pitch;//Æø¶¯À­Æ« ok
 	double lp_yaw;
 	double lp_roll;
 	double lp_lift;
@@ -214,213 +159,269 @@ typedef struct _Stru_Jamming_Data_In
 	double lp_wy;
 	double lp_wz;///14
 	
-	double lp_rotary_inertia;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ« ok
-	int    flag_jggr;//ï¿½á¹¹ï¿½ï¿½ï¿½ï¿½ ok
-	double det_mass;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ« ok
-	double det_x_centroid;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ«
+	double lp_rotary_inertia;//¹ßÁ¿À­Æ« ok ///15
+	int    flag_jggr;//½á¹¹¸ÉÈÅ£¬1ÎªÕı¸ÉÈÅÁ¦¾Ø£¬-1Îª¸º¸ÉÈÅÁ¦¾Ø£¬0ÎªÎŞ¸ÉÈÅ ok
+	double det_mass;//ÖÊÁ¿Æ«²îÀ­Æ« kg ok
+	double det_x_centroid;//ÖÊĞÄÀ­Æ«£¬m£¬½á¹¹Ïµj ok
 	double det_y_centroid;
 	double det_z_centroid;
-	double gama0;	//ï¿½ï¿½Ê¼ï¿½ï¿½Ì¬Æ«ï¿½ï¿½
+	double gama0;	//³õÊ¼×ËÌ¬Æ«²î£¬ÈÏÎª¶Ô×¼Îó²îºÜĞ¡£¬Ò»°ã¹ßµ¼°²×°Îó²î ok ///21
 	double zeta0;
 	double psi0;
-	double wxerr;	//ï¿½ï¿½ï¿½Ù¶ï¿½Æ«ï¿½ï¿½
+	double wxerr;	//½ÇËÙ¶ÈÆ«²î£¬ÈÏÎª¹ßµ¼ÁãÆ« ok
 	double wyerr;
-	double wzerr;
-	double lp_dx;//ï¿½ï¿½Ğ§ï¿½ï¿½Æ« ok
+	double wzerr;	///26
+	
+	double lp_dx;	//¶æĞ§À­Æ« ok
 	double lp_dy;
 	double lp_dz;///29
 
-	double Lp_trust_det;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ«
-	double Lp_eng_flowvol;//ï¿½ï¿½ï¿½ï¿½ï¿½Ê»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ«
+	double Lp_trust_det;//ÍÆÁ¦À­Æ«
+	double Lp_eng_flowvol;//ºÄÓÍÂÊ»òÁ÷Á¿À­Æ«
+	//½á¹¹Ïµ£¬¾­XjÖáÖÜÏò½Ç£¬µÃµ½Æ«ĞÄÏµ
+	//ÍÆÁ¦Æ«ĞÄ£¬È¡Öµ·¶Î§0~0.01m
+	//+ÍÆÁ¦Æ«ĞÄÖÜÏò½Ç£¬YjÏòÎªÁã£¬½á¹¹ÏµÈÆXjÖá×ªÎªÕı£¬È¡Öµ·¶Î§-180~180deg£¬¼´ºóÏòÇ°¿´ÄæÊ±ÕëÎªÕı
 	double trust_det_pos;
-	double trust_det_angle;
+	double trust_det_angle;// 33
+
+	//ÌåÖáÏµ£¬¾­¹ıXjÖáĞı×ª ÖÜÏò½Çgama£¬ÔÙ¾­¹ıZj' ¸©Ñö½Ç£¬µÃµ½ÍÆÁ¦Ïß×ø±êÏµ
+	//ÍÆÁ¦Æ«Ğ±¸©Ñö½Ç£¬È¡Öµ·¶Î§0~90.0deg£¬ÎŞ¸ºÖµ
+	//ÍÆÁ¦Æ«Ğ±ÖÜÏò½Ç£¬YjÏòÎªÁã£¬½á¹¹ÏµÈÆXjÖá×ªÎªÕı£¬È¡Öµ·¶Î§-180~180deg£¬¼´ºóÏòÇ°¿´ÄæÊ±ÕëÎªÕı
 	double trust_det_alpha;
-	double trust_det_gama;//35
-		
-}Stru_Jamming_Data_In;	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ğ¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½???...
+	double trust_det_gama;// 35 
+
+	//ÖúÍÆÆ÷ÍÆÁ¦Æ«Ğ±¸©Ñö½Ç¡¢ÖÜÏò½Ç
+	//ËµÃ÷£ºÖÊĞÄÅäÖÃ·½·¨¾ö¶¨²»´æÔÚÍÆÁ¦Æ«ĞÄ£¬Ö»ÓĞÍÆÁ¦Æ«Ğ±½Ç¡¢ÖÜÏò½Ç
+	double booster_det_alpha;//ÍÆÁ¦Æ«Ğ±¸©Ñö½Ç
+	double booster_det_gama;// 37 ÍÆÁ¦Æ«Ğ±ÖÜÏò½Ç
+
+	//´óÆø²ÎÊıÀ­Æ«
+	double lp_air_density;//¿ÕÆøÃÜ¶ÈÀ­Æ«
+	double lp_air_pressure;//´óÆøÑ¹Á¦À­Æ«
+}Stru_Jamming_Data_In;	//µ¼µ¯·ÉĞĞ¸ÉÈÅÌõ¼şÊı¾İ???...
 
 typedef struct _Stru_Mission_Data_In
 {
 	Stru_Jamming_Data_In st_jamming_data_in;
 	Stru_Initial_Data *	p_st_initial_data;
 	Stru_Route_Data	  *	p_st_route_data;
-}Stru_Mission_Data_In;	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+}Stru_Mission_Data_In;	//ÈÎÎñÊı¾İ
 
-//****************** ï¿½ï¿½ï¿½ï¿½ï¿½Ú²ï¿½ï¿½ï¿½ï¿½è±¸ï¿½ï¿½Í¨Ñ¶ï¿½ï¿½ï¿½ï¿½ *********************//
+//****************** µ¯ÌåÄÚ²¿¸÷Éè±¸¼äÍ¨Ñ¶Êı¾İ *********************//
 
-//ï¿½ï¿½ï¿½Ù¹Ü¸ï¿½ï¿½Û¿Ø»ï¿½ï¿½ï¿½ï¿½İ°ï¿½
+//¿ÕËÙ¹Ü¸ø×Û¿Ø»úÊı¾İ°ü
 typedef struct _Stru_Data_Baro_To_Controller  
 {
-	double static_pressure; //ï¿½ï¿½Ñ¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-	double   total_pressure;	 //ï¿½ï¿½Ñ¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-}Stru_Data_Baro_To_Controller;	//ï¿½ï¿½ï¿½Ù¹Ü¸ï¿½ï¿½Û¿Ø»ï¿½ï¿½ï¿½ï¿½İ°ï¿½	
+	double static_pressure; //¾²Ñ¹´«¸ĞÆ÷Êä³ö
+	double   total_pressure;	 //×ÜÑ¹´«¸ĞÆ÷Êä³ö
+}Stru_Data_Baro_To_Controller;	//¿ÕËÙ¹Ü¸ø×Û¿Ø»úÊı¾İ°ü	
 
-//ï¿½ï¿½ï¿½ßµï¿½ß¶È±ï¿½ï¿½ï¿½ï¿½Û¿Ø»ï¿½ï¿½ï¿½ï¿½İ°ï¿½
+//ÎŞÏßµç¸ß¶È±í¸ø×Û¿Ø»úÊı¾İ°ü
 typedef struct _Stru_Data_RadioAlt_To_Controller  
 {
-	int radioalt_status; //ï¿½ï¿½ï¿½ï¿½×´Ì¬
-	double radioalt_hight;//ï¿½ï¿½Ô¸ß¶È£ï¿½Ò²ï¿½ï¿½ï¿½ï¿½ß¶ï¿½
-}Stru_Data_RadioAlt_To_Controller;	//ï¿½ï¿½ï¿½ßµï¿½ß¶È±ï¿½ï¿½ï¿½ï¿½Û¿Ø»ï¿½ï¿½ï¿½ï¿½İ°ï¿½	
+	int radioalt_status; //¹¤×÷×´Ì¬
+	double radioalt_hight;//Ïà¶Ô¸ß¶È£¬Ò²³ÆÕæ¸ß¶È
+}Stru_Data_RadioAlt_To_Controller;	//ÎŞÏßµç¸ß¶È±í¸ø×Û¿Ø»úÊı¾İ°ü	
 
 typedef struct _Stru_Data_Seeker_To_Controller  
 {
-	bool   flag_combat_status;//ï¿½È¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¿ï¿½ê£¬ï¿½ï¿½Ê¶
-	bool   flag_seize_stable;	//ï¿½ï¿½ï¿½ï¿½ï¿½È¶ï¿½ï¿½ï¿½ï¿½ï¿½Ê¶
+	bool flag_combat_status;//ÊÕµ½·É¿Ø£¬Ëø¶¨ÔÊĞíÖ¸Áîºó£¬µ¼ÒıÍ·½øÈëÄ©ÖÆµ¼×´Ì¬£¬¼´¿ªÊ¼Òıµ¼ËÑ
+	bool flag_seize_stable; //±ÕËø¸ú×Ù£¬¹âÖáÊÓ³¡ÄÚÓĞÄ¿±ê£¬²¢Æ¥ÅäÊ¶±ğ³É¹¦£¬²¢ÎÈ¶¨¸ú×Ù
 	
-	double pitch_LOS_rate;		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	double pitch_LOS_rate;		//½ÇËÙÂÊ
 	double yaw_LOS_rate;	
-	double pitch_gimbal_angle;//ï¿½ï¿½Ü½ï¿½
+	double pitch_gimbal_angle;//¿ò¼Ü½Ç
 	double yaw_gimbal_angle;
-	
-	double longitude_target;	//Ä¿ï¿½ï¿½Î»ï¿½ï¿½
-	double latitude_target;
-	double distance_target;
-	
-	double pitch_LOS_angle;	//Ê§×¼ï¿½ï¿½
+	double pitch_LOS_angle;	//Ê§×¼½Ç
 	double yaw_LOS_angle;
-}Stru_Data_Seeker_To_Controller;	//ï¿½ï¿½ï¿½ï¿½Í·ï¿½ï¿½ï¿½Û¿Ø»ï¿½ï¿½ï¿½ï¿½İ°ï¿½
+
+	//À×´ï»ò¼¤¹âµ¼ÒıÍ·ÓĞĞ§£¬
+	//¹âµçµ¼ÒıÍ·ÎŞĞ§£¬ĞèÒª¸ù¾İÄ¿±ê³ß¶È »ò ×°¶©Ä¿±ê¸ß¶È£¬²ÅÄÜ¹À¼ÆÏà¶Ô¾àÀë»òÄ¿±êÎ»ÖÃ
+	double distance_target;	//µ¯Ä¿¾àÀë
+	double longitude_target;	//Ä¿±êÎ»ÖÃ ¾­¶È¡¢Î³¶È¡¢¾àÀë£¬¿É¸ù¾İµ¼µ¯µ±Ç°Î»ÖÃ¡¢µ¯Ä¿¾àÀë¡¢ÊÓ³¡½Ç¼ÆËã
+	double latitude_target;
+	double hight_target;
+}Stru_Data_Seeker_To_Controller;	//µ¼ÒıÍ·¸ø×Û¿Ø»úÊı¾İ°ü
 
 typedef struct _Stru_Data_INS_To_Controller  
 {
-	double gama;//ï¿½ï¿½Å·ï¿½ï¿½ï¿½Ç£ï¿½ï¿½ï¿½ï¿½ì¶«ï¿½ï¿½ï¿½ï¿½Ïµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½231×ªï¿½ï¿½Ç°ï¿½ï¿½ï¿½Òµï¿½ï¿½ï¿½Ïµ
+	double gama;//ÕıÅ·À­½Ç£º±±Ìì¶«µØÀíÏµ£¬¾­¹ı231×ªĞò£¬Ç°ÉÏÓÒµ¯ÌåÏµ
 	double psi;
 	double zeta;
-	double gamas;//ï¿½ï¿½Å·ï¿½ï¿½ï¿½Ç£ï¿½321×ªï¿½ï¿½	//014ï¿½ï¿½Ê¹ï¿½ï¿½
+	double gamas;//·´Å·À­½Ç£º321×ªĞò
 	double psis;
 	double zetas;
-	double wx;	//deg
+	double wx;	//deg /s
 	double wy;
 	double wz;
 	double ax;
 	double ay;
 	double az;
-	double au;
-	double vtx;//ï¿½ï¿½ï¿½ì¶«ï¿½ï¿½ï¿½ï¿½Ïµ
+	double au;	//Î´ÓÃµ½
+	double vtx;//±±Ìì¶«µØÀíÏµ
 	double vty;
 	double vtz;
 	double longitude;
 	double latitude;
 	double height;
 	int    GPS_status;
-}Stru_Data_INS_To_Controller;	//ï¿½ßµï¿½ï¿½ï¿½ï¿½Û¿Ø»ï¿½ï¿½ï¿½ï¿½İ°ï¿½
+}Stru_Data_INS_To_Controller;	//¹ßµ¼¸ø×Û¿Ø»úÊı¾İ°ü
+
 
 typedef struct _Stru_Data_Datalink_To_Controller  
 {
-	//ï¿½ï¿½ï¿½ßºï¿½ï¿½ï¿½×°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-	Stru_Mission_Update_Data	st_mission_update_data[MAX_CONNECT_NUMBER];//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó£ï¿½ï¿½ï¿½ï¿½Úµï¿½
-	//ï¿½ï¿½Ó¿ï¿½ï¿½ï¿½ï¿½Ùµï¿½×´Ì¬ï¿½ï¿½ï¿½ï¿½
+	//ÔÚÏßº½¼£×°¶©²ÎÊı
+	Stru_Mission_Update_Data	st_mission_update_data[MAX_CONNECT_NUMBER];//ËùÓĞÍøÂçÄÚÁ´½Ó£¬µ¯½Úµã
+	//±à¶Ó¿ØÖÆÁÙµ¯×´Ì¬²ÎÊı
 	Stru_Missile_State_Data		st_missile_state_data[MAX_CONNECT_NUMBER];
-	//Ì¬ï¿½Æ¹ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½ï¿½ï¿½ï¿½
+	//Ì¬ÊÆ¹¹½¨Ä¿±ê²ÎÊı
 	Stru_Target_State_Data		st_target_state_data[MAX_TARGET_NUMBER];
-}Stru_Data_Datalink_To_Controller;	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Û¿Ø»ï¿½ï¿½ï¿½ï¿½İ°ï¿½ ï¿½ï¿½ï¿½ï¿½Ó¦ï¿½ï¿½Stru_Data_Send_To_Missileï¿½ï¿½ï¿½ï¿½Ò»ï¿½Â£ï¿½Í¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+}Stru_Data_Datalink_To_Controller;	//Êı¾İÁ´¸ø×Û¿Ø»úÊı¾İ°ü ÄÚÈİÓ¦ÓëStru_Data_Send_To_Missile±£³ÖÒ»ÖÂ£¬Í¬²½¸üĞÂ
 
 typedef struct _Stru_Data_Datalink_To_ControllerSig  
 {
-	//int missile_ID;//Î´Ê¹ï¿½ï¿½
-	//int	target_ID;	//Î´Ê¹ï¿½ï¿½
-	int	update_count;//ï¿½ï¿½ï¿½Â´ï¿½ï¿½ï¿½
-	int	num_waypoint_updated;	//ï¿½ï¿½Ç°ï¿½ï¿½ï¿½Â£ï¿½ï¿½ï¿½Ğ§ï¿½Äºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¿
+	//int missile_ID;//Î´Ê¹ÓÃ
+	//int	target_ID;	//Î´Ê¹ÓÃ
+	int	update_count;//¸üĞÂ´ÎÊı
+	int	num_waypoint_updated;	//µ±Ç°¸úĞÂ£¬ÓĞĞ§µÄº½¼£µãÊıÄ¿
 	double longitude  [MAX_ROUTE_NUMBER];
 	double latitude   [MAX_ROUTE_NUMBER];
 	double height     [MAX_ROUTE_NUMBER];
-	int    route_mode [MAX_ROUTE_NUMBER];//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-	int    formation_mode[MAX_ROUTE_NUMBER];		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½Î´Ê¹ï¿½ï¿½
-	double dltTime[MAX_ROUTE_NUMBER];//ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½
-	double velocity   [MAX_ROUTE_NUMBER];//ï¿½Ù¶ï¿½Ö¸ï¿½ï¿½
-	double turn_angle [MAX_ROUTE_NUMBER];//ï¿½Ğ³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ×ªï¿½ï¿½Ç¶È£ï¿½ï¿½ï¿½ï¿½Ã£ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-	double turn_radius[MAX_ROUTE_NUMBER];//×ªï¿½ï¿½ë¾¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ë¾¶ï¿½ï¿½Î´Ê¹ï¿½ï¿½
-	double accept_radius[MAX_ROUTE_NUMBER];//ï¿½ï¿½ï¿½Ü°ë¾¶ï¿½ï¿½Î´Ê¹ï¿½ï¿½
-}Stru_Data_Datalink_To_ControllerSig;	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Û¿Ø»ï¿½ï¿½ï¿½ï¿½İ°ï¿½ï¿½ï¿½ï¿½Ş¼ï¿½Èº
+	int    route_mode [MAX_ROUTE_NUMBER];
+	int    formation_mode[MAX_ROUTE_NUMBER];	
+	double dltTime[MAX_ROUTE_NUMBER];
+	double velocity   [MAX_ROUTE_NUMBER];
+	double turn_angle [MAX_ROUTE_NUMBER];
+	double turn_radius[MAX_ROUTE_NUMBER];
+	double accept_radius[MAX_ROUTE_NUMBER];
+}Stru_Data_Datalink_To_ControllerSig;	//Êı¾İÁ´¸ø×Û¿Ø»úÊı¾İ°ü£¬ÎŞ¼¯Èº
 
 typedef struct _Stru_Data_Engine_To_Controller
 {
-	double rpm_engine;		//014 Ö¸ï¿½ï¿½69ï¿½ï¿½Êµï¿½ï¿½×ªï¿½ï¿½
-	int ECU_work_status;	//ï¿½ï¿½ï¿½ï¿½×´Ì¬	//014 ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×´Ì¬ï¿½ï¿½ï¿½ï¿½×´Ì¬ 0Í£ï¿½ï¿½ 1ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 2É¢ï¿½ï¿½ 5ï¿½ï¿½ï¿½ï¿½
-	//int engine_start_result;//ï¿½ï¿½ï¿½ï¿½×´Ì¬0x55ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ğ£ï¿½0xAAï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É£ï¿½0xFFï¿½ï¿½ï¿½ï¿½ï¿½ì³£	//014ï¿½ï¿½Ê¹ï¿½ï¿½
-}Stru_Data_Engine_To_Controller;	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Û¿Ø»ï¿½ï¿½ï¿½ï¿½İ°ï¿½
+	double rpm_engine;		//×´Ì¬×ªËÙ
+	int ECU_work_status;	//¹¤×÷×´Ì¬ 0x55Æô¶¯¹ı³ÌÖĞ£¨×Ô¼ìÕı³££©£¬0xAAÆô¶¯Íê³É²¢ËÙ¶È¿ØÖÆ£¬0x88½øÈë¹Ø»ú¹ı³Ì£¬0x99¹Ø»úÍê³É£¬0xFFÆô¶¯»ò×ªËÙ¿ØÖÆÒì³£
+	//int engine_start_result;//Æô¶¯×´Ì¬£¬Î´Ê¹ÓÃ
+}Stru_Data_Engine_To_Controller;	//·¢¶¯»ú¸ø×Û¿Ø»úÊı¾İ°ü
 
 typedef struct _Stru_Data_Controller_To_Seeker  
 {
-	bool flag_seeker_on;		//ï¿½ï¿½ï¿½ï¿½Í·ï¿½ï¿½ï¿½ï¿½
-	bool flag_lock_on_permit;//Ä¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-	double pitch_gimbal_angle_calc;	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ü½ï¿½Ö¸ï¿½ï¿½
-	double yaw_gimbal_angle_calc;	//ï¿½ï¿½ï¿½ï¿½ï¿½Ü½ï¿½Ö¸ï¿½ï¿½
-}Stru_Data_Controller_To_Seeker;	//ï¿½Û¿Ø»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í·ï¿½ï¿½ï¿½İ°ï¿½
+	bool flag_seeker_on;		//µ¼ÒıÍ·¿ª»ú
+	bool flag_lock_on_permit;//Ä¿±êËø¶¨ÔÊĞí»òÒıµ¼ËÑÖ¸Áî£¬·É¿Ø·¢ËÍ
+	bool flag_target_lock;	//±ÕËøÖ¸Áî
+	//Çé¿öÒ»£¬·É¿Ø¸ù¾İµ¼ÒıÍ·ËÑË÷µ½µÄÄ¿±êĞÅÏ¢£¬Ö¸¶¨Ä¿±ê±àºÅ»òÏñËØÖĞĞÄµã£¬µ¼ÒıÍ·ÒÀ´Ë²¶»ñ¡¢¸ú×ÙÄ¿±ê£»
+	//Çé¿ö¶ş£¬Èç¹û×°¶©ÁËÄ¿±êÄ£°å»òÊÓ³¡Ö»ÓĞÒ»¸öÄ¿±ê£¬µ¼ÒıÍ·×Ô¶¯Æ¥ÅäÊ¶±ğÄ¿±ê£¬²¢²¶»ñ¡¢¸ú×ÙÄ¿±ê£»¹ı³ÌÖĞ£¬¿É½øĞĞÄ¿±êÇĞ»»£¬·É¿Ø·¢ËÍ±ÕËøÖ¸Áîºó£¬²»ÔÙÇĞ»»£»
+	//µ±·É¿ØÅĞ¶Ï£¬µ¼µ¯¾àÄ¿±êÒ»¶¨¾àÀëºóÎ´²¶»ñ£¬ĞéÄâµ¼Òı´ò»÷£»
+
+	//Ä¿±êËø¶¨ÔÊĞí»òÒıµ¼ËÑÖ¸Áî£¬¸½¼ÓĞÅÏ¢
+	double pitch_gimbal_angle_calc;	//¸©Ñö¿ò¼Ü½ÇÖ¸Áî
+	double yaw_gimbal_angle_calc;		//º½Ïò¿ò¼Ü½ÇÖ¸Áî
+	//±ÕËøÖ¸Áî£¬¸½¼ÓĞÅÏ¢
+	//²ÉÓÃÇé¿ö¶ş£¬Ö»ÓĞÖ¸Áî£¬ÎŞ¸½¼ÓĞÅÏ¢£»
+	int target_num__choosen;
+
+	//Ä¿±êÎ»ÖÃ½âËã£¬Ïà¹Øµ¼º½ĞÅÏ¢
+	double wz;
+	double wy;
+	double gama;
+	double zeta;
+	double psit;
+	double longitude;
+	double latitude;
+	double hight;
+}Stru_Data_Controller_To_Seeker;	//×Û¿Ø»ú¸øµ¼ÒıÍ·Êı¾İ°ü
 
 typedef struct _Stru_Data_Controller_To_Datalink  
 {
-	Stru_Mission_Update_Data	st_mission_update_data[MAX_CONNECT_NUMBER];//ï¿½ï¿½Èº×´Ì¬ï¿½ï¿½ï¿½É¿Ø¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å»ï¿½ï¿½ï¿½Ğ¡
-	Stru_Missile_State_Data		st_missile_state_data;//ï¿½ï¿½ï¿½ï¿½×´Ì¬
-	Stru_Target_State_Data		st_target_state_data[MAX_TARGET_NUMBER];//Ä¿ï¿½ï¿½×´Ì¬
-}Stru_Data_Controller_To_Datalink;	//ï¿½Û¿Ø»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½İ°ï¿½
+	Stru_Mission_Update_Data	st_mission_update_data[MAX_CONNECT_NUMBER];//¼¯Èº×´Ì¬£¬·É¿Ø¸øÊı¾İÁ´£¬ÓÅ»¯¼õĞ¡
+	Stru_Missile_State_Data		st_missile_state_data;//µ¼µ¯×´Ì¬
+	Stru_Target_State_Data		st_target_state_data[MAX_TARGET_NUMBER];//Ä¿±ê×´Ì¬
+}Stru_Data_Controller_To_Datalink;	//×Û¿Ø»ú¸øÊı¾İÁ´Êı¾İ°ü
 
 typedef struct Stru_Data_Controller_To_DatalinkTel  
 {
-	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
-	int curPtNo;			//ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½ï¿½
-	double curTargetLon;	//ï¿½ï¿½Ç°Ä¿ï¿½êº½ï¿½ã¾­ï¿½ï¿½
-	double curTargetLat;	//ï¿½ï¿½Ç°Ä¿ï¿½êº½ï¿½ï¿½Î³ï¿½ï¿½
-	double curTargetAlt;	//ï¿½ï¿½Ç°Ä¿ï¿½êº½ï¿½ï¿½ß¶ï¿½
-	//bool on_takeoff;	//ï¿½ï¿½ï¿½ï¿½ï¿½É±ï¿½Ö¾	ï¿½Úµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½á¹¹ï¿½ï¿½
-	//bool open_umbrella;//ï¿½ï¿½É¡ï¿½ï¿½Ö¾   
-	//bool enginge_off;	//ï¿½ï¿½ï¿½ï¿½Í£ï¿½ï¿½ï¿½ï¿½Ö¾
+	//º½µãĞÅÏ¢
+	int curPtNo;			//µ±Ç°º½µãºÅ
+	double curTargetLon;	//µ±Ç°Ä¿±êº½µã¾­¶È
+	double curTargetLat;	//µ±Ç°Ä¿±êº½µãÎ³¶È
+	double curTargetAlt;	//µ±Ç°Ä¿±êº½µã¸ß¶È
+	//bool on_takeoff;	//Æğ·ÉÍê³É±êÖ¾	ÔÚµçÆø¿ØÖÆÊä³ö½á¹¹Ìå
+	//bool open_umbrella;//¿ªÉ¡±êÖ¾   
+	//bool enginge_off;	//¶¯Á¦Í£³µ±êÖ¾
 
-	//Í¨ï¿½ï¿½ï¿½ï¿½
-	double rudderRollCmd;	//Í¨ï¿½ï¿½ï¿½æ¸±ï¿½ï¿½
-	double rudderPitchCmd;	//Í¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-	double rudderYawCmd;	//Í¨ï¿½ï¿½ï¿½æº½ï¿½ï¿½
-	//Ò£ï¿½ï¿½ï¿½ï¿½Ï¢
-	double gamaCmd;	//ï¿½ï¿½×ªï¿½ï¿½Ö¸ï¿½ï¿½
-	double nycCmd;	//ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½
-	double varthetaCmd;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½
-	double heightCmd;//ï¿½ß¶ï¿½Ö¸ï¿½ï¿½
-	double ac_dL;//ï¿½ï¿½ï¿½É¾ï¿½
-	double ac_dZ;// ï¿½ï¿½ß¾ï¿½
-	int token_long;// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-	int token_late;// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-	double thrustCmd;// ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½
-	double  ac_dPsi;//ï¿½ï¿½ï¿½ï¿½ï¿½Æ«ï¿½ï¿½
-	double ac_dR;// Ô²ï¿½ì¼£ï¿½ï¿½ß¾ï¿½
-	double cur_thetav;//ï¿½ì¼£ï¿½ï¿½ï¿½
-	double Vcmd;//ï¿½Ù¶ï¿½Ö¸ï¿½ï¿½ 
-	double nyCmd_Guidance;//Ä©ï¿½Æµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½
-	double nzCmd_Guidance;//Ä©ï¿½Æµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½
-	double pitch_rate_nT_filterOut;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß½ï¿½ï¿½Ù¶ï¿½ï¿½Ë²ï¿½
-	double yaw_rate_nT_filterOut;//Æ«ï¿½ï¿½ï¿½ï¿½ï¿½ß½ï¿½ï¿½Ù¶ï¿½ï¿½Ë²ï¿½
-	double deltaR;//ï¿½ï¿½Ä¿ï¿½ï¿½ï¿½ï¿½
-	double dRn; //ï¿½ï¿½Ä¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½  Î´ï¿½Ãµï¿½ï¿½ï¿½Ô¤ï¿½ï¿½
-	double dRu; //ï¿½ï¿½Ä¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½  Î´ï¿½Ãµï¿½ï¿½ï¿½Ô¤ï¿½ï¿½
-	double dRe; //ï¿½ï¿½Ä¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½  Î´ï¿½Ãµï¿½ï¿½ï¿½Ô¤ï¿½ï¿½
-	double Pitch_Preset_Angle;//ï¿½ï¿½ï¿½Û¸ï¿½ï¿½ï¿½ï¿½ï¿½Ü½ï¿½
-	double Yaw_Preset_Angle;//ï¿½ï¿½ï¿½ï¿½Æ«ï¿½ï¿½ï¿½ï¿½Ü½ï¿½
-	int Dubins_stage;//ï¿½Å±ï¿½Ë¹ï¿½ï¿½
-	int dubins_type1;//ï¿½Å±ï¿½Ë¹ï¿½ï¿½ï¿½ï¿½
-	int dubins_type2;//ï¿½Å±ï¿½Ë¹ï¿½ï¿½ï¿½ï¿½
-	int dubins_type3;//ï¿½Å±ï¿½Ë¹ï¿½ï¿½ï¿½ï¿½
-	double Dubins_length;//ï¿½Å±ï¿½Ë¹ï¿½Îºï¿½ï¿½ï¿½
-	double test1;//ï¿½ï¿½ï¿½ï¿½
-	double Min_IAS2Vel;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½
-	double mx_ESO;
-	double fduox_ADRC;//ADRCï¿½ï¿½Æ«
-	double Qv;//ï¿½ï¿½Ñ¹
-	double alpha_ins;	//ï¿½ï¿½ï¿½Ù¹ï¿½ï¿½ï¿½
-	double beta_ins;	//ï¿½ï¿½ï¿½Ù²à»¬ï¿½ï¿½
-	double MaxRpm; 		//ï¿½ï¿½ï¿½×ªï¿½ï¿½
-	double DFT_freq_max;//ï¿½ï¿½Ê¶ï¿½Ë¶ï¿½Æµï¿½ï¿½
-	//ï¿½ï¿½ï¿½ä£¬ï¿½ï¿½ï¿½Ú·ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾
-	double rudder_I_cmd;	//ï¿½ï¿½ï¿½ï¿½ï¿½æ£¬×ªï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½Ç¶ï¿½
+	//Í¨µÀ¶æ
+	double rudderRollCmd;	//Í¨µÀ¶æ¸±Òí pd+adrc
+	double rudderPitchCmd;	//Í¨µÀ¶æÉı½µ qk + pd »ò qk + ADRC
+	double rudderYawCmd;	//Í¨µÀ¶æº½Ïò pd ×ª Èı»ØÂ·¹ıÔØ¿ØÖÆ
+	//Ò£²âĞÅÏ¢
+	double gamaCmd;	//¹ö×ª½ÇÖ¸Áî
+	double nycCmd;	//ÉıÁ¦Ãæ¹ıÔØÖ¸Áî
+	double varthetaCmd;//¸©Ñö½ÇÖ¸Áî
+	double heightCmd;//¸ß¶ÈÖ¸Áî
+	double vyCmd;//´¹ËÙÖ¸Áî ĞÂÔö£¬20260714 È¡Öµ·¶Î§-90~90£¬0.003
+	double ac_dL;//´ı·É¾à
+	double ac_dZ;// ²à±ß¾à
+	unsigned int flight_control_state;//·ÉĞĞ×´Ì¬ ĞÂÔö£¬20260714 ÎŞ·ûºÅ32bitsÕûĞÍ µ±Á¿1
+	//int token_long;// ×İÏòÁîÅÆ£¬É¾³ı
+	//int token_late;// ²àÏòÁîÅÆ£¬É¾³ı
+	double thrustCmd;// ÍÆÁ¦Ö¸Áî£¬ÀıÈçÓÍÃÅ¿ª¶ÈKc ÎŞ·ûºÅ
+	int rpmState;//·¢¶¯»ú×´Ì¬×ªËÙ ĞÂÔö£¬20260714 ÎŞ·ûºÅÕûĞÍ 0~10000rpm£¬µ±Á¿2
+	//double ac_dPsi;//º½Ïò½ÇÆ«²î£¬É¾³ı20260714
+	double ac_Vz;//²àÏòËÙ¶È£¬ĞÂÔö£¬20260714 È¡Öµ·¶Î§-90~90£¬0.003
+	double ac_Vy;//ÌìÏòËÙ¶È£¬ĞÂÔö£¬20260714 È¡Öµ·¶Î§-90~90£¬0.003
+	double ac_Vx;//ÉäÏòËÙ¶È£¬ĞÂÔö£¬20260714 È¡Öµ·¶Î§-90~90£¬0.003
+	double ac_dR;// Ô²¹ì¼£²à±ß¾à£¬Î´È¥µô×ªÍä°ë¾¶
+	double cur_azimuth;//º½¶Î·½Î»½Ç ĞÂÔö£¬20260714 È¡Öµ·¶Î§-180~180£¬0.006
+	double cur_thetav;//¹ì¼£Çã½Ç  È¡Öµ·¶Î§-90~90£¬0.003
+	double cur_psicv;//¹ì¼£Æ«½Ç  ĞÂÔö£¬20260714 È¡Öµ·¶Î§-180~180£¬0.006
+	double Vcmd;//ËÙ¶ÈÖ¸Áî 
+	double nyCmd_Guidance;//Ä©ÖÆµ¼×İÏò¹ıÔØÖ¸Áî
+	double nzCmd_Guidance;//Ä©ÖÆµ¼²àÏò¹ıÔØÖ¸Áî
+	double wyCmd;//º½Ïò½ÇËÙ¶ÈÖ¸Áî ĞÂÔö£¬20260714
+	double pitch_rate_nT_filterOut;//¸©ÑöÊÓÏß½ÇËÙ¶ÈÂË²¨
+	double yaw_rate_nT_filterOut;//Æ«º½ÊÓÏß½ÇËÙ¶ÈÂË²¨
+	double deltaR;//µ¯Ä¿¾àÀë£¬´ò»÷µã
+	double dRn; //µ¯Ä¿±±Ïò¾àÀë£¬½öÒ£²â·ÖÎö
+	double dRu; //µ¯Ä¿ÌìÏò¾àÀë£¬½öÒ£²â·ÖÎö
+	double dRe; //µ¯Ä¿¶«Ïò¾àÀë£¬½öÒ£²â·ÖÎö
+	double Pitch_Preset_Angle;//ÀíÂÛ¸©Ñö¿ò¼Ü½Ç
+	double Yaw_Preset_Angle;//ÀíÂÛÆ«º½¿ò¼Ü½Ç
+	int Dubins_stage;//¶Å±öË¹¶Î£¬´ı¶¨
+	int dubins_type1;//¶Å±öË¹ÀàĞÍ£¬´ı¶¨
+	int dubins_type2;//¶Å±öË¹ÀàĞÍ£¬´ı¶¨
+	int dubins_type3;//¶Å±öË¹ÀàĞÍ£¬´ı¶¨
+	double Dubins_length;//¶Å±öË¹¶Îº½³Ì£¬´ı¶¨
+	//double test1;//²âÊÔ£¬É¾³ı
+	//double Min_IAS2Vel;//×îµÍÕÛËãËÙ¶È£¬É¾³ı20260714
+	double gamac_compensate;//¹ö×ª½ÇÖ¸Áî²¹³¥Á¿£¬ĞÂÔö20260714 È¡Öµ·¶Î§-90~90£¬0.003
+	double uz_gamac;//²àÆ«¿ØÖÆÁ¿£¬ĞÂÔö20260714 È¡Öµ·¶Î§-90~90£¬0.003
+	double mx_ESO;	//¸ÉÈÅ¹À¼Æ×´Ì¬Á¿z2
+	double fduox_ADRC;//ADRC¶æÆ«
+	double Qv;//¶¯Ñ¹
+	double alpha_ins;	//µØËÙ¹¥½Ç£¬Î´ÓÃµ½
+	double beta_ins;	//µØËÙ²à»¬½Ç£¬Î´ÓÃµ½
+	//double MaxRpm; 		//×î´ó×ªËÙ£¬É¾³ı20260714
+	//double DFT_freq_max;//±æÊ¶ÔË¶¯ÆµÂÊ£¬É¾³ı20260714
+	double nyflt;	//ÌåÖá·¨Ïò¹ıÔØ£¬ĞÂÔö20260714  È¡Öµ·¶Î§-5~5, 0.001
+	double nzflt;	//ÌåÖá²àÏò¹ıÔØ£¬ĞÂÔö20260714 È¡Öµ·¶Î§-5~5, 0.001
+	int count_altitude_change;//¸ß¶È»ú¶¯´ÎÊı£¬ĞÂÔö20260714 È¡Öµ·¶Î§0~255
+	double mass_calc;//ÖÊÁ¿¹À¼Æ£¬ĞÂÔö20260714 È¡Öµ·¶Î§0~250kg 0.01
+	double ugf_zetac;//¸ß¶È¿ØÖÆÁ¿£¬ĞÂÔö20260714 È¡Öµ·¶Î§-15~15£¬0.001
+	double uqkf;//Ç°À¡¿ØÖÆÁ¿£¬ĞÂÔö20260714 È¡Öµ·¶Î§-15~15£¬0.001
+	double flight_time;//·É¿ØÊ±¼ä£¬ĞÂÔö20260714 È¡Öµ·¶Î§0~99999.9s£¬0.001 Õ¼ÓÃËÄ×Ö½Ú
+
+	double rudder_I_cmd;	//ÎïÀí¶æ£¬×ª»»Îªµç»ú½Ç¶È
 	double rudder_II_cmd;
 	double rudder_III_cmd;
 	double rudder_IV_cmd;
 	double rudder_V_cmd;
 	double rudder_VI_cmd;
 
-	double Kc_cmd;			//ï¿½ï¿½ï¿½ï¿½
+	double Kc_cmd;	//ÓÍÃÅ£¬´ıÉ¾³ı
 
-	double curLon;	//ï¿½ï¿½Ç°ï¿½ï¿½ï¿½È¡ï¿½Î³ï¿½È¡ï¿½ï¿½ß¶ï¿½
-	double curLat;	
-	double curAlt;	
-}Stru_Data_Controller_To_DatalinkTel;	//ï¿½Û¿Ø»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½İ°ï¿½
+	double curLon;//µ±Ç°¾­¶È¡¢Î³¶È¡¢¸ß¶È
+	double curLat;
+	double curAlt;
+}Stru_Data_Controller_To_DatalinkTel;	//×Û¿Ø»ú¸øÊı¾İÁ´Êı¾İ°ü
 
 typedef struct _Stru_Data_Controller_To_Actuator  
 {
@@ -430,49 +431,49 @@ typedef struct _Stru_Data_Controller_To_Actuator
 	double control_voltage_IV;
 	double control_voltage_V;
 	double control_voltage_VI;
-}Stru_Data_Controller_To_Actuator;	//ï¿½Û¿Ø»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½İ°ï¿½
+}Stru_Data_Controller_To_Actuator;	//×Û¿Ø»ú¸ø¶æÊı¾İ°ü
 
 typedef struct _Stru_Data_Controller_To_Engine  
 {
-	double control_Kc;	//Ö¸ï¿½ï¿½ï¿½ï¿½ï¿½Å£ï¿½ï¿½ï¿½Ñ¡Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 	//014 È¡Öµï¿½ï¿½Î§0.0~100.0
-	double control_rpm;//Ö¸ï¿½ï¿½×ªï¿½Ù£ï¿½ï¿½ï¿½Ñ¡Ò»ï¿½ï¿½Î´Ê¹ï¿½ï¿½	//014ï¿½ï¿½Ê¹ï¿½ï¿½
-	int ECU_work_cmd;	//ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½0x00 ï¿½ï¿½Ö¸ï¿½î£¬0x11 ï¿½Ô¼ì£¬0x22 ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½0x33 ×ªï¿½Ù¿ï¿½ï¿½ï¿½,  0x44 ï¿½Ø»ï¿½	//014ï¿½ï¿½Ê¹ï¿½ï¿½
-}Stru_Data_Controller_To_Engine;	//ï¿½Û¿Ø»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½İ°ï¿½
+	double control_Kc;	//Ö¸ÁîÓÍÃÅ£¬¶şÑ¡Ò»£¬ÓĞÓÃ 
+	double control_rpm;//Ö¸Áî×ªËÙ£¬¶şÑ¡Ò»£¬Î´Ê¹ÓÃ
+	int ECU_work_cmd;	//¿ØÖÆÖ¸Áî0x00 ÎŞÖ¸Áî£¬0x11 ×Ô¼ì£¬0x22 Æô¶¯£¬0x33 ×ªËÙ¿ØÖÆ,  0x44 ¹Ø»ú
+}Stru_Data_Controller_To_Engine;	//×Û¿Ø»ú¸ø·¢¶¯»úÊı¾İ°ü
 
 typedef struct _Stru_Data_Controller_To_Switch_Output  
 {
-	bool flag_separate_booster;		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½(ï¿½ï¿½Õ¨ï¿½ï¿½Ë¨ï¿½ï¿½ï¿½Ğ¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½)
-	bool flag_launch_missile_wing;	//ï¿½ï¿½ï¿½ï¿½Õ¹ï¿½ï¿½(ï¿½ï¿½Õ¨ï¿½ï¿½Ë¨ï¿½ï¿½ï¿½)
-	bool flag_engine_start;			//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½(ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½)
+	bool flag_separate_booster;		//ÖúÍÆÆ÷·ÖÀë(±¬Õ¨ÂİË¨»òÇĞ¸îËøµã»ğ)
+	bool flag_launch_missile_wing;	//µ¯ÒíÕ¹¿ª(±¬Õ¨ÂİË¨µã»ğ)£¬Î´ÓÃµ½
+	bool flag_engine_start;			//·¢¶¯»úµ¡ËÙ×ª70%ÓÍÃÅ£¬Ö÷·¢¶¯»úµã»ğ(¿ÕÖĞÅÚÆğµã»ğ)
 	
-	bool flag_missle_takeoff;	//ï¿½ï¿½ï¿½ 20260415
-	bool flag_engine_shutdown;	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø»ï¿½ 20260415
-	bool flag_open_umbrella;	//ï¿½ï¿½É¡	20260415
-	bool flag_fuze_unlock;		//ï¿½ï¿½ï¿½Å½ï¿½ï¿½ï¿½ 20260425
-}Stru_Data_Controller_To_Switch_Output;	//ï¿½Û¿Ø»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½î£¬Î´ï¿½Ãµï¿½
+	bool flag_missle_takeoff;			//Æğ·É 20260415
+	bool flag_engine_shutdown;		//·¢¶¯»ú¹Ø»ú 20260415
+	bool flag_open_umbrella;			//¿ªÉ¡	20260415
+	bool flag_fuze_unlock;		//ÒıĞÅ½âËø 20260425
+}Stru_Data_Controller_To_Switch_Output;	//×Û¿Ø»ú¿ª¹ØÁ¿Ö¸Áî£¬Î´ÓÃµ½
 
 
-//******************* ï¿½ï¿½ï¿½ï¿½ï¿½ë»·ï¿½ï¿½ï¿½ä½»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ************************//
+//******************* µ¯ÌåÓë»·¾³¼ä½»»»Êı¾İ ************************//
 typedef struct _Stru_Rudder_Reflection
 {
 	double missile_rudder_delta_I;
 	double missile_rudder_delta_II;
 	double missile_rudder_delta_III;
 	double missile_rudder_delta_IV;
-	double missile_rudder_delta_V;//ï¿½ï¿½ï¿½ï¿½ï¿½
+	double missile_rudder_delta_V;//º½Ïò¶æ
 	double missile_rudder_delta_VI;
-}Stru_Rudder_Reflection;	//ï¿½ï¿½Æ«ï¿½ï¿½ï¿½
+}Stru_Rudder_Reflection;	//¶æÆ«Êä³ö
 
 typedef struct _Stru_Data_Missile_To_Environment 
 {
-	double rpm_engine;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×ªï¿½Ù£ï¿½ï¿½É¿Ø¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä£ï¿½Í£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½
-	Stru_Rudder_Reflection st_missile_rudder_reflection;//ï¿½ï¿½Æ«ï¿½ï¿½ï¿½
-	Stru_Data_Controller_To_Switch_Output st_missile_status_switch;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-}Stru_Data_Missile_To_Environment;	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	double rpm_engine;//·¢¶¯»ú×ªËÙ£¬·É¿Ø¸ø·¢¶¯»úÓÍÃÅ£¬·¢¶¯»úÓëÂİĞı½°Ä£ĞÍ£¬Êä³öÂİĞı½°×ªËÙ
+	Stru_Rudder_Reflection st_missile_rudder_reflection;//¶æÆ«Êä³ö
+	Stru_Data_Controller_To_Switch_Output st_missile_status_switch;//¿ª¹ØÁ¿Êä³ö
+}Stru_Data_Missile_To_Environment;	//µ¼µ¯¸ø»·¾³Êä³öÊı¾İ
 
 typedef struct _Stru_INS_Data_In
 {
-	double gama;//ï¿½ï¿½Å·ï¿½ï¿½ 231×ªï¿½ï¿½
+	double gama;//ÕıÅ·À­ 231×ªĞò
 	double psi;
 	double zeta;
 	double wx;
@@ -488,29 +489,30 @@ typedef struct _Stru_INS_Data_In
 	double longitude;
 	double latitude;
 	double height;
-}Stru_INS_Data_In;	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ßµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+}Stru_INS_Data_In;	//»·¾³¸ø¹ßµ¼ÊäÈëÊı¾İ
 
 typedef struct _Stru_RadioAlt_Data_In
 {
-	double radioalt_height;
-}Stru_RadioAlt_Data_In;	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ßµï¿½ß¶È±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	double radioalt_height;//Õæ¸ß£¬Ïà¶ÔµØÃæ¸ß¶È
+}Stru_RadioAlt_Data_In;	//»·¾³¸øÎŞÏßµç¸ß¶È±íÊäÈëÊı¾İ
 
 typedef struct _Stru_Baro_Data_In
 {
 	double static_pressure;
 	double total_pressure;
-}Stru_Baro_Data_In;	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ù¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+}Stru_Baro_Data_In;	//»·¾³¸ø¿ÕËÙ¹ÜÊäÈëÊı¾İ
 
 typedef struct _Stru_Engine_Data_In
 {
-	double air_density;//ï¿½ï¿½ï¿½ï¿½ï¿½Ü¶ï¿½
-	double air_speed;	 //ï¿½ï¿½ï¿½ï¿½
-	double angle_of_attack;	//ï¿½ï¿½ï¿½Ç£ï¿½Î´ï¿½Ãµï¿½
-	double angle_of_side_slip;//ï¿½à»¬ï¿½Ç£ï¿½Î´ï¿½Ãµï¿½					
-}Stru_Engine_Data_In;	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	double air_density;//¿ÕÆøÃÜ¶È
+	double air_speed;	 //¿ÕËÙ
+	double angle_of_attack;	//¹¥½Ç£¬Î´ÓÃµ½
+	double angle_of_side_slip;//²à»¬½Ç£¬Î´ÓÃµ½					
+}Stru_Engine_Data_In;	//»·¾³¸ø·¢¶¯»úÊäÈëÊı¾İ
+
 typedef struct _Stru_Seeker_Data_In
 {
-	int target_ID;
+	int target_ID;		//µ±IDÎª-1Ê±£¬±íÊ¾ÎŞĞ§Ä¿±ê
 	double pitch_LOS_angle;
 	double yaw_LOS_angle;
 	double pitch_LOS_rate;
@@ -518,23 +520,23 @@ typedef struct _Stru_Seeker_Data_In
 	double distance_target;
 	double longitude_target;
 	double latitude_target;
-}Stru_Seeker_Data_In;	//ï¿½ï¿½ï¿½ï¿½Í·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+}Stru_Seeker_Data_In;	//µ¼ÒıÍ·ÊäÈëÊı¾İ
 
 typedef struct _Stru_Data_Environment_To_Missile
 {
-	//ï¿½ï¿½ï¿½ßµï¿½ï¿½ï¿½ï¿½ï¿½
+	//¸ø¹ßµ¼Êı¾İ
 	Stru_INS_Data_In st_data_environment_to_ins;
-	//ï¿½ï¿½ï¿½ß¶È±ï¿½
+	//¸ø¸ß¶È±í
 	Stru_RadioAlt_Data_In st_data_environment_to_radioalt;
-	//ï¿½ï¿½ï¿½ï¿½ï¿½Ù¹ï¿½
+	//¸ø¿ÕËÙ¹Ü
 	Stru_Baro_Data_In st_data_environment_to_baro;
-	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	//¸ø·¢¶¯»ú
 	Stru_Engine_Data_In st_data_environment_to_engine;
-	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í·ï¿½ï¿½ï¿½ï¿½
+	//¸øµ¼ÒıÍ·Êı¾İ
 	Stru_Seeker_Data_In st_data_environment_to_seeker[MAX_TARGET_NUMBER];
-}Stru_Data_Environment_To_Missile;	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+}Stru_Data_Environment_To_Missile;	//»·¾³¸øµ¼µ¯ÊäÈëÊı¾İ
 
-//****************** ï¿½ï¿½ï¿½ï¿½ï¿½Ú²ï¿½ï¿½ï¿½Ä£ï¿½ï¿½ä½»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ *********************//
+//****************** »·¾³ÄÚ²¿¸÷Ä£¿é¼ä½»»»Êı¾İ *********************//
 typedef struct _Stru_Data_Earth_Model_Out 
 {
 	double gravitational_acceleration;
@@ -542,17 +544,18 @@ typedef struct _Stru_Data_Earth_Model_Out
 	double air_temperature;
 	double air_pressure;
 	double sonic_speed;
+	
 	double velocity_wind;
 	double psi_wind;
 	double theta_wind;	
-}Stru_Data_Earth_Model_Out;	//ï¿½ï¿½ï¿½ï¿½Ä£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+}Stru_Data_Earth_Model_Out;//µØÇòÄ£ĞÍÊä³öÊı¾İ
 
 typedef struct _Stru_Data_Earth_Model_In 
 {
 	double missile_height;
 	double missile_longitude;
 	double missile_latitude;
-}Stru_Data_Earth_Model_In;	//ï¿½ï¿½ï¿½ï¿½Ä£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+}Stru_Data_Earth_Model_In;	//µØÇòÄ£ĞÍÊäÈëÊı¾İ
 
 typedef struct _Stru_Data_Missile_Inertia 
 {
@@ -563,7 +566,7 @@ typedef struct _Stru_Data_Missile_Inertia
 	double x_moment_of_inertia;
 	double y_moment_of_inertia;
 	double z_moment_of_inertia;
-}Stru_Data_Missile_Inertia;	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+}Stru_Data_Missile_Inertia;	//µ¼µ¯¹ßĞÔÊı¾İ
 
 typedef struct _Stru_Data_Aerodynamic_Force 
 {
@@ -573,7 +576,7 @@ typedef struct _Stru_Data_Aerodynamic_Force
 	double pitch_moment;
 	double yaw_moment;
 	double roll_moment;
-}Stru_Data_Aerodynamic_Force;	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+}Stru_Data_Aerodynamic_Force;	//Æø¶¯Á¦Êı¾İ
 
 typedef struct _Stru_Data_Aerodynamic_Force_Coefficient
 {
@@ -589,24 +592,27 @@ typedef struct _Stru_Data_Aerodynamic_Force_Coefficient
 	double dmx_ddeltax;
 	double dcz_ddeltay;
 	double dmy_ddeltay;
-}Stru_Data_Aerodynamic_Force_Coefficient;	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ïµï¿½ï¿½Æ«ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+}Stru_Data_Aerodynamic_Force_Coefficient;	//Æø¶¯Á¦ÏµÊıÆ«µ¼Êı¾İ
 
 typedef struct _Stru_Data_Missile_Force 
 {
-	double gravity;
-	double thrust;
-	double thrust_force[3];//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	double gravity;		//ÖØÁ¦
+	double thrust;		//ºÏÍÆÁ¦
+	//double booster;
+	double thrust_force[3];//·¢¶¯»úÍÆÁ¦
 	double thrust_moment[3];
-	Stru_Data_Aerodynamic_Force st_aerodynamic_force;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-}Stru_Data_Missile_Force;	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	double booster_force[3];//ÖúÍÆÆ÷ÍÆÁ¦
+	double booster_moment[3];	
+	Stru_Data_Aerodynamic_Force st_aerodynamic_force;//Æø¶¯Á¦¼°Á¦¾Ø
+}Stru_Data_Missile_Force;	//µ¼µ¯Á¦¼°Á¦¾ØÄ£ĞÍÊä³ö
 
 typedef struct _Stru_Data_Function_To_Force_Calc
 {
 	double mach;
 	double air_speed;
-	double sonic_speed;
-	double air_density;
-	double air_temperature;//ï¿½ï¿½ï¿½ï¿½ï¿½Â¶ï¿½
+	double sonic_speed;//ÉùËÙ
+	double air_density;//¿ÕÆøÃÜ¶È
+	double air_temperature;//¿ÕÆøÎÂ¶È
 	double height;
 	double wx;
 	double wy;
@@ -614,27 +620,28 @@ typedef struct _Stru_Data_Function_To_Force_Calc
 	double angle_of_attack;
 	double angle_of_side_slip;
 	double gravitational_acceleration;
-	double aby;	//ï¿½ï¿½ï¿½ï¿½Ïµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶È£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-}Stru_Data_Function_To_Force_Calc;	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	double aby;	//ÌåÖáÏµ£¬·¨Ïò¼ÓËÙ¶È£¬¿ÉÓÃÓÚ¾²Æøµ¯±äĞÎ£¬¼´¿¼ÂÇµ¯ĞÔµÄÆø¶¯Á¦¼ÆËã
+}Stru_Data_Function_To_Force_Calc;	//µ¼µ¯Á¦¼°Á¦¾ØÄ£ĞÍÊäÈë
 
 typedef struct _Stru_Data_Function_Solved_Out
 {
-	double mach;
-	double air_speed;
-	double angle_of_attack;
-	double angle_of_side_slip;
-	bool flag_leaving_launcher;	//ï¿½ï¿½ï¿½
+	double mach;				//Î´ÓÃµ½
+	double air_speed;			//Î´ÓÃµ½
+	double angle_of_attack;	//Î´ÓÃµ½
+	double angle_of_side_slip;//Î´ÓÃµ½
+	
+	bool flag_leaving_launcher;	//Àë¼Ü±êÊ¶
 	Stru_INS_Data_In * p_st_data_ins_related;
 	Stru_Baro_Data_In * p_st_data_baro_related;
 	Stru_Engine_Data_In * p_st_data_engine_related;
 	Stru_RadioAlt_Data_In * p_st_data_radioalt_related;
 	Stru_Data_Function_To_Force_Calc * p_st_data_function_to_force_calc;
-}Stru_Data_Function_Solved_Out;	//ï¿½ï¿½ï¿½Ì½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+}Stru_Data_Function_Solved_Out;	//·½³Ì½âËãÊä³ö
 
-//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+//·ÂÕæÊäÈë£¬¼´·É¿ØÊä³ö
 typedef struct _Stru_HIL_Data_INPUT
 {
-	//ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½
+	//¶æ¿ØÖ¸Áî
     double rudderPitchLeft;//I 
     double rudderPitchRight;//II
     double rudderRollLeft;//III
@@ -642,62 +649,80 @@ typedef struct _Stru_HIL_Data_INPUT
 	double rudderYawLeft;//V
     double rudderYawRight;//VI
 
-	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½
-    double Kc;	//ï¿½ï¿½ï¿½ï¿½
+	//·¢¶¯»úÖ¸Áî
+    double Kc;	//ÓÍÃÅ
+	//double engine_cmd;//·¢¶¯»ú¿ØÖÆÖ¸Áî
 
-	//ï¿½ï¿½ï¿½ï¿½Í·ï¿½ï¿½ï¿½ï¿½
-	bool flag_seeker_on;		//ï¿½ï¿½ï¿½ï¿½Í·ï¿½ï¿½ï¿½ï¿½
-	bool flag_lock_on_permit;//Ä¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-	double pitch_gimbal_angle_calc;	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ü½ï¿½Ö¸ï¿½ï¿½
-	double yaw_gimbal_angle_calc;	//ï¿½ï¿½ï¿½ï¿½ï¿½Ü½ï¿½Ö¸ï¿½ï¿½
-	
-	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½
-	bool flag_missile_takeoff;	//ï¿½ï¿½ï¿½
-	bool flag_engine_shutdown;	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø»ï¿½
-	bool flag_open_umbrella;	//ï¿½ï¿½É¡ï¿½ï¿½ï¿½ï¿½
-	bool flag_fuze_unlock;		//ï¿½ï¿½ï¿½Å½ï¿½ï¿½ï¿½
+	//µ¼ÒıÍ·Êı¾İ
+	bool flag_seeker_on;		//µ¼ÒıÍ·¿ª»úÖ¸Áî
+	bool flag_lock_on_permit;//Ä¿±êËø¶¨ÔÊĞíÖ¸Áî
+	bool flag_target_choosen;//Ö¸¶¨Ä¿±êÖ¸Áî£¨Ä¿±êÑ¡Ôñ½á¹û£©£¬ÊÓÇéÊ¹ÓÃ£»    20270706ĞÂÔö
+	//µ¼ÒıÍ·¿ØÖÆÖ¸Áî£¬Ä¿±êËø¶¨ÔÊĞí¡¢Òıµ¼ËÑ(¿ÉÓëËø¶¨ÔÊĞíºÏ²¢)¡¢Æ¥Åä×ªÊ¶±ğ(¿É×Ô¶¯Ö´ĞĞ£¬ÊÓÇé·¢Ö¸Áî)¡¢±ÕËø¸ú×Ù(¿É×Ô¶¯Ö´ĞĞ£¬ÊÓÇé·¢Ö¸Áî)
+	//Î´²¶»ñµ½²¶»ñ¹ı³Ì£ºµ¼ÒıÍ·ÒÑ¿ª»ú£¬·É¿ØÏòµ¼ÒıÍ··¢ËÍÄ¿±êËø¶¨ÔÊĞí£¨ÓëÒıµ¼ËÑºÏ²¢£©Ö¸Áî¡¢¸©Ñö/º½Ïò¿ò¼Ü½Ç£¬
+	//    µ¼ÒıÍ·ÒÀ¾İ¿ò¼Ü½ÇÒıµ¼ËÑË÷£¬ÊÓ³¡ÄÚÄ¿±êÆ¥Åä¡¢Ê¶±ğ²¢¸ú×ÙÄ¿±ê£¬¸ú×ÙÄ¿±êºóÏò·É¿Ø·¢ËÍ¡°±ÕËø¸ú×Ù¡±×´Ì¬£¬²¢ºöÂÔ·É¿ØÒıµ¼ËÑÖ¸Áî£»·É¿ØÊÕµ½ºó£¬ÒÀ¾İµ¼ÒıÍ·¸ú×ÙĞÅÏ¢Ä©ÖÆµ¼·ÉĞĞ£»
+	//²¶»ñµ½¶ªÊ§Ä¿±ê£¬ÔÙÖØ²¶»ñ£º·É¿ØÒÀ¾İµ¼ÒıÍ·¡°±ÕËø¸ú×Ù¡±¿ò¼Ü½Ç¡¢ÊÓÏß½ÇµÈĞÅÏ¢£¬½âËãÄ¿±êÎ»ÖÃ¡¢¾àÀë£»¶ªÊ§Ä¿±êºó£¬¸ù¾İ×îºó¡°±ÕËø/¸ú×Ù¡±Ê±¿Ì¼ÆËãÄ¿±êÎ»ÖÃ£¬ĞéÄâµ¼Òı£¬Ö±ÖÁÖØĞÂ²¶»ñ»ò×î½ü´ò»÷µã£»
+	double pitch_gimbal_angle_calc;	//¸©Ñö¿ò¼Ü½ÇÖ¸Áî
+	double yaw_gimbal_angle_calc;		//º½Ïò¿ò¼Ü½ÇÖ¸Áî
+	double target_num__choosen;//Ä¿±êÑ¡Ôñ½á¹û£¬µäĞÍÖµ0£¬Ôİ²»Ê¹ÓÃ  20270706ĞÂÔö
+
+	//¿ª¹ØÁ¿²¹³¥£¬´Ó·É¿ØÊä³ö
+	bool flag_launch_missile_wing;	//µ¯ÒíÕ¹¿ª£¬Î´ÓÃµ½(Ò»°ãÁ¦¼°Á¦¾ØÄ£ĞÍ´¦Àí) 20270706ĞÂÔö
+	bool flag_separate_booster;		//ÖúÍÆÆ÷·ÖÀë£¬Á¦¼°Á¦¾ØÄ£ĞÍĞèÒª£¨·ÖÀëºóÖÊÁ¿¼õÇá£©£¬°ëÊµÎï·ÂÕæÔö¼Ó 20270706ĞÂÔö
+	bool flag_engine_start;			//·¢¶¯»ú¿ª»ú£¬·¢¶¯»úÓÍÃÅÇĞ»»£¬ÎŞ»ğ¹¤Æ·£¬Î´ÓÃµ½ 20270706ĞÂÔö
+	//¿ª¹ØÁ¿Ö¸Áî
+	bool flag_missile_takeoff;	//Æğ·É
+	bool flag_engine_shutdown;	//·¢¶¯»ú¹Ø»ú
+	bool flag_open_umbrella;		//¿ªÉ¡»ØÊÕ
+	bool flag_fuze_unlock;		//ÒıĞÅ½âËø
 }Stru_HIL_Data_INPUT;
 
-//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+//·ÂÕæÊä³ö£¬¼´·É¿ØÊäÈë
 typedef struct _Stru_HIL_Data_OUTPUT
 {
-    double wx;	//ï¿½ï¿½Ïµï¿½ï¿½ï¿½
+    double wx;	//×éºÏµ¼º½£¬ÌåÖáÏµ
     double wy;
     double wz;
     double ax;
     double ay;
     double az;
-    double pitch;
+    double pitch;//µØÀíÏµ×ËÌ¬½Ç£¬231×ªĞòÕıÅ·À­
     double yaw;
     double roll;
-    double airSpd;//Î´ï¿½Ãµï¿½
+    double airSpd;//¿ÕËÙ£¬Î´ÓÃµ½
     double lon;
     double lat;
     double alt;
-    double vn;
-    double vs;
-    double ve;
-    double DD1;//ï¿½ï¿½ï¿½Ù¹Ü¾ï¿½Ñ¹
-    double DD2;//ï¿½ï¿½ï¿½Ù¹ï¿½ï¿½ï¿½Ñ¹
+    double vn;	//±±ËÙ
+    double vs;	//ÌìËÙ
+    double ve;	//¶«ËÙ
     
-    double DD3;//Î´Ê¹ï¿½ï¿½
-    double DD4;//Î´Ê¹ï¿½ï¿½
-    double mass;//Î´Ê¹ï¿½ï¿½
-    double xg;//Î´Ê¹ï¿½ï¿½
-    double arp;//Î´Ê¹ï¿½ï¿½
+    double DD1;//¿ÕËÙ¹Ü¾²Ñ¹£¬ÓÃÓÚ½âËã¿ÕËÙ¡¢ÆøÑ¹¸ß¶ÈµÈ
+    double DD2;//¿ÕËÙ¹Ü×ÜÑ¹
+    double DD3;//Î´Ê¹ÓÃ
+    double DD4;//Î´Ê¹ÓÃ
+    double mass;//Î´Ê¹ÓÃ
+    double xg;//Î´Ê¹ÓÃ
+    double arp;//Î´Ê¹ÓÃ
     
-    double rpm_state;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½(×´Ì¬×ªï¿½ï¿½)
-    double MX_T_Disturb;//Î´Ê¹ï¿½ï¿½
+    double rpm_state;//·¢¶¯»ú(×´Ì¬×ªËÙ)
+    double MX_T_Disturb;//¹ö×ª¸ÉÈÅÁ¦¾Ø¹À¼Æ£¬Î´ÓÃµ½
 
-	//ï¿½ï¿½ï¿½ï¿½Í·ï¿½ï¿½ï¿½İ£ï¿½Î´ï¿½Ãµï¿½
-	double qf;//ï¿½ï¿½ï¿½ï¿½Êµï¿½Ö½ï¿½
-    double qh;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß½ï¿½
-    double dqf;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß½ï¿½ï¿½Ù¶ï¿½
-    double dqh;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß½ï¿½ï¿½Ù¶ï¿½
-    int TargetLocked;//ï¿½ï¿½ï¿½ï¿½Í·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¶ï¿½ï¿½Ä¬ï¿½ï¿½Öµ0x00ÎªÎ´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	//µ¼ÒıÍ·Êä³öÊı¾İ£¬ºóĞøÊ¹ÓÃ
+	double qf;//¸©ÑöÊµÏÖ½Ç
+    double qh;//º½ÏòÊÓÏß½Ç
+    double dqf;//¸©ÑöÊÓÏß½ÇËÙ¶È
+    double dqh;//º½ÏòÊÓÏß½ÇËÙ¶È
+    //double phif;//¸©Ñö¿ò¼Ü½Ç£¬ĞÂÔö£¬ÔİÊ±²»ÓÃ
+    //double phih;//º½Ïò¿ò¼Ü½Ç£¬ĞÂÔö£¬ÔİÊ±²»ÓÃ
+    //double distance_target;//Ä¿±ê¾àÀë£¬ĞÂÔö£¬ÔİÊ±²»ÓÃ£»¹âµçµ¼ÒıÍ·²»Êä³öµ¯Ä¿¾àÀë
+    int TargetLocked;//µ¼ÒıÍ·Ëø¶¨±êÊ¶£¬Ä¬ÈÏÖµ0x00ÎªÎ´Ëø¶¨£¬0x01ÎªÆ¥Åä£¬0x02ÎªÊ¶±ğ£¬0x03Îª±ÕËø¸ú×Ù£¬0x04Îª¼ÇÒä¸ú×Ù
+	//´ıÀ©Õ¹Îª16¸öÄ¿±êÌØĞÔÊı¾İ£¬±ãÓÚÄ¿±êÑ¡ÔñËã·¨ÑéÖ¤£»
+	//double sigmaf;//¸©ÑöÊ§µ÷½Ç + ¸©Ñö½Ç + ¸©Ñö¿ò¼Ü½Ç =  ÊÓÏß½Ç£¬µ¼ÒıÍ·Öá£¨¹âÖá»òÀ×´ïÖá£©ÓëÊÓÏßÖ®¼ä¼Ğ½Ç
+    //double sigmah;//º½ÏòÊ§µ÷½Ç£¬ĞÂÔö£¬ÔİÊ±²»ÓÃ
     
-	//ï¿½ï¿½ï¿½ï¿½
-	int MissileLauched;//ï¿½ï¿½É±ï¿½Ê¶ï¿½ï¿½1Îªï¿½ï¿½É£ï¿½0ÎªÎ´ï¿½ï¿½ï¿½
+	//ÆäËû
+	int MissileLauched;//Æğ·É±êÊ¶£¬1ÎªÆğ·É£¬0ÎªÎ´Æğ·É
+	int NavigationMode;//µ¼º½²ÎÊÔÄ£Ê½£¬0Îª×éºÏµ¼º½²»²ÎÊÔ/·ÂÕæÈ«²¿Ä£Äâ£¬1Îª¹ßµ¼ÉÏ×´Ì¬µş¼ÓÎ»ÖÃÔË¶¯£¬2Îª½ÇËÙ¶È/¼ÓËÙ¶È×¢Èëµş¼ÓÔëÉù ¹ßµ¼½âËã
 }Stru_HIL_Data_OUTPUT;
 
 #endif

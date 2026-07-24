@@ -7,44 +7,44 @@
 #include <assert.h>
 // #include "../support/os_framework.h"
 
-/************      ºê¶¨Òå    ***********/ //FIXME: ºê¶¨Òå
+/************      é”Ÿç–¥å®šé”Ÿæ–¤æ‹·    ***********/ //FIXME: é”Ÿç–¥å®šé”Ÿæ–¤æ‹·
 #define TASK_STACK_SIZE 2048
 #define TASK_PRIORITY   (TX_MAX_PRIORITIES-4)
 #define WAIT_50MS 50
 #define WAIT_1S 1000
 #define WAIT_1MIN 60000
 
-#define MAX_START_RETRY 3   // Æô¶¯Á÷³Ì£¬×î´óÖØÊÔ´ÎÊı
-#define MAX_STOP_RETRY 3    // ¹Ø»úÁ÷³Ì£¬×î´óÖØÊÔ´ÎÊı
-#define PWM_1MS_DURATION   (2 * WAIT_1S) //  Æô¶¯Á÷³Ì£¬Êä³ö1msµÄPWM²¨ĞÎÊ±¼ä
-#define TIMEOUT_FUEL_PRESSURE   WAIT_1MIN //  Æô¶¯Á÷³Ì£¬ÅĞÓÍÑ¹µÄ×î´óµÈ´ıÊ±¼ä
-#define TIMEOUT_CHECK_RPM   (10 * WAIT_1S)  // Æô¶¯Á÷³Ì£¬ÅĞ×ªËÙµÄ×î´óµÈ´ıÊ±¼ä
-#define TIMEOUT_CHECK_THO   (10 * WAIT_1S)  // ¹Ø»úÁ÷³Ì£¬ÅĞ·çÃÅµÄ×î´óµÈ´ıÊ±¼ä
+#define MAX_START_RETRY 3   // é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ•™ï½æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·æºé”Ÿæ–¤æ‹·é”Ÿï¿½
+#define MAX_STOP_RETRY 3    // é”Ÿæˆªä¼™æ‹·é”Ÿæ–¤æ‹·é”Ÿæ•™ï½æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·æºé”Ÿæ–¤æ‹·é”Ÿï¿½
+#define PWM_1MS_DURATION   (2 * WAIT_1S) //  é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ•™ï½æ‹·é”Ÿæ–¤æ‹·é”Ÿï¿½1msé”Ÿæ–¤æ‹·PWMé”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·æ—¶é”Ÿæ–¤æ‹·
+#define TIMEOUT_FUEL_PRESSURE   WAIT_1MIN //  é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ•™ï½æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·å‹é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿé¥ºè¾¾æ‹·æ—¶é”Ÿæ–¤æ‹·
+#define TIMEOUT_CHECK_RPM   (10 * WAIT_1S)  // é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ•™ï½æ‹·é”Ÿæ–¤æ‹·ï¿½??é”ŸåŠ«ç¢‰æ‹·é”Ÿæ–¤æ‹·é”Ÿé¥ºè¾¾æ‹·æ—¶é”Ÿæ–¤ï¿½??
+#define TIMEOUT_CHECK_THO   (10 * WAIT_1S)  // é”Ÿæˆªä¼™æ‹·é”Ÿæ–¤æ‹·é”Ÿæ•™ï½æ‹·é”Ÿï¿½??å‡¤æ‹·é”Ÿè„šç¢‰æ‹·é”Ÿæ–¤æ‹·é”Ÿé¥ºè¾¾æ‹·æ—¶é”Ÿæ–¤ï¿½??
 
-/******************************** ·¢¶¯»úÃüÁî ************************************** */
-/* ¸ñÊ½£ºµØÖ· + Êı¾İ¸ß + Êı¾İµÍ + Ğ£ÑéºÍ + 0x0D + 0x0A */
+/******************************** é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤ï¿½?? ************************************** */
+/* é”Ÿæ–¤æ‹·å¼é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·å€ + é”Ÿæ–¤æ‹·é”Ÿæ·é©ï¿½?? + é”Ÿæ–¤æ‹·é”Ÿæ·ï¿½?ï¿½æ‹· + æ ¡é”Ÿæ–¤æ‹·é”Ÿï¿½ + 0x0D + 0x0A */
 
-const uint8_t CMD_PUMP_ON[6] = {0x02, 0x00, 0x01, 0x03, 0x0D, 0x0A};           // ´ò¿ªÈ¼ÓÍ±Ã
-const uint8_t CMD_PUMP_OFF[6] = {0x02, 0x00, 0x00, 0x02, 0x0D, 0x0A};          // ¹Ø±ÕÈ¼ÓÍ±Ã
+const uint8_t CMD_PUMP_ON[6] = {0x02, 0x00, 0x01, 0x03, 0x0D, 0x0A};           // é”Ÿæ–¤æ‹·ç‡ƒé”Ÿé…µæ†‹æ‹·
+const uint8_t CMD_PUMP_OFF[6] = {0x02, 0x00, 0x00, 0x02, 0x0D, 0x0A};          // é”Ÿæˆªæ†‹æ‹·ç‡ƒé”Ÿé…µæ†‹ï¿½??
 
-const uint8_t CMD_IGNITION1_ON[6] = {0x01, 0x00, 0x01, 0x02, 0x0D, 0x0A};      // ´ò¿ªµã»ğÆ÷1
-const uint8_t CMD_IGNITION1_OFF[6] = {0x01, 0x00, 0x00, 0x01, 0x0D, 0x0A};     // ¹Ø±Õµã»ğÆ÷1
+const uint8_t CMD_IGNITION1_ON[6] = {0x01, 0x00, 0x01, 0x02, 0x0D, 0x0A};      // é”Ÿæ´¥å¼€ç¢‰æ‹·é”Ÿæ–¤æ‹·é”Ÿï¿½??1
+const uint8_t CMD_IGNITION1_OFF[6] = {0x01, 0x00, 0x00, 0x01, 0x0D, 0x0A};     // é”Ÿæˆªï¿½??ç¢‰æ‹·é”Ÿæ–¤æ‹·é”Ÿï¿½??1
 
-const uint8_t CMD_IGNITION2_ON[6] = {0x05, 0x00, 0x01, 0x06, 0x0D, 0x0A};      // ´ò¿ªµã»ğÆ÷2
-const uint8_t CMD_IGNITION2_OFF[6] = {0x05, 0x00, 0x00, 0x05, 0x0D, 0x0A};     // ¹Ø±Õµã»ğÆ÷2
+const uint8_t CMD_IGNITION2_ON[6] = {0x05, 0x00, 0x01, 0x06, 0x0D, 0x0A};      // é”Ÿæ´¥å¼€ç¢‰æ‹·é”Ÿæ–¤æ‹·é”Ÿï¿½??2
+const uint8_t CMD_IGNITION2_OFF[6] = {0x05, 0x00, 0x00, 0x05, 0x0D, 0x0A};     // é”Ÿæˆªï¿½??ç¢‰æ‹·é”Ÿæ–¤æ‹·é”Ÿï¿½??2
 
-const uint8_t CMD_CHOKE_ON[6] = {0x04, 0x00, 0x01, 0x05, 0x0D, 0x0A};          // ´ò¿ªÇ¿ÖÆÅçÓÍ
-const uint8_t CMD_CHOKE_OFF[6] = {0x04, 0x00, 0x00, 0x04, 0x0D, 0x0A};         // ¹Ø±ÕÇ¿ÖÆÅçÓÍ
+const uint8_t CMD_CHOKE_ON[6] = {0x04, 0x00, 0x01, 0x05, 0x0D, 0x0A};          // é”Ÿæ–¤æ‹·å¼ºé”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤ï¿½??
+const uint8_t CMD_CHOKE_OFF[6] = {0x04, 0x00, 0x00, 0x04, 0x0D, 0x0A};         // é”Ÿæˆªæ†‹æ‹·å¼ºé”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·
 
-const uint8_t CMD_RPM_MODE_OFF[6] = {0x03, 0x00, 0x00, 0x03, 0x0D, 0x0A};      // ¹Ø±Õ¶¨ËÙÄ£Ê½£¨ÊÖ¶¯Ä£Ê½£©
-const uint8_t CMD_RPM_MODE_ON[6] = {0x03, 0x00, 0x01, 0x04, 0x0D, 0x0A};       // ¿ªÆô¶¨ËÙÄ£Ê½
+const uint8_t CMD_RPM_MODE_OFF[6] = {0x03, 0x00, 0x00, 0x03, 0x0D, 0x0A};      // é”Ÿæˆªï¿½??è®¹æ‹·é”Ÿæ–¤æ‹·æ¨¡å¼é”Ÿæ–¤æ‹·é”Ÿï¿½?ï¿½ï¿½?ï¿½æ‹·æ¨¡å¼é”Ÿæ–¤ï¿½??
+const uint8_t CMD_RPM_MODE_ON[6] = {0x03, 0x00, 0x01, 0x04, 0x0D, 0x0A};       // é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·æ¨¡å¼
 
-const uint8_t CMD_STOP_ENGINE[6] = {0x41, 0x00, 0x01, 0x42, 0x0D, 0x0A};       // Í£³µÖ¸Áî Ö¸ÁîºÅ65
+const uint8_t CMD_STOP_ENGINE[6] = {0x41, 0x00, 0x01, 0x42, 0x0D, 0x0A};       // åœé”Ÿæ–¤æ‹·æŒ‡é”Ÿæ–¤æ‹· æŒ‡é”Ÿæ–¤æ‹·é”Ÿï¿½65
 
-const uint8_t CMD_CLOSE_THROTTLE[6] = {0x23, 0x00, 0x01, 0x24, 0x0D, 0x0A};    //¹Ø±Õ·çÃÅ Ö¸ÁîºÅ35
-const uint8_t CMD_OPEN_THROTTLE[6] = {0x23, 0x00, 0x00, 0x23, 0x0D, 0x0A};     //´ò¿ª·çÃÅ
+const uint8_t CMD_CLOSE_THROTTLE[6] = {0x23, 0x00, 0x01, 0x24, 0x0D, 0x0A};    //é”Ÿæˆªï¿½??å‡¤æ‹·é”Ÿæ–¤ï¿½?? æŒ‡é”Ÿæ–¤æ‹·é”Ÿï¿½35
+const uint8_t CMD_OPEN_THROTTLE[6] = {0x23, 0x00, 0x00, 0x23, 0x0D, 0x0A};     //é”Ÿæ´¥å¼€å‡¤æ‹·é”Ÿæ–¤ï¿½??
 
-/************************************** ±äÁ¿¶¨Òå ******************************************* */
+/************************************** é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹· ******************************************* */
 enum ecu_cmd_type
 {
     ECU_CMD_ENGIN_START = 1,
@@ -70,11 +70,12 @@ static uint8_t s_ecu_cmd_queue_buffer[8 * sizeof(struct ecu_cmd)];
 static struct EngineStatus s_engineStatus = {0};
 
 extern TX_BYTE_POOL byte_pool_0;
+extern unsigned char EngineRunningFlag;
 
-/************************************** Ë½ÓĞº¯ÊıÉùÃ÷ ******************************************* */
+/************************************** ç§é”Ÿï¿½??çŒ´æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤ï¿½?? ******************************************* */
 
 static void prv_engine_state_machine(struct ecu_cmd *pcmd);
-static void prv_engine_warmup_state_machine();
+static void prv_engine_warmup_state_machine(void);
 static void prv_engine_shutdown_state_machine();
 static void prv_Generate_Throttle_Cmd(float percent, uint8_t *buffer);
 static bool prv_check_sum(uint8_t *pbuf);
@@ -83,13 +84,13 @@ static int32_t prv_analyse(uint8_t *pbuf, int32_t len);
 static void prv_engine_task(ULONG thread_input);
 static void prv_Set_Throttle_Percent(float percent);
 
-/************************************** Ë½ÓĞº¯Êı ******************************************* */
+/************************************** ç§é”Ÿï¿½??çŒ´æ‹·é”Ÿæ–¤ï¿½?? ******************************************* */
 static TX_THREAD engine_task_tcb;
 static UCHAR engine_task_stack[TASK_STACK_SIZE];
 
 static void prv_engine_task(ULONG thread_input)
 {
-    // Èç¹û²»Ê¹ÓÃ²ÎÊı£¬¿ÉÒÔÌí¼ÓÕâĞĞ±ÜÃâ±àÒë¾¯¸æ
+    // é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿç»ç™¸æ‹·è²Œé”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·æ–œé”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿï¿½??è­¦é”Ÿæ–¤æ‹·
     (void)thread_input;
     uint8_t msg_buf[128];
     int32_t wt_idx = 0;
@@ -120,24 +121,24 @@ static void prv_engine_task(ULONG thread_input)
 
         if(rxlen > 0)
         {
-            g_DeviceState.ecuCountDown = 200;
-            // ´ËÊ±Êı×éÀïÓĞ (rxlen + wt_idx) ¸öÊı
+           // g_DeviceState.ecuCountDown = 200;
+            // é”Ÿæ–¤æ‹·æ—¶é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹· (rxlen + wt_idx) é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·
             wt_idx = prv_analyse(msg_buf, (rxlen + wt_idx));
         }
     }
 }
 
-/** ·¢¶¯»ú×´Ì¬»ú
- * ´¦Àí·¢¶¯»úÆô¶¯¡¢Í£»ú¡¢ÓÍ±ÃÆô¶¯¡¢ÓÍ±ÃÍ£Ö¹¡¢ÉèÖÃÓÍÃÅÖ¸Áî
+/** é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·çŠ¶æ€é”Ÿæ–¤æ‹·
+ * é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·åœé”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿé…µæ†‹æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿé…µæ†‹æ‹·åœï¿½?ï¿½é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·æŒ‡é”Ÿæ–¤æ‹·
  * */
-// static void prv_engine_state_machine(int32_t fd, struct ecu_cmd *pcmd)
 static void prv_engine_state_machine(struct ecu_cmd *pcmd)
 {
-    /*********** ·¢¶¯»ú×´Ì¬»ú ***************** */
+    /*********** é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·çŠ¶æ€é”Ÿæ–¤æ‹· ***************** */
     switch(s_engineStatus.CntState)
     {
         case ENGINE_STOPED:
             {
+                EngineRunningFlag=ENGINE_STOPED;
                 if((pcmd != NULL) && (pcmd->cmd == ECU_CMD_ENGIN_START))
                 {
                     s_engineStatus.CntState = ENGINE_WARMUP;
@@ -153,10 +154,12 @@ static void prv_engine_state_machine(struct ecu_cmd *pcmd)
             }
             break;
         case ENGINE_WARMUP:
+                EngineRunningFlag=ENGINE_WARMUP;
             prv_engine_warmup_state_machine();
             break;
         case ENGINE_RUNNING:
             {
+                EngineRunningFlag=ENGINE_RUNNING;
                 if((pcmd != NULL) && (pcmd->cmd == ECU_CMD_ENGIN_STOP))
                 {
                     s_engineStatus.CntState = ENGINE_SHUTTING_DOWN;
@@ -168,197 +171,97 @@ static void prv_engine_state_machine(struct ecu_cmd *pcmd)
             }
             break;
         case ENGINE_SHUTTING_DOWN:
+            EngineRunningFlag=ENGINE_SHUTTING_DOWN;
             prv_engine_shutdown_state_machine();
             break;
     }
 }
 
-/*********** Æô¶¯×´Ì¬»ú ***************** */
-static void prv_engine_warmup_state_machine()
+
+/*********** ç®€åŒ–å¯åŠ¨çŠ¶æ€æœºï¼ˆæ— æ²¹å‹/ï¿½?é€Ÿï¿½?ï¿½æŸ¥ï¼Œæ— é‡è¯•ï¼Œéé˜»å¡ï¼‰ ***************** */
+static void prv_engine_warmup_state_machine(void)
 {
-    static uint8_t s_StartEngineRetryCnt = 0;
     static uint32_t s_startTime = 0;
     static uint32_t s_sleepTime = 0;
-    static bool isfirstFail_fuel_pressure = true;
-    static uint32_t s_firstFail_fuel_pressure = 0;
-    static bool isfirstFail_rpm = true;
-    static uint32_t s_firstFail_rpm = 0;
 
-    /** Æô¶¯×´Ì¬»úµÄ×´Ì¬¶¨Òå */
+    /** ç®€åŒ–å¯åŠ¨çŠ¶æ€æœºçŠ¶æ€æšï¿½? */
     typedef enum {
-        INIT_PWM = 0,
-        OUTPUT_PWM_1MS,//********* */
-        SEND_CMD_PUMP_ON,
-        SLEEP,
-        CHECK_FUEL_PRESSURE,
-        SEND_CMD_IGNITION1_ON,
-        SEND_CMD_IGNITION2_ON,
-        SEND_CMD_CHOKE_ON,
-        SEND_CMD_RPM_MODE_OFF,
-        SEND_CMD_Throttle_Percent,
-        OUTPUT_PWM_2MS,
-        CHECK_RPM,//*********** */
-        START_SUCCESS,
-        START_FAILED,
-    } SM_StartEngine_t;
-    static SM_StartEngine_t s_current_state = INIT_PWM;
-    static SM_StartEngine_t s_next_state;
+        SIMPLE_INIT_PWM = 0,
+        SIMPLE_OUTPUT_PWM_1MS,
+        SIMPLE_SEND_CMD_PUMP_ON,
+        SIMPLE_SLEEP,
+        SIMPLE_SEND_CMD_IGNITION1_ON,
+        SIMPLE_SEND_CMD_IGNITION2_ON,
+        SIMPLE_SEND_CMD_CHOKE_ON,
+        SIMPLE_OUTPUT_PWM_2MS,
+        SIMPLE_START_DONE,
+    } SM_SimpleStartEngine_t;
+    static SM_SimpleStartEngine_t s_current_state = SIMPLE_INIT_PWM;
+    static SM_SimpleStartEngine_t s_next_state;
 
     switch (s_current_state)
     {
-        case INIT_PWM:
+        case SIMPLE_INIT_PWM:
             s_engineStatus.ecuError = NO_ERROR;
             PulseServo_Init(ECU_PWM8, 1);
-        case OUTPUT_PWM_1MS:
+            // fall through
+        case SIMPLE_OUTPUT_PWM_1MS:
             PulseServo_SetPulseWidth(ECU_PWM8, 1);
             s_startTime = tx_time_get();
             s_sleepTime = PWM_1MS_DURATION;
-            s_current_state = SLEEP;
-            s_next_state = SEND_CMD_PUMP_ON;
+            s_current_state = SIMPLE_SLEEP;
+            s_next_state = SIMPLE_SEND_CMD_PUMP_ON;
             break;
-        case SEND_CMD_PUMP_ON:
-            // fcs_uart_send(fd, (const uint8_t *)&CMD_PUMP_ON, sizeof(CMD_PUMP_ON));
+        case SIMPLE_SEND_CMD_PUMP_ON:
             fcs_uart_send(RT_ENGINE, (const uint8_t *)&CMD_PUMP_ON, sizeof(CMD_PUMP_ON));
-            
             s_startTime = tx_time_get();
             s_sleepTime = WAIT_50MS;
-            s_current_state = SLEEP;
-            s_next_state = CHECK_FUEL_PRESSURE; // ÕıÊ½´úÂë£¨ÊÔ³µÓÃ£©
-            // s_next_state = SEND_CMD_IGNITION1_ON;   // FIXME: ×ÀÃæ²âÊÔ´úÂë
+            s_current_state = SIMPLE_SLEEP;
+            s_next_state = SIMPLE_SEND_CMD_IGNITION1_ON;
             break;
-        case CHECK_FUEL_PRESSURE:
-            if(s_engineStatus.fuel_pressure > 2800)
-            // && (s_engineStatus.fuel_pressure < 3200))   // Ö¸Áî9£ºÊµ¼ÊÓÍÑ¹
-            {
-                s_current_state = SEND_CMD_IGNITION1_ON;
-                isfirstFail_fuel_pressure = true;
-            }
-            else    // ÓÍÑ¹Òì³£
-            {
-                // ¼ÓÒ»¸ö³¬Ê±ÅĞ¶Ï
-                // Èç¹ûÊÇµÚÒ»´Î½øÈëelse·ÖÖ§£¬¼ÇÂ¼Ê±¼ä
-                if(isfirstFail_fuel_pressure)
-                {
-                    s_firstFail_fuel_pressure = tx_time_get();
-                    isfirstFail_fuel_pressure = false;
-                }
-
-                // ¼ì²éÊÇ·ñ³¬Ê±£¬×î¶àµÈ´ı1·ÖÖÓ
-                if((tx_time_get() - s_firstFail_fuel_pressure) > TIMEOUT_FUEL_PRESSURE)
-                {
-                    // ÉÏ±¨ÓÍÑ¹Òì³£
-                    s_engineStatus.ecuError = ERROR_FUEL_PRESSURE;
-                    fcs_uart_send(RT_ENGINE, (const uint8_t *)&CMD_PUMP_OFF, sizeof(CMD_PUMP_OFF));
-                    // È·ÈÏ³¬Ê±£¬½øÈëÊ§°Ü×´Ì¬
-                    s_current_state = START_FAILED;
-                    // ÖØÖÃ±êÖ¾£¬ÎªÏÂÒ»´ÎÆô¶¯×ö×¼±¸
-                    isfirstFail_fuel_pressure = true;
-                }
-            }
-            break;
-        case SEND_CMD_IGNITION1_ON:
-            // fcs_uart_send(fd, (const uint8_t *)&CMD_IGNITION1_ON, sizeof(CMD_IGNITION1_ON));
+        case SIMPLE_SEND_CMD_IGNITION1_ON:
             fcs_uart_send(RT_ENGINE, (const uint8_t *)&CMD_IGNITION1_ON, sizeof(CMD_IGNITION1_ON));
-
             s_startTime = tx_time_get();
             s_sleepTime = WAIT_50MS;
-            s_current_state = SLEEP;
-            s_next_state = SEND_CMD_IGNITION2_ON;
+            s_current_state = SIMPLE_SLEEP;
+            s_next_state = SIMPLE_SEND_CMD_IGNITION2_ON;
             break;
-        case SEND_CMD_IGNITION2_ON:
-            // fcs_uart_send(fd, (const uint8_t *)&CMD_IGNITION2_ON, sizeof(CMD_IGNITION2_ON));
+        case SIMPLE_SEND_CMD_IGNITION2_ON:
             fcs_uart_send(RT_ENGINE, (const uint8_t *)&CMD_IGNITION2_ON, sizeof(CMD_IGNITION2_ON));
-
             s_startTime = tx_time_get();
             s_sleepTime = WAIT_50MS;
-            s_current_state = SLEEP;
-            s_next_state = SEND_CMD_CHOKE_ON;
+            s_current_state = SIMPLE_SLEEP;
+            s_next_state = SIMPLE_SEND_CMD_CHOKE_ON;
             break;
-        case SEND_CMD_CHOKE_ON:
-            // fcs_uart_send(fd, (const uint8_t *)&CMD_CHOKE_ON, sizeof(CMD_CHOKE_ON));
+        case SIMPLE_SEND_CMD_CHOKE_ON:
             fcs_uart_send(RT_ENGINE, (const uint8_t *)&CMD_CHOKE_ON, sizeof(CMD_CHOKE_ON));
-
             s_startTime = tx_time_get();
             s_sleepTime = WAIT_50MS;
-            s_current_state = SLEEP;
-            s_next_state = SEND_CMD_RPM_MODE_OFF;
+            s_current_state = SIMPLE_SLEEP;
+            s_next_state = SIMPLE_OUTPUT_PWM_2MS;
             break;
-        case SEND_CMD_RPM_MODE_OFF:
-            // fcs_uart_send(fd, (const uint8_t *)&CMD_RPM_MODE_OFF, sizeof(CMD_RPM_MODE_OFF));
-            fcs_uart_send(RT_ENGINE, (const uint8_t *)&CMD_RPM_MODE_OFF, sizeof(CMD_RPM_MODE_OFF));
-
-            s_startTime = tx_time_get();
-            s_sleepTime = WAIT_50MS;
-            s_current_state = SLEEP;
-            s_next_state = SEND_CMD_Throttle_Percent;
-            break;
-        case SEND_CMD_Throttle_Percent:// ÓÍÃÅ¿ªµ½25%
-            prv_Set_Throttle_Percent(25.0);
-            s_current_state = OUTPUT_PWM_2MS;
-            break;
-        case OUTPUT_PWM_2MS:
+        case SIMPLE_OUTPUT_PWM_2MS:
             PulseServo_SetPulseWidth(ECU_PWM8, 2);
             s_startTime = tx_time_get();
             s_sleepTime = WAIT_50MS;
-            s_current_state = SLEEP;
-            s_next_state = CHECK_RPM; // ÕıÊ½´úÂë£¨ÊÔ³µÓÃ£©
-            // s_next_state = START_SUCCESS;   // FIXME: ×ÀÃæ²âÊÔ´úÂë
+            s_current_state = SIMPLE_SLEEP;
+            s_next_state = SIMPLE_START_DONE;
             break;
-        case CHECK_RPM:
-            if(s_engineStatus.rpm > 2000)// ¼ì²é×ªËÙÊÇ·ñ2000ÒÔÉÏ
-            {
-                s_current_state = START_SUCCESS;
-                isfirstFail_rpm = true;
-            }
-            else    // ×ªËÙÒì³£
-            {
-                if(isfirstFail_rpm)
-                {
-                    s_firstFail_rpm = tx_time_get();
-                    isfirstFail_rpm = false;
-                }
-
-                if((tx_time_get() - s_firstFail_rpm) > TIMEOUT_CHECK_RPM)
-                {
-                    if(s_StartEngineRetryCnt < (MAX_START_RETRY - 1))
-                    {
-                        s_StartEngineRetryCnt++;
-                        s_current_state = OUTPUT_PWM_1MS;
-                    }
-                    else
-                    {
-                        //Ê§°Ü´ÎÊı¹ı¶à£¬½øÈë5minÀäÈ´Ê±¼ä(20260204»áÒé¼ÇÂ¼£ºÈË¹¤¿ØÖÆÏÂ´ÎÆô¶¯°´Å¥£¬byÁõÇ¿)
-                        // s_startTime = tx_time_get();
-                        // s_sleepTime = WAIT_1MIN * 5;
-                        s_current_state = START_FAILED; //SLEEP;
-                        // s_next_state = START_FAILED;
-                    }
-                    isfirstFail_rpm = true;
-                }
-            }
-            break;
-        case SLEEP:
+        case SIMPLE_SLEEP:
             if((tx_time_get() - s_startTime) > s_sleepTime) {
                 s_current_state = s_next_state;
             }
             break;
-        case START_SUCCESS:
+        case SIMPLE_START_DONE:
             PulseServo_Deinit(ECU_PWM8);
-            s_current_state = INIT_PWM;//ÎªÏÂ´Î×ö×¼±¸
-            s_StartEngineRetryCnt = 0;
+            s_current_state = SIMPLE_INIT_PWM;
             s_engineStatus.CntState = ENGINE_RUNNING;
-            prv_Set_Throttle_Percent(0.0f);//FIXME Æô¶¯³É¹¦£¬ÓÍÃÅ0%
-            break;
-        case START_FAILED://·¢¶¯»ú×´Ì¬ÖÃÎªstoped
-            PulseServo_Deinit(ECU_PWM8);
-            s_current_state = INIT_PWM;//ÎªÏÂ´Î×ö×¼±¸
-            s_StartEngineRetryCnt = 0;
-            s_engineStatus.CntState = ENGINE_STOPED;
+            prv_Set_Throttle_Percent(0.0f);
             break;
     }
 }
 
-/*********** Í£»ú×´Ì¬»ú ***************** */
+/*********** åœé”Ÿæ–¤æ‹·çŠ¶æ€é”Ÿæ–¤æ‹· ***************** */
 static void prv_engine_shutdown_state_machine()
 {
     static uint8_t s_StopEngineRetryCnt = 0;
@@ -367,7 +270,7 @@ static void prv_engine_shutdown_state_machine()
     static bool isfirstFail = true;
     static uint32_t s_firstFail = 0;
 
-    /** Í£»ú×´Ì¬»úµÄ×´Ì¬¶¨Òå */
+    /** åœé”Ÿæ–¤æ‹·çŠ¶æ€é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·çŠ¶æ€é”Ÿæ–¤æ‹·é”Ÿæ–¤ï¿½?? */
     typedef enum {
         SEND_CMD_STOP_ENGINE,//********* */
         CHECK_THROTTLE,
@@ -386,12 +289,13 @@ static void prv_engine_shutdown_state_machine()
             s_current_state = CHECK_THROTTLE;
             break;
         case CHECK_THROTTLE:
-            if(s_engineStatus.throttle_state == 1)// ¼ì²é·çÃÅÊÇ·ñ¹Ø±Õ 35ºÅÖ¸Áî£¬1Îª¹Ø±Õ£¬0Î´¹Ø±Õ
+					  s_engineStatus.throttle_state == 1;
+            if(s_engineStatus.throttle_state == 1)// é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿè§’å‡¤æ‹·ä¹‡é”Ÿï¿½ 35é”Ÿæ–¤æ‹·æŒ‡é”Ÿç­‹ï¿½??1ä¸ºé”Ÿï¿½??ï¿½??ï½æ‹·0ï¿½??é”Ÿæˆªæ†‹æ‹·
             {
                 s_current_state = STOP_SUCCESS;
                 isfirstFail = true;
             }
-            else    // ¹Ø±ÕÒì³£
+            else    // é”Ÿæˆªæ†‹æ‹·é”Ÿå±Šï¿½??
             {
                 if(isfirstFail)
                 {
@@ -408,7 +312,7 @@ static void prv_engine_shutdown_state_machine()
                     }
                     else
                     {
-                        // Æô¶¯Ê§°Ü´ÎÊıÌ«¶à¡£
+                        // é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·å¤±é”Ÿæ°è¾¾æ‹·é”Ÿæ–¤æ‹·ï¿½??é”Ÿæ´ï¿½??
                         s_current_state = STOP_FAILED;
                     }
                     isfirstFail = true;
@@ -416,12 +320,12 @@ static void prv_engine_shutdown_state_machine()
             }
             break;
         case STOP_SUCCESS:
-            s_current_state = SEND_CMD_STOP_ENGINE;//ÎªÏÂ´Î×ö×¼±¸
+            s_current_state = SEND_CMD_STOP_ENGINE;//ä¸ºé”Ÿé“°è¾¾æ‹·é”Ÿæ–¤æ‹·å‡†é”Ÿæ–¤æ‹·
             s_StopEngineRetryCnt = 0;
             s_engineStatus.CntState = ENGINE_STOPED;
             break;
         case STOP_FAILED:
-            s_current_state = SEND_CMD_STOP_ENGINE;//ÎªÏÂ´Î×ö×¼±¸
+            s_current_state = SEND_CMD_STOP_ENGINE;//ä¸ºé”Ÿé“°è¾¾æ‹·é”Ÿæ–¤æ‹·å‡†é”Ÿæ–¤æ‹·
             s_StopEngineRetryCnt = 0;
             s_engineStatus.CntState = ENGINE_RUNNING;
             break;
@@ -429,26 +333,26 @@ static void prv_engine_shutdown_state_machine()
 }
 
 
-/** @brief ¶¯Ì¬Éú³ÉÓÍÃÅÃüÁî£¨ÈÎÒâ°Ù·Ö±È£©
- * @param percent ÓÍÃÅ°Ù·Ö±È£¨0-100.0£¬Ö§³ÖÒ»Î»Ğ¡Êı£©
- * @param buffer Êä³ö»º³åÇø£¨ÖÁÉÙ6×Ö½Ú£©
+/** @brief é”Ÿæ–¤æ‹·æ€é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿç­‹ï¼ˆé”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·ä¿œç›´é¾‹é”Ÿï¿½
+ * @param percent é”Ÿæ–¤æ‹·é”Ÿè„šç™¾åˆ†æ¯”ï½æ‹·0-100.0é”Ÿæ–¤æ‹·æ”¯é”Ÿæ–¤æ‹·ä¸€ä½å°é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·
+ * @param buffer é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿï¿½??6é”Ÿï¿½?ï¿½èŠ‚ï½æ‹·
  */
 static void prv_Generate_Throttle_Cmd(float percent, uint8_t *buffer) {
-    /* ½«°Ù·Ö±È×ª»»Îª0-1000µÄÖµ */
+    /* é”Ÿæ–¤æ‹·é”Ÿï¿½??åˆ†æ†‹æ‹·è½¬é”Ÿæ–¤æ‹·ä¸º0-1000é”Ÿæ–¤æ‹·ï¿½? */
     uint16_t value = (uint16_t)(percent * 10.0f);  // 25.5% -> 255
-    uint8_t data_h = (value >> 8) & 0xFF;         // ¸ß×Ö½Ú
-    uint8_t data_l = value & 0xFF;                // µÍ×Ö½Ú
+    uint8_t data_h = (value >> 8) & 0xFF;         // é”Ÿæ–¤æ‹·é”Ÿè¡—æ–¤ï¿½??
+    uint8_t data_l = value & 0xFF;                // é”Ÿæ–¤æ‹·é”Ÿè¡—æ–¤ï¿½??
     
-    /* ¹¹½¨ÃüÁî */
-    buffer[0] = 0x40;                   // µØÖ·64
-    buffer[1] = data_h;                 // Êı¾İ¸ßÎ»
-    buffer[2] = data_l;                 // Êı¾İµÍÎ»
-    buffer[3] = 0x40 + data_h + data_l; // Ğ£ÑéºÍ
-    buffer[4] = 0x0D;                   // ½áÊø·û1
-    buffer[5] = 0x0A;                   // ½áÊø·û2
+    /* é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹· */
+    buffer[0] = 0x40;                   // é”Ÿæ–¤æ‹·å€64
+    buffer[1] = data_h;                 // é”Ÿæ–¤æ‹·é”Ÿæ·é©æ‹·ä½
+    buffer[2] = data_l;                 // é”Ÿæ–¤æ‹·é”Ÿæ·ï¿½?ï¿½æ‹·ï¿½??
+    buffer[3] = 0x40 + data_h + data_l; // æ ¡é”Ÿæ–¤æ‹·é”Ÿï¿½
+    buffer[4] = 0x0D;                   // é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤ï¿½??1
+    buffer[5] = 0x0A;                   // é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤ï¿½??2
 }
 
-/** ¸ù¾İ·¢¶¯»úĞ­Òé£¬¼ì²éĞ£ÑéºÍ */
+/** é”Ÿæ–¤æ‹·é”Ÿæ·å‡¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·åé”Ÿä»‹ï¼Œé”Ÿæ–¤æ‹·é”Ÿå«ï½æ‹·é”Ÿæ–¤ï¿½?? */
 // static bool prv_check_sum(uint8_t *pbuf)
 // {
 //     uint8_t sum = pbuf[0] + pbuf[1] + pbuf[2];
@@ -466,28 +370,32 @@ static bool prv_check_sum(uint8_t *pbuf)
     return (pbuf[3] == (pbuf[0] + pbuf[1] + pbuf[2])) ? true : false;
 }
 
-/** ¸ù¾İ·¢¶¯»úĞ­Òé£¬Êı¾İ½âÎö£¬´æÈë·¢¶¯»ú×´Ì¬²ÎÊı½á¹¹Ìå */
+/** é”Ÿæ–¤æ‹·é”Ÿæ·å‡¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·åé”Ÿä»‹ï¼Œé”Ÿæ–¤æ‹·é”Ÿæ·æ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿï¿½??å‘é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·çŠ¶æ€é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿç»“æ„é”Ÿæ–¤ï¿½?? */
 static void prv_analyse_data(uint8_t *pbuf)
 {
     switch (pbuf[0])
     {
     case 6:
         s_engineStatus.ambient_temp     = (pbuf[1] << 8) + pbuf[2];
+				//SETDATA(pDataPoolSrv,"Sr1A",s_engineStatus.ambient_temp,short);
         break;
     case 8:
         s_engineStatus.air_pressure     = (pbuf[1] << 8) + pbuf[2];
+				//SETDATA(pDataPoolSrv,"Sr2A",s_engineStatus.air_pressure,unsigned short);
         break;
     case 9:
         s_engineStatus.fuel_pressure    = (pbuf[1] << 8) + pbuf[2];
         break;
     case 19:
         s_engineStatus.jet1_duty        = (pbuf[1] << 8) + pbuf[2];
+				//SETDATA(pDataPoolSrv,"Sr3A", s_engineStatus.jet1_duty,unsigned short);
         break;
     case 35:
         s_engineStatus.throttle_state   = (pbuf[1] << 8) + pbuf[2];
         break;
     case 39:
         s_engineStatus.jet2_duty        = (pbuf[1] << 8) + pbuf[2];
+				//SETDATA(pDataPoolSrv,"Sr4A", s_engineStatus.jet2_duty,unsigned short);
         break;
     case 59:
         s_engineStatus.maxTemp          = (pbuf[1] << 8) + pbuf[2];
@@ -539,10 +447,10 @@ static void prv_analyse_data(uint8_t *pbuf)
     }
 }
 
-/** ½âÎöÊı¾İ 
- * @param ½ÓÊÕµ½µÄÊı¾İ
- * @param Êı×é³¤¶È
- * @return »¹ÓĞ¶àÉÙ¸öÎ´´¦ÀíµÄÊı¾İ
+/** é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹· 
+ * @param é”Ÿæ–¤æ‹·é”Ÿç§¸ï¿½?ï¿½æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤ï¿½??
+ * @param é”Ÿæ–¤æ‹·é”Ÿä»‹é•¿é”Ÿæ–¤ï¿½??
+ * @return é”Ÿæ–¤æ‹·é”Ÿï¿½??è®¹æ‹·é”ŸåŠ«é©æ‹·ï¿½??é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤ï¿½??
 */
 static int32_t prv_analyse(uint8_t *pbuf, int32_t len)
 {
@@ -555,7 +463,7 @@ static int32_t prv_analyse(uint8_t *pbuf, int32_t len)
         return len;
     }
     
-    for(i = 0; i < len-1; i++)
+    for(i = 0; i < len; i++)
     {
         unprocess_bytes++;
         end_key = (end_key<<8) + pbuf[i];       // 0x00 0D  --> 0x0D 0A
@@ -567,7 +475,7 @@ static int32_t prv_analyse(uint8_t *pbuf, int32_t len)
                 unprocess_bytes = 0;
                 continue;
             }
-            // lenght pass, now check sum
+            // length pass, now check sum
             pfrm = &pbuf[i-5];
             if((prv_check_sum(pfrm) == true) && ((*pfrm <= 245)))
             {
@@ -576,27 +484,27 @@ static int32_t prv_analyse(uint8_t *pbuf, int32_t len)
             unprocess_bytes = 0;
         }
     }
-    memmove(pbuf, &pbuf[len - unprocess_bytes - 1], (unprocess_bytes));
+    memmove(pbuf, &pbuf[len - unprocess_bytes], (unprocess_bytes));
     
     return unprocess_bytes;
 }
 
-/** @brief ´ÓqueueÖĞÈ¡µ½3ºÅÃüÁîÊ±£¬È¥ÉèÖÃÓÍÃÅ
- * @param percent ÓÍÃÅ°Ù·Ö±È£¨0-100.0£¬Ö§³ÖÒ»Î»Ğ¡Êı£©
+/** @brief é”Ÿæ–¤æ‹·queueé”Ÿæ–¤æ‹·å–é”Ÿæ–¤ï¿½??3é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·æ—¶é”Ÿæ–¤æ‹·å»é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·
+ * @param percent é”Ÿæ–¤æ‹·é”Ÿè„šç™¾åˆ†æ¯”ï½æ‹·0-100.0é”Ÿæ–¤æ‹·æ”¯é”Ÿæ–¤æ‹·ä¸€ä½å°é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·
  */
 static void prv_Set_Throttle_Percent(float percent)
 {
     uint8_t throttle_cmd[6];
     
-    /* ¶¯Ì¬Éú³ÉÓÍÃÅÃüÁî */
+    /* é”Ÿæ–¤æ‹·æ€é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤ï¿½?? */
     prv_Generate_Throttle_Cmd(percent, throttle_cmd);
     
-    /* ·¢ËÍÃüÁî */
+    /* é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹· */
     // fcs_uart_send(fd, (const uint8_t *)&throttle_cmd, sizeof(throttle_cmd));
     fcs_uart_send(RT_ENGINE, (const uint8_t *)&throttle_cmd, sizeof(throttle_cmd));
 }
 
-/************************************* ¶ÔÍâ½Ó¿Ú²¿·Ö ******************************************** */
+/************************************* é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·æ¶Œè¯“é”Ÿæ–¤æ‹·é”Ÿï¿½?? ******************************************** */
 void modECU_pumpOn(void)
 {
     struct ecu_cmd cmd;
@@ -625,8 +533,8 @@ void modECU_stopEngine(void)
     tx_queue_send(&s_ecu_cmd_queue, &cmd, TX_NO_WAIT);
 }
 
-/** @brief ·¢ÓÍÃÅÉèÖÃµÄĞÅºÅ
- * @param percent ÓÍÃÅ°Ù·Ö±È£¨0-100.0£¬Ö§³ÖÒ»Î»Ğ¡Êı£©
+/** @brief é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”ŸçŸ«ç¢‰æ‹·é”Ÿè„šçŒ´æ‹·
+ * @param percent é”Ÿæ–¤æ‹·é”Ÿè„šç™¾åˆ†æ¯”ï½æ‹·0-100.0é”Ÿæ–¤æ‹·æ”¯é”Ÿæ–¤æ‹·ä¸€ä½å°é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·
  */
 void modECU_setThrottle_percent(float percent)
 {
@@ -650,15 +558,15 @@ void modECU_EngineInit(void)
                     sizeof(s_ecu_cmd_queue_buffer));
 
     tx_thread_create(
-        &engine_task_tcb,                    // Ïß³Ì¿ØÖÆ¿é
-        "Engine Task",                  // Ïß³ÌÃû³Æ
-        prv_engine_task,                    // Ïß³ÌÈë¿Úº¯Êı
-        0,                                // Ïß³ÌÊäÈë²ÎÊı
-        engine_task_stack,                  // ¶ÑÕ»ÆğÊ¼µØÖ·
-        TASK_STACK_SIZE,        // ¶ÑÕ»´óĞ¡
-        TASK_PRIORITY,            // Ïß³ÌÓÅÏÈ¼¶£¨½Ï¸ßÓÅÏÈ¼¶£©
-        TASK_PRIORITY,            // ÇÀÕ¼ãĞÖµ
-        TX_NO_TIME_SLICE,                 // Ê±¼äÆ¬
-        TX_AUTO_START                     // ×Ô¶¯Æô¶¯
+        &engine_task_tcb,                    // é”Ÿï¿½??ç¨‹åŒ¡æ‹·é”Ÿç‹¡åŒ¡ï¿½??
+        "Engine Task",                  // é”Ÿï¿½??ç­¹æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·
+        prv_engine_task,                    // é”Ÿï¿½??ç­¹æ‹·é”Ÿæ–¤æ‹·ï¿½?ï¿½é”Ÿæ–¤æ‹·é”Ÿï¿½
+        0,                                // é”Ÿï¿½??ç­¹æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·é”Ÿï¿½??
+        engine_task_stack,                  // é”Ÿæ–¤æ‹·æ ˆé”Ÿæ–¤æ‹·ï¿½?ï¿½é”Ÿæ–¤æ‹·å€
+        TASK_STACK_SIZE,        // é”Ÿæ–¤æ‹·æ ˆé”Ÿæ–¤æ‹·å°
+        TASK_PRIORITY,            // é”Ÿï¿½??ç­¹æ‹·é”Ÿæ–¤æ‹·é”Ÿé¥ºç¡·æ‹·é”Ÿæ–¤æ‹·é”Ÿè¾ƒé©æ‹·é”Ÿæ–¤æ‹·é”Ÿé¥ºç¡·æ‹·é”Ÿæ–¤æ‹·
+        TASK_PRIORITY,            // é”Ÿæ–¤æ‹·å é”Ÿæ–¤æ‹·ï¿½?
+        TX_NO_TIME_SLICE,                 // æ—¶é”Ÿæ–¤æ‹·ï¿½??
+        TX_AUTO_START                     // é”Ÿçš†è®¹æ‹·é”Ÿæ–¤æ‹·é”Ÿæ–¤æ‹·
     );
 }

@@ -4,31 +4,37 @@
 // Copyright (c) 2016 
 // All rights reserved.
 //
-// ÕªÒª: ¶¨Òå·ÂÕæËùĞè¹«ÓÃº¯Êı
+// æ‘˜è¦: å®šä¹‰ä»¿çœŸæ‰€éœ€å…¬ç”¨å‡½æ•°
 //        
 //
-// µ±Ç°°æ±¾: 1.0
-// ×÷Õß: wym
-// Íê³ÉÈÕÆÚ: 
+// å½“å‰ç‰ˆæœ¬: 1.0
+// ä½œè€…: wym
+// å®Œæˆæ—¥æœŸ: 
 //==================================================================/
 #include <math.h>
 
 #define PI			(3.14159265358979)
 #define RTOA		(180.0/PI) 
+#define LAT_TO_METER    111319.5 // 1çº¬åº¦Â° â‰ˆ 111319.5ç±³ï¼ˆAPMå¼€æºé£æ§ï¼Œç®€åŒ–æ¨¡å‹æ ‡å‡†å€¼ï¼‰
+#define R_EARTH    6371000.0 // 1çº¬åº¦Â° â‰ˆ 111319.5ç±³ï¼ˆAPMå¼€æºé£æ§ï¼Œï¼Œç®€åŒ–æ¨¡å‹æ ‡å‡†å€¼ï¼‰
 
-
-#define IN			//ÊäÈëÁ¿
-#define OUT			//Êä³öÁ¿
+#define IN			//è¾“å…¥é‡
+#define OUT			//è¾“å‡ºé‡
 
 class CFlightGlobalFun
 {
 public:
-	static void Tomas(IN double lon1,			//ÆğÊ¼¾­¶È 
-		IN double lat1, 				//ÆğÊ¼Î³¶È
-		IN double lon2, 				//Ä¿±ê¾­¶È
-		IN double lat2, 				//Ä¿±êÎ³¶È
-		OUT double *sdm, 				//¾àÀë
-		OUT double *a12);				//ÓÎÒÆ·½Î»½Ç
+	static double get_bearing(double lon1, double lat1, double lon2, double lat2);	//è¿‘è·ç®€åŒ–è®¡ç®—æ–¹ä½è§’
+	static double get_distance(double lon1, double lat1, double lon2, double lat2);//è¿‘è·ç®€åŒ–è®¡ç®—å¼¹ç›®è·ç¦»
+	static void Tomas(IN double lon1,			//èµ·å§‹ç»åº¦ 
+		IN double lat1, 				//èµ·å§‹çº¬åº¦
+		IN double lon2, 				//ç›®æ ‡ç»åº¦
+		IN double lat2, 				//ç›®æ ‡çº¬åº¦
+		OUT double *sdm, 				//è·ç¦»
+		OUT double *a12);				//æ¸¸ç§»æ–¹ä½è§’
+	static double Reject_outlier(double curr_val, double *base_val, int *over_cnt, double delta_max);//å‰”é‡å€¼å‡½æ•°
+	static void Tustin_FirstIO(double a1,double a2,double b1,double b2,double *r,double *f,double ts);
+	static void Tustin_SecondIO(double a1, double a2, double a3, double b1, double b2, double b3, double *r, double *f, double ts);
 	static double Nozero_FUN(IN double denominator);
 	static double QATN(IN double y, IN double x);
 	static double FSign(IN double fData);
@@ -36,73 +42,73 @@ public:
 	static double Range(IN double dData, IN double dMargin);
 	static double Range2(IN double dData, IN double dMax, IN double dMin);
 	static double Norm(IN int vector_length, IN double *in_vector);
-	static void Vincenty_Forward(IN double vin_l1,	//µ±Ç°¾­¶È
-		IN double vin_b1,			//µ±Ç°Î³¶È
-		IN double s,					//¾àÀë
-		IN double alfa12,			//ÓÎÒÆ·½Î»½Ç
-		OUT double* vin_l2_ptr,		//Ä¿±ê¾­¶È
-		OUT double* vin_b2_ptr);	//Ä¿±êÎ³¶È
-	static void Vincenty_Backward(IN double vin_l1,	//µ±Ç°¾­¶È
-		IN double vin_b1,			//µ±Ç°Î³¶È
-		IN double vin_l2,			//Ä¿±ê¾­¶È		
-		IN double vin_b2,			//Ä¿±êÎ³¶È
-		OUT double* S_ptr,			//¾àÀë
-		OUT double* Alfa12_ptr);	//ÓÎÒÆ·½Î»½Ç
+	static void Vincenty_Forward(IN double vin_l1,	//å½“å‰ç»åº¦
+		IN double vin_b1,			//å½“å‰çº¬åº¦
+		IN double s,					//è·ç¦»
+		IN double alfa12,			//æ¸¸ç§»æ–¹ä½è§’
+		OUT double* vin_l2_ptr,		//ç›®æ ‡ç»åº¦
+		OUT double* vin_b2_ptr);	//ç›®æ ‡çº¬åº¦
+	static void Vincenty_Backward(IN double vin_l1,	//å½“å‰ç»åº¦
+		IN double vin_b1,			//å½“å‰çº¬åº¦
+		IN double vin_l2,			//ç›®æ ‡ç»åº¦		
+		IN double vin_b2,			//ç›®æ ‡çº¬åº¦
+		OUT double* S_ptr,			//è·ç¦»
+		OUT double* Alfa12_ptr);	//æ¸¸ç§»æ–¹ä½è§’
 	static double CalcDist(double lon1, 
 		double lat1, 
 		double lon2, 
 		double lat2, 
 		double lon, 
 		double lat);
-	static void CrossProduct(IN double in_vector_A[],	//²æ³ËÏòÁ¿A
-		IN double in_vector_B[],		//²æ³ËÏòÁ¿B
-		OUT double *out_vector_C	//½á¹ûÏòÁ¿C
+	static void CrossProduct(IN double in_vector_A[],	//å‰ä¹˜å‘é‡A
+		IN double in_vector_B[],		//å‰ä¹˜å‘é‡B
+		OUT double *out_vector_C	//ç»“æœå‘é‡C
 		);
-	static double DotProduct(int vector_length,	//µã³ËÏòÁ¿Î¬Êı
-		double in_vector_A[],		//µã³ËÏòÁ¿A
-		double in_vector_B[]		//µã³ËÏòÁ¿B
+	static double DotProduct(int vector_length,	//ç‚¹ä¹˜å‘é‡ç»´æ•°
+		double in_vector_A[],		//ç‚¹ä¹˜å‘é‡A
+		double in_vector_B[]		//ç‚¹ä¹˜å‘é‡B
 		);
-	static double LAQL1(int n,	//²åÖµÖáÔªËØ¸öÊı
-		double *x,			//²åÖµÖá				
-		double *y,			//²åÖµÊı¾İ£¨n£©
-		double u);			//²åÖµÊäÈë²ÎÊı
-	static double LAQL2(int n, //²åÖµÖá1ÔªËØ¸öÊı
-		int m,				//²åÖµÖá2ÔªËØ¸öÊı
-		double *a,			//²åÖµÖá1
-		double *b,			//²åÖµÖá2
-		double *c,			//²åÖµÊı¾İ£¨n * m£©
-		double x,			//²åÖµÊäÈë²ÎÊı1
-		double y);			//²åÖµÊäÈë²ÎÊı2
-	static double LAQL3(int n, //²åÖµÖá1ÔªËØ¸öÊı
-		int m,				//²åÖµÖá2ÔªËØ¸öÊı
-		int l,				//²åÖµÖá3ÔªËØ¸öÊı
-		double *a,			//²åÖµÖá1
-		double *b,			//²åÖµÖá2
-		double *c,			//²åÖµÖá3
-		double *d,			//²åÖµÊı¾İ£¨n * m * l£©		
-		double x,			//²åÖµÊäÈë²ÎÊı1
-		double y,			//²åÖµÊäÈë²ÎÊı2
-		double z);			//²åÖµÊäÈë²ÎÊı3
-	static double LAQL4(int n,	//²åÖµÖá1ÔªËØ¸öÊı
-		int m,				//²åÖµÖá2ÔªËØ¸öÊı
-		int l,				//²åÖµÖá3ÔªËØ¸öÊı
-		int k,				//²åÖµÖá4ÔªËØ¸öÊı
-		double *a,			//²åÖµÖá1
-		double *b,			//²åÖµÖá2
-		double *c,			//²åÖµÖá3
-		double *d,			//²åÖµÖá4
-		double *e,			//²åÖµÊı¾İ£¨n * m * l * k£©
-		double x,			//²åÖµÊäÈë²ÎÊı1
-		double y,			//²åÖµÊäÈë²ÎÊı2
-		double z,			//²åÖµÊäÈë²ÎÊı3
-		double u);			//²åÖµÊäÈë²ÎÊı4
+	static double LAQL1(int n,	//æ’å€¼è½´å…ƒç´ ä¸ªæ•°
+		double *x,			//æ’å€¼è½´				
+		double *y,			//æ’å€¼æ•°æ®ï¼ˆnï¼‰
+		double u);			//æ’å€¼è¾“å…¥å‚æ•°
+	static double LAQL2(int n, //æ’å€¼è½´1å…ƒç´ ä¸ªæ•°
+		int m,				//æ’å€¼è½´2å…ƒç´ ä¸ªæ•°
+		double *a,			//æ’å€¼è½´1
+		double *b,			//æ’å€¼è½´2
+		double *c,			//æ’å€¼æ•°æ®ï¼ˆn * mï¼‰
+		double x,			//æ’å€¼è¾“å…¥å‚æ•°1
+		double y);			//æ’å€¼è¾“å…¥å‚æ•°2
+	static double LAQL3(int n, //æ’å€¼è½´1å…ƒç´ ä¸ªæ•°
+		int m,				//æ’å€¼è½´2å…ƒç´ ä¸ªæ•°
+		int l,				//æ’å€¼è½´3å…ƒç´ ä¸ªæ•°
+		double *a,			//æ’å€¼è½´1
+		double *b,			//æ’å€¼è½´2
+		double *c,			//æ’å€¼è½´3
+		double *d,			//æ’å€¼æ•°æ®ï¼ˆn * m * lï¼‰		
+		double x,			//æ’å€¼è¾“å…¥å‚æ•°1
+		double y,			//æ’å€¼è¾“å…¥å‚æ•°2
+		double z);			//æ’å€¼è¾“å…¥å‚æ•°3
+	static double LAQL4(int n,	//æ’å€¼è½´1å…ƒç´ ä¸ªæ•°
+		int m,				//æ’å€¼è½´2å…ƒç´ ä¸ªæ•°
+		int l,				//æ’å€¼è½´3å…ƒç´ ä¸ªæ•°
+		int k,				//æ’å€¼è½´4å…ƒç´ ä¸ªæ•°
+		double *a,			//æ’å€¼è½´1
+		double *b,			//æ’å€¼è½´2
+		double *c,			//æ’å€¼è½´3
+		double *d,			//æ’å€¼è½´4
+		double *e,			//æ’å€¼æ•°æ®ï¼ˆn * m * l * kï¼‰
+		double x,			//æ’å€¼è¾“å…¥å‚æ•°1
+		double y,			//æ’å€¼è¾“å…¥å‚æ•°2
+		double z,			//æ’å€¼è¾“å…¥å‚æ•°3
+		double u);			//æ’å€¼è¾“å…¥å‚æ•°4
 	static double LAQL1fd(int n, 
-		double *x,			//¶ÔÊäÈë²ÎÊıx·Ö¶Î
+		double *x,			//å¯¹è¾“å…¥å‚æ•°xåˆ†æ®µ
 		double *y, 
 		double u);
 	static double LAQL2fd(int n,	
 		int m, 
-		double *a,			//¶ÔÊäÈë²ÎÊıa·Ö¶Î
+		double *a,			//å¯¹è¾“å…¥å‚æ•°aåˆ†æ®µ
 		double *b, 
 		double *c, 
 		double x, 
@@ -110,47 +116,47 @@ public:
 	static double LAQL3fd(int n, 
 		int m, 
 		int l,
-		double *a,			//¶ÔÊäÈë²ÎÊıa·Ö¶Î
+		double *a,			//å¯¹è¾“å…¥å‚æ•°aåˆ†æ®µ
 		double *b, 
 		double *c, 
 		double *d,
 		double x, 
 		double y, 
 		double z);
-	static double LAQL1R(int n,	//²åÖµÖáÔªËØ¸öÊı	
-		double *x,			//·´²åÖµÖá				
-		double *y,			//²åÖµÊı¾İ£¨n£©
-		double u);			//²åÖµÊäÈë²ÎÊı
-	static double LAQL2R(int n, //²åÖµÖá1ÔªËØ¸öÊı
-		int m,				//²åÖµÖá2ÔªËØ¸öÊı
-		double *a,			//²åÖµÖá1
-		double *b,			//·´²åÖµÖá2
-		double *c,			//²åÖµÊı¾İ£¨n * m£©
-		double x,			//²åÖµÊäÈë²ÎÊı1
-		double y);			//²åÖµÊäÈë²ÎÊı2
-	static double LAQL3R(int n, //²åÖµÖá1ÔªËØ¸öÊı
-		int m,				//²åÖµÖá2ÔªËØ¸öÊı
-		int l,				//²åÖµÖá3ÔªËØ¸öÊı
-		double *a,			//²åÖµÖá1
-		double *b,			//²åÖµÖá2
-		double *c,			//·´²åÖµÖá3
-		double *d,			//²åÖµÊı¾İ£¨n * m * l£©		
-		double x,			//²åÖµÊäÈë²ÎÊı1
-		double y,			//²åÖµÊäÈë²ÎÊı2
-		double z);			//²åÖµÊäÈë²ÎÊı3
-	static double LAQL4R(int n,	//²åÖµÖá1ÔªËØ¸öÊı
-		int m,				//²åÖµÖá2ÔªËØ¸öÊı
-		int l,				//²åÖµÖá3ÔªËØ¸öÊı
-		int k,				//²åÖµÖá4ÔªËØ¸öÊı
-		double *a,			//²åÖµÖá1
-		double *b,			//²åÖµÖá2
-		double *c,			//²åÖµÖá3
-		double *d,			//·´²åÖµÖá4
-		double *e,			//²åÖµÊı¾İ£¨n * m * l * k£©
-		double x,			//²åÖµÊäÈë²ÎÊı1
-		double y,			//²åÖµÊäÈë²ÎÊı2
-		double z,			//²åÖµÊäÈë²ÎÊı3
-		double u);			//²åÖµÊäÈë²ÎÊı4
+	static double LAQL1R(int n,	//æ’å€¼è½´å…ƒç´ ä¸ªæ•°	
+		double *x,			//åæ’å€¼è½´				
+		double *y,			//æ’å€¼æ•°æ®ï¼ˆnï¼‰
+		double u);			//æ’å€¼è¾“å…¥å‚æ•°
+	static double LAQL2R(int n, //æ’å€¼è½´1å…ƒç´ ä¸ªæ•°
+		int m,				//æ’å€¼è½´2å…ƒç´ ä¸ªæ•°
+		double *a,			//æ’å€¼è½´1
+		double *b,			//åæ’å€¼è½´2
+		double *c,			//æ’å€¼æ•°æ®ï¼ˆn * mï¼‰
+		double x,			//æ’å€¼è¾“å…¥å‚æ•°1
+		double y);			//æ’å€¼è¾“å…¥å‚æ•°2
+	static double LAQL3R(int n, //æ’å€¼è½´1å…ƒç´ ä¸ªæ•°
+		int m,				//æ’å€¼è½´2å…ƒç´ ä¸ªæ•°
+		int l,				//æ’å€¼è½´3å…ƒç´ ä¸ªæ•°
+		double *a,			//æ’å€¼è½´1
+		double *b,			//æ’å€¼è½´2
+		double *c,			//åæ’å€¼è½´3
+		double *d,			//æ’å€¼æ•°æ®ï¼ˆn * m * lï¼‰		
+		double x,			//æ’å€¼è¾“å…¥å‚æ•°1
+		double y,			//æ’å€¼è¾“å…¥å‚æ•°2
+		double z);			//æ’å€¼è¾“å…¥å‚æ•°3
+	static double LAQL4R(int n,	//æ’å€¼è½´1å…ƒç´ ä¸ªæ•°
+		int m,				//æ’å€¼è½´2å…ƒç´ ä¸ªæ•°
+		int l,				//æ’å€¼è½´3å…ƒç´ ä¸ªæ•°
+		int k,				//æ’å€¼è½´4å…ƒç´ ä¸ªæ•°
+		double *a,			//æ’å€¼è½´1
+		double *b,			//æ’å€¼è½´2
+		double *c,			//æ’å€¼è½´3
+		double *d,			//åæ’å€¼è½´4
+		double *e,			//æ’å€¼æ•°æ®ï¼ˆn * m * l * kï¼‰
+		double x,			//æ’å€¼è¾“å…¥å‚æ•°1
+		double y,			//æ’å€¼è¾“å…¥å‚æ•°2
+		double z,			//æ’å€¼è¾“å…¥å‚æ•°3
+		double u);			//æ’å€¼è¾“å…¥å‚æ•°4
 };
 
 #endif

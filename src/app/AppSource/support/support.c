@@ -3,6 +3,7 @@
 #include "../Interface/interface_uart.h"
 #include "../Interface/interface_gpio.h"
 #include "interface_timer.h"
+#include "../modules/modSrvCtl.h"
 #include "../../sd_flash.h"
 
 void uart_mode_init(void)
@@ -27,24 +28,22 @@ void uart_mode_init(void)
 OS_S32 BoardInit()
 {
 	BufferInit();	
-	//³õÊ¼»¯Êý¾Ý³Ø
+	//ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½Ý³ï¿½
 	InitDataPool();
-	//³õÊ¼»¯×ÜÏß
+	//ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	InitRts();
 
 	InitCanRts();
 
-    AngleServo_Init(SERVO_PWM1, 0.0f); //×ó³á°ò¶æ»ú³õÊ¼»¯
-    AngleServo_Init(SERVO_PWM6, 0.0f); //ÓÒ³á°ò¶æ»ú³õÊ¼»¯
-    AngleServo_Init(SERVO_PWM7, 0.0f); //¿ªÉ¡¶æ»ú³õÊ¼»¯
-
+    AngleServo_Init(SERVO_PWM7, 0.0f);
 #ifdef SERVO_PWM
-    AngleServo_Init(SERVO_PWM2, 0.0f);	// ×ó¸±Òí¶æ
-    AngleServo_Init(SERVO_PWM3, 0.0f);	// ×ó¸©Ñö¶æ
-    AngleServo_Init(SERVO_PWM4, 0.0f);	// ÓÒ¸©Ñö¶æ
-    AngleServo_Init(SERVO_PWM5, 0.0f);	// ÓÒ¸±Òí¶æ
+    AngleServo_Init(SERVO_PWM1, 0.0f);
+    AngleServo_Init(SERVO_PWM2, 0.0f);
+    AngleServo_Init(SERVO_PWM3, 0.0f);
+    AngleServo_Init(SERVO_PWM4, 0.0f);
+    AngleServo_Init(SERVO_PWM5, 0.0f);
+    AngleServo_Init(SERVO_PWM6, 0.0f);
 #endif
-
     return OS_SUCCESS;
 }
 

@@ -9,7 +9,7 @@ CMathControlPitch::CMathControlPitch()
 {
 	p_st_pitch_control_input = NULL;
 	p_st_pitch_control_output = NULL;
-	// p_st_debug_monitor = NULL;
+	//p_st_debug_monitor = NULL;
 	
 	m_k0f = 0.0;
 	m_k2f = 0.0;
@@ -26,6 +26,7 @@ CMathControlPitch::CMathControlPitch()
 	m_u7f = 0.0;
 	m_u6f = 0.0;
 	m_ugf = 0.0;
+	m_ugf_record = 0.0;
 	m_unwif = 0.0;
 	m_urf_zd = 0.0;
 
@@ -36,6 +37,7 @@ CMathControlPitch::CMathControlPitch()
 	m_g = 0.0;
 	m_zeta = 0.0;
 	m_zeta_command = 0.0;
+	m_zeta_t_change = 0.0;
 	m_zeta_command_record1 = 0.0;
 	m_zeta_command_record2 = 0.0;
 	m_wz = 0.0;
@@ -51,6 +53,7 @@ CMathControlPitch::CMathControlPitch()
 	m_h_rate_command2 = 0.0;
 	m_nby = 0.0;
 	m_ny_command = 0.0;
+	m_ny_command_guidance = 0.0;
 	m_dqf = 0.0;
 	m_h_target_in = 0.0;
 	m_h_target = 0.0;
@@ -67,14 +70,21 @@ CMathControlPitch::CMathControlPitch()
 	m_uaf = 0.0;
 	m_uaf_record = 0.0;
 	m_wz_record = 0.0;
-	m_time_control = MAX_TIME;
-	m_time_altitude_change_start = MAX_TIME;
+ 
 	m_time_altitude_change = MAX_TIME;
 	m_time_altitude_change_record = MAX_TIME;
+	m_time_zeta_change = MAX_TIME;
+	m_time_zeta_change_record = MAX_TIME;
+	m_time_altitude_change_tocruise = MAX_TIME;
+	
+	m_time_control = MAX_TIME;
+	m_time_altitude_change_start = MAX_TIME;
+	m_time_altitude_change_end = MAX_TIME;
 	m_time_separate_booster = MAX_TIME;
 	m_time_altitude_control = MAX_TIME;
 	m_time_combat_status = MAX_TIME;
 	m_time_combat_delay = MAX_TIME;
+	m_time_combat_dive_pullup = MAX_TIME;
 	m_time_v70 = MAX_TIME;
 	m_time_v120 = MAX_TIME;
 	m_time_v60 = MAX_TIME;
@@ -82,42 +92,49 @@ CMathControlPitch::CMathControlPitch()
 	m_time_v140 = MAX_TIME;
 	m_flag_altitude_integral_set = false;
 
-	m_ktheta_lauch_enc = 12.0;//·¢Éä¸©Ñö½Ç
-	m_ktheta_climb_enc = 6.0;//ÖúÍÆÆ÷·ÖÀëºó£¬ÅÀÉý¸©Ñö½Ç
-	m_ktheta_hight_enc = 1.0;
+	m_ktheta_lauch_enc = 12.0;//ï¿½ï¿½ï¿½ä¸©ï¿½ï¿½ï¿½ï¿½
+	m_ktheta_climb_enc = 8.0;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	m_ktheta_hight_enc = 2.0;
+	m_ktheta_decline_enc = -4.0;//ï¿½Â»ï¿½ï¿½ï¿½
+	m_alpha_b = 2.0;
 }
 void CMathControlPitch::Initial()
 {
-	m_ktheta_lauch_enc = p_st_pitch_control_input->ktheta_lauch_enc;//µØÃæ×°¶©£¬·¢Éä
-	m_ktheta_climb_enc = p_st_pitch_control_input->ktheta_climb_enc;//µØÃæ×°¶©£¬ÅÀÉý
-	m_ktheta_hight_enc = p_st_pitch_control_input->ktheta_hight_enc;//µØÃæ×°¶©£¬¶¨¸ß
+	m_ktheta_lauch_enc = p_st_pitch_control_input->ktheta_lauch_enc;//ï¿½ï¿½ï¿½ï¿½×°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	m_ktheta_climb_enc = p_st_pitch_control_input->ktheta_climb_enc;//ï¿½ï¿½ï¿½ï¿½×°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	m_ktheta_hight_enc = p_st_pitch_control_input->ktheta_hight_enc;//ï¿½ï¿½ï¿½ï¿½×°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	m_ktheta_decline_enc = -4.0;//ï¿½Â»ï¿½ï¿½ï¿½Ì¬ï¿½Ç£ï¿½ï¿½ï¿½ï¿½ï¿½Ô¼2degï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½-8deg
+
+	m_high_maneuver_state = 0;//ï¿½ï¿½Ê¼ï¿½ï¿½
 }
 void CMathControlPitch::Run()
 {
 	Get_Data();
 	Calc_Data();
 	Send_Data();
-	// Monitor_Data();
 }
 void CMathControlPitch::Get_Data()
 {
-	m_mass = p_st_pitch_control_input->mass;//¹À¼ÆÖÊÁ¿
-	m_q = p_st_pitch_control_input->q;	//¶¯Ñ¹
-	m_v = p_st_pitch_control_input->v;	//¿ÕËÙ
-	m_vs = p_st_pitch_control_input->vs;//´¹ËÙ
+	m_mass = p_st_pitch_control_input->mass;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	m_q = p_st_pitch_control_input->q;	//ï¿½ï¿½Ñ¹
+	m_v = p_st_pitch_control_input->v;	//ï¿½ï¿½ï¿½ï¿½
+	m_vs = p_st_pitch_control_input->vs;//ï¿½ï¿½ï¿½ï¿½
 	m_g = p_st_pitch_control_input->g;
 	m_zeta = p_st_pitch_control_input->zeta;
 	m_wz = p_st_pitch_control_input->wz;
-	m_hz = p_st_pitch_control_input->hz;//×éºÏ¸ß¶È
+	m_hz = p_st_pitch_control_input->hz;//ï¿½ï¿½Ï¸ß¶ï¿½
 	m_nby = p_st_pitch_control_input->nby;
+	m_ny_command_guidance = p_st_pitch_control_input->ny_command_guidance;
 	m_dqf = p_st_pitch_control_input->dqf;
 	m_time_control = p_st_pitch_control_input->time_control;
 	m_time_separate_booster = p_st_pitch_control_input->time_separate_booster;
 	m_time_missile_takeoff = p_st_pitch_control_input->time_missile_takeoff;
 	m_time_altitude_control = p_st_pitch_control_input->time_altitude_control;
 	m_time_altitude_change_start = p_st_pitch_control_input->time_altitude_change_start;
+	m_time_altitude_change_end = p_st_pitch_control_input->time_altitude_change_end;
 	m_time_combat_status = p_st_pitch_control_input->time_combat_status;
 	m_time_combat_delay = p_st_pitch_control_input->time_combat_delay;
+	m_time_combat_dive_pullup = p_st_pitch_control_input->time_combat_dive_pullup;
 	m_h_target_in = p_st_pitch_control_input->target_height;
 	m_distance_target = p_st_pitch_control_input->distance_target;
 	m_distance_target_t_combat = p_st_pitch_control_input->distance_target_t_combat;
@@ -126,396 +143,804 @@ void CMathControlPitch::Get_Data()
 }
 void CMathControlPitch::Send_Data()
 {
-	p_st_pitch_control_output->uqkf = m_uqkf;
-	p_st_pitch_control_output->u2f = m_u2f;
-	p_st_pitch_control_output->u5f = m_u5f;
-	p_st_pitch_control_output->ugf = m_ugf;	//¸ß¶È¿ØÖÆ
-	p_st_pitch_control_output->urf_zd = m_urf_zd;
+	p_st_pitch_control_output->uqkf = m_uqkf;//ï¿½Ú»ï¿½Â·Ç°ï¿½ï¿½
+	p_st_pitch_control_output->u2f = m_u2f;	//ï¿½Ú»ï¿½Â·kp
+	p_st_pitch_control_output->u5f = m_u5f;	//ï¿½Ú»ï¿½Â·kd
+	p_st_pitch_control_output->ugf = m_ugf;//m_ugf;	//ï¿½ï¿½ï¿½Â·ï¿½ï¿½ï¿½ß¶È¿ï¿½ï¿½ï¿½
+	p_st_pitch_control_output->urf_zd = m_urf_zd;//ï¿½ï¿½ï¿½Â·ï¿½ï¿½ï¿½Æµï¿½
+	
 	p_st_pitch_control_output->h_command = m_h_command;
+	p_st_pitch_control_output->h_rate_command = m_h_rate_command;
 	p_st_pitch_control_output->zeta_command = m_zeta_command;
 	p_st_pitch_control_output->ny_command = m_ny_command;
 }
 
-//ËµÃ÷£ºÕýÂß¼­¶æ¶ÔÓ¦¸ºÁ¦¾Ø£¬¼´¿ØÖÆÏµÊýÎªÕý£¬Æ«²îÎª¡°×´Ì¬ - Ö¸Áî¡±£¬²úÉú¡°ÕýÂß¼­¶æ¸ºÁ¦¾Ø¡±
+//Ëµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß¼ï¿½ï¿½ï¿½ï¿½Ó¦ï¿½ï¿½ï¿½ï¿½ï¿½Ø£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ïµï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½Æ«ï¿½ï¿½Îªï¿½ï¿½×´Ì¬ - Ö¸ï¿½î¡±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß¼ï¿½ï¿½æ¸ºï¿½ï¿½ï¿½Ø¡ï¿½
 void CMathControlPitch::Calc_Data()
 {
 	Calc_Control_Gain();
 	Calc_Control_Commond();
-	
-	//ÎªÁËµ÷ÊÔ???...
-	if(	flight_time > 15.0)
+
+	//ï¿½Ú»ï¿½Â·ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç°ï¿½ï¿½
+	if (flight_time < m_time_control)
 	{
-		double temp_a = 1.0;
+		m_uqkf = 0.0;
 	}
-	
-	//ÄÚ»ØÂ·£ºÇ°À¡£¬ÖúÍÆÆ÷·ÖÀëºóÖð²½ÒýÈëÇ°À¡
-	if(flight_time < m_time_separate_booster)
+	else if(flight_time < m_time_separate_booster)
 	{
-		m_uqkf = 0.0;//µ¥Î»deg
+		m_uqkf = 2.0;//ï¿½ï¿½Î»deg
 	}
-	else if(flight_time < m_time_separate_booster + 3.0)
+	else if(flight_time < m_time_separate_booster + 2.0)
 	{
-		m_uqkf = m_k0f*(flight_time - m_time_separate_booster)/3.0;
+		m_uqkf = m_k0f*(flight_time - m_time_separate_booster)/2.0 + 2.0*(m_time_separate_booster + 2.0 - flight_time)/2.0;//ï¿½ï¿½Î»deg
 	}
+	//else if(flight_time < m_time_missile_takeoff + 1.0)
+	//{
+	//	m_uqkf = -2.0;//ï¿½ï¿½Î»deg
+	//}
+	//else if(flight_time < m_time_missile_takeoff + 3.0)
+	//{
+	//	m_uqkf = m_k0f*(flight_time - m_time_missile_takeoff - 1.0)/2.0 - 2.0*(m_time_missile_takeoff + 3.0 - flight_time)/2.0;
+	//}
+	else if(flight_time < m_time_combat_status + m_time_combat_delay)
+	{
+		m_uqkf = m_k0f;//ï¿½ï¿½Î»deg
+	}
+	//ï¿½ï¿½ï¿½ï¿½Ä©ï¿½Æµï¿½ï¿½Ð»ï¿½ï¿½Ø£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø¹ï¿½ï¿½Ç²ï¿½ï¿½ï¿½
 	else
 	{
-		m_uqkf = m_k0f;//µ¥Î»deg
+		m_uqkf = -6.5;//ï¿½ï¿½Î»deg
 	}
-	//ÄÚ»ØÂ·£º±ÈÀý»·½Ú
+	//Ç°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì§Í·ï¿½ï¿½ï¿½Ø²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É¼ï¿½ï¿½ï¿½ï¿½ï¿½
+	//m_uqkf = m_k0f;//ï¿½ï¿½Î»deg
+	
+	//ï¿½Ú»ï¿½Â·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	m_u2f = m_k2f * (m_zeta - m_zeta_command);
-	if(flight_time < m_time_separate_booster)
+	if (flight_time < m_time_control)
+	{
+		m_u2f = 0.0;
+	}
+	else if(flight_time < m_time_separate_booster + 1.0)
 	{
 		m_u2f = CFlightGlobalFun::Range(m_u2f, 12.0);
 	}
 	else
 	{
-		m_u2f = m_u2f / cos(m_gama_command_compensate / RTOA);//¹ö×ª½âñî
-		m_u2f = CFlightGlobalFun::Range(m_u2f, 11.0);		
+		m_u2f = m_u2f / cos(m_gama_command_compensate / RTOA);//ï¿½ï¿½×ªï¿½ï¿½ï¿½ï¿½
+		m_u2f = CFlightGlobalFun::Range(m_u2f, 10.0);		
 	}	
-	//ÄÚ»ØÂ·£ºÎ¢·Ö»·½Ú£¬Ö¸Áî½ÇËÙ¶ÈÎªÁã
+	//ï¿½Ú»ï¿½Â·ï¿½ï¿½Î¢ï¿½Ö»ï¿½ï¿½Ú£ï¿½Ö¸ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½Îªï¿½ï¿½
 	m_u5f = m_k5f * m_wz;
-
-	//Íâ»ØÂ·£º¸ß¶È¸ú×Ù
-	m_u3f = m_k3f * (m_hz - m_h_command);
-	m_u3f = CFlightGlobalFun::Range(m_u3f, 10.0);	//¸ß¶È»ú¶¯¼ÆËã£¬ÁÙÊ±È¡Ïû
-	//Íâ»ØÂ·£º´¹ËÙ·´À¡
-	m_u7f = m_k7f * (m_vs - m_h_rate_command);
-	//Íâ»ØÂ·:¸ß¶È»ý·Ö¿ØÖÆ
-	if((!m_flag_altitude_integral_set)
-		&&(((flight_time > m_time_altitude_control) //¿ªÊ¼¸ß¶È¿ØÖÆÇÒ¸ß¶ÈÆ«²î½ÏÐ¡
-		&& (fabs(m_hz - m_h_command) <= 20.0))
-		||(flight_time >= (m_time_altitude_control + 20.0))))//±¸·ÝÌõ¼þ
+	if (flight_time < m_time_control)
 	{
-		m_flag_altitude_integral_set = true;
+		m_u5f = 0.0;
 	}
+
+	//ï¿½ï¿½ï¿½Â·ï¿½ï¿½ï¿½ß¶È¸ï¿½ï¿½ï¿½
+	m_u3f = m_k3f * (m_hz - m_h_command);
+	m_u3f = CFlightGlobalFun::Range(m_u3f, 10.0);	//ï¿½ß¶È»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ã£¬ï¿½ï¿½Ê±È¡ï¿½ï¿½
+	//ï¿½ï¿½ï¿½Â·ï¿½ï¿½ï¿½ï¿½ï¿½Ù·ï¿½ï¿½ï¿½
+	m_u7f = m_k7f * (m_vs - m_h_rate_command);
+	//ï¿½ï¿½ï¿½Â·:ï¿½ß¶È»ï¿½ï¿½Ö¿ï¿½ï¿½ï¿½
+	//if((!m_flag_altitude_integral_set)
+	//	&&(((flight_time > m_time_altitude_control) && (fabs(m_hz - m_h_command) <= 20.0))//ï¿½ï¿½Ê¼ï¿½ß¶È¿ï¿½ï¿½ï¿½ï¿½Ò¸ß¶ï¿½Æ«ï¿½ï¿½ï¿½Ð¡
+	//	    ||(flight_time >= (m_time_altitude_control + 20.0))))//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	//{
+	//	m_flag_altitude_integral_set = true;
+	//}
 	if (m_flag_altitude_integral_set)
 	{
 		m_u6f += m_k6f * (m_hz - m_h_command) * STEP_5ms;
-		m_u6f = CFlightGlobalFun::Range(m_u6f, 9.0);
+		m_u6f = CFlightGlobalFun::Range(m_u6f, 6.0);
+	}
+	else
+	{
+		m_u6f = 0.0;
 	}
 
-	//¸ù¾Ý·ÉÐÐ½×¶Î£¬È·¶¨¸ß¶È¿ØÖÆ
-	//ÅÀÉýÍê³ÉÇ°£¬ÎÞ¸ß¶È¿ØÖÆ
+	//ï¿½ï¿½ï¿½Ý·ï¿½ï¿½Ð½×¶Î£ï¿½È·ï¿½ï¿½ï¿½ß¶È¿ï¿½ï¿½ï¿½
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç°ï¿½ï¿½ï¿½Þ¸ß¶È¿ï¿½ï¿½ï¿½
 	if(flight_time <= m_time_altitude_control)
 	{
 		m_ugf = 0.0;
 	}
-	//¸ß¶È¿ØÖÆÒýÈë¹ý¶É£¬¹ý¶ÉÊ±¼ä4s
+	//ï¿½ï¿½Ê¼ï¿½ß¶È¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É£ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½4s
 	else if(flight_time <= (m_time_altitude_control + 4.0))
 	{
 		m_ugf = (m_u3f + m_u7f + m_u6f)  * (flight_time - m_time_altitude_control) /4.0;
-		m_ugf = CFlightGlobalFun::Range(m_ugf,20.0);
+		
 	}
-	//¸ß¶È¿ØÖÆ¹ý³Ì£¬¹ý¶ÉÍê³É
+	//ï¿½ß¶È¿ï¿½ï¿½Æ¹ï¿½ï¿½Ì£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	else if(flight_time < m_time_combat_status + m_time_combat_delay)
+	{
+		//ï¿½ï¿½ï¿½ï¿½ï¿½ß¶È»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â·
+		if(2 == m_high_maneuver_state)
+		{
+			m_ugf = m_u3f + m_u7f + m_u6f;
+			m_ugf_record = m_ugf;
+		}
+		//ï¿½ß¶È»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì£ï¿½Ö»ï¿½ï¿½ï¿½Ð¸ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½ï¿½ï¿½Ù£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â·
+		//(3 == m_high_maneuver_state)&&(4 == m_high_maneuver_state)
+		else
+		{
+			m_ugf = 0.0;
+		}
+	}
+	//else if(flight_time < m_time_combat_status + m_time_combat_delay + 1.0)
+	//{
+	//	//ï¿½ï¿½ï¿½ï¿½Ä©ï¿½Æµï¿½ï¿½ó£¬²ï¿½ï¿½ï¿½ï¿½Ð¸ß¶È¿ï¿½ï¿½ï¿½
+	//	//(5 == m_high_maneuver_state)
+	//	//Ëµï¿½ï¿½ï¿½ï¿½ï¿½ð¹¥²ï¿½ï¿½ï¿½Ê±ï¿½ï¿½Ä©ï¿½Æµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ó£¬¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì£ï¿½ï¿½Æµï¿½Ê±ï¿½ä¸³ÖµÎªï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñ²ï¿½ï¿½×´Ì¬ï¿½ï¿½ï¿½ï¿½
+	//	
+	//	//ï¿½ï¿½m_ugf_record ï¿½ï¿½ï¿½Éµï¿½0ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½1s
+	//	m_ugf = m_ugf_record * (m_time_combat_status + m_time_combat_delay + 1.0 - flight_time);
+	//}
 	else
 	{
-		m_ugf = m_u3f + m_u7f + m_u6f;
-		m_ugf = CFlightGlobalFun::Range(m_ugf,20.0);
+		m_ugf = 0.0;
 	}
+	m_ugf = CFlightGlobalFun::Range(m_ugf,6.5);//ï¿½ï¿½ï¿½È±ï¿½1ï¿½ï¿½1degï¿½ï¿½ï¿½Ç¶ï¿½Ó¦0.15gï¿½ï¿½ï¿½Ø¹ï¿½ï¿½ï¿½
+	//ï¿½ï¿½Îªï¿½Ú»ï¿½Â·ï¿½ï¿½ï¿½ë£¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½
+	//m_ugf = m_ugf/m_k2f;
 
-	//µ¼ÒýÍ·Ëø¶¨Ä¿±êÇ°£¬³£¹æ¿ØÖÆ
-	if (flight_time < (m_time_combat_status + m_time_combat_delay))
+	//ï¿½ï¿½ï¿½ï¿½Í·ï¿½ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	if(flight_time < m_time_combat_status + m_time_combat_delay)
+	//if(flight_time < m_time_combat_status)
 	{
-		m_unwif = m_u2f + m_u5f + m_ugf;//ÄÚÍâ»ØÂ·¿ØÖÆµþ¼Ó
+		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý¼ï¿½ï¿½ï¿½
+		m_unwif = m_uqkf + m_u2f + m_u5f;// + m_ugf;//ï¿½ï¿½ï¿½Ú»ï¿½Í¼ï¿½ï¿½ï¿½ï¿½
 	}
-	//µ¼ÒýÍ·Ëø¶¨Ä¿±êºó£¬½øÈëÄ©ÖÆµ¼
+	//ï¿½ï¿½ï¿½ä£¬Ä©ï¿½Æµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì¹ï¿½ï¿½É£ï¿½Õ½ï¿½ï¿½ï¿½ï¿½ï¿½Ó³ï¿½Ê±ï¿½ï¿½
+	//else if(flight_time < (m_time_combat_status + m_time_combat_delay))
+	//{
+	//	//ï¿½ï¿½ï¿½ï¿½Ä©ï¿½Æµï¿½Ê±ï¿½Ì£ï¿½Ñ²ï¿½É¶ï¿½Øµï¿½Ñ¹ ï¿½ï¿½ï¿½Éµï¿½ Ä©ï¿½Æµï¿½ï¿½ï¿½Ñ¹
+	//	//m_unwif -> m_urf_zd
+	//}
+	//ï¿½ï¿½ï¿½ï¿½Í·ï¿½ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½ó£¬½ï¿½ï¿½ï¿½Ä©ï¿½Æµï¿½
 	else
 	{
-		//²âÊÔµ¯µÀ½×Ô¾ÏìÓ¦²âÊÔ
+		//ï¿½ï¿½ï¿½Ôµï¿½ï¿½ï¿½ï¿½ï¿½Ô¾ï¿½ï¿½Ó¦ï¿½ï¿½ï¿½ï¿½
  		//m_ny_command = 1.0;
  		//if (flight_time > (m_time_combat_status + 10.0)) m_ny_command = 0.5;	
 
-		//±ê×¼Èý»ØÂ·¹ýÔØ¿ØÖÆ
+		//ï¿½ï¿½×¼ï¿½ï¿½ï¿½ï¿½Â·ï¿½ï¿½ï¿½Ø¿ï¿½ï¿½ï¿½
  		//m_unwif += (RTOA * m_knif * (m_nby - m_ny_command) + m_kwif * m_wz) * STEP_5ms;
  		//m_unwif = CFlightGlobalFun::Range(m_unwif, 5.0);
  		//m_urf_zd = m_unwif + m_u5f;
 
-		//£¨»ý·ÖÐÎÊ½£©Î±¹¥½ÇÈý»ØÂ·¹ýÔØ¿ØÖÆ £¬ÆäÖÐ£¬¹ýÔØÖ¸ÁîÓÉ"¸Ä½ø±ÈÀýµ¼Òý(Éú³É¹ýÔØÖ¸Áî)"
-		//¹ýÔØ»ý·ÖÏî
+		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê½ï¿½ï¿½Î±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â·ï¿½ï¿½ï¿½Ø¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ð£ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½ï¿½ï¿½"ï¿½Ä½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½(ï¿½ï¿½ï¿½É¹ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½)"
+		//ï¿½ï¿½ï¿½Ø»ï¿½ï¿½ï¿½ï¿½ï¿½
 		m_unif += RTOA * m_knif * (m_nby - m_ny_command) * STEP_5ms;
 		m_unif = CFlightGlobalFun::Range(m_unif, 10.0);
-		//Î±¹¥½ÇÏî£¬Áã½×±£³ÖÆ÷ÏßÐÔ»¯
+		//Î±ï¿½ï¿½ï¿½ï¿½ï¿½î£¬ï¿½ï¿½×±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô»ï¿½
 		double k1 = 7.4772e-3;//0.004981;
-		double k2 = 0.9925;	//Î±¹¥½Ç·´À¡»ØÂ·´«º¯1/(s+a4)ÀëÉ¢»¯ÏµÊý£¬a4=1.5
+		double k2 = 0.9925;	//Î±ï¿½ï¿½ï¿½Ç·ï¿½ï¿½ï¿½ï¿½ï¿½Â·ï¿½ï¿½ï¿½ï¿½1/(s+a4)ï¿½ï¿½É¢ï¿½ï¿½Ïµï¿½ï¿½ï¿½ï¿½a4=1.5
 		m_uaf = k2 * m_uaf_record + m_kwif * k1 * m_wz_record;
 		m_uaf_record = m_uaf;
 		m_wz_record = m_wz;
 		
-		//µþ¼ÓÎ¢·ÖÏî£¬¹¹³É×Ü¿ØÖÆÁ¿
-		m_urf_zd = m_unif + m_uaf + m_u5f;//¹ýÔØ»ý·Ö¡¢¹ýÔØ¿ØÖÆ
+		//ï¿½ï¿½ï¿½ï¿½Î¢ï¿½ï¿½ï¿½î£¬ï¿½ï¿½ï¿½ï¿½ï¿½Ü¿ï¿½ï¿½ï¿½ï¿½ï¿½
+		if(m_distance_target > 10.0)
+			m_urf_zd = m_unif + m_uaf + m_u5f;//ï¿½ï¿½ï¿½Ø»ï¿½ï¿½Ö¡ï¿½ï¿½ï¿½ï¿½Ø¿ï¿½ï¿½ï¿½
+		//ï¿½ï¿½ï¿½ï¿½Ð¡ï¿½ï¿½10mÊ±ï¿½ï¿½ï¿½ï¿½ï¿½Ö²ï¿½ï¿½ï¿½
+
+		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý¼ï¿½ï¿½ï¿½
+		m_unwif = m_uqkf + m_urf_zd;
 	}
 }
 
 void CMathControlPitch::Calc_Control_Gain()
 {
-	//ÏÞ·ùºó´¦Àí±äÁ¿
-	double temp_velocity = 50.0;//³õÖµ m/s
-	double temp_hight = 1500.0;//³õÖµ m
-	double temp_mass = 133.0;//³õÖµ kg
-	double temp_q = 1500.0;//³õÖµ Pa	
+	//ï¿½Þ·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	double temp_velocity = 50.0;//ï¿½ï¿½Öµ m/s
+	double temp_hight = 1500.0;//ï¿½ï¿½Öµ m
+	double temp_mass = 133.0;//ï¿½ï¿½Öµ kg
+	double temp_q = 1500.0;//ï¿½ï¿½Öµ Pa	
 	
-	//Æð·É¶Î¿ØÖÆ²ÎÊý: ¹Ì¶¨±Õ»·´ø¿íµÄ¸©Ñö½ÇPD¿ØÖÆ£¬¸ß¶È¡¢ËÙ¶È¶þÎ¬²åÖµ
+	//ï¿½ï¿½É¶Î¿ï¿½ï¿½Æ²ï¿½ï¿½ï¿½: 1.2Hzï¿½Ì¶ï¿½ï¿½Õ»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¸ï¿½ï¿½ï¿½ï¿½ï¿½PDï¿½ï¿½ï¿½Æ£ï¿½ï¿½ß¶È¡ï¿½ï¿½Ù¶È¶ï¿½Î¬ï¿½ï¿½Öµ
 	double k2f_stage1 = 1.211;
 	double k5f_stage1 = 0.200;
-	static double hight_stage1_array[4] = {0.0, 1000.0, 2000.0, 3000.0};//¸ß¶È
-	static double vel_stage1_array[6] = {30, 40, 50, 60, 70, 80};//ËÙ¶È
-	// ÐÞÕýºó±ÈÀýÔöÒæ Kp[¸ß¶È][ËÙ¶È]
+	static double hight_uf_stage1_array[4] = {0.0, 1000.0, 2000.0, 3000.0};//ï¿½ß¶ï¿½
+	static double vel_uf_stage1_array[6] = {30, 40, 50, 60, 70, 80};//ï¿½Ù¶ï¿½
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Kp[ï¿½ß¶ï¿½][ï¿½Ù¶ï¿½]
 	double K2f_stage1_matrix[4][6] = {
-	    {2.9019, 1.6323, 1.0447, 0.7255, 0.5330, 0.4081},
-	    {3.1977, 1.7987, 1.1512, 0.7994, 0.5873, 0.4497},
-	    {3.5316, 1.9865, 1.2714, 0.8829, 0.6487, 0.4966},
-	    {3.9095, 2.1991, 1.4074, 0.9774, 0.7181, 0.5498}
+	    {5.0347, 2.8320, 1.8125, 1.2587, 0.9247, 0.7080},
+	    {5.5478, 3.1206, 1.9972, 1.3869, 1.0190, 0.7802},
+	    {6.1270, 3.4465, 2.2057, 1.5318, 1.1254, 0.8616},
+	    {6.7827, 3.8153, 2.4418, 1.6957, 1.2458, 0.9538}
 	};
-	// ÐÞÕýºóÎ¢·ÖÔöÒæ Kd[¸ß¶È][ËÙ¶È]
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î¢ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Kd[ï¿½ß¶ï¿½][ï¿½Ù¶ï¿½]
 	double K5f_stage1_matrix[4][6] = {
-	    {0.4933, 0.2775, 0.1776, 0.1233, 0.0906, 0.0694},
-	    {0.5436, 0.3058, 0.1957, 0.1359, 0.0998, 0.0764},
-	    {0.6004, 0.3377, 0.2161, 0.1501, 0.1103, 0.0844},
-	    {0.6646, 0.3738, 0.2393, 0.1662, 0.1221, 0.0935}
-	};
-	//Ç°À¡¸©Ñö¶æ
-	double K0f_stage1_matrix[4][6] = {
-    	{17.4762, 10.9412,  7.9164,  6.2733,  5.2826,  4.6396},
-    	{18.9985, 11.7975,  8.4645,  6.6539,  5.5622,  4.8537},
-    	{19.0000, 12.7642,  9.0831,  7.0836,  5.8779,  5.0953},//20.7170 -> 19.0
-    	{20.0000, 13.8583,  9.7834,  7.5698,  6.2351,  5.3689} //22.6622 -> 20.0
+	    {1.4206, 0.8089, 0.5221, 0.3643, 0.2679, 0.2046},
+	    {1.5568, 0.8855, 0.5711, 0.3983, 0.2929, 0.2237},
+	    {1.7105, 0.9720, 0.6265, 0.4368, 0.3212, 0.2453},
+	    {1.8845, 1.0699, 0.6891, 0.4803, 0.3531, 0.2698}
 	};
 
-	//Ñ²º½¶Î¿ØÖÆ²ÎÊý£º0.8±¶¿ª»·×ªÕÛÆµÂÊÎª±Õ»·´ø¿í£¬PD¿ØÖÆ£¬ÒÔµ¯ÖÊÁ¿¡¢¶¯Ñ¹¶þÎ¬²åÖµ
+	//Ñ²ï¿½ï¿½ï¿½Î¿ï¿½ï¿½Æ²ï¿½ï¿½ï¿½ï¿½ï¿½0.8ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½Æµï¿½ï¿½Îªï¿½Õ»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½PDï¿½ï¿½ï¿½Æ£ï¿½ï¿½Ôµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¹ï¿½ï¿½Î¬ï¿½ï¿½Öµ
 	double k2f_stage2 = 1.3092;
 	double k5f_stage2 = 0.1147;
 	/******************************************************************
-	 * ÊäÈë£ºÖÊÁ¿ mass(kg)¡¢¶¯Ñ¹ q(Pa)
-	 * ÖÊÁ¿²åÖµµã£º102, 133, 165 kg
-	 * ¶¯Ñ¹²åÖµµã£º500, 1000, 1500, 2000, 2500, 3000 Pa
-	 * Êä³ö£ºKp£¨±ÈÀýÔöÒæ£©¡¢Kd£¨Î¢·ÖÔöÒæ£©
-	 * Êý×é½á¹¹£ºKp[ÖÊÁ¿ÐÐ][¶¯Ñ¹ÁÐ]¡¢Kd[ÖÊÁ¿ÐÐ][¶¯Ñ¹ÁÐ]
+	 * ï¿½ï¿½ï¿½ë£ºï¿½ï¿½ï¿½ï¿½ mass(kg)ï¿½ï¿½ï¿½ï¿½Ñ¹ q(Pa)
+	 * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öµï¿½ã£º102, 133, 165 kg
+	 * ï¿½ï¿½Ñ¹ï¿½ï¿½Öµï¿½ã£º500, 1000, 1500, 2000, 2500, 3000 Pa
+	 * ï¿½ï¿½ï¿½ï¿½ï¿½Kpï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½æ£©ï¿½ï¿½Kdï¿½ï¿½Î¢ï¿½ï¿½ï¿½ï¿½ï¿½æ£©
+	 * ï¿½ï¿½ï¿½ï¿½á¹¹ï¿½ï¿½Kp[ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½][ï¿½ï¿½Ñ¹ï¿½ï¿½]ï¿½ï¿½Kd[ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½][ï¿½ï¿½Ñ¹ï¿½ï¿½]
 	 *****************************************************************/
-	// ÖÊÁ¿²åÖµ±í£¨ÐÐË÷Òý 0,1,2£©
-	static double mass_stage2_array[3] = {102.0, 133.0, 165.0};
-	// ¶¯Ñ¹²åÖµ±í£¨ÁÐË÷Òý 0~5£©
-	static double q_stage2_array[6] = {500.0, 1000.0, 1500.0, 2000.0, 2500.0, 3000.0};
-	// ÐÞÕýºó±ÈÀýÔöÒæ Kp[ÖÊÁ¿][¶¯Ñ¹]
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 0,1,2ï¿½ï¿½
+	static double mass_uf_stage2_array[3] = {102.0, 133.0, 165.0};
+	// ï¿½ï¿½Ñ¹ï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 0~5ï¿½ï¿½
+	static double q_uf_stage2_array[6] = {500.0, 1000.0, 1500.0, 2000.0, 2500.0, 3000.0};
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Kp[ï¿½ï¿½ï¿½ï¿½][ï¿½ï¿½Ñ¹]
 	double K2f_stage2_matrix[3][6] = {
-	    {1.1419, 1.3529, 1.5149, 1.6514, 1.7716, 1.8803},   // mass = 102kg
-	    {1.0232, 1.1850, 1.3092, 1.4139, 1.5061, 1.5895},   // mass = 133kg
-	    {0.9474, 1.0779, 1.1780, 1.2623, 1.3367, 1.4039}    // mass = 165kg
+	    {1.4863, 1.5120, 1.5318, 1.5484, 1.5631, 1.5763},   // mass = 102kg
+	    {1.4718, 1.4916, 1.5067, 1.5195, 1.5307, 1.5409},   // mass = 133kg
+	    {1.4626, 1.4785, 1.4907, 1.5010, 1.5100, 1.5182}    // mass = 165kg
 	};
-	// ÐÞÕýºóÎ¢·ÖÔöÒæ Kd[ÖÊÁ¿][¶¯Ñ¹]
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î¢ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Kd[ï¿½ï¿½ï¿½ï¿½][ï¿½ï¿½Ñ¹]
 	double K5f_stage2_matrix[3][6] = {
-	    {0.3929, 0.2129, 0.1323, 0.0838, 0.0503, 0.0255},   // mass = 102kg
-	    {0.3779, 0.1960, 0.1147, 0.0660, 0.0326, 0.0100},   // mass = 133kg
-	    {0.3678, 0.1845, 0.1029, 0.0540, 0.0205, 0.0100}    // mass = 165kg
+	    {0.6086, 0.4274, 0.3470, 0.2992, 0.2665, 0.2423},   // mass = 102kg
+	    {0.6127, 0.4293, 0.3481, 0.2997, 0.2666, 0.2422},   // mass = 133kg
+	    {0.6153, 0.4306, 0.3488, 0.3000, 0.2667, 0.2421}    // mass = 165kg
 	};
-	// Ç°À¡ K0[ÖÊÁ¿][¶¯Ñ¹]
-	double K0f_stage2_matrix[3][6] = {
-	    {12.7194,  7.6292,  5.9325,  5.0841,  4.5751,  4.2358},
-	    {15.8134,  9.1762,  6.9638,  5.8576,  5.1939,  4.7515},
-	    {19.0072, 10.7731,  8.0284,  6.6561,  5.8327,  5.2838}
+	//Ç°ï¿½ï¿½ K0[ï¿½ï¿½ï¿½ï¿½][ï¿½ï¿½Ñ¹]
+	//double K0f_stage2_matrix[3][6] = {
+	//   {11.9249,  7.1517,  5.5607,  4.7651,  4.2878,  3.9696},
+    //    {14.8263,  8.6024,  6.5278,  5.4905,  4.8681,  4.4532},
+    //    {17.8212, 10.0999,  7.5261,  6.2392,  5.4671,  4.9523}
+	//};
+	
+	//12.3051    7.4145    5.7843    4.9692    4.4802    4.1541
+	//15.2778    8.9009    6.7752    5.7124    5.0747    4.6496
+	//18.3464   10.4352    7.7981    6.4796    5.6884    5.1610
+	//ï¿½ï¿½Í¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¬ï¿½ï¿½Ñ¹ï¿½ï¿½Æ½ï¿½â¹¥ï¿½Ç£ï¿½ï¿½ï¿½Ó¦Æ½ï¿½â¸©ï¿½ï¿½ï¿½ï¿½
+	double alpha_b_stage2_matrix[3][6] = {
+	    {6.6295, 1.4113, -0.3281, -1.1978, -1.7197, -2.0675},
+    	{9.8014, 2.9972,  0.7292, -0.4049, -1.0853, -1.5389},
+    	{13.0756,4.6343,  1.8206,  0.4137, -0.4304, -0.9932}
 	};
 	
-	//Ä©ÖÆµ¼¶Î¿ØÖÆ²ÎÊý£º¹Ì¶¨´ø¿íÎ±¹¥½ÇÈý»ØÂ·¹ýÔØ¿ØÖÆ£¬¼´ 5rad-1±Õ»·´ø¿í£¬1.5rad-1³¤ÖÜÆÚ×ªÕÛÆµÂÊ£»
-	//¹ýÔØÔöÒæ knif
-	//½ÇËÙ¶ÈÔöÒæ kwif
-	//Î±²à»¬½ÇÔöÒæ k5f
-	double knif_staget3 = 0.10;//×ª»¯Îª½Ç¶È£¬¶ÔÓ¦4.011
-	double kwif_staget3 = 0.55;//½ÇËÙ¶È»ý·Ö£¬Î±¹¥½Ç¿ØÖÆ
-	double k5f_staget3  = 0.14;//½ÇËÙ¶È¿ØÖÆ
+	//Ä©ï¿½Æµï¿½ï¿½Î¿ï¿½ï¿½Æ²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì¶ï¿½ï¿½ï¿½ï¿½ï¿½Î±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â·ï¿½ï¿½ï¿½Ø¿ï¿½ï¿½Æ£ï¿½ï¿½ï¿½ 5rad-1ï¿½Õ»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½1.5rad-1ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½Æµï¿½Ê£ï¿½
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ knif
+	//ï¿½ï¿½ï¿½Ù¶ï¿½ï¿½ï¿½ï¿½ï¿½ kwif
+	//Î±ï¿½à»¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ k5f
+	double knif_staget3 = 0.10;//×ªï¿½ï¿½Îªï¿½Ç¶È£ï¿½ï¿½ï¿½Ó¦4.011
+	double kwif_staget3 = 0.55;//ï¿½ï¿½ï¿½Ù¶È»ï¿½ï¿½Ö£ï¿½Î±ï¿½ï¿½ï¿½Ç¿ï¿½ï¿½ï¿½
+	double k5f_staget3  = 0.14;//ï¿½ï¿½ï¿½Ù¶È¿ï¿½ï¿½ï¿½
 	/******************************************************************
-	 * ¿ØÖÆ²ÎÊý±í¹æÔò
-	 * £¨1£©ËÙ¶È < 40m/s  ¡ú Ê¹ÓÃ 40m/s ¶ÔÓ¦²ÎÊý£¨µÚ0ÁÐ£©
-	 * £¨2£©ËÙ¶ÈµµÎ»£º40¡¢50¡¢60¡¢70 m/s ¡ú ¶ÔÓ¦ÁÐË÷Òý 0¡¢1¡¢2¡¢3
-	 * £¨3£©¸ß¶È > 3km    ¡ú Ê¹ÓÃ 3km ¶ÔÓ¦²ÎÊý£¨µÚ3ÐÐ£©
-	 * £¨4£©¸ß¶ÈµµÎ»£º0¡¢1000¡¢2000¡¢3000 m ¡ú ¶ÔÓ¦ÐÐË÷Òý 0¡¢1¡¢2¡¢3
+	 * ï¿½ï¿½ï¿½Æ²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	 * ï¿½ï¿½1ï¿½ï¿½ï¿½Ù¶ï¿½ < 40m/s  ï¿½ï¿½ Ê¹ï¿½ï¿½ 40m/s ï¿½ï¿½Ó¦ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½0ï¿½Ð£ï¿½
+	 * ï¿½ï¿½2ï¿½ï¿½ï¿½Ù¶Èµï¿½Î»ï¿½ï¿½40ï¿½ï¿½50ï¿½ï¿½60ï¿½ï¿½70 m/s ï¿½ï¿½ ï¿½ï¿½Ó¦ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 0ï¿½ï¿½1ï¿½ï¿½2ï¿½ï¿½3
+	 * ï¿½ï¿½3ï¿½ï¿½ï¿½ß¶ï¿½ > 3km    ï¿½ï¿½ Ê¹ï¿½ï¿½ 3km ï¿½ï¿½Ó¦ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½3ï¿½Ð£ï¿½
+	 * ï¿½ï¿½4ï¿½ï¿½ï¿½ß¶Èµï¿½Î»ï¿½ï¿½0ï¿½ï¿½1000ï¿½ï¿½2000ï¿½ï¿½3000 m ï¿½ï¿½ ï¿½ï¿½Ó¦ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 0ï¿½ï¿½1ï¿½ï¿½2ï¿½ï¿½3
 	 *****************************************************************/
-	static double hight_stage3_array[4] = {0.0, 1000.0, 2000.0, 3000.0};//¸ß¶È
-	static double vel_stage3_array[4] = {40.0, 50.0, 60.0, 70.0};//ËÙ¶È
-	// ¹ýÔØ»ý·ÖÔöÒæ knif[¸ß¶ÈÐÐ][ËÙ¶ÈÁÐ]
+	static double hight_uf_stage3_array[4] = {0.0, 1000.0, 2000.0, 3000.0};//ï¿½ß¶ï¿½
+	static double vel_uf_stage3_array[4] = {40.0, 50.0, 60.0, 70.0};//ï¿½Ù¶ï¿½
+	// ï¿½ï¿½ï¿½Ø»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ knif[ï¿½ß¶ï¿½ï¿½ï¿½][ï¿½Ù¶ï¿½ï¿½ï¿½]
 	double knif_stage3_matrix[4][4] = {
-	    {-0.1291f,  -0.1030f,  -0.0855f,  -0.0728f},   // ¸ß¶È 0m
-	    {-0.1290f,  -0.1029f,  -0.0855f,  -0.0728f},   // ¸ß¶È 1000m
-	    {-0.1289f,  -0.1029f,  -0.0854f,  -0.0728f},   // ¸ß¶È 2000m
-	    {-0.1287f,  -0.1028f,  -0.0854f,  -0.0729f}    // ¸ß¶È 3000m
+		{0.1291,  0.1030,  0.0855,  0.0728},   // ï¿½ß¶ï¿½ 0m
+		{0.1290,  0.1029,  0.0855,  0.0728},   // ï¿½ß¶ï¿½ 1000m
+		{0.1289,  0.1029,  0.0854,  0.0728},   // ï¿½ß¶ï¿½ 2000m
+		{0.1287,  0.1028,  0.0854,  0.0729}    // ï¿½ß¶ï¿½ 3000m
 	};
 
-	// ²à»¬½ÇÔöÒæ kwif[¸ß¶ÈÐÐ][ËÙ¶ÈÁÐ]
+	// ï¿½à»¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ kwif[ï¿½ß¶ï¿½ï¿½ï¿½][ï¿½Ù¶ï¿½ï¿½ï¿½]
 	double kwif_stage3_matrix[4][4] = {
-	    {-0.8938f,  -0.3943f,  -0.1266f,   0.0326f},   // ¸ß¶È 0m
-	    {-1.0427f,  -0.4894f,  -0.1925f,  -0.0157f},   // ¸ß¶È 1000m
-	    {-1.2107f,  -0.5969f,  -0.2670f,  -0.0703f},   // ¸ß¶È 2000m
-	    {-1.4010f,  -0.7186f,  -0.3513f,  -0.1321f}    // ¸ß¶È 3000m
+		{0.8938,  0.3943,  0.1266,  0.0326},   // ï¿½ß¶ï¿½ 0m
+		{1.0427,  0.4894,  0.1925,  0.0157},   // ï¿½ß¶ï¿½ 1000m
+		{1.2107,  0.5969,  0.2670,  0.0703},   // ï¿½ß¶ï¿½ 2000m
+		{1.4010,  0.7186,  0.3513,  0.1321}    // ï¿½ß¶ï¿½ 3000m
 	};
 
-	// ½ÇËÙ¶ÈÔöÒæ k5f[¸ß¶ÈÐÐ][ËÙ¶ÈÁÐ]
+	// ï¿½ï¿½ï¿½Ù¶ï¿½ï¿½ï¿½ï¿½ï¿½ k5f[ï¿½ß¶ï¿½ï¿½ï¿½][ï¿½Ù¶ï¿½ï¿½ï¿½]
 	double k5f_stage3_matrix[4][4] = {
-	    {-0.8938f,  -0.3943f,  -0.1266f,   0.0326f},   // ¸ß¶È 0m
-	    {-1.0427f,  -0.4894f,  -0.1925f,  -0.0157f},   // ¸ß¶È 1000m
-	    {-1.2107f,  -0.5969f,  -0.2670f,  -0.0703f},   // ¸ß¶È 2000m
-	    {-1.4010f,  -0.7186f,  -0.3513f,  -0.1321f}    // ¸ß¶È 3000m
+		{0.8938,  0.3943,  0.1266,  0.0326},   // ï¿½ß¶ï¿½ 0m
+		{1.0427,  0.4894,  0.1925,  0.0157},   // ï¿½ß¶ï¿½ 1000m
+		{1.2107,  0.5969,  0.2670,  0.0703},   // ï¿½ß¶ï¿½ 2000m
+		{1.4010,  0.7186,  0.3513,  0.1321}    // ï¿½ß¶ï¿½ 3000m
 	};
-	// Ç°À¡ k0f[¸ß¶ÈÐÐ][ËÙ¶ÈÁÐ]
-	double k0f_stage3_matrix[4][4] = {
+
+	/*Ka = 
+
+	   -0.1859   -0.0762   -0.0367   -0.0198
+	   -0.2258   -0.0925   -0.0446   -0.0241
+	   -0.2754   -0.1128   -0.0544   -0.0294
+	   -0.3374   -0.1382   -0.0667   -0.0360
+
+
+	K0 =
+
+	    0.0254    0.1661    0.1955    0.1924
+	   -0.0516    0.1456    0.1960    0.2015
+	   -0.1586    0.1121    0.1906    0.2081
+	   -0.3056    0.0609    0.1769    0.2106
+
+
+	Kg =
+
+	   -0.4094   -0.2357   -0.1440   -0.0904
+	   -0.4649   -0.2712   -0.1687   -0.1085
+	   -0.5275   -0.3112   -0.1965   -0.1290
+	   -0.5984   -0.3566   -0.2280   -0.1521
+  */
+	// Ç°ï¿½ï¿½ k0f[ï¿½ß¶ï¿½ï¿½ï¿½][ï¿½Ù¶ï¿½ï¿½ï¿½]
+	/*double k0f_stage3_matrix[4][4] = {
 	    {8.3951, 6.2869, 5.1417, 4.4512},
 		{8.9919, 6.6689, 5.4070, 4.6461},
 		{9.6657, 7.1001, 5.7064, 4.8661},
 		{10.4282, 7.5881, 6.0454, 5.1151}
-	};
+	};*/
 
-	//Æð·É¶Î£ºÖúÍÆÆ÷·ÖÀëÇ°»òËÙ¶ÈÏÂ½µµ½50m/s£¬¸©Ñö½ÇPD¿ØÖÆ
+	//ï¿½ï¿½É¶Î£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç°ï¿½ï¿½ï¿½Ù¶ï¿½ï¿½Â½ï¿½ï¿½ï¿½50m/sï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½PDï¿½ï¿½ï¿½ï¿½
 	if(flight_time < m_time_separate_booster)
 	{	
-		temp_hight  = CFlightGlobalFun::Range2(m_hz, hight_stage1_array[3], hight_stage1_array[0]);
-		temp_velocity = CFlightGlobalFun::Range2(m_v, vel_stage1_array[5], vel_stage1_array[0]);
+		temp_hight  = CFlightGlobalFun::Range2(m_hz, hight_uf_stage1_array[3], hight_uf_stage1_array[0]);
+		temp_velocity = CFlightGlobalFun::Range2(m_v, vel_uf_stage1_array[5], vel_uf_stage1_array[0]);
 
-		m_k0f = CFlightGlobalFun::LAQL2(4, 6, hight_stage1_array, vel_stage1_array, &K0f_stage1_matrix[0][0], temp_hight, temp_velocity);
-		m_k2f = CFlightGlobalFun::LAQL2(4, 6, hight_stage1_array, vel_stage1_array, &K2f_stage1_matrix[0][0], temp_hight, temp_velocity);
-		m_k5f = CFlightGlobalFun::LAQL2(4, 6, hight_stage1_array, vel_stage1_array, &K5f_stage1_matrix[0][0], temp_hight, temp_velocity);
+		//m_k0f = CFlightGlobalFun::LAQL2(4, 6, hight_stage1_array, vel_stage1_array, &K0f_stage1_matrix[0][0], temp_hight, temp_velocity);
+		m_k2f = CFlightGlobalFun::LAQL2(4, 6, hight_uf_stage1_array, vel_uf_stage1_array, &K2f_stage1_matrix[0][0], temp_hight, temp_velocity);
+		m_k5f = CFlightGlobalFun::LAQL2(4, 6, hight_uf_stage1_array, vel_uf_stage1_array, &K5f_stage1_matrix[0][0], temp_hight, temp_velocity);
 	}
-	//Ñ²º½¶Î:ÖúÍÆÆ÷·ÖÀëºó£¬½øÈëÄ©ÖÆµ¼Ç°£¬¸©Ñö½ÇPD¿ØÖÆ + ¸ß¶È¿ØÖÆ(ºóÐø¶¨Òå)
+	//Ñ²ï¿½ï¿½ï¿½ï¿½:ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ó£¬½ï¿½ï¿½ï¿½Ä©ï¿½Æµï¿½Ç°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½PDï¿½ï¿½ï¿½ï¿½ + ï¿½ß¶È¿ï¿½ï¿½ï¿½(ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½)
 	else if(flight_time < (m_time_combat_status + m_time_combat_delay))
 	{
-		temp_mass  = CFlightGlobalFun::Range2(m_mass, mass_stage2_array[2], mass_stage2_array[0]);//¹À¼ÆÖÊÁ¿mass
-		temp_q = CFlightGlobalFun::Range2(m_q, q_stage2_array[5], q_stage2_array[0]);//¶¯Ñ¹q
+		temp_mass  = CFlightGlobalFun::Range2(m_mass, mass_uf_stage2_array[2], mass_uf_stage2_array[0]);//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½mass
+		temp_q = CFlightGlobalFun::Range2(m_q, q_uf_stage2_array[5], q_uf_stage2_array[0]);//ï¿½ï¿½Ñ¹q
 
-		m_k0f = CFlightGlobalFun::LAQL2(3, 6, mass_stage2_array, q_stage2_array, &K0f_stage2_matrix[0][0], temp_mass, temp_q);
-		m_k2f = CFlightGlobalFun::LAQL2(3, 6, mass_stage2_array, q_stage2_array, &K2f_stage2_matrix[0][0], temp_mass, temp_q);
-		m_k5f = CFlightGlobalFun::LAQL2(3, 6, mass_stage2_array, q_stage2_array, &K5f_stage2_matrix[0][0], temp_mass, temp_q);
+		//m_k0f = CFlightGlobalFun::LAQL2(3, 6, mass_stage2_array, q_stage2_array, &K0f_stage2_matrix[0][0], temp_mass, temp_q);
+		m_k2f = CFlightGlobalFun::LAQL2(3, 6, mass_uf_stage2_array, q_uf_stage2_array, &K2f_stage2_matrix[0][0], temp_mass, temp_q);
+		m_k5f = CFlightGlobalFun::LAQL2(3, 6, mass_uf_stage2_array, q_uf_stage2_array, &K5f_stage2_matrix[0][0], temp_mass, temp_q);
+		m_k5f *= 2.0;//???...
 	}
-	//Ä©ÖÆµ¼¹ý³Ì£¬Î±¹¥½ÇÈý»ØÂ·¹ýÔØ¿ØÖÆ
+	//Ä©ï¿½Æµï¿½ï¿½ï¿½ï¿½Ì£ï¿½Î±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â·ï¿½ï¿½ï¿½Ø¿ï¿½ï¿½ï¿½
 	else
 	{
-		//¸ß¶È¡¢ËÙ¶È
-		temp_hight  = CFlightGlobalFun::Range2(m_hz, hight_stage3_array[3], hight_stage3_array[0]);
-		temp_velocity = CFlightGlobalFun::Range2(m_v, vel_stage3_array[3], vel_stage3_array[0]);
+		//ï¿½ß¶È¡ï¿½ï¿½Ù¶ï¿½
+		temp_hight  = CFlightGlobalFun::Range2(m_hz, hight_uf_stage3_array[3], hight_uf_stage3_array[0]);
+		temp_velocity = CFlightGlobalFun::Range2(m_v, vel_uf_stage3_array[3], vel_uf_stage3_array[0]);
 
-		m_knif = CFlightGlobalFun::LAQL2(4, 4, hight_stage3_array, vel_stage3_array, &knif_stage3_matrix[0][0], temp_hight, temp_velocity);
-		m_kwif = CFlightGlobalFun::LAQL2(4, 4, hight_stage3_array, vel_stage3_array, &kwif_stage3_matrix[0][0], temp_hight, temp_velocity);
-		m_k5f = CFlightGlobalFun::LAQL2(4, 4, hight_stage3_array, vel_stage3_array, &k5f_stage3_matrix[0][0], temp_hight, temp_velocity);
-		m_k0f = CFlightGlobalFun::LAQL2(4, 4, hight_stage3_array, vel_stage3_array, &k0f_stage3_matrix[0][0], temp_hight, temp_velocity);
-		//m_knif = 0.07;//×ª»¯Îª½Ç¶È£¬¶ÔÓ¦4.011
-		//m_kwif = 0.90;//½ÇËÙ¶È»ý·Ö£¬Î±¹¥½Ç¿ØÖÆ
-		//m_k5f  = 0.14;//½ÇËÙ¶È¿ØÖÆ
+		m_knif = CFlightGlobalFun::LAQL2(4, 4, hight_uf_stage3_array, vel_uf_stage3_array, &knif_stage3_matrix[0][0], temp_hight, temp_velocity);
+		m_kwif = CFlightGlobalFun::LAQL2(4, 4, hight_uf_stage3_array, vel_uf_stage3_array, &kwif_stage3_matrix[0][0], temp_hight, temp_velocity);
+		m_k5f = CFlightGlobalFun::LAQL2(4, 4, hight_uf_stage3_array, vel_uf_stage3_array, &k5f_stage3_matrix[0][0], temp_hight, temp_velocity);
+		//m_k0f = CFlightGlobalFun::LAQL2(4, 4, hight_stage3_array, vel_stage3_array, &k0f_stage3_matrix[0][0], temp_hight, temp_velocity);
+		//m_knif = 0.07;//×ªï¿½ï¿½Îªï¿½Ç¶È£ï¿½ï¿½ï¿½Ó¦4.011
+		//m_kwif = 0.90;//ï¿½ï¿½ï¿½Ù¶È»ï¿½ï¿½Ö£ï¿½Î±ï¿½ï¿½ï¿½Ç¿ï¿½ï¿½ï¿½
+		//m_k5f  = 0.14;//ï¿½ï¿½ï¿½Ù¶È¿ï¿½ï¿½ï¿½
 
-		//µ±Ç°Í¨µÀ¶æ£¬ÒÑ¾­ÊÇ¸º·´À¡
-		m_knif = - m_knif;
-		m_kwif = - m_kwif;
-		m_k5f = - m_k5f;
+		//ï¿½ï¿½Ç°Í¨ï¿½ï¿½ï¿½æ£¬ï¿½Ñ¾ï¿½ï¿½Ç¸ï¿½ï¿½ï¿½ï¿½ï¿½
+		//m_knif = - m_knif;
+		//m_kwif = - m_kwif;
+		//m_k5f = - m_k5f;
 	}
 
-	//Ç°À¡µçÑ¹È¡¸º
-	m_k0f = - m_k0f;
-	//Íâ»ØÂ·¿ØÖÆ²ÎÊý£¬¸ß¶ÈPID¿ØÖÆ
-	m_k3f = 0.45;
-	m_k7f = 0.90;
-	m_k6f = 0.025;
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¶ï¿½Ñ¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½Ñ¹
+	temp_mass  = CFlightGlobalFun::Range2(m_mass, mass_uf_stage2_array[2], mass_uf_stage2_array[0]);//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½mass
+	temp_q = CFlightGlobalFun::Range2(m_q, q_uf_stage2_array[5], q_uf_stage2_array[0]);//ï¿½ï¿½Ñ¹q
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¶ï¿½Ñ¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ½ï¿½â¹¥ï¿½ï¿½
+	m_alpha_b = CFlightGlobalFun::LAQL2(3, 6, mass_uf_stage2_array, q_uf_stage2_array, &alpha_b_stage2_matrix[0][0], temp_mass, temp_q);
+	m_alpha_b = CFlightGlobalFun::Range2(m_alpha_b, 8.0, -2.0);
+
+	//m_k0f = CFlightGlobalFun::LAQL2(3, 6, mass_uf_stage2_array, q_uf_stage2_array, &K0f_stage2_matrix[0][0], temp_mass, temp_q);
+	//m_k0f = - m_k0f;
+	//m_k0f = CFlightGlobalFun::Range2(m_k0f, 0.0, -10.0);
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø¹ï¿½ï¿½ï¿½-7.0degï¿½Í²ï¿½ï¿½È±ï¿½1.067ï¿½ï¿½ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½Ñ¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å¤ï¿½Ò¾ï¿½ï¿½È£ï¿½Æ½ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì§Í·ï¿½ï¿½ï¿½ï¿½
+	m_k0f = -(m_alpha_b  + 6.0)/1.067;//-6.56;
+	m_k0f = CFlightGlobalFun::Range2(m_k0f, 0.0, -10.0);
+	
+	//ï¿½ï¿½ï¿½Â·ï¿½ï¿½ï¿½Æ²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß¶ï¿½PIDï¿½ï¿½ï¿½ï¿½
+	m_k3f = 0.245;//0.45;
+	m_k7f = 0.900;//0.90;
+	m_k6f = 0.027;//0.025;
 }
 void CMathControlPitch::Calc_Control_Commond()
 {
-	//¼ÆËã¸©Ñö³ÌÐò½Ç£¬¹ö×ª½Ç²¹³¥
+	//ï¿½ï¿½ï¿½ã¸©ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½î£¬ï¿½ï¿½×ªï¿½Ç²ï¿½ï¿½ï¿½
 	//double delta_zeta_command = (5.5 / (1.0 - cos(60.0 / RTOA))) * (1.0 - cos(m_gama_command_compensate / RTOA));
-	double delta_zeta_command = 5.5 * (1.0 - cos(m_gama_command_compensate / RTOA)) / (1.0 + cos(m_gama_command_compensate / RTOA));
-	//¹ö×ª½Ç60degÊ±£¬ÉýÁ¦ÎªÖØÁ¿2g£¬¼´°ëÓÍÖØÁ¿Æ½ºâ¹¥½Ç6.6deg = 5.5deg + 1.2deg£¬¼´1g¹ýÔØÔ¼¹¥½ÇÔöÁ¿5.5deg
+	double temp_dltzeta_factor = m_mass /24.48;
+	temp_dltzeta_factor = CFlightGlobalFun::Range2(temp_dltzeta_factor, 6.74, 4.17);
+	double delta_zeta_command = temp_dltzeta_factor * (1/cos(m_gama_command_compensate / RTOA) - 1);
+	//ï¿½ï¿½×ªï¿½ï¿½60degÊ±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½2gï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ½ï¿½â¹¥ï¿½ï¿½6.6deg = 5.5deg + 1.2degï¿½ï¿½ï¿½ï¿½1gï¿½ï¿½ï¿½ï¿½Ô¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½5.5deg
 	delta_zeta_command = CFlightGlobalFun::Range(delta_zeta_command, 5.5);	
 
-	//Æô¿ØÇ°£¬Ô¼0.3s
+	//ï¿½ï¿½ï¿½ã¸©ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½î£¬ï¿½ß¶È¿ï¿½ï¿½Æ²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß¶È¿ï¿½ï¿½Æ¸ï¿½ï¿½ï¿½ï¿½ï¿½Îª5.0deg
+	double temp_hightctrl_zeta_command = -m_ugf/m_k2f;
+	temp_hightctrl_zeta_command = CFlightGlobalFun::Range(temp_hightctrl_zeta_command, 3.0);
+
+	//ÊµÊ±ï¿½ï¿½ï¿½ï¿½ß¶È²ï¿½
+	//double dlt_hight = m_hz - m_h_target;
+
+	//ï¿½ï¿½Ò»ï¿½ï¿½ï¿½Ö£ï¿½ï¿½ï¿½ï¿½ï¿½ß¶È»ï¿½ï¿½ï¿½×´Ì¬ï¿½ï¿½ï¿½ï¿½
+	// 1.ï¿½ï¿½Ê¼×ªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	if((m_high_maneuver_state == 0)&&(flight_time > m_time_missile_takeoff))
+	{
+		m_high_maneuver_state_record = m_high_maneuver_state;
+		m_high_maneuver_state = 1;//ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½
+	}
+	// 2.ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½ï¿½Î¸ß¶È¿ï¿½ï¿½ï¿½
+	if((m_high_maneuver_state == 1)&&(flight_time > m_time_altitude_control))
+	{
+		m_high_maneuver_state_record = m_high_maneuver_state;
+		m_high_maneuver_state = 2;//ï¿½ï¿½Ê¼ï¿½ß¶È¿ï¿½ï¿½ï¿½
+
+		//Ö¸ï¿½î¸©ï¿½ï¿½ï¿½Ç£ï¿½Ë«Ö¸ï¿½ï¿½ï¿½ï¿½ï¿½É£ï¿½ï¿½ï¿½ï¿½ï¿½Æ½ï¿½ï¿½Ö¸ï¿½î¸©ï¿½ï¿½ï¿½Ç²ï¿½ï¿½ï¿½
+		//ï¿½ï¿½Â¼ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+		m_zeta_t_change = m_zeta;
+		//m_zeta_t_change = m_ktheta_hight_enc;
+		//ï¿½ï¿½ï¿½Éµï¿½Ä¿ï¿½ê¸©ï¿½ï¿½ï¿½ï¿½
+		//m_ktheta_hight_enc
+		//ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ä³£ï¿½ï¿½Îªï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½
+
+		//ï¿½ß¶È»ï¿½ï¿½ï¿½ï¿½ï¿½Ê¶ï¿½ï¿½ï¿½ï¿½
+		m_flag_altitude_integral_set = 1;
+	}
+	// 3.ï¿½ï¿½ï¿½Ý¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ì³£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß¶È»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½ß¶È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß¶È»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½2ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½3ï¿½ï¿½ï¿½Â»ï¿½4ï¿½ï¿½Ñ²ï¿½ï¿½×´Ì¬×ªï¿½ï¿½
+	//Ëµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É¹ï¿½ï¿½Ì£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É¹ï¿½ï¿½Ì£ï¿½ï¿½ï¿½ï¿½Âºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð»ï¿½
+	if((m_high_maneuver_state > 1)&&(m_high_maneuver_state < 5))
+	{
+		//ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½ï¿½ï¿½Éºó£¬¿ï¿½Ê¼ï¿½ß¶È»ï¿½ï¿½ï¿½
+		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í»ï¿½ï¿½ï¿½ï¿½Þ·ï¿½Æ½ï¿½É»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß¶È¿ï¿½ï¿½Æ£ï¿½ï¿½ï¿½Ê¼ï¿½ß¶È»ï¿½ï¿½ï¿½
+		// 3.1 ï¿½ï¿½ï¿½ï¿½ß¶È»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß¶È¡ï¿½ï¿½ß¶È±ä»¯ï¿½ï¿½
+		if((m_count_altitude_change != m_count_altitude_change_record)	//ï¿½ï¿½flight_basicï¿½Ûºï¿½ï¿½ï¿½ï¿½Ìµï¿½ï¿½È¿ï¿½ï¿½Æ£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ß¶È»ï¿½ï¿½ï¿½
+			&& (flight_time > m_time_altitude_change_start))			///1ï¿½ï¿½ï¿½ß¶È»ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä±ï¿½		2ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½Ú»ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼Ê±ï¿½ï¿½
+		{
+			//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â£ï¿½Ö»ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½
+			m_count_altitude_change_record = m_count_altitude_change;
+
+			// 1.Ö¸ï¿½ï¿½ß¶È²ï¿½ï¿½Ð¡ï¿½ï¿½ï¿½ï¿½ï¿½Ð¸ß¶È¹ï¿½ï¿½É¸ï¿½ï¿½Ù£ï¿½ï¿½ï¿½Ö´ï¿½Ð¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Â»ï¿½
+			if(fabs(m_hz - m_h_target_in) < 20.0)
+			{
+				m_high_maneuver_state_record = m_high_maneuver_state;
+				m_high_maneuver_state = 2;//ï¿½ß¶È¿ï¿½ï¿½Æ£ï¿½ï¿½ï¿½ï¿½Í£ï¿½ï¿½ï¿½ï¿½Â»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½->ï¿½ß¶È¿ï¿½ï¿½ï¿½
+
+				//ï¿½ï¿½ï¿½Ö¸ß¶È¿ï¿½ï¿½Æ£ï¿½ï¿½ï¿½Â¼×ªÑ²ï¿½ï¿½Ê±ï¿½ï¿½
+				m_time_altitude_change_tocruise = flight_time;
+				
+				//ï¿½ï¿½ï¿½ï¿½BÖ¸ï¿½ï¿½ß¶È£ï¿½Ë«Ö¸ï¿½ï¿½ï¿½ï¿½ï¿½Éµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½CÖ¸ï¿½ï¿½ß¶ï¿½
+				//ï¿½ï¿½Ê¼Ö¸ï¿½ï¿½ß¶È£ï¿½m_h_command_t_change = m_h_command;
+				m_h_command_t_change_record = m_h_command_t_change;
+				m_h_command_t_change = m_h_command;
+				//Ä¿ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½ß¶È£ï¿½m_h_target
+				//ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ä³£ï¿½ï¿½
+				m_altitude_change_gain_record = m_altitude_change_gain;
+				m_altitude_change_gain = 4.0;
+
+				//Ç°ï¿½ï¿½ï¿½ï¿½Ç¼Ì³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½â´¦ï¿½ï¿½
+				
+				//ï¿½ß¶È»ï¿½ï¿½Ö¿ï¿½ï¿½Æ¶ï¿½Ç¼Ì³Ð£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½â´¦ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+				m_flag_altitude_integral_set = 1;
+			}
+			// 2.ï¿½ß¶È»ï¿½ï¿½ï¿½
+			else 
+			{
+				// 2.1 ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+				if( (m_hz - m_h_target_in) < - 20.0 )
+				{
+					m_high_maneuver_state_record = m_high_maneuver_state;
+					m_high_maneuver_state = 3;//Ñ²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í£ï¿½ï¿½ï¿½ï¿½Â»ï¿½->ï¿½ï¿½ï¿½ï¿½
+
+					//Ç°ï¿½ï¿½ï¿½ï¿½Ç¼Ì³Ð£ï¿½ï¿½ï¿½Ç°Ò»ï¿½×¶Î¡ï¿½ï¿½ß¶È¿ï¿½ï¿½ï¿½Æ½ï¿½ï¿½ï¿½Ø¡ï¿½ï¿½Ì³ï¿½
+					
+					//ï¿½ï¿½ï¿½ï¿½ï¿½Ç»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ã£¬ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½ï¿½
+
+					//ï¿½ß¶È»ï¿½ï¿½ï¿½ï¿½ï¿½Ê¶ï¿½ï¿½ï¿½ï¿½
+					m_flag_altitude_integral_set = 0;
+				}
+				// 2.2 ï¿½Â»ï¿½ï¿½ï¿½ï¿½ï¿½
+				else
+				{
+					m_high_maneuver_state_record = m_high_maneuver_state;
+					m_high_maneuver_state = 4;//Ñ²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½->ï¿½Â»ï¿½
+					
+					//Ç°ï¿½ï¿½ï¿½ï¿½Ç¼Ì³Ð£ï¿½ï¿½ï¿½Ç°Ò»ï¿½×¶Î¡ï¿½ï¿½ß¶È¿ï¿½ï¿½ï¿½Æ½ï¿½ï¿½ï¿½Ø¡ï¿½ï¿½Ì³ï¿½
+					
+					//ï¿½ï¿½ï¿½ï¿½ï¿½Ç»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ã£¬ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½ï¿½
+
+					//ï¿½ß¶È»ï¿½ï¿½ï¿½ï¿½ï¿½Ê¶ï¿½ï¿½ï¿½ï¿½
+					m_flag_altitude_integral_set = 0;
+				}
+
+				//Ö¸ï¿½î¸©ï¿½ï¿½ï¿½Ç£ï¿½Ë«Ö¸ï¿½ï¿½ï¿½ï¿½ï¿½É£ï¿½ï¿½ï¿½ï¿½ï¿½Æ½ï¿½ï¿½Ö¸ï¿½î¸©ï¿½ï¿½ï¿½Ç²ï¿½ï¿½ï¿½
+				//ï¿½ï¿½Â¼ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½Ç¼ï¿½Ê±ï¿½ï¿½
+				//m_zeta_t_change = m_zeta;
+				m_zeta_t_change = m_zeta_command;
+				m_time_zeta_change = flight_time;
+				//ï¿½ï¿½ï¿½Éµï¿½Ä¿ï¿½ê¸©ï¿½ï¿½ï¿½ï¿½
+				///2->2 ï¿½×´ï¿½Îªm_ktheta_hight_encï¿½ï¿½ï¿½ï¿½ï¿½×´ï¿½ÎªÆ½ï¿½â¹¥ï¿½ï¿½m_alpha_b
+				///2->3 m_ktheta_climb_enc
+				///2->4 m_ktheta_decline_enc
+				//ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ä³£ï¿½ï¿½Îªï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½
+
+				//ï¿½ï¿½ï¿½ï¿½BÖ¸ï¿½ï¿½ß¶È£ï¿½Ë«Ö¸ï¿½ï¿½ï¿½ï¿½ï¿½Éµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½CÖ¸ï¿½ï¿½ß¶ï¿½
+				//ï¿½ï¿½Ê¼Ö¸ï¿½ï¿½ß¶È£ï¿½m_h_command_t_change = m_h_command;
+				//m_h_command_t_change_record = m_h_command_t_change;
+				//m_h_command_t_change = m_h_command;
+				//Ä¿ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½ß¶È£ï¿½m_h_target
+
+				//ï¿½ï¿½Â¼ï¿½ï¿½ï¿½Î¼ï¿½ï¿½ï¿½Ò»ï¿½Î¸ß¶È»ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½
+				//m_altitude_change_gain_record = m_altitude_change_gain;	//ï¿½ï¿½ï¿½ã²¢ï¿½ï¿½Â¼ï¿½ï¿½Ò»ï¿½Î¸ß¶È»ï¿½ï¿½ï¿½ï¿½Ù¶È¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½	
+				//m_altitude_change_gain = fabs(m_h_command_t_change - m_h_target) / (2.5*2.0);
+				//ï¿½ï¿½ï¿½Õ´ï¿½ï¿½ï¿½2.5m/sï¿½ï¿½4sÊ±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß¶ï¿½Ô¼10mï¿½ï¿½ï¿½ï¿½ï¿½ï¿½2sï¿½Ó³Ùµï¿½5m/sï¿½ï¿½ï¿½ï¿½10m
+				//if(m_altitude_change_gain <= 4.0)	m_altitude_change_gain = 4.0;
+				//ï¿½ï¿½ï¿½Õ´ï¿½ï¿½ï¿½2.5m/sï¿½ï¿½100sÊ±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß¶ï¿½Ô¼250m
+				//if(m_altitude_change_gain >= 100.0) m_altitude_change_gain = 100.0;
+			}
+
+			//ï¿½ï¿½Â¼ï¿½ï¿½ï¿½Î¼ï¿½ï¿½ï¿½Ò»ï¿½Î¸ß¶È»ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼Ê±ï¿½ï¿½Ö¸ï¿½ï¿½ß¶ï¿½
+			//m_h_command_t_change_record = m_h_command_t_change;
+			//m_h_command_t_change = m_h_command;
+			//ï¿½ï¿½Â¼ï¿½ï¿½ï¿½Î¼ï¿½ï¿½ï¿½Ò»ï¿½Î¸ß¶È»ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼Ê±ï¿½ï¿½
+			m_time_altitude_change_record = m_time_altitude_change;
+			m_time_altitude_change = m_time_altitude_change_start;	//ï¿½ß¶È»ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼Ê±ï¿½ï¿½
+			//ï¿½ï¿½Â¼ï¿½ï¿½ï¿½Î¼ï¿½ï¿½ï¿½Ò»ï¿½Î¸ß¶È»ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼Ê±ï¿½ï¿½Ä¿ï¿½ï¿½ß¶È¸ï¿½ï¿½ï¿½
+			m_h_target_record = m_h_target;
+			m_h_target = m_h_target_in;
+		}
+
+		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½ß¶È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß¶È»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â»ï¿½×ªï¿½ß¶È¿ï¿½ï¿½Æ£ï¿½ï¿½ï¿½ï¿½Ë»ï¿½ï¿½ï¿½Ê±ï¿½ï¿½
+		// 3.2 ï¿½ß¶È»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×ªï¿½ß¶È¿ï¿½ï¿½ï¿½
+		if( ((m_high_maneuver_state == 3) || (m_high_maneuver_state == 4)) && (flight_time > m_time_altitude_change_end) )
+		{
+			m_high_maneuver_state_record = m_high_maneuver_state;
+			m_high_maneuver_state = 2;
+
+			//ï¿½ï¿½Â¼×ªÑ²ï¿½ï¿½Ê±ï¿½ï¿½
+			m_time_altitude_change_tocruise = flight_time;
+			//ï¿½ï¿½Â¼ï¿½ï¿½ï¿½Î¼ï¿½ï¿½ï¿½Ò»ï¿½Î¸ß¶È»ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼Ê±ï¿½ï¿½
+			//m_time_altitude_change_record = m_time_altitude_change;
+			//m_time_altitude_change = m_time_altitude_change_end;	//ï¿½ß¶È»ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼Ê±ï¿½ï¿½ tocruise
+			
+			//ï¿½ï¿½Â¼ï¿½ï¿½ï¿½ï¿½ß¶È¿ï¿½ï¿½ï¿½Ê±ï¿½ÌµÄ¸ß¶È£ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ Ä¿ï¿½ï¿½ß¶ï¿½
+			//ï¿½ï¿½Ê¼Ö¸ï¿½ï¿½ß¶È£ï¿½m_h_command_t_change = m_hz;
+			m_h_command_t_change_record = m_h_command_t_change;
+			m_h_command_t_change = m_hz;
+			//Ä¿ï¿½ï¿½Ö¸ï¿½ï¿½ß¶È£ï¿½m_h_target
+			//ï¿½ß¶È¹ï¿½ï¿½ï¿½Ê±ï¿½ä³£ï¿½ï¿½ï¿½ï¿½ï¿½ß¶È²ï¿½20mï¿½ï¿½ï¿½ï¿½Ê¼ï¿½Ù¶ï¿½5m/sï¿½ï¿½Ä©ï¿½ï¿½ï¿½Ù¶ï¿½0m/sï¿½ï¿½Æ½ï¿½ï¿½ï¿½Ù¶ï¿½Ô¼Î´2.5m/sï¿½ï¿½ï¿½ï¿½ï¿½Æ¹ï¿½ï¿½ï¿½Ê±ï¿½ï¿½8s
+			m_altitude_change_gain_record = m_altitude_change_gain;
+			m_altitude_change_gain = fabs(m_h_command_t_change - m_h_target) / (5.0*2.0);
+			if(m_altitude_change_gain <= 4.0)	m_altitude_change_gain = 4.0;//ï¿½ï¿½ï¿½Õ´ï¿½ï¿½ï¿½5m/sï¿½ï¿½4sÊ±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß¶ï¿½Ô¼20m
+			if(m_altitude_change_gain >= 450.0) m_altitude_change_gain = 450.0;//ï¿½ï¿½ï¿½Õ´ï¿½ï¿½ï¿½5m/sï¿½ï¿½900sÊ±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß¶ï¿½Ô¼4500m
+
+			//Ç°ï¿½ï¿½ï¿½ï¿½Ç¼Ì³Ð£ï¿½ï¿½ï¿½Ç°Ò»ï¿½×¶Î¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç¸ï¿½ï¿½Ù¿ï¿½ï¿½Æ£ï¿½ï¿½ï¿½Ì¬Æ½ï¿½ï¿½ï¿½Ø¡ï¿½ï¿½Ì³ï¿½
+			
+			//Ö¸ï¿½î¸©ï¿½ï¿½ï¿½Ç¹ï¿½ï¿½É¼ï¿½Ê±ï¿½ï¿½
+			//ï¿½ï¿½Ê¼Ö¸ï¿½î¸©ï¿½ï¿½ï¿½ï¿½m_ktheta_decline_enc ï¿½ï¿½ m_ktheta_climb_enc
+			m_zeta_t_change = m_zeta_command;///3ï¿½ï¿½4->2 ï¿½ï¿½ m_zeta
+			m_time_zeta_change = flight_time;
+			//Ä¿ï¿½ï¿½Ö¸ï¿½î¸©ï¿½ï¿½ï¿½ï¿½m_ktheta_hight_enc
+			//ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ä³£ï¿½ï¿½ï¿½ï¿½ï¿½Ì¶ï¿½
+
+			//ï¿½ß¶È»ï¿½ï¿½ï¿½ï¿½ï¿½Ê¶ï¿½ï¿½ï¿½ï¿½
+			m_flag_altitude_integral_set = 1;
+		}
+		
+		// 4.Ñ²ï¿½ï¿½×´Ì¬×ªÄ©ï¿½Æµï¿½ï¿½ï¿½Ò»ï¿½ï¿½ÎªÑ²ï¿½ï¿½×´Ì¬×ªÄ©ï¿½Æµï¿½ï¿½ï¿½Ò²ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â»ï¿½ï¿½ß¶È»ï¿½ï¿½ï¿½ï¿½ï¿½×ªÄ©ï¿½Æµï¿½
+		//ï¿½ï¿½Ê½ï¿½ï¿½ï¿½Ä£Ê½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+		//ï¿½ð¹¥´ï¿½ï¿½Ä£Ê½ï¿½ï¿½Ä©ï¿½Æµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ó£¬½ï¿½ï¿½ë¸©ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö®ï¿½ï¿½ï¿½Ù½ï¿½ï¿½ï¿½Ä©ï¿½Æµï¿½
+		if( (flight_time > m_time_combat_status + m_time_combat_delay)&&(flight_time < m_time_combat_dive_pullup) )
+		{
+			m_high_maneuver_state_record = m_high_maneuver_state;
+			m_high_maneuver_state = 5;
+
+			//ï¿½ß¶È¿ï¿½ï¿½ï¿½ ×ª Ä©ï¿½Æµï¿½ ï¿½ï¿½ï¿½É£ï¿½ï¿½ï¿½Ë¼ï¿½ï¿½???...
+			
+			//ï¿½Ú»ï¿½Â·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â·ï¿½ï¿½ï¿½Ø¿ï¿½ï¿½Æ£ï¿½ï¿½ï¿½Ê¹ï¿½ï¿½ Ö¸ï¿½î¸©ï¿½ï¿½ï¿½ï¿½
+			//Ö¸ï¿½î¸©ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Æ½ï¿½É¸ï¿½ï¿½ï¿½ï¿½Ç£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+
+			//ï¿½ï¿½ï¿½Â·ï¿½ï¿½ï¿½ï¿½ï¿½Ã¸Ä½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¹ï¿½ï¿½Ö¸ï¿½ï¿½ß¶ï¿½
+			//Ö¸ï¿½ï¿½ß¶ï¿½ ï¿½ï¿½ï¿½Éµï¿½ Ä¿ï¿½ï¿½ß¶ï¿½
+			//ï¿½ï¿½Ê¼Ö¸ï¿½ï¿½ß¶È£ï¿½m_h_command_t_change = m_h_command;
+			//m_h_command_t_change_record = m_h_command_t_change;
+			//m_h_command_t_change = m_hz;
+			//Ä¿ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½ß¶È£ï¿½m_h_target
+			//ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ä³£ï¿½ï¿½
+			//m_altitude_change_gain_record = m_altitude_change_gain;
+			//m_altitude_change_gain = fabs(m_h_command_t_change - m_h_target) / (5.0*2.0);
+			//if(m_altitude_change_gain <= 4.0)	m_altitude_change_gain = 4.0;//ï¿½ï¿½ï¿½Õ´ï¿½ï¿½ï¿½5m/sï¿½ï¿½4sÊ±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß¶ï¿½Ô¼20m
+			//if(m_altitude_change_gain >= 450.0) m_altitude_change_gain = 450.0;//ï¿½ï¿½ï¿½Õ´ï¿½ï¿½ï¿½5m/sï¿½ï¿½900sÊ±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß¶ï¿½Ô¼4500m
+
+			//ï¿½ï¿½Â¼Ä©ï¿½Æµï¿½ï¿½ß¶È»ï¿½ï¿½ï¿½Ê±ï¿½ï¿½
+			//ï¿½ï¿½Â¼ï¿½ï¿½ï¿½Î¼ï¿½ï¿½ï¿½Ò»ï¿½Î¸ß¶È»ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼Ê±ï¿½ï¿½
+			m_time_altitude_change_record = m_time_altitude_change;
+			m_time_altitude_change = flight_time;	//ï¿½ß¶È»ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼Ê±ï¿½ï¿½
+			//ï¿½ï¿½Â¼ï¿½ï¿½ï¿½Î¼ï¿½ï¿½ï¿½Ò»ï¿½Î¸ß¶È»ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼Ê±ï¿½ï¿½Ä¿ï¿½ï¿½ß¶È¸ï¿½ï¿½ï¿½
+			m_h_target_record = m_h_target;
+			m_h_target = m_h_target_in;
+		}
+
+		// 5.Ñ²ï¿½ï¿½×´Ì¬ï¿½ï¿½×ªï¿½ï¿½ï¿½ï¿½×´Ì¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ã·¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø·ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½Ö±ï¿½Ó»ï¿½ï¿½ã¼´ï¿½É£ï¿½
+		//m_high_maneuver_state = 8;
+	}
+
+	// 6.Ä©ï¿½Æµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ð£¬¼ï¿½Ñ²ï¿½ï¿½×´Ì¬ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+	// 7.Ä©ï¿½Æµï¿½ï¿½ó¸©³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì£ï¿½ï¿½ï¿½Ñ²ï¿½ï¿½ï¿½ï¿½×´Ì¬ï¿½ï¿½ï¿½Ï£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½â´¦ï¿½ï¿½ï¿½ï¿½6ï¿½ï¿½7×´Ì¬ï¿½ï¿½Ö´ï¿½ï¿½
+	if(m_high_maneuver_state == 5)
+	{
+		if(flight_time > m_time_combat_dive_pullup)
+		{
+			//ï¿½ï¿½Ä©ï¿½Æµï¿½×ªï¿½ï¿½Ñ²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+			m_high_maneuver_state_record = m_high_maneuver_state;
+			m_high_maneuver_state = 3;
+
+			//ï¿½ï¿½Â¼ï¿½ï¿½ï¿½ï¿½Ê±ï¿½Ì¸ï¿½ï¿½ï¿½ï¿½Ç£ï¿½ï¿½ï¿½ï¿½Ú¹ï¿½ï¿½Éµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç¶ï¿½
+			m_zeta_t_change = m_zeta_command;///5->3 ï¿½ï¿½ m_zeta
+			//Ê±ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½
+			//m_time_combat_dive_pullup
+			m_time_zeta_change = flight_time;
+
+			//ï¿½ï¿½Â¼ï¿½ß¶È»ï¿½ï¿½ï¿½Ê±ï¿½ï¿½
+			m_time_altitude_change_record = m_time_altitude_change;
+			m_time_altitude_change = flight_time;	//ï¿½ß¶È»ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼Ê±ï¿½ï¿½
+			//ï¿½ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½ï¿½ß¶ï¿½
+			m_h_target_record = m_h_target;
+			m_h_target = m_h_target_in;
+			
+			//ï¿½ß¶È»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð£ï¿½ï¿½ï¿½ï¿½Ö±ï¿½Ê¶ï¿½ï¿½ï¿½ï¿½
+			m_flag_altitude_integral_set = 0;
+		}
+	}
+
+	// 8.ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñ²ï¿½ï¿½×´Ì¬ ×ª ï¿½ï¿½ï¿½ï¿½×´Ì¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñ²ï¿½ï¿½×´Ì¬ï¿½ï¿½Ì¬ï¿½È¶ï¿½ï¿½ï¿½8×´Ì¬ï¿½ï¿½Ö´ï¿½ï¿½
+	//Ëµï¿½ï¿½ï¿½ï¿½Ö±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É¡ï¿½ï¿½ï¿½ï¿½É¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø¹ï¿½ï¿½ó£¬²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Þ·ï¿½Î¬ï¿½ï¿½Æ½ï¿½â£¬ï¿½ï¿½Ø·ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½
+
+	//ï¿½Ú¶ï¿½ï¿½ï¿½ï¿½Ö£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½
+	// 1.ï¿½ï¿½ï¿½ï¿½Ç°ï¿½ï¿½Ô¼0.3s
 	if (flight_time < m_time_control)
 	{
 		m_zeta_command = m_zeta;
 		m_zeta_command_record1 = m_zeta_command;
 	}
-	//ÖúÍÆÆ÷·ÖÀëÇ°, Ô¼2s£¬¸©Ñö½Ç¹ý¶Èµ½³õÊ¼·¢Éä½Ç(×°¶©Öµ)
-	else if(flight_time < m_time_separate_booster)
+	// 2.ï¿½ï¿½Øºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç°, Ô¼2sï¿½ï¿½9.5sï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½Ô¼1.7s
+	//else if(flight_time < m_time_separate_booster)
+	else if(flight_time < m_time_missile_takeoff)
 	{
+		//ï¿½ï¿½ï¿½ï¿½ï¿½Ç¹ï¿½ï¿½Èµï¿½ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½(×°ï¿½ï¿½Öµ)ï¿½ï¿½Ö®ï¿½ó±£³Ö·ï¿½ï¿½ï¿½ï¿½
 		m_zeta_command = (m_zeta_command_record1 - m_ktheta_lauch_enc) * exp(-(flight_time - m_time_control) * (flight_time - m_time_control) / 1.0) + m_ktheta_lauch_enc;
 		m_zeta_command_record2 = m_zeta_command;
-// 		m_zeta_command = (m_zeta_command_record1 - 15.0) * exp(-(flight_time - m_time_control) / 2.0) + 15.0;
-// 		m_zeta_command_record2 = m_zeta;
 	}
-	//ÒýÈë¸ß¶È¿ØÖÆÇ°£¬¸©Ñö½Ç¹ý¶Èµ½2deg£¬¹ý¶Èµ½Æ½ºâ¹¥½Ç£¬±ãÓÚ×ª¶¨¸ß
+	// 3.ï¿½ï¿½ï¿½ï¿½ï¿½Éºï¿½ï¿½×´Î¸ß¶È¿ï¿½ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç¹ï¿½ï¿½Éµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç£ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½4sï¿½ï¿½ï¿½ï¿½ï¿½Ú¸ß¶È¿ï¿½ï¿½ï¿½
 	else if(flight_time < m_time_altitude_control)
 	{
-		//¹ý¶ÉÖÁ×°¶©ÅÀÉý½Ç£¬¹ý¶ÉÊ±¼äÔ¼4s£¬Ö®ºó±£³Ö³£Öµ¸©Ñö½ÇÅÀÉý
-		m_zeta_command = (m_zeta_command_record2 - m_ktheta_climb_enc) * exp(-(flight_time - m_time_separate_booster) * (flight_time - m_time_separate_booster) / 5.0) + m_ktheta_climb_enc;
+		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç£ï¿½Ö®ï¿½ó±£³Ö³ï¿½Öµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+		m_zeta_command = (m_zeta_command_record2 - m_ktheta_climb_enc) * exp(-(flight_time - m_time_missile_takeoff) * (flight_time - m_time_missile_takeoff) / 5.0) + m_ktheta_climb_enc;
 		m_zeta_command_record1 = m_zeta_command;
 		m_zeta_command = m_zeta_command + delta_zeta_command;
 	}
-// 	else if(flight_time < m_time_altitude_control)
-// 	{
-// 		m_zeta_command = (m_zeta_command_record1 - 2.0) * exp(-(flight_time - (m_time_separate_booster + 7.0)) / 2.0) + 2.0;
-// 		m_zeta_command_record2 = m_zeta_command;
-// 		m_zeta_command = m_zeta_command + delta_zeta_command;
-// 	}
-	//½øÈëµ¼ÒýÇ°£¬¸ß¶È¿ØÖÆ¹ý³ÌÖÐ
-	else if(flight_time < (m_time_combat_status + 5.0))
+	// 4.ï¿½ï¿½ï¿½ëµ¼ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç¹ï¿½ï¿½ï¿½Ê±ï¿½ï¿½5.5s
+	else if(flight_time < (m_time_combat_status + m_time_combat_delay))
 	{
-		//¹ý¶ÉÖÁ¹À¼ÆÆ½ºâ¹¥½Ç,¹ý¶ÉÊ±¼äÔ¼5.5s
-		m_zeta_command = (m_zeta_command_record1 - m_ktheta_hight_enc)*exp(-(flight_time - m_time_altitude_control) * (flight_time - m_time_altitude_control)/ 10.0) + m_ktheta_hight_enc; 
+		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ½ï¿½ï¿½ï¿½ï¿½Ì¬ï¿½Ç¹ï¿½ï¿½Éµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì¬ï¿½Ç£ï¿½ï¿½ï¿½2degï¿½ï¿½8deg
+		if(m_high_maneuver_state == 3)
+		{
+			m_zeta_command = (m_zeta_t_change - m_ktheta_climb_enc)*exp(-(flight_time - m_time_zeta_change) * (flight_time - m_time_zeta_change)/ 10.0) + m_ktheta_climb_enc; 
+		}
+		//ï¿½Â½ï¿½ï¿½ï¿½Æ½ï¿½ï¿½ï¿½ï¿½Ì¬ï¿½Ç¹ï¿½ï¿½Éµï¿½ï¿½Â»ï¿½ï¿½ï¿½Ì¬ï¿½Ç£ï¿½ï¿½ï¿½2degï¿½ï¿½-6deg
+		if(m_high_maneuver_state == 4)
+		{
+			m_zeta_command = (m_zeta_t_change - m_ktheta_decline_enc)*exp(-(flight_time - m_time_zeta_change) * (flight_time - m_time_zeta_change)/ 10.0) + m_ktheta_decline_enc; 
+		}
+		//Æ½ï¿½É¸ß¶È¿ï¿½ï¿½Æ£ï¿½ï¿½ï¿½Ì¬ï¿½ï¿½Ö¸ï¿½ï¿½ï¿½ï¿½Éµï¿½Æ½ï¿½ï¿½ï¿½ï¿½Ì¬ï¿½Ç£ï¿½ï¿½ï¿½ï¿½ï¿½Ç°ï¿½ï¿½Ì¬ï¿½Ç¹ï¿½ï¿½Éµï¿½0deg
+		if(m_high_maneuver_state == 2)
+		{
+			//ï¿½×´Î¸ß¶È¿ï¿½ï¿½Æ£ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½Ö¸ï¿½ï¿½ï¿½(ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½) ï¿½ï¿½ï¿½Éµï¿½ ï¿½×´Î¸ß¶È¿ï¿½ï¿½Æ¸ï¿½ï¿½ï¿½ï¿½Ç£ï¿½×°ï¿½ï¿½Öµï¿½ï¿½
+			//if(0 == m_count_altitude_change)
+			//ï¿½ï¿½Îªï¿½ï¿½Ó¦ï¿½ï¿½Ö¸ï¿½ï¿½ï¿½Ù´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â£ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×´Ì¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î´ï¿½ï¿½ï¿½ï¿½
+			if(0 == m_count_altitude_change_record)
+			{
+				m_zeta_command = (m_zeta_command_record1 - m_ktheta_hight_enc)*exp(-(flight_time - m_time_altitude_control) * (flight_time - m_time_altitude_control)/ 10.0) + m_ktheta_hight_enc; 	
+			}
+			//ï¿½ï¿½ï¿½×´Î¸ß¶È¿ï¿½ï¿½Æ£ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½Ì¸ï¿½ï¿½ï¿½ï¿½ï¿½(×´Ì¬ï¿½ï¿½ ï¿½ï¿½ï¿½Éµï¿½ Æ½ï¿½É¸ï¿½ï¿½ï¿½ï¿½Ç£ï¿½Æ½ï¿½â¹¥ï¿½Ç£ï¿½
+			//ï¿½Â»ï¿½×ªï¿½ß¶È¿ï¿½ï¿½Æ£ï¿½ï¿½ï¿½Ê¼Ê±ï¿½ï¿½Îªï¿½Â»ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½
+			//ï¿½ï¿½ï¿½ï¿½×ªï¿½ß¶È¿ï¿½ï¿½Æ£ï¿½ï¿½ï¿½Ê¼Ê±ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½
+			//ï¿½ß¶È¿ï¿½ï¿½ï¿½×ªï¿½ß¶È¿ï¿½ï¿½Æ£ï¿½ï¿½ï¿½Ê¼Ê±ï¿½ï¿½Îª ï¿½ß¶È¹ï¿½ï¿½É¿ï¿½Ê¼Ê±ï¿½ï¿½
+			else
+			{
+				//m_zeta_command = (m_zeta_t_change - m_ktheta_hight_enc)*exp(-(flight_time - m_time_altitude_change_end) * (flight_time - m_time_altitude_change_end)/ 10.0) + m_ktheta_hight_enc; 
+				m_zeta_command = (m_zeta_t_change - m_alpha_b)*exp(-(flight_time - m_time_zeta_change) * (flight_time - m_time_zeta_change)/ 10.0) + m_alpha_b; 
+			}
+			
+			//ï¿½ß¶È¿ï¿½ï¿½Æ¸ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½î²¹ï¿½ï¿½
+			m_zeta_command = m_zeta_command + temp_hightctrl_zeta_command;
+		}
+
+		//ï¿½ï¿½×ªï¿½ï¿½ï¿½Æ¸ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½î²¹ï¿½ï¿½
 		m_zeta_command = m_zeta_command + delta_zeta_command;
 	}
-	//½øÈëÄ©ÖÆµ¼¿ØÖÆ£¬²»ÔÙÊ¹ÓÃÖ¸Áî¸©Ñö½Ç
+	// 5.ï¿½ï¿½ï¿½ï¿½Ä©ï¿½Æµï¿½ï¿½ï¿½ï¿½Æ£ï¿½ï¿½ï¿½ï¿½ï¿½Ê¹ï¿½ï¿½Ö¸ï¿½î¸©ï¿½ï¿½ï¿½Ç£ï¿½Îªï¿½Ë±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô£ï¿½ï¿½ï¿½ï¿½Ö¸ß¶È¿ï¿½ï¿½Æ¼ï¿½ï¿½ï¿½Öµ
 	else
 	{
-		m_zeta_command = m_ktheta_hight_enc + delta_zeta_command;
+		//m_zeta_command = m_ktheta_hight_enc + delta_zeta_command;
+		m_zeta_command = m_alpha_b + delta_zeta_command + temp_hightctrl_zeta_command;
 	}
+	// 6.ï¿½Ü¸ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½ï¿½Þ·ï¿½
+	// Ëµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½2degÆ½ï¿½â¹¥ï¿½Ç¹ï¿½ï¿½Æ£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô¼Îª-10deg~10deg
+	m_zeta_command = CFlightGlobalFun::Range2(m_zeta_command, 12.0, -8.0);
 
-	//Âú×ã¸ß¶È»ú¶¯Ìõ¼þ£¬³õÊ¼»¯£¬¼ÆËã³ÌÐò¸ß¶È¡¢¸ß¶È±ä»¯ÂÊ
-	if((m_count_altitude_change != m_count_altitude_change_record)	//ÊÜflight_basic×ÛºÏÁ÷³Ìµ÷¶È¿ØÖÆ£¬Âú×ãÒÔÏÂÌõ¼þ¿ªÊ¼¸ß¶È»ú¶¯
-		&& (flight_time >= m_time_altitude_change_start))			///1£º¸ß¶È»ú¶¯Ö¸Áî´ÎÊý¸Ä±ä		2£º·ÉÐÐÊ±¼ä´óÓÚ»ú¶¯¿ªÊ¼Ê±¼ä
-	{
-		//´ÎÊý¸üÐÂ£¬Ö»½øÈëÒ»´Î
-		m_count_altitude_change_record = m_count_altitude_change;
-		
-		//¼ÇÂ¼±¾´Î¼°ÉÏÒ»´Î¸ß¶È»ú¶¯¿ªÊ¼Ê±£¬Ö¸Áî¸ß¶È
-		m_h_command_t_change_record = m_h_command_t_change;
-		m_h_command_t_change = m_h_command;
-		//¼ÇÂ¼±¾´Î¼°ÉÏÒ»´Î¸ß¶È»ú¶¯¿ªÊ¼Ê±£¬»ú¶¯¿ªÊ¼Ê±¿Ì
-		m_time_altitude_change_record = m_time_altitude_change;
-		m_time_altitude_change = m_time_altitude_change_start;	//¿ªÊ¼Ê±¼ä	
-		//¼ÇÂ¼±¾´Î¼°ÉÏÒ»´Î¸ß¶È»ú¶¯¿ªÊ¼Ê±£¬Ä¿±ê¸ß¶È
-		m_h_target_record = m_h_target;
-		m_h_target = m_h_target_in;
-		//¼ÇÂ¼±¾´Î¼°ÉÏÒ»´Î¸ß¶È»ú¶¯¿ªÊ¼Ê±£¬¹ý¶ÉÊ±¼ä¹À¼Æ
-		m_altitude_change_gain_record = m_altitude_change_gain;	//¼ÆËã²¢¼ÇÂ¼ÉÏÒ»´Î¸ß¶È»ú¶¯ËÙ¶È¿ØÖÆÔöÒæ	
-		m_altitude_change_gain = fabs(m_h_command_t_change - m_h_target) / 5.0;
-		if(m_altitude_change_gain <= 5.0)	m_altitude_change_gain = 5.0;
-		if(m_altitude_change_gain >= 400.0)	m_altitude_change_gain = 400.0;
-	}
-
-	//¸ß¶È¿ØÖÆÇ°
+	
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö£ï¿½ï¿½ß¶ï¿½Ö¸ï¿½ï¿½ï¿½ï¿½ï¿½
+	// 1.ï¿½×´Î¸ß¶È¿ï¿½ï¿½ï¿½Ç°
 	if (flight_time <= m_time_altitude_control)
 	{
+		//Ö¸ï¿½ï¿½ß¶È¡ï¿½ï¿½ï¿½ï¿½Ù£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â·
 		m_h_command = m_hz;
-		m_h_rate_command = 0.0;
+		m_h_rate_command = m_vs;
 		
-		//¸üÐÂÖ±ÖÁ¸ß¶È¿ØÖÆ
+		//ï¿½ï¿½ï¿½ï¿½Ö±ï¿½ï¿½ï¿½ß¶È¿ï¿½ï¿½ï¿½
 		m_hz_t_altitude_control = m_hz;
 		m_vs_t_altitude_control = m_vs;
-		//Ä¿±ê¸ß¶È
+		//Ä¿ï¿½ï¿½ß¶ï¿½
 		m_h_target = m_h_target_in;
 	}
-	//¸ß¶È¿ØÖÆ¿ªÊ¼ºóµ½¸ß¶È»ú¶¯Á÷³Ì£¬¶¨ËÙÅÀÉý¹ý³Ì
+	// 2.ï¿½×´Î¸ß¶È¿ï¿½ï¿½Æ¿ï¿½Ê¼ï¿½ï¿½ ï¿½ï¿½ ï¿½ß¶È»ï¿½ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð´ï¿½ï¿½Ù£ï¿½ï¿½ï¿½ï¿½Éµï¿½Æ½ï¿½ï¿½
 	else if(flight_time < m_time_altitude_change)
 	{
-		//¸ù¾Ý½øÈëÊ±¿Ì´¹ËÙ£¬¹À¼Æ»ú¶¯µ½Ä¿±ê¸ß¶ÈÊ±¼ä
-		if (fabs(m_vs_t_altitude_control) > 0.01)
-			m_altitude_change_gain_seg1 = fabs((m_hz_t_altitude_control - m_h_target)/m_vs_t_altitude_control);
+		//ï¿½ï¿½ï¿½Ý½ï¿½ï¿½ï¿½Ê±ï¿½Ì´ï¿½ï¿½Ù£ï¿½ï¿½ï¿½ï¿½Æ»ï¿½ï¿½ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½ß¶ï¿½Ê±ï¿½ï¿½
+		if (fabs(m_vs_t_altitude_control) > 0.5)
+			m_altitude_change_gain_seg1 = 2.0*fabs((m_hz_t_altitude_control - m_h_target)/m_vs_t_altitude_control);
 		else
-			m_altitude_change_gain_seg1 = 50.0;
-		if (m_altitude_change_gain_seg1<=5.0)	m_altitude_change_gain_seg1 = 5.0;
-		if (m_altitude_change_gain_seg1>=50.0)	m_altitude_change_gain_seg1 = 50.0;
+			m_altitude_change_gain_seg1 = 100.0;
+		if (m_altitude_change_gain_seg1<=4.0)	m_altitude_change_gain_seg1 = 4.0;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½20m
+		if (m_altitude_change_gain_seg1>=100.0)	m_altitude_change_gain_seg1 = 100.0;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½250m
 		
-		//Ö¸Áî¸ß¶ÈÓÉ¸ß¶È»ú¶¯Ê±¿Ì ¸ß¶È ¹ý¶Éµ½ Ä¿±ê¸ß¶È(×°¶©Öµ)£¬´¹ËÙ¹ý¶ÉÖÁÁã£¬¿ªÊ¼¸ß¶È¸ú×Ù
+		//Ö¸ï¿½ï¿½ß¶ï¿½ï¿½É¸ß¶È»ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ ï¿½ß¶ï¿½ ï¿½ï¿½ï¿½Éµï¿½ Ä¿ï¿½ï¿½ß¶ï¿½(×°ï¿½ï¿½Öµ)ï¿½ï¿½ï¿½ï¿½ï¿½Ù¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ã£¬ï¿½ï¿½Ê¼ï¿½ß¶È¸ï¿½ï¿½ï¿½
 		m_h_command = (m_hz_t_altitude_control - m_h_target) 
 			* exp(- (flight_time - m_time_altitude_control) / m_altitude_change_gain_seg1) 
 			+ m_h_target;
 		m_h_rate_command = -((m_hz_t_altitude_control - m_h_target) / m_altitude_change_gain_seg1) 
 			* exp(- (flight_time - m_time_altitude_control) / m_altitude_change_gain_seg1);
 	}
-	//´óÓÚ¸ß¶È»ú¶¯Ê±¿Ì£¬£»Ñ²º½·ÉÐÐ¹ý³ÌÖÐ¸ß¶È»ú¶¯Á÷³Ì£¬°üº¬Á¬Ðø»ú¶¯Æ½»¬¹ý¶É
-	else			
-	{
-		//Èç¹ûÆð·É¹ý³ÌÖÐ£¬º½¼£ÇÐ»»ÁËÒ»¸öº½µã£¬¼´m_count_altitude_change Îª1£¬¼ÌÐø¹ý ¶ÉÖÁ Ç°Ò»´ÎÄ¿±ê¸ß¶È
-		//¸ß¶È¹ý¶ÉÖÁÇ°Ò»º½µãÄ¿±ê¸ß¶Èm_hz_t_altitude_control -> m_h_target_record£¬m_altitude_change_gain_seg1
+	// 3.ï¿½ï¿½Ê¼ï¿½ß¶È»ï¿½ï¿½ï¿½ï¿½ï¿½Ñ²ï¿½ï¿½ï¿½ï¿½ï¿½Ð¹ï¿½ï¿½ï¿½ï¿½Ð¸ß¶È»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	else
+	{	
+		//ï¿½ï¿½ï¿½ï¿½å£ºÑ²ï¿½ï¿½ï¿½Þ¸ß¶È»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï£ï¿½ï¿½ï¿½Îªï¿½Ç¹ï¿½ï¿½ï¿½ï¿½ï¿½Éºï¿½ï¿½ï¿½ï¿½Ì¬
+		if(m_high_maneuver_state == 2)
+		{
+			//ï¿½ï¿½ï¿½Ò»: ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â»ï¿½ï¿½ï¿½É£ï¿½state = 2ï¿½ï¿½Ö¸ï¿½ï¿½ï¿½ï¿½ï¿½Éµï¿½Ä¿ï¿½ï¿½ß¶È£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö£ï¿½ï¿½ï¿½ï¿½Ð¸ß¶È¿ï¿½ï¿½ï¿½
+			//ï¿½Ð»ï¿½Ê±ï¿½ï¿½ï¿½ï¿½Ä¿ï¿½ê£¬ï¿½ß¶È²ï¿½Ð¡ï¿½ï¿½ï¿½ï¿½Ê¼Ê±ï¿½ä£»ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ä£¬ï¿½ï¿½ï¿½Ú½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½
+			if ((m_high_maneuver_state_record == 3)||(m_high_maneuver_state_record == 4))
+			{
+				m_h_command = (m_h_command_t_change - m_h_target) 
+								* exp(- (flight_time - m_time_altitude_change_tocruise) / m_altitude_change_gain)
+								//* exp(- (flight_time - m_time_altitude_change) / m_altitude_change_gain)
+								+ m_h_target;
+				m_h_rate_command = -((m_h_command_t_change - m_h_target) / m_altitude_change_gain) 
+								* exp(- (flight_time - m_time_altitude_change_tocruise) / m_altitude_change_gain);
+								//* exp(- (flight_time - m_time_altitude_change) / m_altitude_change_gain);
+			}
+			//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß¶È»ï¿½ï¿½ï¿½ï¿½ï¿½Î§ï¿½ï¿½Ð¡ï¿½ï¿½state = 2ï¿½ï¿½Ë«Ö¸ï¿½ï¿½ï¿½ï¿½ï¿½Éµï¿½Ä¿ï¿½ï¿½ß¶È£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â»ï¿½
+			//ï¿½Ð»ï¿½Ê±ï¿½ï¿½ï¿½ï¿½Ä¿ï¿½ê£¬ï¿½ß¶È²ï¿½ï¿½ï¿½ï¿½Ê¼Ê±ï¿½ä£»ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ä£¬ï¿½Õ¿ï¿½Ê¼Ð¡ï¿½Ú½ï¿½ï¿½ï¿½Ê±ï¿½ä£¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½
+			else
+			{
+				m_h_command = (m_h_command_t_change - m_h_target) 
+					* exp(-((flight_time - m_time_altitude_change_tocruise) / m_altitude_change_gain) * ((flight_time - m_time_altitude_change_tocruise) / m_altitude_change_gain))
+					//* exp(-((flight_time - m_time_altitude_change) / m_altitude_change_gain) * ((flight_time - m_time_altitude_change) / m_altitude_change_gain))
+					+ m_h_target;
+				m_h_rate_command = -2.0 * (flight_time - m_time_altitude_change_tocruise) * (m_h_command_t_change - m_h_target) / (m_altitude_change_gain * m_altitude_change_gain)
+					* exp(-((flight_time - m_time_altitude_change_tocruise) / m_altitude_change_gain) * ((flight_time - m_time_altitude_change_tocruise) / m_altitude_change_gain));
+					//* exp(-((flight_time - m_time_altitude_change) / m_altitude_change_gain) * ((flight_time - m_time_altitude_change) / m_altitude_change_gain));
+			}
+		}
+		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì£ï¿½state = 3
+		//ï¿½ï¿½ï¿½ï¿½Ä£ï¿½ï¿½Â»ï¿½ï¿½ï¿½ï¿½Ì£ï¿½state = 4
+		//ï¿½ï¿½ï¿½ï¿½å£ºï¿½Æµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì£ï¿½state = 5ï¿½ï¿½
+		//ï¿½ß¶È»ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½Î´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â»ï¿½ï¿½ï¿½ï¿½Ì£ï¿½Ö¸ï¿½ï¿½ß¶ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ç°ï¿½ß¶ï¿½
+		else if( (m_high_maneuver_state == 3) || (m_high_maneuver_state == 4) || (m_high_maneuver_state == 5) )
+		{
+			//ï¿½ß¶ï¿½Ö¸ï¿½ï¿½ï¿½ï¿½ï¿½
+			m_h_command = m_hz;
+			m_h_rate_command = m_vs;
+		}
+		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½ß¶Èµï¿½ï¿½ï¿½Ä¿ï¿½ï¿½ß¶È£ï¿½Ö¸ï¿½ï¿½ï¿½Ù¶ï¿½Îªï¿½ï¿½Ì¬ï¿½Ù¶ï¿½Îªï¿½ï¿½
+		else
+		{
+			m_h_command = m_h_target;
+			m_h_rate_command = 0.0;
+		}
+		
+		/* ï¿½ï¿½ï¿½ï¿½ï¿½Ç¸ß¶È»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å»ï¿½???...
+		
+		// 1.ï¿½ï¿½ï¿½ï¿½ï¿½Ð»ï¿½Ç°ï¿½Äºï¿½ï¿½Î£ï¿½Ö¸ï¿½ï¿½ß¶È¡ï¿½ï¿½ï¿½ï¿½Ù¶È£ï¿½Ö¸ï¿½ï¿½ß¶È¡ï¿½Ö¸ï¿½î´¹ï¿½Ù¶È¼ï¿½ï¿½ï¿½
+		// 1.1ï¿½ï¿½ï¿½ï¿½ï¿½É¹ï¿½ï¿½ï¿½ï¿½Ð£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð»ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ã£¬ï¿½ï¿½m_count_altitude_change Îª1ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ Ç°Ò»ï¿½ï¿½Ä¿ï¿½ï¿½ß¶ï¿½
+		//ï¿½ß¶È¹ï¿½ï¿½ï¿½ï¿½ï¿½Ç°Ò»ï¿½ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½ß¶ï¿½m_hz_t_altitude_control -> m_h_target_recordï¿½ï¿½m_altitude_change_gain_seg1
 		if(1 == m_count_altitude_change)
 		{			
 			m_h_command1 = (m_hz_t_altitude_control - m_h_target_record)
@@ -523,9 +948,9 @@ void CMathControlPitch::Calc_Control_Commond()
 				+ m_h_target_record;
 			m_h_rate_command1 = -1.0 / m_altitude_change_gain_seg1 * (m_h_command1 - m_h_target_record);
 		}
-		//Èç¹û¸ß¶È»ú¶¯¹ý³ÌÖÐ£¬º½¼£ÇÐ»»ÁËÒ»¸öº½µã£¬¼´m_count_altitude_change ´óÓÚ1£¬¼ÆËãÇ°Ò»´ÎÖ¸Áî¸ß¶È¡¢´¹ËÙ¶È
-		//Èç¹û¸ß¶È»ú¶¯¹ý³ÌÖÐ£¬Î´ÇÐ»»º½µã£¬¼ÆËãÇ°Ò»´ÎÖ¸Áî¸ß¶ÈÎªÇ°Ò»´ÎÖ¸Áî¸ß¶È¡¢´¹ËÙ¶È£¬¼´¸ß¶ÈÎªÇ°Ò»´Î×°¶©Öµ£¬´¹ËÙÎªÁã
-		//¸ß¶È ¹ý¶ÉÖÁ Ç°Ò»º½µãÄ¿±ê¸ß¶Èm_h_command_t_change_record -> m_h_target_record£¬m_altitude_change_gain_record
+		// 1.2ï¿½ï¿½ï¿½ï¿½ß¶È»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð»ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ã£¬ï¿½ï¿½m_count_altitude_change ï¿½ï¿½ï¿½ï¿½1ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç°Ò»ï¿½ï¿½Ö¸ï¿½ï¿½ß¶È¡ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½
+		//ï¿½ï¿½ï¿½ï¿½ß¶È»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð£ï¿½Î´ï¿½Ð»ï¿½ï¿½ï¿½ï¿½ã£¬ï¿½ï¿½ï¿½ï¿½Ç°Ò»ï¿½ï¿½Ö¸ï¿½ï¿½ß¶ï¿½ÎªÇ°Ò»ï¿½ï¿½Ö¸ï¿½ï¿½ß¶È¡ï¿½ï¿½ï¿½ï¿½Ù¶È£ï¿½ï¿½ï¿½ï¿½ß¶ï¿½ÎªÇ°Ò»ï¿½ï¿½×°ï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½
+		//ï¿½ß¶ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Ç°Ò»ï¿½ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½ß¶ï¿½m_h_command_t_change_record -> m_h_target_recordï¿½ï¿½m_altitude_change_gain_record
 		else
 		{
 			double temp = (flight_time - m_time_altitude_change_record) / m_altitude_change_gain_record;
@@ -534,15 +959,16 @@ void CMathControlPitch::Calc_Control_Commond()
 				/ (m_altitude_change_gain_record * m_altitude_change_gain_record);
 		}
 		
-		//Èç¹û¸ß¶È»ú¶¯¹ý³Ì»òÆð·É¹ý³ÌÖÐ£¬º½¼£ÇÐ»»ÁËÒ»¸öº½µã£¬¼ÆËãµ±Ç°´ÎÖ¸Áî¸ß¶È¡¢´¹ËÙ¶È£¬Ë«Ö¸Êý¹ý¶É
-		//½øÈëÊ±¿Ì¸ß¶È ¹ý¶ÉÖÁ Ä¿±ê¸ß¶Èm_h_command_t_change -> m_h_target£¬m_altitude_change_gain
+		// 2.ï¿½ï¿½ï¿½ï¿½ß¶È»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì»ï¿½ï¿½ï¿½É¹ï¿½ï¿½ï¿½ï¿½Ð£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð»ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ã£¬ï¿½ï¿½ï¿½ãµ±Ç°ï¿½ï¿½Ö¸ï¿½ï¿½ß¶È¡ï¿½ï¿½ï¿½ï¿½Ù¶È£ï¿½Ë«Ö¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+		//ï¿½ï¿½ï¿½ï¿½Ê±ï¿½Ì¸ß¶ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Ä¿ï¿½ï¿½ß¶ï¿½m_h_command_t_change -> m_h_targetï¿½ï¿½m_altitude_change_gain
 		m_h_command2 = (m_h_command_t_change - m_h_target) 
 			* exp(-((flight_time - m_time_altitude_change) / m_altitude_change_gain) * ((flight_time - m_time_altitude_change) / m_altitude_change_gain))
 			+ m_h_target;
 		m_h_rate_command2 = -2.0 * (flight_time - m_time_altitude_change) * (m_h_command2 - m_h_target) 
 			/ (m_altitude_change_gain * m_altitude_change_gain);
 
-		//Ö¸Áî¸ß¶È¹ý¶É
+		// 3.Ö¸ï¿½ï¿½ß¶È¹ï¿½ï¿½ï¿½
+		// 3.1 Ö¸ï¿½ï¿½ß¶È¹ï¿½ï¿½É¹ï¿½ï¿½ï¿½ï¿½ï¿½
 		if(flight_time <= (m_time_altitude_change + 8.0))
 		{
 			//m_h_command1->m_h_command2
@@ -552,17 +978,22 @@ void CMathControlPitch::Calc_Control_Commond()
 				+ 0.5 * ( m_h_rate_command2 - m_h_rate_command1) * (1.0 - cos(temp)) 
 				+ PI / 16.0 * ( m_h_command2 - m_h_command1) * sin(temp);
 		}
+		// 3.2 Ö¸ï¿½ï¿½ß¶È¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		else
 		{
-			//±£³Öm_h_command2
+			//ï¿½ï¿½ï¿½ï¿½m_h_command2
 			double temp = (flight_time - m_time_altitude_change) / m_altitude_change_gain;
 			m_h_command = (m_h_command_t_change - m_h_target) * exp(- temp * temp) + m_h_target;
 			m_h_rate_command = -2.0 * (flight_time - m_time_altitude_change) * (m_h_command - m_h_target)
 				/ (m_altitude_change_gain * m_altitude_change_gain);
-		}
+		}*/
 	}
 
-	//¼ÆËã³ÌÐò¹ýÔØ£¬µ¼Òý¹æÂÉ
+
+	//ï¿½ï¿½ï¿½Ä²ï¿½ï¿½Ö£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½
+	
+	//Ä©ï¿½Ëµï¿½ï¿½ï¿½ï¿½É£ï¿½ï¿½ï¿½ï¿½Å»ï¿½???...
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 // 	if(m_distance_target > 3500.0)
 // 	{
 // 		m_ny_command = 4.0 * m_v * m_dqf / m_g / RTOA + 1.05;
@@ -581,32 +1012,56 @@ void CMathControlPitch::Calc_Control_Commond()
 // 	{		    
 // 		m_ny_command = 4.0 * m_v * m_dqf / m_g / RTOA + 1.05;		
 // 	}
-
-	//ÖØÁ¦²¹³¥±ÈÀýµ¼Òý
-	m_ny_command = 3.0 * m_v * m_dqf / m_g / RTOA + 1.05;
-	m_ny_command = CFlightGlobalFun::Range(m_ny_command, 2.0);
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	//m_ny_command = 4.0 * m_v * m_dqf / m_g / RTOA + 1.00*cos(m_zeta / RTOA);
+	//m_ny_command = CFlightGlobalFun::Range(m_ny_command, 2.0);
+	
+	//ï¿½â²¿ï¿½ï¿½ï¿½ï¿½ï¿½Æµï¿½Ö¸ï¿½ï¿½
+	if(flight_time < m_time_combat_status + m_time_combat_delay)
+	{
+		m_ny_command = 0.0;
+	}
+	else
+	{
+		m_ny_command = m_ny_command_guidance;
+	}
+	
 }
 
-// void CMathControlPitch::Monitor_Data()
-// {
-// 	extern CSimMonitor sim_monitor;
-	
-// 	if (sim_monitor.flag_monitor2_valid)
-// 	{
-// 		sim_monitor.Get_Variable(m_zeta_command,"zetacx",ENUM_FILE_CONTROL1);	//ÖúÍÆ¶Î:×ËÌ¬½ÇÖ¸Áî
-// 		sim_monitor.Get_Variable(m_h_command,"hcx",ENUM_FILE_CONTROL1);		//Ñ²º½¶Î:¸ß¶ÈÖ¸Áî
-// 		sim_monitor.Get_Variable(m_h_rate_command,"dhcx",ENUM_FILE_CONTROL1);	//Ñ²º½¶Î:´¹ËÙÖ¸Áî
-// 		sim_monitor.Get_Variable(m_ny_command,"nyc",ENUM_FILE_CONTROL1);		//µ¼Òý¶Î:¹ýÔØÖ¸Áî
-// 	}
-	
-// 	if (sim_monitor.flag_monitor3_valid)
-// 	{
-// 		sim_monitor.Get_Variable(m_k2f,"k2f",ENUM_FILE_AERO1);
-// 		sim_monitor.Get_Variable(m_k5f,"k5f",ENUM_FILE_AERO1);
-// 		sim_monitor.Get_Variable(m_k3f,"k3f",ENUM_FILE_AERO1);
-// 		sim_monitor.Get_Variable(m_k7f,"k7f",ENUM_FILE_AERO1);
-// 		sim_monitor.Get_Variable(m_k6f,"k6f",ENUM_FILE_AERO1);
-// 		sim_monitor.Get_Variable(m_knif,"knif",ENUM_FILE_AERO1);
-// 		sim_monitor.Get_Variable(m_kwif,"kwif",ENUM_FILE_AERO1);
-// 	}
-// }
+/*
+void CMathControlPitch::Monitor_Data()
+{
+	extern CSimMonitor sim_monitor;
+
+	//ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½
+	if (sim_monitor.flag_monitor2_valid)
+	{
+		sim_monitor.Get_Variable(m_zeta_command,"zetacx",ENUM_FILE_CONTROL1);	//ï¿½ï¿½ï¿½Æ¶ï¿½:ï¿½ï¿½Ì¬ï¿½ï¿½Ö¸ï¿½ï¿½
+		sim_monitor.Get_Variable(m_h_command,"hcx",ENUM_FILE_CONTROL1);		//Ñ²ï¿½ï¿½ï¿½ï¿½:ï¿½ß¶ï¿½Ö¸ï¿½ï¿½
+		sim_monitor.Get_Variable(m_h_rate_command,"dhcx",ENUM_FILE_CONTROL1);	//Ñ²ï¿½ï¿½ï¿½ï¿½:ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½
+		sim_monitor.Get_Variable(m_ny_command,"nyc",ENUM_FILE_CONTROL1);		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½:ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½
+		
+		//ï¿½ï¿½ï¿½ï¿½
+		sim_monitor.Get_Variable(m_zeta,"zeta",ENUM_FILE_CONTROL1);//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+		sim_monitor.Get_Variable(m_hz,"hight",ENUM_FILE_CONTROL1);//ï¿½ß¶ï¿½
+		sim_monitor.Get_Variable(m_vs,"vy",ENUM_FILE_CONTROL1);//ï¿½ï¿½ï¿½ï¿½
+		sim_monitor.Get_Variable(m_nby,"ny",ENUM_FILE_CONTROL1);//ï¿½ï¿½ï¿½ï¿½Ïµï¿½ï¿½ï¿½ï¿½
+
+		//ï¿½ï¿½ï¿½ï¿½1ï¿½ï¿½2
+		sim_monitor.Get_Variable(m_unwif,"unwif",ENUM_FILE_CONTROL1); //ï¿½Æµï¿½Ç°ï¿½ï¿½ï¿½
+		sim_monitor.Get_Variable(m_urf_zd,"urf_zd",ENUM_FILE_CONTROL1); //ï¿½Æµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	}
+
+	//ï¿½ï¿½ï¿½Æ²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô·ï¿½ï¿½ï¿½
+	if (sim_monitor.flag_monitor3_valid)
+	{
+		sim_monitor.Get_Variable(m_k2f,"k2f",ENUM_FILE_AERO1);
+		sim_monitor.Get_Variable(m_k5f,"k5f",ENUM_FILE_AERO1);
+		sim_monitor.Get_Variable(m_k3f,"k3f",ENUM_FILE_AERO1);
+		sim_monitor.Get_Variable(m_k7f,"k7f",ENUM_FILE_AERO1);
+		sim_monitor.Get_Variable(m_k6f,"k6f",ENUM_FILE_AERO1);
+		sim_monitor.Get_Variable(m_knif,"knif",ENUM_FILE_AERO1);
+		sim_monitor.Get_Variable(m_kwif,"kwif",ENUM_FILE_AERO1);
+	}
+}
+*/

@@ -16,6 +16,7 @@
 typedef struct  _Stru_Yaw_Control_Input
 {
 	double gama;
+	double wx;	//用于BTT机动过程，运动学、动力学解耦
 	double wy;
 	double mass;
 	double hz;//组合高度
@@ -25,6 +26,7 @@ typedef struct  _Stru_Yaw_Control_Input
 	double dqh;
 	double nby;
 	double nbz;
+	double nz_command_guidance;//速度系过载指令（BTT为零） 或 体轴系侧向过载指令（STT制导，滚转角近似于零解耦，体轴系即制导系）
 	double tgo;
 	double qh_leader;
 	double det_qh;
@@ -39,6 +41,10 @@ typedef struct  _Stru_Yaw_Control_Output
 {
 	double u5h;
 	double urh_zd;
+
+	//用于遥测及分析
+	double wy_command;
+	double nz_command;
 }Stru_Yaw_Control_Output;
 
 class CMathControlYaw
@@ -79,11 +85,15 @@ private:
 	double m_time_separate_booster;
 	double m_time_combat_status;
 	double m_time_combat_delay;
+	double m_wx;
 	double m_wy;
 	double m_wy_record;
 	double m_wy_command;
+	double m_wy_command_comp;
+	double m_wy_command_comp_record;
 	double m_distance_target;
 	double m_nz_command;
+	double m_nz_command_guidance;
 	double m_nvz;//速度系侧向过载，用于侧滑角为零控制
 	double m_nby;
 	double m_nbz;

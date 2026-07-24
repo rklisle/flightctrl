@@ -4,131 +4,206 @@
 // Copyright (c) 2016 
 // All rights reserved.
 //
-// ÕªÒª: ·É¿ØÔ¤´¦ÀíÄ£¿é£¬°üÀ¨¹Ø¼üµ¼º½²ÎÊý½âËã£¬Ö¸ÁîÁ÷³Ì½âËãµÈ
+// ÕªÒª: ï¿½É¿ï¿½Ô¤ï¿½ï¿½ï¿½ï¿½Ä£ï¿½é£¬ï¿½ï¿½ï¿½ï¿½ï¿½Ø¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ã£¬Ö¸ï¿½ï¿½ï¿½ï¿½ï¿½Ì½ï¿½ï¿½ï¿½ï¿½
 //        
 //
-// µ±Ç°°æ±¾: 1.0
-// ×÷Õß: wym
-// Íê³ÉÈÕÆÚ: 
+// ï¿½ï¿½Ç°ï¿½æ±¾: 1.0
+// ï¿½ï¿½ï¿½ï¿½: wym
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½: 
 //==================================================================/
 #include "control_roll.h"
 #include "control_engine.h"
 #include "../data_protocol.h"
-
-
-
+/*
+typedef struct  _Stru_Way_Point
+{
+	int num;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	
+	double longitude;	//ï¿½ï¿½ï¿½ã¾­ï¿½ï¿½
+	double latitude;	//ï¿½ï¿½ï¿½ï¿½Î³ï¿½ï¿½
+	double height;		//ï¿½ï¿½ï¿½ï¿½ß¶ï¿½
+	int    route_mode; //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	int    formation_mode;	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½Î´Ê¹ï¿½ï¿½
+	double dltTime;//ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½
+	double turn_angle;//ï¿½Ð³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ×ªï¿½ï¿½Ç¶È£ï¿½ï¿½ï¿½ï¿½Ã£ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	double turn_radius;//×ªï¿½ï¿½ë¾¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ë¾¶ï¿½ï¿½Î´Ê¹ï¿½ï¿½
+	double velocity;	//ï¿½Ù¶ï¿½Ö¸ï¿½ï¿½
+	double accept_radius;//ï¿½ï¿½ï¿½Ü°ë¾¶ï¿½ï¿½Î´Ê¹ï¿½ï¿½
+	
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý£ï¿½ï¿½ï¿½Ê¶
+	bool if_flightime_ctrl;	//[ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½Ê¶ï¿½ï¿½1ï¿½ï¿½Ð§ï¿½ï¿½0ï¿½ï¿½Ð§ï¿½ï¿½]
+	bool if_relativehigh_ctrl;  //[ï¿½ï¿½Ô¸ß¶È£ï¿½ï¿½ï¿½ï¿½ï¿½ß¶È£ï¿½ï¿½ï¿½ï¿½Æ±ï¿½Ê¶ï¿½ï¿½1ï¿½ï¿½Ð§ï¿½ï¿½0ï¿½ï¿½Ð§]
+	bool if_heading_hold;  //[Ö¸ï¿½ï¿½ï¿½ï¿½Ð±ï¿½Ê¶ï¿½ï¿½1ï¿½ï¿½Ð§ï¿½ï¿½0ï¿½ï¿½Ð§ï¿½ï¿½]
+	bool if_groundspeed_ctrl;  //[ï¿½ï¿½ï¿½Ù¿ï¿½ï¿½Æ±ï¿½Ê¶ï¿½ï¿½1ï¿½ï¿½ï¿½Ù£ï¿½0ï¿½ï¿½ï¿½Ù£ï¿½]
+	bool if_attackangle_ctrl;//[ï¿½ï¿½ï¿½ï¿½ï¿½Ç±ï¿½Ê¶ï¿½ï¿½1Ö¸ï¿½ï¿½ï¿½ï¿½Ç£ï¿½0ï¿½ï¿½Ô¼ï¿½ï¿½ï¿½ï¿½]				
+	bool if_turndir_set;//[ï¿½ï¿½ï¿½ï¿½×ªï¿½ä£ºï¿½ï¿½×ªï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½Ê¶ï¿½ï¿½]
+	bool if_prepare_hover;//[Ô¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¶ï¿½ï¿½1ï¿½ï¿½Ð§ï¿½ï¿½0ï¿½ï¿½Ð§ï¿½ï¿½]
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	double outtrack_angle;//[Ö¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð³ï¿½ï¿½Ç¶È£ï¿½ï¿½ï¿½Æ«ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½ï¿½Ô£ï¿½ï¿½Ð³ï¿½ï¿½Ç¶ï¿½deg]
+	int hover_round; //[ï¿½ï¿½ï¿½ï¿½È¦ï¿½ï¿½]
+	double attack_angle;//[ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½]
+}Stru_Way_Point;
+*/
 typedef struct  _Stru_Command
 {
-	bool flag_separate_booster;	 //ÖúÍÆÆ÷·ÖÀë£¬Èý½ÇÒíÏîÄ¿£¬×Ô¶¯·ÖÀë£¬²»ÐèÒª·¢³öÖ¸Áî
-	bool flag_launch_missile_wing;//µ¯ÒíÕ¹¿ª£¬Èý½ÇÒíÏîÄ¿Î´Ê¹ÓÃ
-	bool flag_engine_start;		//·¢¶¯»úµã»ð£¬Èý½ÇÒíÏîÄ¿¸ÄÎª£¬µ¡ËÙ×ª70%ÓÍÃÅ »ò ÂúÓÍÃÅ
-	
-	bool flag_seeker_on;			//µ¼ÒýÍ·¿ª»ú£¬Èý½ÇÒíÏîÄ¿´ýÀ©Õ¹£¬ºóÐø°²×°µ¼ÒýÍ·ºóÊ¹ÓÃ
-	bool flag_lock_on_permit;		//Ëø¶¨ÔÊÐí±êÊ¶£¬Èý½ÇÒíÏîÄ¿´ýÀ©Õ¹£¬ºóÐø°²×°µ¼ÒýÍ·ºóÊ¹ÓÃ
-	bool flag_combat_status;		//Ëø¶¨Ä¿±ê£¬½øÈëÕ½¶·/Ä©ÖÆµ¼×´Ì¬£¬¸øÒýÐÅ·¢ËÍ¡°ÑÓ³Ù×°¶©¡¢±£ÏÕ½â³ýÖ¸Áî¡±
+	//ï¿½è±¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	bool flag_separate_booster;	 //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ë£¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¿Î´Ê¹ï¿½Ã£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½(ï¿½ï¿½ï¿½ï¿½Ð¡ï¿½ï¿½ï¿½ï¿½Öµï¿½ï¿½0.2s)ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½
+	bool flag_launch_missile_wing;//ï¿½ï¿½ï¿½ï¿½Õ¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¿Î´Ê¹ï¿½Ã£ï¿½Ò»ï¿½ï¿½Ö´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½0.2sï¿½ï¿½(ï¿½ï¿½ï¿½ï¿½Ð¡ï¿½ï¿½ï¿½ï¿½Öµï¿½ï¿½0.4s)
+	bool flag_engine_start;		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½ï¿½ï¿½Ö´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½1sï¿½ï¿½ï¿½ï¿½Ô¼10sï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×ª70%ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	bool flag_seeker_on;			//ï¿½ï¿½ï¿½ï¿½Í·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×°ï¿½ï¿½çµ¼ï¿½ï¿½Í·ï¿½ï¿½Ö´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½2sï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×°ï¿½ï¿½ï¿½ï¿½Í·ï¿½ï¿½Ê¹ï¿½ï¿½
+	bool flag_lock_on_permit;		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×°ï¿½ï¿½çµ¼ï¿½ï¿½Í·ï¿½ï¿½Ö´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½Ä¿ï¿½êº½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ð¹¥µã£¬ï¿½Ò¾ï¿½ï¿½ï¿½Ä¿ï¿½êº½ï¿½ï¿½ï¿½ï¿½ï¿½Ð¡ï¿½ï¿½2kmï¿½ï¿½
+	bool flag_target_lock;		//Ä¿ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×°ï¿½ï¿½çµ¼ï¿½ï¿½Í·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½Ñ¡ï¿½ñ£¬¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç°Ä¿ï¿½ê²»ï¿½Ù¸ï¿½ï¿½ï¿½
 
-	bool flag_missile_takeoff;	//Æð·É
-	bool flag_engine_shutdown;	//·¢¶¯»ú¹Ø»ú
-	bool flag_open_umbrella;		//¿ªÉ¡»ØÊÕ
-	bool flag_fuze_unlock;		//ÒýÐÅ½âËø
+	//ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ò²¿·ï¿½
+	bool flag_missile_takeoff;	//ï¿½ï¿½ï¿½ï¿½ï¿½É£ï¿½70%ï¿½ï¿½ï¿½ï¿½×ªï¿½Ù¶È¿ï¿½ï¿½ï¿½
+	bool flag_altitude_control;	//ï¿½×´Î¸ß¶È¿ï¿½ï¿½ï¿½
+	bool flag_combat_status;		//ï¿½ï¿½ï¿½ï¿½Ä¿ï¿½ê£¬ï¿½ï¿½ï¿½ï¿½Õ½ï¿½ï¿½/Ä©ï¿½Æµï¿½×´Ì¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å·ï¿½ï¿½Í¡ï¿½ï¿½Ó³ï¿½×°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Õ½ï¿½ï¿½Ö¸ï¿½î¡±
+	bool flag_fuze_unlock;		//ï¿½ï¿½ï¿½Å½ï¿½ï¿½ï¿½
+	bool flag_combat_dive_pullup;	//Ä©ï¿½Æµï¿½×ªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ð£¬·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×ª×ªï¿½Ù¿ï¿½ï¿½ï¿½
+	bool flag_combat_dive_sidectrl;//Ä©ï¿½Æµï¿½×ªï¿½ï¿½Æ«ï¿½ï¿½ï¿½ï¿½
+	bool flag_engine_shutdown;	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø»ï¿½
+	bool flag_open_umbrella;		//ï¿½ï¿½É¡ï¿½ï¿½ï¿½ï¿½
 }Stru_Command;
+
+// Î»ï¿½ï¿½ï¿½ë¶¨ï¿½å£¬Ë³ï¿½ï¿½ï¿½ï¿½á¹¹ï¿½ï¿½ï¿½Ô±Ò»Ò»ï¿½ï¿½Ó¦
+#define BIT_flag_t0                    (1U << 0)
+#define BIT_flag_control_on            (1U << 1)
+#define BIT_flag_separate_booster      (1U << 2)
+#define BIT_flag_engine_start          (1U << 3)
+#define BIT_flag_seeker_on             (1U << 4)
+#define BIT_flag_initial_hz            (1U << 5)
+#define BIT_flag_missile_takeoff       (1U << 6)
+#define BIT_flag_launch_turn           (1U << 7)
+#define BIT_flag_altitude_control      (1U << 8)
+#define BIT_flag_lock_on_permit        (1U << 9)
+#define BIT_flag_cooperative_attack    (1U << 10)
+#define BIT_flag_combat_status         (1U << 11)
+#define BIT_flag_fuze_unlock           (1U << 12)
+#define BIT_flag_combat_dive_ok_set    (1U << 13)
+#define BIT_flag_combat_dive_sidectrl  (1U << 14)
+#define BIT_flag_combat_dive_pullup    (1U << 15)
+#define BIT_flag_engine_shutdown       (1U << 16)
+#define BIT_flag_open_umbrella         (1U << 17)
+#define BIT_flag_alltitude_change      (1U << 18)
+#define BIT_flag_alltitude_climb       (1U << 19)
+#define BIT_flag_alltitude_decline     (1U << 20)
+#define BIT_flag_waypoint_turn         (1U << 21)
+#define BIT_flag_turn_out_set          (1U << 22)
+#define BIT_flag_flightime_ctrl        (1U << 23)
+#define BIT_flag_velocity_control      (1U << 24)
+#define BIT_flag_heading_hold          (1U << 25)
+#define BIT_flag_turndir_set           (1U << 26)
+#define BIT_flag_prepare_hover         (1U << 27)
+#define BIT_flag_relativehigh_ctrl     (1U << 28)
+#define BIT_flag_attackangle_ctrl      (1U << 29)
 
 typedef struct  _Stru_Control_Time
 {
-	double time_control;			//Æô¿ØÊ±¼ä
-	double time_separate_booster;//ÖúÍÆÆ÷·ÖÀëÊ±¼ä
-	double time_launch_missile_wing;//µ¯ÒíÕ¹¿ªÊ±¼ä
-	double time_seeker_on;		//µ¼ÒýÍ·¿ª»úÊ±¼ä
-	double time_engine_start;	//·¢¶¯»ú¿ª»úÊ±¼ä
-	double time_engine_start_finish;//·¢¶¯»ú¿ª»úÍê³ÉÊ±¼ä
-	double time_altitude_control;//¿ªÊ¼¸ß¶È¿ØÖÆ
-	double time_cooperative_attack;//Ð­Í¬(ËÑË÷)¹¥»÷
-	double time_combat_status;	//Õ½¶·Ö¸Áî: ¡°µ¼ÒýÍ·Ëø¶¨Ä¿±ê¡±»ò¡°¹Ì¶¨Ä¿±êµã¾àÀëÐ¡ÓÚãÐÖµ¡±
-	
-	double time_altitude_change_start;//¸ß¶È»ú¶¯¿ªÊ¼Ê±¼ä
-	double time_altitude_change_end;	//¸ß¶È»ú¶¯½áÊøÊ±¼ä
-	double time_turn_in_start;	//Èë×ªÍä¿ªÊ¼Ê±¼ä: ÉÈÃæ¡¢º½¼£×ªÍä¹²ÓÃ
-	double time_turn_in_end;		//Èë×ªÍä½áÊøÊ±¼ä: Ô¤¼Æ¹ö×ª¹ý¶ÉÍê³ÉÊ±¼ä
-	double time_turn_out_start;	//³ö×ªÍä¿ªÊ¼Ê±¼ä
-	double time_turn_out_end;		//³ö×ªÍä½áÊøÊ±¼ä
-	
-	double time_turn_in_minimum;	//ÈëÍä×îÐ¡Ê±¿Ì£¬Âú×ã×ªÍäÌõ¼þÊ±¿Ì + 10s
-	double time_arrive_minimum;	//º½¶Î£¨»òÄ¿±êµã£©µ½´ïÊ±¼ä
+	double time_control;			//ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½
+	double time_separate_booster;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½
+	double time_launch_missile_wing;//ï¿½ï¿½ï¿½ï¿½Õ¹ï¿½ï¿½Ê±ï¿½ä£¬ï¿½ï¿½ï¿½ï¿½
+	double time_seeker_on;		//ï¿½ï¿½ï¿½ï¿½Í·ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ä£¬ï¿½ï¿½ï¿½ï¿½
+	double time_engine_start;	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ä£¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½1sï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	double time_engine_start_finish;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ä£¬ï¿½ï¿½ï¿½ï¿½
+	double time_missile_takeoff;	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½
+	double time_altitude_control;//ï¿½ï¿½Ê¼ï¿½ß¶È¿ï¿½ï¿½ï¿½
+	double time_launch_turn;		//ï¿½ï¿½ï¿½ï¿½×ªï¿½ä¿ªÊ¼Ê±ï¿½ï¿½
+	double time_launch_turn_ok;	//ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½
+	double time_cooperative_attack;//Ð­Í¬(ï¿½ï¿½ï¿½ï¿½)ï¿½ï¿½ï¿½ï¿½
+	double time_combat_status;	//Õ½ï¿½ï¿½Ö¸ï¿½ï¿½: ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í·ï¿½ï¿½ï¿½ï¿½Ä¿ï¿½ê¡±ï¿½ò¡°¹Ì¶ï¿½Ä¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð¡ï¿½ï¿½ï¿½ï¿½Öµï¿½ï¿½
 
-	double time_missile_takeoff;	//Æð·É
-	double time_engine_shutdown;	//·¢¶¯»ú¹Ø»ú
-	double time_open_umbrella;	//¿ªÉ¡»ØÊÕ
-	double time_fuze_unlock;		//ÒýÐÅ½âËø
+	double time_combat_dive_ok;	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	double time_combat_dive_sidectrl;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½0.1ï¿½ï¿½ï¿½ï¿½ï¿½Â½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¥ï¿½ï¿½×ªï¿½ï¿½Æ«ï¿½ï¿½ï¿½ï¿½
+	double time_combat_dive_pullup;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½0.1ï¿½ï¿½×ªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	
+	double time_altitude_change_start;//ï¿½ß¶È»ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼Ê±ï¿½ï¿½
+	double time_altitude_change_end;	//ï¿½ß¶È»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½
+	double time_turn_in_start;	//ï¿½ï¿½×ªï¿½ä¿ªÊ¼Ê±ï¿½ï¿½: ï¿½ï¿½ï¿½æ¡¢ï¿½ï¿½ï¿½ï¿½×ªï¿½ä¹²ï¿½ï¿½
+	double time_turn_in_end;		//ï¿½ï¿½×ªï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½: Ô¤ï¿½Æ¹ï¿½×ªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½
+	double time_turn_out_start;	//ï¿½ï¿½×ªï¿½ä¿ªÊ¼Ê±ï¿½ï¿½
+	double time_turn_out_end;		//ï¿½ï¿½×ªï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½
+	
+	double time_turn_in_minimum;	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð¡Ê±ï¿½Ì£ï¿½ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ + 10s
+	double time_arrive_minimum;	//ï¿½ï¿½ï¿½Î£ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½ã£©ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ä£¬ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð¶ï¿½
 
-	double time_touch_ground;//´¥µØÊ±¿Ì
+	double time_engine_shutdown;	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø»ï¿½
+	double time_open_umbrella;	//ï¿½ï¿½É¡ï¿½ï¿½ï¿½ï¿½
+	double time_fuze_unlock;		//ï¿½ï¿½ï¿½Å½ï¿½ï¿½ï¿½
+	double time_touch_ground;		//ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½
 }Stru_Control_Time;
 
 typedef struct  _Stru_Control_flag
 {
-	bool flag_initial_hz;			//×éºÏ¸ß¶È³õÊ¼»¯
+	bool flag_t0;
 	
 	bool flag_control_set;
-	bool flag_control_on;			//Æô¿Ø£¨»òÀë¼Ü£©£¬ÔÚset(Âú×ãÌõ¼þ)ºó£¬ÑÓ³Ù¶ÌÊ±¼ä¿ªÊ¼Ö´ÐÐ
+	bool flag_control_on;			//ï¿½ï¿½ï¿½Ø£ï¿½ï¿½ï¿½ï¿½ï¿½Ü£ï¿½ï¿½ï¿½ï¿½ï¿½set(ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½)ï¿½ï¿½ï¿½Ó³Ù¶ï¿½Ê±ï¿½ä¿ªÊ¼Ö´ï¿½ï¿½
 	bool flag_separate_booster_set;
-	bool flag_separate_booster;	//ÖúÍÆÆ÷·ÖÀë
+	bool flag_separate_booster;	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	bool flag_launch_missile_wing_set;
-	bool flag_launch_missile_wing;//µ¯ÒíÕ¹¿ª(Íê³É)£¬É¾³ý
+	bool flag_launch_missile_wing;//ï¿½ï¿½ï¿½ï¿½Õ¹ï¿½ï¿½(ï¿½ï¿½ï¿½)ï¿½ï¿½É¾ï¿½ï¿½
 	bool flag_engine_start_set;
-	bool flag_engine_start;		//·¢¶¯»úÊ×´Îµ¡ËÙ×ª´ó³µ£¬·¢³ö·¢¶¯»úÆô¶¯/¼ÓËÙÖ¸Áî¼°ÂúÓÍÃÅ
+	bool flag_engine_start;		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×´Îµï¿½ï¿½ï¿½×ªï¿½ó³µ£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½/ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½î¼°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	
-	bool flag_engine_start_finish_set;//³õÊ¼ÅÀÉý¶Î·¢¶¯»ú´ó³µ£¬¼´×î´óÄÜÁ¦ÅÀÉý½áÊø£¬×ª·¢¶¯»úÑ²º½¿ØÖÆÖ¸Áî¼°ÓÍÃÅ
-	//bool flag_engine_start_finish;//Í¬Ê±·¢¶¯»ú¿ª»ú£¬²»ÑÓ³Ù
-	//ÔÊÐí·¢¶¯»ú¿ØÖÆ£¬¼´Æô¶¯Íê³Éºó¿ÉÒÔ¿ªÊ¼·¢¶¯»ú¿ØÖÆ
-
-	bool flag_launch_turn_set;	
-	bool flag_launch_turn;		//ÉÈÃæ×ªÍä¹ý³ÌÖÐ£¬½áÊøºóÇå³ý
+	bool flag_engine_start_finish_set;//ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½Î·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ó³µ£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñ²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½î¼°ï¿½ï¿½ï¿½ï¿½
+	//bool flag_engine_start_finish;//Í¬Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó³ï¿½
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Éºï¿½ï¿½ï¿½Ô¿ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	
+	bool flag_launch_turn_set;	//Ö»ï¿½ï¿½ï¿½ï¿½Ò»ï¿½Î£ï¿½ï¿½ï¿½ï¿½ï¿½
+	bool flag_launch_turn;		//ï¿½×´Î¸ß¶È¿ï¿½ï¿½ï¿½5sï¿½ó£¬¿ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½×ªï¿½ä£¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	bool flag_altitude_control_set;
-	bool flag_altitude_control;	//Ê×´Î½ÓÈë¸ß¶È¿ØÖÆ
+	bool flag_altitude_control;	//ï¿½×´Î½ï¿½ï¿½ï¿½ß¶È¿ï¿½ï¿½ï¿½
 	
 	bool flag_seeker_on_set;		
-	bool flag_seeker_on;			//µ¼ÒýÍ·¿ª»ú£¬¹âµçµ¼ÒýÍ·Ò»°ã¿É³¤Ê±¼ä¹¤×÷£¬ÖúÍÆÆ÷·ÖÀëÒ»¶ÎÊ¹¾¢°´ºó¼´¿É¿ª»ú
+	bool flag_seeker_on;			//ï¿½ï¿½ï¿½ï¿½Í·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½çµ¼ï¿½ï¿½Í·Ò»ï¿½ï¿½É³ï¿½Ê±ï¿½ä¹¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½Ê¹ï¿½ï¿½ï¿½ï¿½ï¿½ó¼´¿É¿ï¿½ï¿½ï¿½
 	
-	bool flag_lock_on_permit;		//µ¼ÒýÍ·Ëø¶¨ÔÊÐí: ÇÐ»»×îºóÒ»¸öº½µã(ÊÓÇéÓÅ»¯Îª£¬µ¯Ä¿¾àÀëÐ¡ÓÚãÐÖµÊ±£¬Ëø¶¨ÔÊÐí)
+	bool flag_lock_on_permit;		//ï¿½ï¿½ï¿½ï¿½Í·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½: ï¿½Ð»ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½(ï¿½ï¿½ï¿½ï¿½ï¿½Å»ï¿½Îªï¿½ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½ï¿½ï¿½Ð¡ï¿½ï¿½ï¿½ï¿½ÖµÊ±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½)
 	bool flag_cooperative_attack_set;
-	bool flag_cooperative_attack;//Ð­Í¬(¿ò¼Ü½ÇÒýµ¼ËÑË÷)´ò»÷£¬¾àÀë×îºóÒ»¸öÄ¿±êµã¾àÀëÐ¡ÓÚ10km;
+	bool flag_cooperative_attack;//Ð­Í¬(ï¿½ï¿½Ü½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½)ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½Ä¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð¡ï¿½ï¿½10km;
 	bool flag_combat_status_set;
-	bool flag_combat_status;		//Õ½¶·Ö¸Áî£¬½øÈë´ò»÷Á÷³Ì(Ä©ÖÆµ¼)
+	bool flag_combat_status;		//Õ½ï¿½ï¿½Ö¸ï¿½î£¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½(Ä©ï¿½Æµï¿½)
+	bool flag_target_lock;//Ä¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½
 
-	bool flag_alltitude_change;//¸ß¶È»ú¶¯¹ý³ÌÖÐ±êÊ¶
-	bool flag_alltitude_climb;//¸ß¶È»ú¶¯: ÅÀÉý
-	bool flag_alltitude_decline;//¸ß¶È»ú¶¯:ÏÂ»¬
-	
-	bool flag_waypoint_turn;	//º½¼£×ªÍä¹ý³ÌÖÐ±êÊ¶£¬½áÊøºóÇå³ý
-	bool flag_turn_out_set;	//³ö×ªÍä¹ý³ÌÖÐ±êÊ¶£¬º½¼£×ªÍäºÍÉÈÃæ×ªÍä¹²ÓÃ
-	bool flag_flightime_ctrl;//µ½´ïÊ±¼ä¿ØÖÆ±êÊ¶£¬°ë¿ª»·²¹³¥ËÙ¶ÈÖ¸Áî
-	bool flag_velocity_control;//µØËÙ¿ØÖÆ±êÊ¶
+	bool flag_combat_dive_ok_set;//ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð¾ï¿½ÎªÐ¡ï¿½ï¿½Ä¿ï¿½ï¿½ß¶ï¿½
+	bool flag_combat_dive_sidectrl;//ï¿½Ú¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½0.1sï¿½ï¿½ï¿½ï¿½ï¿½Â½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð»ï¿½ÎªÖ±ï¿½ï¿½ï¿½ï¿½Æ«ï¿½ï¿½ï¿½Æ£ï¿½ï¿½ï¿½STTï¿½Ð»ï¿½ÎªBTT
+	bool flag_combat_dive_pullup;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½0.1sï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð»ï¿½Îªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ£ï¿½ï¿½ï¿½È¥ï¿½ï¿½ï¿½ï¿½ï¿½Â·ï¿½ï¿½ï¿½Æ£ï¿½Ö¸ï¿½î¸©ï¿½ï¿½ï¿½Ç´Óµï¿½Ç°ï¿½ï¿½ï¿½ï¿½ï¿½Ç¹ï¿½ï¿½Éµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
-	bool flag_heading_hold;  	//[Ö¸µã·ÉÐÐ±êÊ¶£º1ÓÐÐ§£¬0ÎÞÐ§£»]
-	bool flag_turndir_set;	//[ÅÌÐý×ªÍä£º×ó×ª¡¢ÓÒ×ª±êÊ¶£»]
-	bool flag_prepare_hover;	//[Ô¤ÅÌÐý±êÊ¶£º1ÓÐÐ§£¬0ÎÞÐ§£»]
+	bool flag_alltitude_change;//ï¿½ß¶È»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½Ê¶
+	bool flag_alltitude_climb;//ï¿½ß¶È»ï¿½ï¿½ï¿½: ï¿½ï¿½ï¿½ï¿½
+	bool flag_alltitude_decline;//ï¿½ß¶È»ï¿½ï¿½ï¿½:ï¿½Â»ï¿½
 	
-	bool flag_relativehigh_ctrl;//[Ïà¶Ô¸ß¶È£¨»òÕæ¸ß¶È£©¿ØÖÆ±êÊ¶£º1ÓÐÐ§£¬0ÎÞÐ§]
-	bool flag_attackangle_ctrl;	//[´ò»÷Âä½Ç±êÊ¶£º1Ö¸¶¨Âä½Ç£¬0ÎÞÔ¼Êø£»]				
-	
-	//³öÍäÍê³É²¢½øÈëÖ±º½Ê±£¨ÖØÐÂ½¨Á¢º½Ïß£©£¬ÅÐ¶ÏÊÇ·ñÐèÒª½øÐÐµ½´ïÊ±¼ä¿ØÖÆ
+	bool flag_waypoint_turn;	//ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½Ê¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	bool flag_turn_out_set;	//ï¿½ï¿½×ªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð±ï¿½Ê¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×ªï¿½ä¹²ï¿½ï¿½
+	bool flag_flightime_ctrl;//ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½Æ±ï¿½Ê¶ï¿½ï¿½ï¿½ë¿ªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½Ö¸ï¿½ï¿½
+	bool flag_velocity_control;//ï¿½ï¿½ï¿½Ù¿ï¿½ï¿½Æ±ï¿½Ê¶
 
-	bool flag_missile_takeoff;	//Æð·É
-	bool flag_engine_shutdown;	//·¢¶¯»ú¹Ø»ú
-	bool flag_open_umbrella;		//¿ªÉ¡»ØÊÕ
-	bool flag_fuze_unlock;		//ÒýÐÅ½âËø
+	bool flag_heading_hold;  	//[Ö¸ï¿½ï¿½ï¿½ï¿½Ð±ï¿½Ê¶ï¿½ï¿½1ï¿½ï¿½Ð§ï¿½ï¿½0ï¿½ï¿½Ð§ï¿½ï¿½]
+	bool flag_turndir_set;	//[ï¿½ï¿½ï¿½ï¿½×ªï¿½ä£ºï¿½ï¿½×ªï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½Ê¶ï¿½ï¿½]
+	bool flag_prepare_hover;	//[Ô¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¶ï¿½ï¿½1ï¿½ï¿½Ð§ï¿½ï¿½0ï¿½ï¿½Ð§ï¿½ï¿½]
+	
+	bool flag_relativehigh_ctrl;//[ï¿½ï¿½Ô¸ß¶È£ï¿½ï¿½ï¿½ï¿½ï¿½ß¶È£ï¿½ï¿½ï¿½ï¿½Æ±ï¿½Ê¶ï¿½ï¿½1ï¿½ï¿½Ð§ï¿½ï¿½0ï¿½ï¿½Ð§]
+	bool flag_attackangle_ctrl;	//[ï¿½ï¿½ï¿½ï¿½ï¿½Ç±ï¿½Ê¶ï¿½ï¿½1Ö¸ï¿½ï¿½ï¿½ï¿½Ç£ï¿½0ï¿½ï¿½Ô¼ï¿½ï¿½ï¿½ï¿½]				
+	
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É²ï¿½ï¿½ï¿½ï¿½ï¿½Ö±ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½Â½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß£ï¿½ï¿½ï¿½ï¿½Ð¶ï¿½ï¿½Ç·ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½Ðµï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½
+	
+	bool flag_initial_hz;			//ï¿½ï¿½Ï¸ß¶È³ï¿½Ê¼ï¿½ï¿½
+	bool flag_missile_takeoff;	//ï¿½ï¿½ï¿½
+	bool flag_engine_shutdown;	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø»ï¿½
+	bool flag_open_umbrella;		//ï¿½ï¿½É¡ï¿½ï¿½ï¿½ï¿½
+	bool flag_fuze_unlock;		//ï¿½ï¿½ï¿½Å½ï¿½ï¿½ï¿½
 }Stru_Control_flag;
 
 typedef struct  _Stru_Flight_Basic_Input
 {
 	int missile_ID;
-	//int engine_start_result;//Î´ÓÃµ½
-	//double engine_rpm;		//Î´ÓÃµ½
-	double engine_cmd_rpm;	//¡°·¢¶¯»ú¿ØÖÆ¡±Êä³öµÄ·¢¶¯»úµÄÖ¸Áî×ªËÙ£¬¶þÑ¡Ò»
-	double engine_cmd_Kc;	//·¢¶¯¸ø·¢¶¯»úµÄÖ¸ÁîÓÍÃÅ£¬¶þÑ¡Ò»
+	//int engine_start_result;//Î´ï¿½Ãµï¿½
+	//double engine_rpm;		//Î´ï¿½Ãµï¿½
+	double engine_cmd_rpm;	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ¡ï¿½ï¿½ï¿½ï¿½ï¿½Ä·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½×ªï¿½Ù£ï¿½ï¿½ï¿½Ñ¡Ò»
+	double engine_cmd_Kc;	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½ï¿½ï¿½ï¿½Å£ï¿½ï¿½ï¿½Ñ¡Ò»
 	
-	Stru_Data_RadioAlt_To_Controller st_radioalt_data;//ÎÞÏßµç¸ß¶È±í¸ø¿ØÖÆ£¬Èý½ÇÒíÏîÄ¿Î´Ê¹ÓÃ
-	Stru_Data_Baro_To_Controller st_baro_data;//¿ÕËÙ¹Ü¸ø¿ØÖÆ
-	Stru_Data_Engine_To_Controller st_engine_data;//·¢¶¯»ú¸ø¿ØÖÆ
+	Stru_Data_RadioAlt_To_Controller st_radioalt_data;//ï¿½ï¿½ï¿½ßµï¿½ß¶È±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¿Î´Ê¹ï¿½ï¿½
+	Stru_Data_Baro_To_Controller st_baro_data;//ï¿½ï¿½ï¿½Ù¹Ü¸ï¿½ï¿½ï¿½ï¿½ï¿½
+	Stru_Data_Engine_To_Controller st_engine_data;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	Stru_Data_INS_To_Controller	st_ins_data;
 	Stru_Data_Seeker_To_Controller	st_seeker_data;
 	//Stru_Data_Datalink_To_Controller	st_datalink_data;
@@ -137,85 +212,108 @@ typedef struct  _Stru_Flight_Basic_Input
 
 typedef struct  _Stru_Flight_Basic_Output
 {
-	double mass_calc;	//¹À¼ÆÖÊÁ¿
+	double mass_calc;	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	double hz;
-	double h_ini;
+	double h_ini;	//ï¿½ï¿½Ê¼ï¿½ß¶ï¿½
 	double nby;
 	double nbz;
-	double v;	//¿ÕËÙ
-	double vs;	//Ë®Æ½ËÙ¶È
+	double v;	//ï¿½ï¿½ï¿½ï¿½
+	double vs;	//Ë®Æ½ï¿½Ù¶ï¿½
 	double vnx;
-	double vnz;	//²àÏòËÙ¶È
+	double vnz;	//ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½
 	double mach;
-	double sz;	//²àÆ«
+	double sonic_speed;//ï¿½ï¿½ï¿½Ù£ï¿½ï¿½ï¿½ï¿½ï¿½
+	double sz;	//ï¿½ï¿½Æ«
 	double zeta;
 	double gama;
 	double wx;
 	double wy;
 	double wz;
-	double g;	//ÖØÁ¦³£Êý
-	double dqf;	//ÊÓÏß½ÇËÙ¶È
+	double g;	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	double dqf;	//ï¿½ï¿½ï¿½ß½ï¿½ï¿½Ù¶ï¿½
 	double dqh;	
 	double qf;
 	double qh;
 	double time_to_go;
-	double phif;//¿ò¼Ü½Ç
-	double phih;
-	double angle_zw;
+	double phif;//ï¿½ï¿½Ü½ï¿½
+	double phih;	
+	int target_num__choosen;
+	double gama_command;
+	double ny_command;//Ä©ï¿½Æµï¿½Ö¸ï¿½ï¿½
+	double nz_command;
+
+	double angle_zw;//ï¿½ï¿½Æ«ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½-180deg~180deg
 	double radius_zw;
 	double target_velocity;
 	double target_time;
 	double target_height;
-	//ÐÂÔöÐÅÏ¢start
-	double dynamic_pressure;//¶¯Ñ¹
-	double target_long;
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢start
+	double dynamic_pressure;//ï¿½ï¿½Ñ¹
+	int num_way_point_target;//ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½ï¿½
+	double target_long;//ï¿½ï¿½Â·Ä¿ï¿½ï¿½ï¿½
 	double target_lat;
-	int token_long;//×ÝÏò£¬Î´Ê¹ÓÃ
-	int token_lat;//²àÏò£¬Î´Ê¹ÓÃ
-	double dlt_psic;//º½¼£½ÇÆ«²î£¬Î´Ê¹ÓÃ
-	double sz_circle;//Ô²¹ì¼£²àÆ«¾à£¬Î´Ê¹ÓÃ
-	double theta;//µ¯µÀÇã½Ç£¬Î´Ê¹ÓÃ
-	double alpha_vg;//µØËÙ¹¥½Ç£¬Î´Ê¹ÓÃ
-	double beita_vg;//µØËÙ²à»¬½Ç£¬Î´Ê¹ÓÃ
-	//ÐÂÔöÐÅÏ¢end
+	double target_distance;//ï¿½ï¿½Â·Ä¿ï¿½ï¿½ï¿½ï¿½ï¿½ë£¬ï¿½ï¿½ï¿½ï¿½20260715
+	unsigned int flight_control_state;//ï¿½ï¿½ï¿½ï¿½×´Ì¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½20260715
+	//int token_long;//ï¿½ï¿½ï¿½ï¿½É¾ï¿½ï¿½
+	//int token_lat;//ï¿½ï¿½ï¿½ï¿½É¾ï¿½ï¿½
+	unsigned int rpmState;//ï¿½É¿ï¿½ï¿½Õµï¿½ï¿½Ä·ï¿½ï¿½ï¿½ï¿½ï¿½×ªï¿½Ù£ï¿½ï¿½ï¿½ï¿½ï¿½20260715
+	
+	//double dlt_psic;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ«ï¿½î£¬É¾ï¿½ï¿½ 20260715
+	double sz_circle;//Ô²ï¿½ì¼£ï¿½ï¿½Æ«ï¿½à£¬Î´Ê¹ï¿½ï¿½
+	double azimuth;//ï¿½ï¿½ï¿½Î·ï¿½Î»ï¿½Ç£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô²ï¿½ï¿½ï¿½ï¿½
+	double psicn;//ï¿½ï¿½ï¿½ï¿½Æ«ï¿½ï¿½
+	double theta;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç£ï¿½Î´Ê¹ï¿½ï¿½
+	double alpha_vg;//ï¿½ï¿½ï¿½Ù¹ï¿½ï¿½Ç£ï¿½Î´Ê¹ï¿½ï¿½
+	double beita_vg;//ï¿½ï¿½ï¿½Ù²à»¬ï¿½Ç£ï¿½Î´Ê¹ï¿½ï¿½
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢end
 
-	//·¢ÉäÇ°×°¶©ÐÅÏ¢
-	double ground_temperature;//µØÃæÎÂ¶È
+	//ï¿½ï¿½ï¿½ï¿½Ç°×°ï¿½ï¿½ï¿½ï¿½Ï¢
+	double ground_temperature;//ï¿½ï¿½ï¿½ï¿½ï¿½Â¶ï¿½
 	double ktheta_lauch_enc;
 	double ktheta_climb_enc;
 	double ktheta_hight_enc;
 
-	//ÊµÊ±º½¼£ÐÅÏ¢
-	int num_way_point_target;//µ±Ç°º½µãºÅ
-	double distance_target;//´ý·É¾àÀë£¬ÊµÊ±
-	double distance_target_t_combat;//½øÈëÖÆµ¼Ê±£¬µ¯Ä¿¾àÀë£¬¼ÆËãÒ»´Î
-	double gama_turn_nominal;//¸ù¾Ý×ªÍä°ë¾¶£¬È·¶¨¹ö×ª½Ç±ê³ÆÖµ£¬¼ÆËãÒ»´Î
-	double velocity_average_10s;//µØËÙ¾ùÖµ£¬ÊµÊ±
-	int ECU_work_cmd;	//·¢¶¯»ú¿ØÖÆÖ¸Áî£¬¿ª»ú¡¢¹Ø»úµÈ
-	int	count_altitude_change;//¸ß¶È¸üÐÂ
+	//ÊµÊ±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
+	double longitude;//ÊµÊ±ï¿½ï¿½ï¿½ï¿½
+	double latitude;//ÊµÊ±Î³ï¿½ï¿½
+	double Rmt_n[3];
+	double distance_target;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É¾ï¿½ï¿½ë£¬ÊµÊ±
+	double distance_target_t_combat;//ï¿½ï¿½ï¿½ï¿½Ä©ï¿½Æµï¿½Ê±ï¿½ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½ï¿½ë£¬ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½
+	double gama_turn_nominal;//ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½ë¾¶ï¿½ï¿½È·ï¿½ï¿½ï¿½ï¿½×ªï¿½Ç±ï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½
+	double velocity_average_10s;//ï¿½ï¿½ï¿½Ù¾ï¿½Öµï¿½ï¿½ÊµÊ±
+	int ECU_work_cmd;	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½î£¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø»ï¿½ï¿½ï¿½
+	int	count_altitude_change;//ï¿½ß¶È¸ï¿½ï¿½Â£ï¿½ï¿½ï¿½ÖµÎª0ï¿½ï¿½ï¿½ï¿½É¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×´Î¸ß¶È»ï¿½ï¿½ï¿½1ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð»ï¿½Ê±+1ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â½ï¿½
 	
-	//º½¼£»ú¶¯±êÊ¶
-	bool flag_altitude_change;//¸ß¶È»ú¶¯
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¶
+	bool flag_altitude_change;//ï¿½ß¶È»ï¿½ï¿½ï¿½
 	bool flag_altitude_climb;
 	bool flag_altitude_decline;
-	bool flag_launch_turn;//²àÏò»ú¶¯
+	bool flag_launch_turn;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	bool flag_waypoint_turn;
 	
-	//º½µã´¦ÀíÐÅÏ¢
-	bool flag_flightime_ctrl;//µ½´ïÊ±¼ä¿ØÖÆ±êÊ¶£¬°ë¿ª»·²¹³¥ËÙ¶ÈÖ¸Áî
-	bool flag_velocity_control;//µØËÙ¿ØÖÆ±êÊ¶
+	//ï¿½ï¿½ï¿½ã´¦ï¿½ï¿½ï¿½ï¿½Ï¢
+	bool flag_flightime_ctrl;//ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½Æ±ï¿½Ê¶ï¿½ï¿½ï¿½ë¿ªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½Ö¸ï¿½ï¿½
+	bool flag_velocity_control;//ï¿½ï¿½ï¿½Ù¿ï¿½ï¿½Æ±ï¿½Ê¶
 
-	bool flag_heading_hold;  	//[Ö¸µã·ÉÐÐ±êÊ¶£º1ÓÐÐ§£¬0ÎÞÐ§£»]
-	bool flag_turndir_set;	//[ÅÌÐý×ªÍä£º×ó×ª¡¢ÓÒ×ª±êÊ¶£»]
-	bool flag_prepare_hover;	//[Ô¤ÅÌÐý±êÊ¶£º1ÓÐÐ§£¬0ÎÞÐ§£»]
+	bool flag_heading_hold;  	//[Ö¸ï¿½ï¿½ï¿½ï¿½Ð±ï¿½Ê¶ï¿½ï¿½1ï¿½ï¿½Ð§ï¿½ï¿½0ï¿½ï¿½Ð§ï¿½ï¿½]
+	bool flag_turndir_set;	//[ï¿½ï¿½ï¿½ï¿½×ªï¿½ä£ºï¿½ï¿½×ªï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½Ê¶ï¿½ï¿½]
+	bool flag_prepare_hover;	//[Ô¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¶ï¿½ï¿½1ï¿½ï¿½Ð§ï¿½ï¿½0ï¿½ï¿½Ð§ï¿½ï¿½]
 	
-	bool flag_relativehigh_ctrl;//[Ïà¶Ô¸ß¶È£¨»òÕæ¸ß¶È£©¿ØÖÆ±êÊ¶£º1ÓÐÐ§£¬0ÎÞÐ§]
-	bool flag_attackangle_ctrl;	//[´ò»÷Âä½Ç±êÊ¶£º1Ö¸¶¨Âä½Ç£¬0ÎÞÔ¼Êø£»]	
+	bool flag_relativehigh_ctrl;//[ï¿½ï¿½Ô¸ß¶È£ï¿½ï¿½ï¿½ï¿½ï¿½ß¶È£ï¿½ï¿½ï¿½ï¿½Æ±ï¿½Ê¶ï¿½ï¿½1ï¿½ï¿½Ð§ï¿½ï¿½0ï¿½ï¿½Ð§]
+	bool flag_attackangle_ctrl;	//[ï¿½ï¿½ï¿½ï¿½ï¿½Ç±ï¿½Ê¶ï¿½ï¿½1Ö¸ï¿½ï¿½ï¿½ï¿½Ç£ï¿½0ï¿½ï¿½Ô¼ï¿½ï¿½ï¿½ï¿½]	
 
-	bool flag_fire_distribution;//»ðÁ¦·ÖÅä£¬Î´ÓÃµ½
+	bool flag_fire_distribution;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ä£¬Î´ï¿½Ãµï¿½
 	Stru_Command st_command;
 	Stru_Control_Time st_control_time;
 }Stru_Flight_Basic_Output;
+
+typedef struct _Stru_Tustin_FirstIO_Filter
+{
+	double inputdata[2];	//ï¿½ï¿½ï¿½ï¿½
+	double outputdata[2];	//ï¿½ï¿½ï¿½
+	double T; //ï¿½Ë²ï¿½Ê±ï¿½ä³£ï¿½ï¿½s
+	double Ts;//ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½s
+} Stru_Tustin_FirstIO_Filter;
 
 class CMathControlFlightBasic
 {
@@ -223,9 +321,9 @@ public:
 	CMathControlFlightBasic(); 
 	double flight_time;
 	int time_tick;
-//	Stru_Debug_Monitor					* p_st_debug_monitor;//µ÷ÊÔÐÅÏ¢
-	Stru_Route_Data						* p_st_route_data_preflight;//Ô¤×°º½ÏßÐÅÏ¢
-	Stru_Initial_Data					* p_st_initial_data;//·¢ÉäÐÅÏ¢
+	//Stru_Debug_Monitor					* p_st_debug_monitor;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
+	Stru_Route_Data						* p_st_route_data_preflight;//Ô¤×°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
+	Stru_Initial_Data					* p_st_initial_data;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
 	Stru_Flight_Basic_Input				* p_st_flight_basic_input;
 	Stru_Flight_Basic_Output			* p_st_flight_basic_output;
 	void Run();
@@ -236,6 +334,7 @@ private:
 	void Send_Data();
 	//void Monitor_Data();
 	void Calc_Command();	
+	void PackControlFlag(const Stru_Control_flag* pSt);
 	void Calc_Flight_Data();
 	void Calc_Mass_Data();
 	void Calc_LOS_Rate();
@@ -244,66 +343,70 @@ private:
 	void Calc_BaroSpd();
 	void Control_Turn();
 	void Control_Altitude_Change();
+	void Calc_Dualplane_Guidance();
 	void Coord_Rebuild();
 	void Update_Task_Info();
 	void Change_Task_Info_Online();
 	bool Judge_Turn_Error();
 	
 	int m_missile_ID;
-	int m_missile_flight_mode;//0x55 ²âÊÔÑµÁ·£¬0xAA ¹Ì¶¨µã(ÐéÄâ)´ò»÷»òµ¼ÒýÍ·²¶»ñºó´ò»÷
+	int m_missile_flight_mode;//0x55 ï¿½ï¿½ï¿½ï¿½Ñµï¿½ï¿½ï¿½ï¿½0xAA ï¿½Ì¶ï¿½ï¿½ï¿½(ï¿½ï¿½ï¿½ï¿½)ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	double m_ground_temperature;
 	double m_ktheta_lauch_enc;
-	double m_ktheta_climb_enc;//·¢Éä¹ý³ÌÅÀÉý¸©Ñö½Ç£¨ÅÀÉý½Ç,µäÐÍÖµ 6deg£¬¸ù¾Ý·¢Éäº£°Î¸ß¶ÈÈ·¶¨¿ÉÓÃÅÀÉý½Ç)
-	double m_ktheta_hight_enc;//¶¨¸ßÑ²º½£¬¸©Ñö½ÇµÈÓÚÆ½ºâ¹¥½Ç
+	double m_ktheta_climb_enc;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½Öµ 6degï¿½ï¿½ï¿½ï¿½ï¿½Ý·ï¿½ï¿½äº£ï¿½Î¸ß¶ï¿½È·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½)
+	double m_ktheta_hight_enc;//ï¿½ï¿½ï¿½ï¿½Ñ²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Çµï¿½ï¿½ï¿½Æ½ï¿½â¹¥ï¿½ï¿½
 	
-	int m_num_way_point;	//×Üº½µãÊý
-	int m_num_way_point_target;//Ä¿±êº½µã(µ±Ç°º½¶Î)
-	Stru_Way_Point m_st_way_point[MAX_ROUTE_NUMBER];//º½µã£¬·¢Éäµã²»ÊÇµÚ0º½µã£»º½µãºÅÎª0£¬±íÕ÷µÚÒ»¸ö(Ä¿±ê)º½µã
-	Stru_Way_Point m_st_target;//Ä¿±êÐÅÏ¢£¬Î»ÖÃ¡¢×ªÍä°ë¾¶¡¢½Ç¶È(Õýº½Ïò»ò×ªÍä½Ç¶ÈµÈ)¡¢ËÙ¶È¡¢º½µãÀàÐÍ¼°ÐÅÏ¢ÀàÐÍ
+	int m_num_way_point;	//ï¿½Üºï¿½ï¿½ï¿½ï¿½ï¿½
+	int m_num_way_point_target;//Ä¿ï¿½êº½ï¿½ï¿½(ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½)
+	Stru_Way_Point m_st_way_point[MAX_ROUTE_NUMBER];//ï¿½ï¿½ï¿½ã£¬ï¿½ï¿½ï¿½ï¿½ã²»ï¿½Çµï¿½0ï¿½ï¿½ï¿½ã£»ï¿½ï¿½ï¿½ï¿½ï¿½Îª0ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½(Ä¿ï¿½ï¿½)ï¿½ï¿½ï¿½ï¿½
+	Stru_Way_Point m_st_target;//Ä¿ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½Î»ï¿½Ã¡ï¿½×ªï¿½ï¿½ë¾¶ï¿½ï¿½ï¿½Ç¶ï¿½(ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½Ç¶Èµï¿½)ï¿½ï¿½ï¿½Ù¶È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¼ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½ï¿½
 	
-	int valid_count;	//ÊÓÏß½ÇËÙ¶È¼ÆËã£¬µ¯Ä¿Ã¤Çø¾àÀë¼ÆÊý£¬Ð¡ÓÚÄ³Öµ²»ÔÙ¸üÐÂ
-	int count_qk;		//Àë¼Ü»òÆô¿Ø
-	int count_v_5;		//Æô¿Ø±¸±£
-	int count_fl;		//ÖúÍÆÆ÷·ÖÀë
-	int count_qd;		//·¢¶¯»úÆô¶¯Íê³É
-	int count_v_50;	//ÖúÍÆÆ÷·ÖÀë±¸±£
-	int count_takeoff;	//Æð·ÉÍê³É±êÊ¶
-	int count_tg;		//¿ªÊ¼¸ß¶È¿ØÖÆ
-	double dlt_time_tg;//³õ¶ÎÅÀÉýÊ±¼ä¹À¼Æ
-	int count_cooperative_attack;//Ð­Í¬ËÑË÷£¬µäÐÍµ¯Ä¿¾àÀë10km
-	int count_virtual;//ÐéÄâ´ò»÷»òµ¼ÒýÍ·¹¥»÷Ä¿±ê£¬µäÐÍµ¯Ä¿¾àÀë2km
-	int count_distance_recycle;//½øÈë»ØÊÕ°ë¾¶¼ÆÊý
-	int count_v50_recycle;//ËÙ¶ÈÐ¡ÓÚ50m/s£¬»ØÊÕÌõ¼þ
-	int count_h300_v54_recycle;//ËÙ¶ÈÐ¡ÓÚ54m/s£¬ÇÒÏà¶Ô¸ß¶ÈÐ¡ÓÚ300m£¬»ØÊÕÌõ¼þ
-	int count_distance_out_recycle;//³öÈ¦ÅÐ¶Ï
-	int count_v54_recycle;//£¨1)ËÙ¶ÈÐ¡ÓÚ54m/s£»(2) Ïà¶Ô¸ß¶ÈÐ¡ÓÚ250m£»(3)³öÈ¦ºó£¬·ÉÐÐ¾àÀë´óÓÚ600m
+	int valid_count;	//ï¿½ï¿½ï¿½ß½ï¿½ï¿½Ù¶È¼ï¿½ï¿½ã£¬ï¿½ï¿½Ä¿Ã¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð¡ï¿½ï¿½Ä³Öµï¿½ï¿½ï¿½Ù¸ï¿½ï¿½ï¿½
+	int count_qk;		//ï¿½ï¿½Ü»ï¿½ï¿½ï¿½ï¿½ï¿½
+	int count_v_5;		//ï¿½ï¿½ï¿½Ø±ï¿½ï¿½ï¿½
+	int count_fl;		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	int count_qd;		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	int count_v_50;	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ë±¸ï¿½ï¿½
+	int count_takeoff;	//ï¿½ï¿½ï¿½ï¿½ï¿½É±ï¿½Ê¶
+	int count_tg;		//ï¿½ï¿½Ê¼ï¿½ß¶È¿ï¿½ï¿½ï¿½
+	double dlt_time_tg;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½
+	int count_cooperative_attack;//Ð­Í¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Íµï¿½Ä¿ï¿½ï¿½ï¿½ï¿½10km
+	int count_virtual;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í·ï¿½ï¿½ï¿½ï¿½Ä¿ï¿½ê£¬ï¿½ï¿½ï¿½Íµï¿½Ä¿ï¿½ï¿½ï¿½ï¿½2km
+	int count_combat_dive_ok;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð¾Ý£ï¿½ï¿½ß¶È²ï¿½Ð¡ï¿½ï¿½0
+	int count_distance_recycle;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Õ°ë¾¶ï¿½ï¿½ï¿½ï¿½
+	int count_v50_recycle;//ï¿½Ù¶ï¿½Ð¡ï¿½ï¿½50m/sï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	int count_h300_v54_recycle;//ï¿½Ù¶ï¿½Ð¡ï¿½ï¿½54m/sï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô¸ß¶ï¿½Ð¡ï¿½ï¿½300mï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	int count_distance_out_recycle;//ï¿½ï¿½È¦ï¿½Ð¶ï¿½
+	int count_v54_recycle;//ï¿½ï¿½1)ï¿½Ù¶ï¿½Ð¡ï¿½ï¿½54m/sï¿½ï¿½(2) ï¿½ï¿½Ô¸ß¶ï¿½Ð¡ï¿½ï¿½250mï¿½ï¿½(3)ï¿½ï¿½È¦ï¿½ó£¬·ï¿½ï¿½Ð¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½600m
 	int count_h250_recycle;
 	int count_distance_out600_recycle;
-	int count_h10_recycle;//¸ß¶ÈÐ¡ÓÚ10m£¬´ò¿ªÆøÄÒ
-	int count_h5_ny2_recycle;//¸ß¶ÈÐ¡ÓÚ5mÇÒyÏò¹ýÔØ´óÓÚ2
+	int count_h10_recycle;//ï¿½ß¶ï¿½Ð¡ï¿½ï¿½10mï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	int count_h5_ny2_recycle;//ï¿½ß¶ï¿½Ð¡ï¿½ï¿½5mï¿½ï¿½yï¿½ï¿½ï¿½ï¿½Ø´ï¿½ï¿½ï¿½2
 
-	int count_altitude_change;//¸ß¶È»ú¶¯´ÎÊý¼ÇÂ¼
+	int count_altitude_change;//ï¿½ß¶È»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â¼
 	int count_altitude_change_enable;
 	int count_altitude_change_lauch_enable;
-	int count_altitude_change_energy_enable;//Ñ²º½»òÅÀÉýÊ±£¬Á¬Ðø5s×ÜÄÜÁ¿¼õÐ¡
+	int count_altitude_change_energy_enable;//Ñ²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½5sï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð¡
 	int count_altitude_change_end;
-	int count_away;	//Ô­ÀíÄ¿±êµã¼ÆÊý
-	int count_sd_in;	//Ð¡ÓÚÌáÇ°×ªÍä¾àÀë
-	int count_turn_out;//×ªÍä×ª³ö£¬½øÈëÖ±º½
-	int count_turn_error;//×ªÍä½Ç¶È¹ý´ó£¬Òì³£
-	int count_update;	//Êý¾ÝÁ´»òÈÎÎñ»ú£¬º½µã¸üÐÂ
+	int count_away;	//Ô­ï¿½ï¿½Ä¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	int count_sd_in;	//Ð¡ï¿½ï¿½ï¿½ï¿½Ç°×ªï¿½ï¿½ï¿½ï¿½ï¿½
+	int count_turn_out;//×ªï¿½ï¿½×ªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö±ï¿½ï¿½
+	int count_turn_error;//×ªï¿½ï¿½Ç¶È¹ï¿½ï¿½ï¿½ï¿½ì³£
+	int count_update;	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
-	//¿ªÉ¡»ØÊÕ½×¶Î
-	int step_open_umbrella;//¿ªÉ¡½×¶Î£¬0³õÊ¼ÎÞÐ§£¬1½øÈë¿ªÉ¡¹ý¶É(º½¼£ÇÐ»»ºó£¬Ä¿±êµãÀàÐÍÎª¿ªÉ¡µã)£¬2½øÈë»ØÊÕÈ¦ÇÒ·¢¶¯»ú¹Ø»ú£¬3 Âú×ãÖ÷¿ªÉ¡Ìõ¼þ£¬4³ö»ØÊÕÈ¦£¬5Âú×ã±¸·Ý¿ªÉ¡Ìõ¼þ
-							//ºóÐø´ýÀ©Õ¹£¬6 ´ò¿ª°²È«ÆøÄÒ£¬7´¥µØ£¬8 ÇÐ¸î½µÂäÉ¡
-	//Æð·É¸ß¶È»ú¶¯
-	int step_altitude_change_lauch;//Æð·É¸ß¶È»ú¶¯½×¶Î£¬
-
-	Stru_Control_flag m_st_control_flag;//Ê±Ðò¼°Ê±¼ä
-	Stru_Control_Time m_st_control_time;
+	//ï¿½ï¿½É¡ï¿½ï¿½ï¿½Õ½×¶ï¿½
+	int step_open_umbrella;//ï¿½ï¿½É¡ï¿½×¶Î£ï¿½0ï¿½ï¿½Ê¼ï¿½ï¿½Ð§ï¿½ï¿½1ï¿½ï¿½ï¿½ë¿ªÉ¡ï¿½ï¿½ï¿½ï¿½(ï¿½ï¿½ï¿½ï¿½ï¿½Ð»ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½É¡ï¿½ï¿½)ï¿½ï¿½2ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¦ï¿½Ò·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø»ï¿½ï¿½ï¿½3 ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½4ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¦ï¿½ï¿½5ï¿½ï¿½ï¿½ã±¸ï¿½Ý¿ï¿½É¡ï¿½ï¿½ï¿½ï¿½
+							//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Õ¹ï¿½ï¿½6 ï¿½ò¿ª°ï¿½È«ï¿½ï¿½ï¿½Ò£ï¿½7ï¿½ï¿½ï¿½Ø£ï¿½8 ï¿½Ð¸î½µï¿½ï¿½É¡
+	//ï¿½ï¿½É¸ß¶È»ï¿½ï¿½ï¿½
+	int step_altitude_change_lauch;//ï¿½ï¿½É¸ß¶È»ï¿½ï¿½ï¿½ï¿½×¶Î£ï¿½
+	//Ë«Æ½ï¿½ï¿½ï¿½Æµï¿½ï¿½×¶Î±ï¿½Ê¶ï¿½ï¿½0ï¿½ï¿½É½×¶Î£ï¿½1 Ñ²ï¿½ï¿½ï¿½×¶ï¿½ BTTï¿½Æµï¿½ï¿½ï¿½2 Ä©ï¿½Æµï¿½ï¿½×¶ï¿½ BTTï¿½Æµï¿½ï¿½ï¿½3Ä©ï¿½Æµï¿½ï¿½×¶ï¿½ STTï¿½Æµï¿½ï¿½ï¿½4 ï¿½ï¿½Ä©ï¿½Æµï¿½ï¿½×¶Î½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì£ï¿½5 ï¿½ï¿½Ä©ï¿½Æµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×ªÑ²ï¿½ï¿½ BTTï¿½Æµï¿½ï¿½ï¿½Í¬2ï¿½ï¿½
+	int step_dualplane_guidance;
 	
-	//¹ßÐÔÎÀÐÇ×éºÏµ¼º½
-	double m_au;
+	Stru_Control_flag m_st_control_flag;//Ê±ï¿½ï¿½Ê±ï¿½ï¿½
+	Stru_Control_Time m_st_control_time;
+	unsigned int m_flight_control_state;//ï¿½ï¿½ï¿½ï¿½×´Ì¬
+	
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ïµï¿½ï¿½ï¿½
 	double m_hgps;
 	double m_longitude;
 	double m_latitude;
@@ -314,146 +417,200 @@ private:
 	double m_wy;
 	double m_wz;
 	double m_vtx;
-	double m_vty;//×éºÏµ¼º½Êä³ö´¹ËÙ¶È
+	double m_vty;//ï¿½ï¿½Ïµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½
 	double m_vtz;
 	double m_zeta;
 	double m_gama;
-	double m_psit;//µØÀíÏµ£¬Æ«º½½Ç
+	double m_psit;//ï¿½ï¿½ï¿½ï¿½Ïµï¿½ï¿½Æ«ï¿½ï¿½ï¿½ï¿½
 	
-	//´¦ÀíºóÊý¾Ý 
-	double m_vx;	//ÖáÏòËÙ¶È
-	double m_sx;	//ÖáÏòÎ»ÒÆ£¬ÓÃÓÚÀë¼ÜÅÐ¶Ï
-	double m_v;		//ºÏËÙ¶È£¬µØËÙ
-	double m_vs;	//×éºÏ´¹ËÙ
-	double m_hz;	//×éºÏ¸ß¶È
-	double m_vnx;	//ÉäÏòËÙ¶È
-	double m_vnz;	//²àÏòËÙ¶È
-	double m_g;		//¸ù¾ÝÎ³¶È¡¢º£°Î¸ß¶ÈÐÞÕý£¬ÓÃÓÚ¼ÆËã¹ýÔØ 	
-	double m_ny;	//ÌìÏò¹ýÔØ
-	double m_nz;	//²àÏò¹ýÔØ
-
-	//ÂË²¨ºó½ÇËÙ¶È
-	double m_wxflt;
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 
+	int count_ax_tyz;
+	int count_ay_tyz;
+	int count_az_tyz;
+	int count_wx_tyz;
+	int count_wy_tyz;
+	int count_wz_tyz;
+	double m_axtyz;	//ï¿½ï¿½Ò°Öµï¿½ï¿½
+	double m_aytyz;
+	double m_aztyz;
+	double m_wxtyz;	//ï¿½Ë²ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½
+	double m_wytyz;
+	double m_wztyz;	
+	Stru_Tustin_FirstIO_Filter m_nav_data_filter[6];//ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½Ù¶È¡ï¿½ï¿½ï¿½ï¿½Ù¶Èµï¿½ï¿½Ë²ï¿½
+	double m_axflt;	//ï¿½Ë²ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½
+	double m_ayflt;
+	double m_azflt;
+	double m_wxflt;	//ï¿½Ë²ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½
 	double m_wyflt;
-	double m_wzflt;
+	double m_wzflt;	
+	double m_A;		//ï¿½ï¿½ï¿½Î·ï¿½Î»ï¿½Ç£ï¿½ï¿½ï¿½Æ«ï¿½ï¿½ Îªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð»ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½Î£ï¿½ï¿½ï¿½ï¿½ï¿½Ïµï¿½Ù¶ï¿½ï¿½ï¿½ï¿½ï¿½;
+	double m_psin;	//ï¿½ï¿½ï¿½ï¿½ÏµÆ«ï¿½ï¿½ï¿½Ç£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß½ï¿½ï¿½Ù¶È¼ï¿½ï¿½ï¿½
+	double m_psicn;//ï¿½ï¿½ï¿½ï¿½Ïµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ«ï¿½Ç»òº½¼ï¿½ï¿½Ç£ï¿½ï¿½ï¿½Æ«ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½-180~180deg
+	double m_theta;//ï¿½ï¿½ï¿½ï¿½Ïµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç£ï¿½-90deg~90deg
+	double m_Cbn[9];//ï¿½ï¿½ï¿½ï¿½Ïµ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ïµ×ªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	double m_Cnb[9];//ï¿½ï¿½ï¿½ï¿½Ïµ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ïµ×ªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	double m_vx;	//ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½
+	double m_sx;	//ï¿½ï¿½ï¿½ï¿½Î»ï¿½Æ£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð¶ï¿½
+	double m_v;		//ï¿½ï¿½ï¿½Ù¶È£ï¿½ï¿½ï¿½ï¿½ï¿½
+	double m_vs;	//ï¿½ï¿½Ï´ï¿½ï¿½ï¿½
+	double m_hz;	//ï¿½ï¿½Ï¸ß¶ï¿½
+	double m_vnx;	//ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½
+	double m_vnz;	//ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½
+	double m_vnz_record1;
+	double m_vnz_record2;
+	double m_ny;	//ï¿½ï¿½ï¿½ï¿½Ïµyï¿½ï¿½ï¿½ï¿½ï¿½
+	double m_nz;	//ï¿½ï¿½ï¿½ï¿½Ïµzï¿½ï¿½ï¿½ï¿½ï¿½
+	double m_g;		//ï¿½ï¿½ï¿½ï¿½Î³ï¿½È¡ï¿½ï¿½ï¿½ï¿½Î¸ß¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 	
+	//double m_an[3]; //ï¿½ï¿½ï¿½ï¿½Ïµ x/y/zï¿½ï¿½ï¿½ï¿½Ù¶ï¿½
+	double m_anx;
+	double m_au;
+	double m_anz;
+	
 
-	//¿ÕËÙ¹Ü: ×ÜÑ¹¡¢¶¯Ñ¹£¬¼ÆËã»ñµÃ¿ÕËÙ¡¢¸ß¶È
-	double m_static_pressure; //ÊäÈëÔ­Ê¼Êý¾Ý
+	//ï¿½ï¿½ï¿½Ù¹ï¿½: ï¿½ï¿½Ñ¹ï¿½ï¿½ï¿½ï¿½Ñ¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ã¿ï¿½ï¿½Ù¡ï¿½ï¿½ß¶ï¿½
+	double m_static_pressure_raw; //ï¿½ï¿½ï¿½ï¿½Ô­Ê¼ï¿½ï¿½ï¿½Ý£ï¿½20msï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	double m_total_pressure_raw;
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	int count_static_pressure_tyz;
+	int count_total_pressure_tyz;
+	double m_static_pressure; //ï¿½ï¿½Ò°ÖµÖ®ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	double m_total_pressure;
-	//´¦ÀíºóÊý¾Ý
-	int m_baroalt_status;
-	double m_hbaro;		
-	double m_Vbaro;//ÆøÑ¹¸ß¶È±íÖ¸Ê¾¿ÕËÙ
-	double m_v_air;//¿ÕËÙ
-	double m_dynamic_pressure;//¶¯Ñ¹
-	double m_v_average_1s;
-	double m_v_average_10s;
-	double m_mach;//ÂíºÕÊý£¬¿ÕËÙ£¬¾­¹ý¸ß¶È¡¢ÎÂ¶ÈÐÞÕýºóÂíºÕÊýÐÞÕý
-	double m_v_record_100ms[10];
-	double m_v_record_1s[10];
-	//×ÜÄÜÁ¿£¬1sÊ±¼ä¼ä¸ô
+	double m_static_pressure_flt;//ï¿½Ë²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	double m_total_pressure_flt;
+	Stru_Tustin_FirstIO_Filter m_baro_data_filter[2];//ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½Ñ¹ï¿½ï¿½ï¿½ï¿½Ñ¹ï¿½ï¿½ï¿½Ë²ï¿½
+	int m_baroalt_status;	//ï¿½ß¶È±ï¿½×´Ì¬ 0xAAï¿½ï¿½ï¿½ï¿½ï¿½ï¿½0xFFï¿½ì³£
+	double m_hbaro;	//ï¿½ï¿½Ñ¹ï¿½ß¶ï¿½
+	double m_Vbaro;//Ö¸Ê¾ï¿½ï¿½ï¿½ï¿½
+	double m_v_air;//ï¿½ï¿½ï¿½Ù£ï¿½ï¿½ï¿½ï¿½Ðµï¿½ï¿½ï¿½ï¿½ï¿½Ð§ï¿½ï¿½ï¿½Ð¶Ïºï¿½
+	double m_dynamic_pressure;//ï¿½ï¿½Ñ¹
+	double m_mach;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ù£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß¶È¡ï¿½ï¿½Â¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	double m_v_average_1s;//ï¿½ï¿½ï¿½ï¿½1sï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½100msï¿½ï¿½ï¿½Ù»ï¿½ï¿½ï¿½
+	double m_v_average_10s;//ï¿½ï¿½ï¿½ï¿½10sï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½ï¿½Ú¹ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½ï¿½ï¿½ï¿½Ð¡ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ä£¬ï¿½Ô¼ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½
+	double m_v_record_100ms[10];//ï¿½ï¿½ï¿½Ù¾ï¿½Öµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½1sï¿½ï¿½ï¿½Ù¶È¾ï¿½Öµ
+	double m_v_record_1s[10];//ï¿½ï¿½ï¿½Ù¾ï¿½Öµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½10sï¿½ï¿½ï¿½Ù¶È¾ï¿½Öµ
+	//ï¿½ï¿½ï¿½Ýµï¿½ï¿½ï¿½ï¿½Â¶È¡ï¿½ï¿½ï¿½ï¿½æº£ï¿½Î¸ß¶È¡ï¿½ï¿½ï¿½ï¿½Î¸ß¶È£ï¿½ï¿½ï¿½ï¿½Æ´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â¶È¡ï¿½ï¿½ï¿½ï¿½Ù¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ü¶È¡ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¹ï¿½ï¿½ï¿½ï¿½
+	double m_air_temperature;
+	double m_air_density;
+	double m_air_pressure;
+	double m_sonic_speed;
+	
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½1sÊ±ï¿½ï¿½ï¿½ï¿½
 	double m_total_energy;
 	double m_total_energy_pre;
 
-	//ÎÞÏßµç¸ß¶È±íÊý¾Ý
+	//ï¿½ï¿½ï¿½ßµï¿½ß¶È±ï¿½ï¿½ï¿½ï¿½ï¿½
 	double m_radioalt_hight;
 	int m_radioalt_status;
 
-	//·¢¶¯»ú×´Ì¬¼°×ªËÙ
-	int m_engine_state;//·¢¶¯»ú¿ª»ú×´Ì¬
-	double m_engine_state_rpm;//×´Ì¬×ªËÙ
-	//·¢¶¯»úÖ¸Áî
-	int m_ECU_work_cmd;	//0x11´ý»ú£¬0x22Æô¶¯£¬0x33 ×ªËÙ¿ØÖÆ£¬0x44 ¹Ø»ú£¬0x55 µ¡ËÙ
-	double m_cmd_Kc;//·¢¶¯»úÓÍÃÅ£¬¶þÑ¡Ò»
-	double m_cmd_rpm;//·¢¶¯»ú×ªËÙ£¬¶þÑ¡Ò»
-	//´¦ÀíºóÊý¾Ý
-	double m_state_rpm;//·¢¶¯»ú×´Ì¬×ªËÙ£¬´«¸ÐÆ÷²É¼¯»òÓÍÃÅ¹À¼Æ	
-	double m_fuel_comsumped;//ÏûºÄÈ¼ÓÍÖØÁ¿¡¢ÖØÁ¿¹À¼Æ
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×´Ì¬ï¿½ï¿½×ªï¿½ï¿½
+	int m_engine_state;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×´Ì¬
+	double m_engine_state_rpm;//×´Ì¬×ªï¿½ï¿½
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½
+	int m_ECU_work_cmd;	//0x11ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½0x22ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½0x33 ×ªï¿½Ù¿ï¿½ï¿½Æ£ï¿½0x44 ï¿½Ø»ï¿½ï¿½ï¿½0x55 ï¿½ï¿½ï¿½ï¿½
+	double m_cmd_Kc;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å£ï¿½ï¿½ï¿½Ñ¡Ò»
+	double m_cmd_rpm;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×ªï¿½Ù£ï¿½ï¿½ï¿½Ñ¡Ò»
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	double m_state_rpm;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×´Ì¬×ªï¿½Ù£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å¹ï¿½ï¿½ï¿½	
+	double m_fuel_comsumped;//ï¿½ï¿½ï¿½ï¿½È¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	double m_mass_calc;
-	double m_left_flight_time_calc;//Ê£Óà·ÉÐÐÊ±¼ä¹À¼Æ
-	double m_left_flight_dist_calc;//Ê£Óà·ÉÐÐº½³Ì¹À¼Æ
+	double m_left_flight_time_calc;//Ê£ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½
+	double m_left_flight_dist_calc;//Ê£ï¿½ï¿½ï¿½ï¿½Ðºï¿½ï¿½Ì¹ï¿½ï¿½ï¿½
 
-	//µ¼ÒýÍ·Êý¾Ý£¬¸ù¾Ý·É¿Ø±êÊ¶£ºµ¼ÒýÍ·¿ª»ú(µçËøÁãÎ»)¡¢ÔÊÐíËø¶¨(½â³ýµçËøÁãÎ»)¡¢Ð­Í¬(¿ò¼Ü½ÇÒýµ¼ËÑË÷)´ò»÷¡¢Õ½¶·Ö¸ÁîµÈ±êÊ¶£¬Íâ²¿Éú³ÉÖ¸Áî
-	//µ¼ÒýÍ·Ö¸ÁîÊý¾Ý
-	//double m_seeker_cmd;//µ¼ÒýÍ·¿ØÖÆÖ¸Áî£¬0x01 ×Ô¼ì(ÉÏµç×Ô¶¯)£¬0x02 ×°¶©Ä¿±êÄ£°å£¬ 0x03 ÉäÇ°¼ì²é£¬0x04/0x05±¸ÓÃ£¬0x06·É¿ØÒýµ¼ËÑË÷(Ö¸¶¨¿ò¼Ü½Ç)£¬0x07Ëø¶¨ÔÊÐí£¬0x08±ÕËø£¬0x09ÐÞÕý¸ú×Ù
-	double m_seeker_cmdpara_targettype;//Ö¸Ê¾Ä¿±êÀàÐÍ£¬0x01 ³µÁ¾£¬0x02 ·ÉÐÐÆ÷£¬0x03 ¹Ì¶¨½¨Öþ
-	double m_seeker_cmdpara_dltheight;//µ¯Ä¿¸ß¶È²î
-	double m_seeker_cmdpara_ktheta;//µ¼µ¯¸©Ñö½Ç
-	double m_seeker_cmdpara_psi;//µ¼µ¯Æ«º½½Ç
-	double m_seeker_cmdpara_gama;//µ¼µ¯¹ö×ª½Ç
-	double m_seeker_cmdpara_phif;//Òýµ¼¿ò¼Ü½Ç
-	double m_seeker_cmdpara_phih;//Òýµ¼¿ò¼Ü½Ç
+	//ï¿½ï¿½ï¿½ï¿½Í·ï¿½ï¿½ï¿½Ý£ï¿½ï¿½ï¿½ï¿½Ý·É¿Ø±ï¿½Ê¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í·ï¿½ï¿½ï¿½ï¿½(ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î»)ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½(ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î»)ï¿½ï¿½Ð­Í¬(ï¿½ï¿½Ü½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½)ï¿½ï¿½ï¿½ï¿½ï¿½Õ½ï¿½ï¿½Ö¸ï¿½ï¿½È±ï¿½Ê¶ï¿½ï¿½ï¿½â²¿ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½
+	//ï¿½ï¿½ï¿½ï¿½Í·Ö¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	//double m_seeker_cmd;//ï¿½ï¿½ï¿½ï¿½Í·ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½î£¬0x01 ï¿½Ô¼ï¿½(ï¿½Ïµï¿½ï¿½Ô¶ï¿½)ï¿½ï¿½0x02 ×°ï¿½ï¿½Ä¿ï¿½ï¿½Ä£ï¿½å£¬ 0x03 ï¿½ï¿½Ç°ï¿½ï¿½é£¬0x04/0x05ï¿½ï¿½ï¿½Ã£ï¿½0x06ï¿½É¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½(Ö¸ï¿½ï¿½ï¿½ï¿½Ü½ï¿½)ï¿½ï¿½0x07ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½0x08ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½0x09ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	double m_seeker_cmdpara_targettype;//Ö¸Ê¾Ä¿ï¿½ï¿½ï¿½ï¿½ï¿½Í£ï¿½0x01 ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½0x02 ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½0x03 ï¿½Ì¶ï¿½ï¿½ï¿½ï¿½ï¿½
+	double m_seeker_cmdpara_dltheight;//ï¿½ï¿½Ä¿ï¿½ß¶È²ï¿½
+	double m_seeker_cmdpara_ktheta;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	double m_seeker_cmdpara_psi;//ï¿½ï¿½ï¿½ï¿½Æ«ï¿½ï¿½ï¿½ï¿½
+	double m_seeker_cmdpara_gama;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½
+	double m_seeker_cmdpara_phif;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ü½ï¿½
+	double m_seeker_cmdpara_phih;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ü½ï¿½
 
-	//µ¼ÒýÍ·×´Ì¬Êý¾Ý
-	//double m_seeker_state;//´øÒýÍ·¹¤×÷×´Ì¬£¬0xAX Õý³££¬0xFXÒì³££¬0x5X ¹ý³ÌÖÐ
-	double m_seeker_state_track;//µ¼ÒýÍ·¸ú×Ù×´Ì¬£¬0x01µçËøÁãÎ»,0x02ËÑË÷£¨»òÊ§Ëø£©£¬0x03±ÕËø£¬0x04¸ú×Ù
-	double m_seeker_dqf;	//ÊÓÏß½ÇËÙ¶È
+	//ï¿½ï¿½ï¿½ï¿½Í·×´Ì¬ï¿½ï¿½ï¿½ï¿½
+	//double m_seeker_state;//ï¿½ï¿½ï¿½ï¿½Í·ï¿½ï¿½ï¿½ï¿½×´Ì¬ï¿½ï¿½0xAX ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½0xFXï¿½ì³£ï¿½ï¿½0x5X ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	double m_seeker_state_track;//ï¿½ï¿½ï¿½ï¿½Í·ï¿½ï¿½ï¿½ï¿½×´Ì¬ï¿½ï¿½0x00ï¿½ï¿½Ê¼ï¿½ï¿½Ð§×´Ì¬ï¿½ï¿½0x01ï¿½Ô¼ï¿½ï¿½ï¿½É½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î»,0x02ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê§ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½0x03ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½0x04ï¿½ï¿½ï¿½ï¿½
+	double m_seeker_dqf;	//ï¿½ï¿½ï¿½ß½ï¿½ï¿½Ù¶ï¿½
 	double m_seeker_dqh;
-	double m_seeker_phif;	//¿ò¼Ü½Ç£¨×´Ì¬£©
+	double m_seeker_phif;	//ï¿½ï¿½Ü½Ç£ï¿½×´Ì¬ï¿½ï¿½
 	double m_seeker_phih;
-	double m_seeker_qf;	//ÊÓÏß½Ç£¨×´Ì¬£©
+	double m_seeker_qf;	//ï¿½ï¿½ï¿½ß½Ç£ï¿½×´Ì¬ï¿½ï¿½
 	double m_seeker_qh;
-	int m_seeker_pixelf;//¸©ÑöÏñËØÆ«²î£¬×ó¸ºÓÒÕý
-	int m_seeker_pixelh;//º½ÏòÏñËØÆ«²î£¬ÏÂ¸ºÉÏÕý
-	double m_seeker_distance_target;//µ¼ÒýÍ·Êä³öµ¯Ä¿¾àÀë£¬À×´ï»ò¼¤¹â¿ÉÖ±½ÓÊä³ö£»
-										//¿É½«¹â»òºìÍâ¸ù¾Ý¸ß¶È²î¡¢ÊÓÏß½Ç¹ÀËã£¬Ò²¿É¸ù¾ÝÄ¿±êÏñËØ´óÐ¡ºÍ½¹¾à¹À¼ÆÄ¿±ê¾àÀë£»
-	double m_seeker_targetlong;//Ä¿±êÎ»ÖÃ
-	double m_seeker_targetlat;
-	double m_seeker_targethight;
+	int m_seeker_pixelf;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ«ï¿½î£¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½
+	int m_seeker_pixelh;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ«ï¿½î£¬ï¿½Â¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½
+	double m_seeker_distance_target;//ï¿½ï¿½ï¿½ï¿½Í·ï¿½ï¿½ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½ï¿½ë£¬ï¿½×´ï¿½ò¼¤¹ï¿½ï¿½Ö±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í·ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½
+										//ï¿½É½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý¸ß¶È²î¡¢ï¿½ï¿½ï¿½ß½Ç¹ï¿½ï¿½ã£¬Ò²ï¿½É¸ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½ï¿½ï¿½ï¿½Ø´ï¿½Ð¡ï¿½Í½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½ï¿½ï¿½ë£»
+	//double m_seeker_targetlong;//Ä¿ï¿½ï¿½Î»ï¿½Ã£ï¿½Î´ï¿½ï¿½ï¿½ï¿½
+	//double m_seeker_targetlat;
+	//double m_seeker_targethight;
 
-	//´¦ÀíºóÊý¾Ý£¬ÓëÐéÄâµ¼ÒýÊý¾ÝÕûºÏ
-	double m_dqf;	//ÊÓÏß½ÇËÙ¶È
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½âµ¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	int m_target_num__choosen;//Ä¿ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î´Ê¹ï¿½ï¿½
+	double m_dqf;	//ï¿½ï¿½ï¿½ß½ï¿½ï¿½Ù¶ï¿½
 	double m_dqh;
-	double m_phif;	//¿ò¼Ü½Ç£¨Òýµ¼ËÑÖ¸Áî£©
+	double m_dqf_flt;//ï¿½Ë²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß½ï¿½ï¿½Ù¶ï¿½
+	double m_dqh_flt;
+	Stru_Tustin_FirstIO_Filter m_guide_data_filter[2];//ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½Ù¶È¡ï¿½ï¿½ï¿½ï¿½Ù¶Èµï¿½ï¿½Ë²ï¿½
+	double m_phif;	//ï¿½ï¿½Ü½Ç£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½î£©
 	double m_phih;
-	double m_Qf;	//ÊÓÏß½Ç
-	double m_Qh;
-	double m_time_to_go;//£¨Ä©ÖÆµ¼£©µ½´ïÊ±¼ä 
+	double m_Qf;	//ï¿½ï¿½ï¿½ß¸ßµÍ½ï¿½
+	double m_Qh;	//ï¿½ï¿½ï¿½ß·ï¿½Î»ï¿½Ç£ï¿½ï¿½ï¿½ï¿½ß±ï¿½Æ«ï¿½ï¿½Îªï¿½ï¿½
+	double m_Qn;	//ï¿½Æµï¿½Ïµï¿½ï¿½ï¿½ß·ï¿½Î»ï¿½ï¿½
+	double m_time_to_go;//ï¿½ï¿½Ä©ï¿½Æµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ 
+	double m_ny_command;
+	double m_nz_command;
+	double m_gama_command;
+	double m_gama_command_record;//Ç°Ò»Ö¡
 	
-	//º½ÏßÐÅÏ¢
-	double m_longitude_A;//ÒÑ¹ýº½µã£¬Ç°Ò»º½¶Î£¬Ä¿±êº½µã
+	double m_alpha_target;		//ÊµÊ±ï¿½ï¿½ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½ã·½Î»ï¿½ï¿½ï¿½ï¿½Æ«ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½-180~180deg
+	double m_distance_target;	//ÊµÊ±ï¿½ï¿½ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½ï¿½Ë®Æ½ï¿½ï¿½ï¿½ï¿½
+	double m_slant_distance_target;//ÊµÊ±ï¿½ï¿½ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½ï¿½Ð±ï¿½ï¿½
+	double m_Rmt_n[3];//ï¿½ï¿½ï¿½ï¿½Ïµï¿½ï¿½Ä¿ï¿½ï¿½ï¿½ï¿½Ê¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ò¡¢²ï¿½ï¿½ï¿½
+	
+	double m_distance_target_t_combat;//ï¿½ï¿½ï¿½ï¿½Õ½ï¿½ï¿½Ö¸ï¿½î£¨ï¿½ï¿½ï¿½ï¿½Ä©ï¿½Æµï¿½ï¿½ï¿½Ê±ï¿½ï¿½Ä¿ï¿½ï¿½ï¿½ï¿½ë£¬ï¿½ï¿½ï¿½ï¿½Ò»ï¿½Î£ï¿½
+	double m_gama_target_t_combat;//ï¿½ï¿½ï¿½ï¿½Õ½ï¿½ï¿½Ö¸ï¿½î£¨ï¿½ï¿½ï¿½ï¿½Ä©ï¿½Æµï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½×ªï¿½Ç£ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½Î£ï¿½
+	
+	//Ô¤ï¿½ï¿½ï¿½ï¿½ï¿½Ì¼ï¿½ï¿½ï¿½ï¿½Ò»ï¿½Î·ï¿½Î»ï¿½ï¿½
+	//distance_AB//ï¿½ï¿½ï¿½Îºï¿½ï¿½Ì£ï¿½Îªï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½
+	double m_total_distance;//ï¿½Üºï¿½ï¿½Ì£ï¿½Ô¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½ï¿½Âºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½Î£ï¿½,ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½(Î´Ê¹ï¿½ï¿½)
+	double m_alpha_AB;		  //ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½Î·ï¿½Î»ï¿½ï¿½/ï¿½æº½ï¿½ï¿½ï¿½ï¿½(ï¿½ï¿½Æ«ï¿½ï¿½Îªï¿½ï¿½)ï¿½ï¿½Ô¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½ï¿½Âºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½Î£ï¿½,ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½(Î´Ê¹ï¿½ï¿½)ï¿½ï¿½
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
+	double m_longitude_A;//ï¿½Ñ¹ï¿½ï¿½ï¿½ï¿½ã£¬Ç°Ò»ï¿½ï¿½ï¿½Î£ï¿½Ä¿ï¿½êº½ï¿½ï¿½
 	double m_latitude_A;
-	double m_longitude_B;//µ±Ç°Ä¿±êº½µã
+	double m_longitude_B;//ï¿½ï¿½Ç°Ä¿ï¿½êº½ï¿½ï¿½
 	double m_latitude_B;
-	double m_longitude_C;//ÏÂÒ»º½¶Î£¬Ä¿±êº½µã
+	double m_longitude_C;//ï¿½ï¿½Ò»ï¿½ï¿½ï¿½Î£ï¿½Ä¿ï¿½êº½ï¿½ï¿½
 	double m_latitude_C;
-	double m_distance_BP;	//µ±Ç°µãµ½Ä¿±êµã¾àÀë
-	double m_distance_BP_projection;//ÊµÊ±Êä³ö£¬º½Ïß·½ÏòÍ¶Ó°¾àÀë
-	double m_distance_BP_500;		//µ±Ç°500ms¼ä¸ô£¬µ¼µ¯µ½Ä¿±êµã¼äº½ÏßÍ¶Ó°¾àÀë
-	double m_distance_BP_500pre;	//Ç°Ò»Ö¡500ms¼ä¸ô£¬µ¼µ¯µ½Ä¿±êµã¼äº½ÏßÍ¶Ó°¾àÀë
+	double m_distance_BP;	//ÊµÊ±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç°ï¿½ãµ½Ä¿ï¿½êº½ï¿½ï¿½ï¿½ï¿½ï¿½
+	double m_distance_BP_projection;//ÊµÊ±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç°ï¿½ãµ½Ä¿ï¿½êº½ï¿½ï¿½ï¿½ï¿½ë£¬ï¿½ï¿½ï¿½ß·ï¿½ï¿½ï¿½Í¶Ó°
+	double m_distance_BP_500;		//ï¿½ï¿½Ç°500msï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¿ï¿½êº½ï¿½ï¿½äº½ï¿½ï¿½Í¶Ó°ï¿½ï¿½ï¿½ï¿½
+	double m_distance_BP_500pre;	//Ç°Ò»Ö¡500msï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¿ï¿½êº½ï¿½ï¿½äº½ï¿½ï¿½Í¶Ó°ï¿½ï¿½ï¿½ï¿½
 	
-	double m_alpha_target;		//Ä¿±êµã·½Î»,ÊµÊ±
-	double m_distance_target;	//Ä¿±êµã¾àÀë,ÊµÊ±
+	double m_sz;	//ï¿½ï¿½ï¿½ï¿½Î»ï¿½Æ£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶È¹ï¿½Í¬ï¿½ï¿½ï¿½ï¿½ï¿½Ú²ï¿½Æ«ï¿½ï¿½ï¿½ï¿½
+	double m_sz_record1;
+	double m_sz_record2;
+	double m_sz_radius;//ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½ï¿½Ô²ï¿½Ä¾ï¿½ï¿½ë£¬ï¿½ï¿½ï¿½Ç²ï¿½Æ«
 	
-	double m_distance_target_t_combat;//½øÈëÕ½¶·Ö¸Áî£¨½øÈëÄ©ÖÆµ¼£©Ê±£¬Ä¿±ê¾àÀë£¬¼ÆËãÒ»´Î£»
-	double m_A;		//º½¶Î·½Î»½Ç£¬±±Æ«Î÷ ÎªÕý£¬º½¶ÎÇÐ»»¼ÆËãÒ»´Î£¬µØÀíÏµËÙ¶ÈÐÞÕý;
-	//distance_AB//º½¶Îº½³Ì£¬ÎªÁÙÊ±±äÁ¿
-	double m_total_distance;//×Üº½³Ì£¨Ô¤´¦Àí£¬·¢Éä³õ¶Î»ò¸üÐÂº½¼£ºóµÚÒ»¶Î£©,¼ÆËãÒ»´Î(Î´Ê¹ÓÃ)
-	double m_alpha_AB;		  //×îÓÐÒ»º½¶Î·½Î»½Ç/Õæº½¼£½Ç(±±Æ«¶«ÎªÕý)£¨Ô¤´¦Àí£¬·¢Éä³õ¶Î»ò¸üÐÂº½¼£ºóµÚÒ»¶Î£©,¼ÆËãÒ»´Î(Î´Ê¹ÓÃ)£¬
-	
-	double m_sz;	//²àÏòÎ»ÒÆ£¬Óë²àÏòËÙ¶È¹²Í¬£¬ÓÃÓÚ²àÆ«¿ØÖÆ
-	double m_psit_t_turn_in;//×ªÍä¿ªÊ¼Ê±¿Ì£¬Õæº½Ïò½Ç
-	double m_psin;	//µ¼º½ÏµÆ«º½½Ç£¬ÓÃÓÚÊÓÏß½ÇËÙ¶È¼ÆËã
-	double m_psicn;//µØÀíÏµ£¬µ¯µÀÆ«½Ç»òº½¼£½Ç£¬±±Æ«Î÷ÎªÕý£¬180~180deg
-	//º½ÏßÇÐ»»Ê±£¬º½µãÒ»´ÎÐÔÔØÈë
-	int m_route_mode;//º½µãÀàÐÍ
-	int m_formation_mode;//º½µãÀàÐÍÀ©Õ¹ÐÅÏ¢£¬Î´Ê¹ÓÃ
-	double m_turn_angle;	//×ªÍä½Ç¶È
-	double m_turn_radius;	//×ªÍä°ë¾¶
-	double m_accept_radius;//½ÓÊÜ°ë¾¶£¬º½µãÀàÐÍÎª»ØÊÕµã¡¢ÈÎÎñµãÊ±£¬Ê¹ÓÃ
-	double m_target_velocity;	//º½¶ÎËÙ¶È
-	double m_target_height;	//º½¶Î(º£°Î)¸ß¶È
-	//×ªÍä¹ý³ÌÊµÊ±¸üÐÂ
-	double m_gama_turn_nominal;//×ªÍä¹ý³ÌÖÐ¹ö¶¯³ÌÐò½Ç±ê³ÆÖµ£¬×ªÍä°ë¾¶¹À¼Æ²àÏò¹ýÔØºó»ñµÃ
-	double m_x_coordinate_turn;//×ªÍäÖÐÐÄ
+	//ï¿½ï¿½ï¿½ï¿½ï¿½Ð»ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	int m_route_mode;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	int m_formation_mode;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Õ¹ï¿½ï¿½Ï¢ï¿½ï¿½Î´Ê¹ï¿½ï¿½
+	double m_turn_angle;	//×ªï¿½ï¿½Ç¶ï¿½,ï¿½ï¿½Æ«ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½-180~180deg
+	double m_turn_radius;	//×ªï¿½ï¿½ë¾¶
+	double m_accept_radius;//ï¿½ï¿½ï¿½Ü°ë¾¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½Õµã¡¢ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½Ê¹ï¿½ï¿½
+	double m_target_velocity;	//ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½
+	double m_target_height;	//ï¿½ï¿½ï¿½ï¿½(ï¿½ï¿½ï¿½ï¿½)ï¿½ß¶ï¿½
+	//×ªï¿½ï¿½ï¿½ï¿½ï¿½ÊµÊ±ï¿½ï¿½ï¿½ï¿½
+	double m_gama_turn_nominal;//×ªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç±ï¿½ï¿½Öµï¿½ï¿½×ªï¿½ï¿½ë¾¶ï¿½ï¿½ï¿½Æ²ï¿½ï¿½ï¿½ï¿½ï¿½Øºï¿½ï¿½ï¿½
+	double m_x_coordinate_turn;//×ªï¿½ï¿½ï¿½ï¿½Ì£ï¿½ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½ï¿½Ô²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	double m_z_coordinate_turn;
-	double m_distance_turn_in_compensate;//×ªÍäÌáÇ°¾àÀë£¬½Ç¶È¹ý¶É²¹³¥
-	double m_distance_turn_in;//×ªÍäÌáÇ°¾àÀë
+	double m_distance_turn_in_compensate;//×ªï¿½ï¿½ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ë£¬ï¿½ï¿½×ªï¿½Ç¶È¹ï¿½ï¿½É²ï¿½ï¿½ï¿½
+	double m_distance_turn_in;//×ªï¿½ï¿½ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ë£¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×ªï¿½Ç¹ï¿½ï¿½É²ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	double m_psit_t_turn_in;//ï¿½ï¿½ï¿½ï¿½òº½¼ï¿½×ªï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½Ì¼ï¿½ï¿½ï¿½Ò»ï¿½Î£ï¿½×ªï¿½ä¿ªÊ¼Ê±ï¿½ï¿½ï¿½æº½ï¿½ï¿½Ç£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð¶ï¿½×ªï¿½ï¿½Ç¶È¹ï¿½ï¿½ï¿½ï¿½ì³£
 
-	double m_outtrack_angle;//[Ö¸µã·ÉÐÐÇÐ³ö½Ç¶È£¬±±Æ«Î÷ÎªÕý¾ø¶Ô£¬ÇÐ³ö½Ç¶Èdeg]
-	int m_hover_round;		//[ÅÌÐýÈ¦Êý]
-	double m_attack_angle;	//[´ò»÷Âä½Ç deg]
-	double m_target_height_ground;//º½¶ÎµØÃæ¸ß¶È
+	double m_outtrack_angle;//[Ö¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð³ï¿½ï¿½Ç¶È£ï¿½ï¿½ï¿½Æ«ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½ï¿½Ô£ï¿½ï¿½Ð³ï¿½ï¿½Ç¶ï¿½deg]
+	int m_hover_round;		//[ï¿½ï¿½ï¿½ï¿½È¦ï¿½ï¿½]
+	double m_attack_angle;	//[ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ deg]
+	double m_target_height_ground;//ï¿½ï¿½ï¿½Îµï¿½ï¿½ï¿½ß¶ï¿½
 };
 
 

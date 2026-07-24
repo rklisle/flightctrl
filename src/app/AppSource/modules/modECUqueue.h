@@ -21,7 +21,7 @@ typedef enum {
 /** 发动机状态参数 */
 struct EngineStatus
 {
-    uint16_t ambient_temp;      // 指令6 ，环境温度，整数，有符号实际数值，[0~9999]
+    int16_t ambient_temp;      // 指令6 ，环境温度，整数，有符号实际数值，[0~9999]
     uint16_t air_pressure;      // 指令8 ，环境气压，无符号，单位mbar，[0~9999]
     uint16_t fuel_pressure; //*指令9 ，实际油压，单位mbar，[0~9999]
 

@@ -22,10 +22,12 @@ typedef struct  _Stru_Roll_Control_Input
 	double wx;
 	double sz;
 	double mass;//质量估计
+	double hz;	//组合高度
 	double v;	//空速
 	double vnz;//侧向速度，地速
 	double g;	//重力常数
 	double dqh;//航向视线角速度
+	double gama_command_guidance;//末制导滚转指令
 	double angle_zw;//转弯角度
 	double radius_zw;//转弯半径
 	double target_velocity;//目标速度
@@ -36,7 +38,9 @@ typedef struct  _Stru_Roll_Control_Input
 	double time_engine_start;
 	double time_missile_takeoff;
 	double time_altitude_control;//开始高度控制
-	double time_combat_status;//末制导时间
+	double time_launch_turn_ok;	//扇面转弯完成
+	double time_combat_status;	//末制导时间
+	double time_combat_dive_sidectrl;//末制导后，转侧偏控制;
 	
 	double time_turn_in_start;	//转弯开始、结束
 	double time_turn_in_end;
@@ -50,10 +54,14 @@ typedef struct  _Stru_Roll_Control_Output
 	double u25g;
 	double u4g;
 	double ug_adrc;
+	
 	double time_combat_delay;	//进入末制导延迟时间，BTT到STT制导过渡过程
+	
 	double gama_command_compensate;
 	double gama_command;//滚转角指令
 	double wx_command;	 //滚转角速度指令
+	double z2_adrc;//自抗扰状态估计量
+	double uz;//侧偏控制滚转角指令
 }Stru_Roll_Control_Output;
 
 // 滚转角速度观测器结构体
@@ -84,7 +92,7 @@ private:
 	void Get_Data();
 	void Calc_Data();
 	void Send_Data();
-	// void Monitor_Data();
+	//void Monitor_Data();
 	void Calc_Control_Gain();
 	void Calc_Control_Commond();
 
@@ -128,6 +136,7 @@ private:
 	
 	double m_mass;	//估计质量
 	double m_v;		//空速
+	double m_hz;
 	double m_sz;	//侧向位移
 	double m_vnz;
 	double m_dqh;	//航向视线角速度，大干扰BTT末制导
@@ -136,9 +145,11 @@ private:
 	double m_gama;
 	double m_gama_record1;//助推器分离时刻滚转角
 	double m_gama_record2;//入转弯准备后，滚转角
+	double m_gama_record3;//进入末制导时刻滚转角
 	double m_gama_command;
 	double m_gama_command_compensate;
 	double m_gama_command_compensate_out;
+	double m_gama_command_guidance;
 	double m_wx;
 	double m_wx_command;
 	
@@ -153,8 +164,10 @@ private:
 	double m_time_engine_start;
 	double m_time_missile_takeoff;
 	double m_time_altitude_control;
+	double m_time_launch_turn_ok;
 	double m_time_combat_status;
-	double m_time_combat_delay;
+	double m_time_combat_delay;	//末制导滚转回零时间，用于滚转角末制导过渡
+	double m_time_combat_dive_sidectrl;
 	double m_time_BTT_guidance_in;//进入末制导时刻
 	double m_time_start;	//未用到
 	

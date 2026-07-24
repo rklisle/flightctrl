@@ -1,7 +1,7 @@
 /*
  * PwrSeqCtl.c
  *
- *  Created on: 2021Äê10ÔÂ16ÈÕ
+ *  Created on: 2021ï¿½ï¿½10ï¿½ï¿½16ï¿½ï¿½
  *      Author: QL
  */
 
@@ -46,8 +46,8 @@ PWR_SEQ_GROUP seqGroups[] = {
 	{0}
 };
 /*********************************************
- * º¯Êý¹¦ÄÜ: TrigerSeq
- * º¯Êý¹¦ÄÜ: ¸ù¾Ý¸ø¶¨µÄÊ±Ðò±àºÅ£¬Éè¶¨µ±Ç°Ê±Ðò£¬ÓÉ×´Ì¬»úÅÐ¶Ï×´Ì¬²¢·¢ËÍ
+ * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½: TrigerSeq
+ * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½: ï¿½ï¿½ï¿½Ý¸ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½Å£ï¿½ï¿½è¶¨ï¿½ï¿½Ç°Ê±ï¿½ï¿½ï¿½ï¿½×´Ì¬ï¿½ï¿½ï¿½Ð¶ï¿½×´Ì¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
  * *******************************************/
 #define MAX_SIMULTANEOUS_SEQ_COUNT	(5)
 static PWR_SEQ curSeqList[MAX_SIMULTANEOUS_SEQ_COUNT] = {0};
@@ -124,8 +124,8 @@ static int PWRTimSeq(int channelNo, int isEnalbe)
 
 
 /*********************************************
- * º¯Êý¹¦ÄÜ: TrigerGroupSeq
- * º¯Êý¹¦ÄÜ: ¸ù¾Ý¸ø¶¨µÄ×éÊ±Ðò±àºÅ£¬Éè¶¨µ±Ç°Ê±Ðò×é£¬ÓÉ×´Ì¬»úÅÐ¶Ï×´Ì¬²¢·¢ËÍ
+ * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½: TrigerGroupSeq
+ * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½: ï¿½ï¿½ï¿½Ý¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½Å£ï¿½ï¿½è¶¨ï¿½ï¿½Ç°Ê±ï¿½ï¿½ï¿½é£¬ï¿½ï¿½×´Ì¬ï¿½ï¿½ï¿½Ð¶ï¿½×´Ì¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
  * *******************************************/
 OS_U8 TrigerGroupSeq(int groupIndex)
 {
@@ -145,8 +145,8 @@ OS_U8 TrigerGroupSeq(int groupIndex)
 }
 
 /*********************************************
- * º¯Êý¹¦ÄÜ: SeqHandle
- * º¯Êý¹¦ÄÜ: ¸ºÔð·¢ËÍÊ±ÐòÐÅºÅ¼°¹Ø±ÕÐÅºÅ·¢ËÍ£¬µ±Ê±Ðò½áÊøºó£¬Éè¶¨µ±Ç°Ê±ÐòÎª¿Õ
+ * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½: SeqHandle
+ * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½: ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ÅºÅ¼ï¿½ï¿½Ø±ï¿½ï¿½ÅºÅ·ï¿½ï¿½Í£ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½è¶¨ï¿½ï¿½Ç°Ê±ï¿½ï¿½Îªï¿½ï¿½
  * *******************************************/
 OS_U8 SeqGroupHandle();
 OS_U8 SeqHandle()
@@ -193,8 +193,8 @@ OS_U8 SeqHandle()
 	return 0;
 }
 /*********************************************
- * º¯ÊýÃû³Æ:SeqGroupHandle()
- * º¯Êý¹¦ÄÜ:¸ù¾Ý×éºÅÂë£¬·¢ËÍÁ¬ÐøµÄÊ±ÐòÐÅÏ¢
+ * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½:SeqGroupHandle()
+ * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½:ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ë£¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½Ï¢
  * *******************************************/
 OS_U8 SeqGroupHandle()
 {
@@ -248,7 +248,7 @@ OS_U8 SeqGroupHandle()
 
 /*********************************************
  *
- * º¯Êý¹¦ÄÜ:Îªµ¥»úÅäµçÖ¸ÁîÉú³É·¢ÍùÅäµçÉè±¸µÄÊý¾ÝÇø
+ * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½:Îªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½ï¿½ï¿½ï¿½É·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½è±¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
  * *******************************************/
 OS_U8 GeneratePwrBuf(int channel, OS_U8* buf)
 {
@@ -273,10 +273,10 @@ OS_U8 GeneratePwrBuf(int channel, OS_U8* buf)
 }
 
 /*************************************************
- * º¯ÊýÃû³Æ :PwrCmdHandler()
- * º¯Êý¹¦ÄÜ:ÖÇÄÜ¿ØÖÆÆ÷ÔÚ½ÓÊÕµ½ÎÞÏßÅäµçÖ¸ÁîÊ±£¬ÈÏÎªÊÇÕë¶Ôcontrol°æµÄÅäµçÖ¸Áî
- * 		    ÒòÎª¸øÊ±ÐòÅäµçÆ÷µÄÎÞÏßÅäµçÖ¸ÁîÒÑÖ±½Ó·¢ÍùÊ±ÐòÅäµçÆ÷¡£
- * 		    ÓÉÖÇÄÜ¿ØÖÆÆ÷×ª·¢ÖÁÊ±ÐòÅäµçÆ÷µÄ¹¦ÄÜÎªµ¥»úÅäµç¹¦ÄÜ
+ * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ :PwrCmdHandler()
+ * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½:ï¿½ï¿½ï¿½Ü¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú½ï¿½ï¿½Õµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½ï¿½controlï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½
+ * 		    ï¿½ï¿½Îªï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½ï¿½ï¿½Ö±ï¿½Ó·ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+ * 		    ï¿½ï¿½ï¿½ï¿½ï¿½Ü¿ï¿½ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¹ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ç¹¦ï¿½ï¿½
  * ************************************************/
 OS_U8 powerNeedRsp[3] = {0};
 extern OS_U16 AutoZeroCount;
@@ -286,7 +286,7 @@ OS_U32 PwrCmdHandler(STRU_422_MSG_INFO * frame)
 	OS_U8 msgId = frame->u8MsgID;
 	switch(msgId)
 	{
-		case CMD_POWER_REQ://µ¥»úÅäµç
+		case CMD_POWER_REQ://ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 		{
 			OS_U8 pwrByte = frame->au8Data[0];
 			if(pwrByte > 0x0F)
@@ -299,7 +299,7 @@ OS_U32 PwrCmdHandler(STRU_422_MSG_INFO * frame)
 			}
 		}
 		break;
-		case CMD_SEQ_POWER_REQ://Ê±Ðò²âÊÔ
+		case CMD_SEQ_POWER_REQ://Ê±ï¿½ï¿½ï¿½ï¿½ï¿½
 		{
 			OS_U8 testChannel = frame->au8Data[0];
 			OS_U16 width;
@@ -319,23 +319,25 @@ CAN_RECV_VA canRecvVa;
 
 void SavePwrSeq()
 {
-    SETDATA(pDataPoolPwr, "battV", canRecvVa.battV,	OS_U16);
+    SETDATA(pDataPoolPwr, "Batt28V", canRecvVa.battV,	OS_U16);
     SETDATA(pDataPoolPwr, "groundV", canRecvVa.groundV,	OS_U16);
-    SETDATA(pDataPoolPwr, "engineV", canRecvVa.engineV,	OS_U16);
+    //SETDATA(pDataPoolPwr, "engineV", canRecvVa.engineV,	OS_U16);
+	SETDATA(pDataPoolPwr, "engineV", canRecvVa.engineV,	OS_U32);
     SETDATA(pDataPoolPwr, "VCombin", canRecvVa.mainV,	OS_U16);
-    SETDATA(pDataPoolPwr, "battA", canRecvVa.battA,	OS_U16);
+    SETDATA(pDataPoolPwr, "Batt28A", canRecvVa.battA,	OS_U16);
     SETDATA(pDataPoolPwr, "groundA", canRecvVa.groundA,	OS_U16);
-    SETDATA(pDataPoolPwr, "engineA", canRecvVa.engineA,	OS_U16);
+    //SETDATA(pDataPoolPwr, "engineA", canRecvVa.engineA,	OS_U16);
+	SETDATA(pDataPoolPwr, "engineA", canRecvVa.engineA,	OS_U32);
     SETDATA(pDataPoolPwr, "ACombin", canRecvVa.mainA,	OS_U16);
     SETDATA(pDataPoolPwr, "pwrTemp", canRecvVa.mcuTemp,	OS_U16);
 }
 
 OS_U8 CanRtPwrSeqHandler(OS_U32 id, OS_BOOL ext_id, const OS_U8* pdata, OS_U8 datalen)
 {
-    if(id == 0x183)//V	// Ð­Òé½âÎö
+    if(id == 0x183)//V	// Ð­ï¿½ï¿½ï¿½ï¿½ï¿½
     {
-		//e.g. unsigned long long data = 0x0001D63AAF164000ULL;(Êµ¼ÊCAN×¥À´µÄÊý¾ÝÊÇÐ¡¶ËÐò£¬ÕâÀï´æÈëÄÚ´æ£¬·´ÁËÒ»ÏÂ×Ö½ÚÐò)
-		//µÃµ½
+		//e.g. unsigned long long data = 0x0001D63AAF164000ULL;(Êµï¿½ï¿½CAN×¥ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú´æ£¬ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½Ö½ï¿½ï¿½ï¿½)
+		//ï¿½Ãµï¿½
 		// pdata[0] = 0x00  // Byte1
 		// pdata[1] = 0x40  // Byte2
 		// pdata[2] = 0x16  // Byte3
@@ -344,12 +346,12 @@ OS_U8 CanRtPwrSeqHandler(OS_U32 id, OS_BOOL ext_id, const OS_U8* pdata, OS_U8 da
 		// pdata[5] = 0xD6  // Byte6
 		// pdata[6] = 0x01  // Byte7
 		// pdata[7] = 0x00  // Byte8
-		canRecvVa.battV = (pdata[0] << 4) | (pdata[1] >> 4);      //0.01	// ÔÚÉÏÃæÀý×ÓÖÐ£¬½âÎöµÃµ½0x004
-		canRecvVa.groundV = ((pdata[1] & 0x0F) << 8) | pdata[2];  //0.01	// ÔÚÉÏÃæÀý×ÓÖÐ£¬½âÎöµÃµ½0x016
-		canRecvVa.engineV = (pdata[3] << 4) | (pdata[4] >> 4);    //0.01	// ÔÚÉÏÃæÀý×ÓÖÐ£¬½âÎöµÃµ½0xAF3
-		canRecvVa.mainV = ((pdata[4] & 0x0F) << 8) | pdata[5];    //0.01	// ÔÚÉÏÃæÀý×ÓÖÐ£¬½âÎöµÃµ½0xAD6
+		canRecvVa.battV = (pdata[0] << 4) | (pdata[1] >> 4);      //0.01	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ãµï¿½0x004
+		canRecvVa.groundV = ((pdata[1] & 0x0F) << 8) | pdata[2];  //0.01	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ãµï¿½0x016
+		canRecvVa.engineV = (pdata[3] << 4) | (pdata[4] >> 4);    //0.01	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ãµï¿½0xAF3
+		canRecvVa.mainV = ((pdata[4] & 0x0F) << 8) | pdata[5];    //0.01	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ãµï¿½0xAD6
     }
-    else if(id == 0x184)//A	// Ð­Òé½âÎö
+    else if(id == 0x184)//A	// Ð­ï¿½ï¿½ï¿½ï¿½ï¿½
     {
         canRecvVa.battA = pdata[0];  	//0.1
         canRecvVa.groundA = pdata[1];	//0.1
@@ -360,7 +362,7 @@ OS_U8 CanRtPwrSeqHandler(OS_U32 id, OS_BOOL ext_id, const OS_U8* pdata, OS_U8 da
 	else{
 		return -1;
 	}
-    g_DeviceState.powerCountDown = 200;	// Èç¹û³¬¹ý200*5ms»¹Ã»ÓÐÖØÖÃ´ËÖµ£¬ËµÃ÷CAN2£¬Ò²¾ÍÊÇÅäµç°åÒ»Ö±Ã»ÓÐÉÏ±¨Êý¾Ý
+    g_DeviceState.powerCountDown = 200;	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½200*5msï¿½ï¿½Ã»ï¿½ï¿½ï¿½ï¿½ï¿½Ã´ï¿½Öµï¿½ï¿½Ëµï¿½ï¿½CAN2ï¿½ï¿½Ò²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»Ö±Ã»ï¿½ï¿½ï¿½Ï±ï¿½ï¿½ï¿½ï¿½ï¿½
     return 0;
 }
 

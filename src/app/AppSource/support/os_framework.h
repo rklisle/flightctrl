@@ -6,7 +6,7 @@ Copyright (C), 2022-2023, SpaceTransportation Co., Ltd.
 /******************************************************************************
 File Name		: os_framework.h
 Version			: 2.0
-Author			: ³Éºê­Z
+Author			: ï¿½Éºï¿½Z
 Created			: 2022/07/23
 ******************************************************************************/
 #include "os_types.h"
@@ -23,13 +23,13 @@ Created			: 2022/07/23
 
 typedef enum
 {
-	DOM_INTERACTIVE	= 0x1,	// ÓëµØÃæ(ÓĞÏß/·¢Éä×¼±¸)½»»¥¹ı³Ì »ò³Æ ÉäÇ°¹ı³Ì£¬°üº¬ÁËµ÷ÊÔµ½·¢Éä¹ı³ÌÖĞµÄÒ»ÇĞ½»»¥Âß¼­;1) ½øÈë·É¿ØºóÎŞĞ§£¬ÔÊĞíÏìµØÃæÕ¾¡°Ó¦¼±¿ªÉ¡¡±µÈÖ¸Áî
-	DOM_SIMIMUDAT	= 0x1<<1,	// Ä£Äâ·ÉĞĞÄ£Ê½£¬IMUÊı¾İ´ÓFLASH¶ÁÈ¡
-	DOM_SIMSRVDAT	= 0x1<<2,	// ËÅ·şĞ¡»ØÂ·Ä£Ê½£¬ËÅ·şÊı¾İÓÉµØÃæ¸ø³ö£¬×Ô¶¯Éú³É²¢Ìæ»»Êä³ö
-	DOM_TRIGGERON	= 0x1<<3,	// Ê±Ğò¿ª¹Ø£¬ÊÇ·ñÊä³öÊ±Ğò¶¯×÷
-	DOM_AUTOMATIC	= 0x1<<4,	// ×Ô¶¯¹ı³Ì£¬µ¯¶¯(»òÆğ·É)ºó×Ô¶¯Ö´ĞĞµÄ¹ı³Ì£¬ÖÜÆÚµ÷ÓÃ
-	DOM_HILSMODE	= 0x1<<5,	// °ëÊµÎïÄ£Ê½
-	DOM_NAVON		= 0x1<<6,	// ¿ªÆôµ¼º½
+	DOM_INTERACTIVE	= 0x1,	// ï¿½ï¿½ï¿½ï¿½ï¿½(ï¿½ï¿½ï¿½ï¿½/ï¿½ï¿½ï¿½ï¿½×¼ï¿½ï¿½)ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½Ç°ï¿½ï¿½ï¿½Ì£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ëµï¿½ï¿½Ôµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ğµï¿½Ò»ï¿½Ğ½ï¿½ï¿½ï¿½ï¿½ß¼ï¿½;1) ï¿½ï¿½ï¿½ï¿½É¿Øºï¿½ï¿½ï¿½Ğ§ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Õ¾ï¿½ï¿½Ó¦ï¿½ï¿½ï¿½ï¿½É¡ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½
+	DOM_SIMIMUDAT	= 0x1<<1,	// Ä£ï¿½ï¿½ï¿½ï¿½ï¿½Ä£Ê½ï¿½ï¿½IMUï¿½ï¿½ï¿½İ´ï¿½FLASHï¿½ï¿½È¡
+	DOM_SIMSRVDAT	= 0x1<<2,	// ï¿½Å·ï¿½Ğ¡ï¿½ï¿½Â·Ä£Ê½ï¿½ï¿½ï¿½Å·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Éµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô¶ï¿½ï¿½ï¿½ï¿½É²ï¿½ï¿½æ»»ï¿½ï¿½ï¿½
+	DOM_TRIGGERON	= 0x1<<3,	// Ê±ï¿½ò¿ª¹Ø£ï¿½ï¿½Ç·ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½
+	DOM_AUTOMATIC	= 0x1<<4,	// ï¿½Ô¶ï¿½ï¿½ï¿½ï¿½Ì£ï¿½ï¿½ï¿½ï¿½ï¿½(ï¿½ï¿½ï¿½ï¿½ï¿½)ï¿½ï¿½ï¿½Ô¶ï¿½Ö´ï¿½ĞµÄ¹ï¿½ï¿½Ì£ï¿½ï¿½ï¿½ï¿½Úµï¿½ï¿½ï¿½
+	DOM_HILSMODE	= 0x1<<5,	// ï¿½ï¿½Êµï¿½ï¿½Ä£Ê½
+	DOM_NAVON		= 0x1<<6,	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 }FUNC_DOMAIN;
 
 #pragma pack(1)
@@ -37,13 +37,13 @@ typedef struct
 {
 	OS_U8 u8HeadA;//EB
 	OS_U8 u8HeadB;//90
-	OS_U16 u16Len;//au8Data³¤¶È
+	OS_U16 u16Len;//au8Dataï¿½ï¿½ï¿½ï¿½
 	OS_U8 u8Seq;//
-	OS_U8 u8MsgID;	// µØÃæÕ¾ºÍ»úÔØÖ®¼ä¹æ¶¨ºÃµÄÃüÁî
+	OS_U8 u8MsgID;	// ï¿½ï¿½ï¿½ï¿½Õ¾ï¿½Í»ï¿½ï¿½ï¿½Ö®ï¿½ï¿½æ¶¨ï¿½Ãµï¿½ï¿½ï¿½ï¿½ï¿½
 	OS_U8 au8Data[2048];
 	OS_U8 u8CRCA;
 	OS_U8 u8CRCB;
-}STRU_422_MSG_INFO;	//422ÏûÏ¢´«µİ¸ñÊ½
+}STRU_422_MSG_INFO;	//422ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½İ¸ï¿½Ê½
 
 typedef struct
 {
@@ -56,21 +56,21 @@ typedef struct
 	OS_U8 u8Seq;
 	OS_U8 au8Data[2048];
 	OS_U8 u8CRC;
-}LinkOUT_422_MSG_INFO;	//LinkOUT422ÏûÏ¢´«µİ¸ñÊ½
+}LinkOUT_422_MSG_INFO;	//LinkOUT422ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½İ¸ï¿½Ê½
 typedef struct
 {
-	OS_U8 u8RtIndex;	//×ÜÏßrtË÷ÒıºÅ
+	OS_U8 u8RtIndex;	//ï¿½ï¿½ï¿½ï¿½rtï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	STRU_422_MSG_INFO pStand422Data;
-}STRU_STANDARD_FRAME;  //¶¨Òå±ê×¼Ö¡¸ñÊ½£¬±È´«µİ422¸ñÊ½¶àÒ»¸öÃèÊö422Í¨µÀºÅµÄ±äÁ¿
+}STRU_STANDARD_FRAME;  //ï¿½ï¿½ï¿½ï¿½ï¿½×¼Ö¡ï¿½ï¿½Ê½ï¿½ï¿½ï¿½È´ï¿½ï¿½ï¿½422ï¿½ï¿½Ê½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½422Í¨ï¿½ï¿½ï¿½ÅµÄ±ï¿½ï¿½ï¿½
 
 typedef struct
 {
 	OS_U8 CanIndex;
-	OS_U8 NodeIndex;	//¶æ»ú½ÚµãºÅ£¬Ä¬ÈÏ0x25	//¶æ»ú
+	OS_U8 NodeIndex;	//ï¿½ï¿½ï¿½ï¿½Úµï¿½Å£ï¿½Ä¬ï¿½ï¿½0x25	//ï¿½ï¿½ï¿½
 	OS_U16 MsgID;
 	OS_U8 MsgLen;
 	OS_U8 MsgData[8];
-}STRU_CAN_MSG;  //¶¨Òå±ê×¼Ö¡¸ñÊ½£¬±È´«µİ422¸ñÊ½¶àÒ»¸öÃèÊö422Í¨µÀºÅµÄ±äÁ¿
+}STRU_CAN_MSG;  //ï¿½ï¿½ï¿½ï¿½ï¿½×¼Ö¡ï¿½ï¿½Ê½ï¿½ï¿½ï¿½È´ï¿½ï¿½ï¿½422ï¿½ï¿½Ê½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½422Í¨ï¿½ï¿½ï¿½ÅµÄ±ï¿½ï¿½ï¿½
 
 #pragma pack()
 
@@ -84,16 +84,16 @@ typedef struct
 #define STANDARD_HEADGPSA					(0xEB)
 #define STANDARD_HEADGPSB					(0x90)
 
-#define STANDARD_HEADGPSC					(0xFC)	//ÔİÎ´Ê¹ÓÃ
-#define STANDARD_HEADGPSD					(0x1D)	//ÔİÎ´Ê¹ÓÃ
+#define STANDARD_HEADGPSC					(0xFC)	//ï¿½ï¿½Î´Ê¹ï¿½ï¿½
+#define STANDARD_HEADGPSD					(0x1D)	//ï¿½ï¿½Î´Ê¹ï¿½ï¿½
 
-#define IMU_G0								(9.794265)	//ÖØÁ¦¼ÓËÙ¶È³£Êı£¬°´·¢Éä³¡Î³¶ÈÉèÖÃ
+#define IMU_G0								(9.794265)	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶È³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ä³¡Î³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
-#define _422_FRAME_SYNCCHAR_LEN			(0x2)
-#define _422_FRAME_HEADER_LEN			(0x6)
-#define _422_FRAME_TM_HEADER_LEN		(0x7)
-#define _422_FRAME_FOOTER_LEN			(0x2)
-#define _422_PAYLOAD_MAX_LEN			(0x0FFF)
+#define _422_FRAME_SYNCCHAR_LEN				(0x2)
+#define _422_FRAME_HEADER_LEN				(0x6)
+#define _422_FRAME_TM_HEADER_LEN			(0x7)
+#define _422_FRAME_FOOTER_LEN				(0x2)
+#define _422_PAYLOAD_MAX_LEN				(0x0FFF)
 #define  _422_LinkFRAME_HEADER_LEN			(0xA)
 #define _422_LinkFRAME_FOOTER_LEN			(0x1)
 
@@ -109,161 +109,158 @@ typedef struct
 //#include "./os_time.h"
 #include "../controller/controller.h"
 
-//DEV Éè±¸ºÅ
-#define CHECK_HEAD							(0x01)	 //Ô¤±àÒëÍ·£¬ÊÇ·ñ¶ÔÏûÏ¢Í·½øĞĞ±È¶ÔĞ£Ñé
-#define DEV_CODE_FK						(0x01)  //Éè±¸ºÅ£ºDEV     ID
-#define DEV_CODE_POWER						(0x0A)  //Éè±¸ºÅ£ºDEV     ID  Ê±ĞòÉè±¸
-#define DEV_CODE_SX						(0x0B)  //Éè±¸ºÅ£ºDEV     ID  ÅäµçÉè±¸
+//DEV ï¿½è±¸ï¿½ï¿½
+#define CHECK_HEAD					(0x01)	 //Ô¤ï¿½ï¿½ï¿½ï¿½Í·ï¿½ï¿½ï¿½Ç·ï¿½ï¿½ï¿½ï¿½Ï¢Í·ï¿½ï¿½ï¿½Ğ±È¶ï¿½Ğ£ï¿½ï¿½
+#define DEV_CODE_FK					(0x01)  //ï¿½è±¸ï¿½Å£ï¿½DEV     ID
+#define DEV_CODE_POWER				(0x0A)  //ï¿½è±¸ï¿½Å£ï¿½DEV     ID  Ê±ï¿½ï¿½ï¿½è±¸
+#define DEV_CODE_SX					(0x0B)  //ï¿½è±¸ï¿½Å£ï¿½DEV     ID  ï¿½ï¿½ï¿½ï¿½è±¸
 
-//MSG-Ö¸Áî-·¢Éä
-#define CMD_ENGINE_START					(0xF6)	//·¢¶¯»úÆô¶¯
-#define CMD_ENGINE_STOP                   (0xF7)	//·¢¶¯»úÍ£»ú
-#define CMD_FORE_LAUNCH_REQ				(0xF8)	//·¢ÉäÔ¤Æğ¿ØÖ¸Áî	//Ô¤·¢Éä£¨Î´Ê¹ÓÃ£©
-#define CMD_FORE_LAUNCH_RSP				(0xF9)	//·¢ÉäÔ¤Æğ¿ØÖ¸Áî½á¹û
-#define CMD_LAUNCH_REQ						(0xFA)	//È«²¿½âËø£¬
-#define CMD_LUANCH_FORCE					(0xFB)	//Ç¿ÖÆ·¢ÉäÖ¸Áî		// 0xFB Ê×Ò³ - Æğ·É
+//MSG-Ö¸ï¿½ï¿½-ï¿½ï¿½ï¿½ï¿½
+#define CMD_ENGINE_START			(0xF6)	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+#define CMD_ENGINE_STOP             (0xF7)	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í£ï¿½ï¿½
+#define CMD_FORE_LAUNCH_REQ			(0xF8)	//ï¿½ï¿½ï¿½ï¿½Ô¤ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½	//Ô¤ï¿½ï¿½ï¿½ä£¨Î´Ê¹ï¿½Ã£ï¿½
+#define CMD_FORE_LAUNCH_RSP			(0xF9)	//ï¿½ï¿½ï¿½ï¿½Ô¤ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½ï¿½ï¿½
+#define CMD_LAUNCH_REQ				(0xFA)	//È«ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+#define CMD_LUANCH_FORCE			(0xFB)	//Ç¿ï¿½Æ·ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½		// 0xFB ï¿½ï¿½Ò³ - ï¿½ï¿½ï¿½
 
-//MSG-Ö¸Áî-ÖÇÄÜ¿ØÖÆÆ÷×´Ì¬
-#define CMD_MODULE_SET_REQ			(0x01)	//ÖÇÄÜ¿ØÖÆÆ÷Ä£Ê½ÉèÖÃ
-#define CMD_STATUS_REPORT				(0x02)	//ÖÇÄÜ¿ØÖÆÆ÷×´Ì¬ÉÏ±¨
+//MSG-Ö¸ï¿½ï¿½-ï¿½ï¿½ï¿½Ü¿ï¿½ï¿½ï¿½ï¿½ï¿½×´Ì¬
+#define CMD_MODULE_SET_REQ			(0x01)	//ï¿½ï¿½ï¿½Ü¿ï¿½ï¿½ï¿½ï¿½ï¿½Ä£Ê½ï¿½ï¿½ï¿½ï¿½
+#define CMD_STATUS_REPORT			(0x02)	//ï¿½ï¿½ï¿½Ü¿ï¿½ï¿½ï¿½ï¿½ï¿½×´Ì¬ï¿½Ï±ï¿½
 
-#define CMD_BJTIME_SET					(0x0A)	//±±¾©Ê±ÉèÖÃ
+#define CMD_BJTIME_SET				(0x0A)	//ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½
 
-#define CMD_DATA_REQ					(0x03)	//ÖîÔªÁĞ±íÇëÇó
-#define CMD_DATA_RSP					(0x04)	//ÖîÔªÁĞ±íÉÏ´«
-#define CMD_DATA_SET					(0x21)	//ÖîÔªÁĞ±íÉèÖÃ
+#define CMD_DATA_REQ				(0x03)	//ï¿½ï¿½Ôªï¿½Ğ±ï¿½ï¿½ï¿½ï¿½ï¿½
+#define CMD_DATA_RSP				(0x04)	//ï¿½ï¿½Ôªï¿½Ğ±ï¿½ï¿½Ï´ï¿½
+#define CMD_DATA_SET				(0x21)	//ï¿½ï¿½Ôªï¿½Ğ±ï¿½ï¿½ï¿½ï¿½ï¿½
 
-#define CMD_URGENT_LAND				(0x22)	//½ô¼±É¡½µ
-#define CMD_URGENT_RETURN				(0x23)	//½ô¼±·µº½
-#define CMD_INSTANT_RECOVER			(0x24)	//½ô¼±»ØÊÕ
+#define CMD_URGENT_LAND				(0x22)	//ç´§æ€¥ä¼é™
+#define CMD_URGENT_RETURN			(0x23)	//ç´§æ€¥è¿”èˆª
+#define CMD_INSTANT_RECOVER			(0x24)	//å³æ—¶å›æ”¶
 
-//MSG_Ö¸Áî_ECU
-#define	CMD_START_STOP_ENGINE			(0xC1)	// 0xC1 ËÅ·şÊ±Ğò - Æô¶¯Í£Ö¹·¢¶¯»ú - ¸ù¾İ´øµÄ²ÎÊı²»Í¬Çø·ÖÆôÍ££º0x11Æô¶¯ 0x22Í£Ö¹
-#define	CMD_GET_RUNNING_INFO			(0xC2)	// 0xC2 ËÅ·şÊ±Ğò - ×óÓÒ»¬¿é
+//MSG_Ö¸ï¿½ï¿½_ECU
+#define	CMD_START_STOP_ENGINE		(0xC1)	// 0xC1 ï¿½Å·ï¿½Ê±ï¿½ï¿½ - ï¿½ï¿½ï¿½ï¿½Í£Ö¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ - ï¿½ï¿½ï¿½İ´ï¿½ï¿½Ä²ï¿½ï¿½ï¿½ï¿½ï¿½Í¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í£ï¿½ï¿½0x11ï¿½ï¿½ï¿½ï¿½ 0x22Í£Ö¹
+#define	CMD_GET_RUNNING_INFO		(0xC2)	// 0xC2 ï¿½Å·ï¿½Ê±ï¿½ï¿½ - ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½
 
-#define	CMD_GET_RUNNING_PARAM			(0xC3)	// 0xC3 ËÅ·şÊ±Ğò - »ñÈ¡ÔËĞĞ²ÎÊı
-#define	CMD_GET_START_PARAM			(0xC4)	// 0xC4 ËÅ·şÊ±Ğò - »ñÈ¡Æô¶¯²ÎÊı
-#define	CMD_ECU_RPM_SETTING			(0xC5)	//×ªËÙÉèÖÃ	// 0xC5 ËÅ·şÊ±Ğò - ÓÍÃÅÉè¶¨
+#define	CMD_GET_RUNNING_PARAM		(0xC3)	// 0xC3 ï¿½Å·ï¿½Ê±ï¿½ï¿½ - ï¿½ï¿½È¡ï¿½ï¿½ï¿½Ğ²ï¿½ï¿½ï¿½
+#define	CMD_GET_START_PARAM			(0xC4)	// 0xC4 ï¿½Å·ï¿½Ê±ï¿½ï¿½ - ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+#define	CMD_ECU_RPM_SETTING			(0xC5)	//×ªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½	// 0xC5 ï¿½Å·ï¿½Ê±ï¿½ï¿½ - ï¿½ï¿½ï¿½ï¿½ï¿½è¶¨
 
-//MSG-Ö¸Áî-Åäµç
-#define CMD_POWER_REQ					(0x05)	//µ¥»úÅäµçÇëÇó		  // 0x05 ËÅ·şÊ±Ğò - µ¥Í¨µÀÊ±Ğò²âÊÔ - ·¢ËÍ/¿ª/¹Ø
-#define CMD_SEQ_POWER_REQ				(0xEF)	//Ê±ĞòÅäµçÇëÇó
+//MSG-Ö¸ï¿½ï¿½-ï¿½ï¿½ï¿½
+#define CMD_POWER_REQ				(0x05)	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½		  // 0x05 ï¿½Å·ï¿½Ê±ï¿½ï¿½ - ï¿½ï¿½Í¨ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ - ï¿½ï¿½ï¿½ï¿½/ï¿½ï¿½/ï¿½ï¿½
+#define CMD_SEQ_POWER_REQ			(0xEF)	//Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
-//MSG-Ö¸Áî-¹ß×é
-#define CMD_NAV_INIT					(0xE4)	//·¢ÉäµãÖîÔªËÍµ¼º½°å
-#define CMD_HOR_CALC_REQ				(0xE0)	//Ë®Æ½¼ÆËã£¨¶Ô×¼£©ÇëÇó	 // 0xE0 ËÅ·şÊ±Ğò - ¶Ô×¼
-#define CMD_TO_NAV_REQ					(0xE2)	//×ªµ¼º½ÇëÇó			// 0xE2 ËÅ·şÊ±Ğò - ×ªµ¼º½
-#define CMD_TO_AFTER_LUANCH				(0xE3)	//×ªµ¼º½ÇëÇó			// 0xE3 ËÅ·şÊ±Ğò - ×ªÉäºó
-#define CMD_POLAR_TEST_REQ				(0x3A)	//¼«ĞÔ²âÊÔ
+//MSG-Ö¸ï¿½ï¿½-ï¿½ï¿½ï¿½ï¿½
+#define CMD_NAV_INIT				(0xE4)	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ôªï¿½Íµï¿½ï¿½ï¿½ï¿½ï¿½
+#define CMD_HOR_CALC_REQ			(0xE0)	//Ë®Æ½ï¿½ï¿½ï¿½ã£¨ï¿½ï¿½×¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½	 // 0xE0 ï¿½Å·ï¿½Ê±ï¿½ï¿½ - ï¿½ï¿½×¼
+#define CMD_TO_NAV_REQ				(0xE2)	//×ªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½			// 0xE2 ï¿½Å·ï¿½Ê±ï¿½ï¿½ - ×ªï¿½ï¿½ï¿½ï¿½
+#define CMD_TO_AFTER_LUANCH			(0xE3)	//×ªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½			// 0xE3 ï¿½Å·ï¿½Ê±ï¿½ï¿½ - ×ªï¿½ï¿½ï¿½
+#define CMD_POLAR_TEST_REQ			(0x3A)	//ï¿½ï¿½ï¿½Ô²ï¿½ï¿½ï¿½
 
-//MSG Ö¸Áî-ĞÇÀú
-#define CMD_GET_EPH						(0xE7)	//ĞÇÀúÌáÈ¡
-#define CMD_GET_EPH_RSP					(0xE8)	//ĞÇÀúÌáÈ¡»Ø¸´
-#define CMD_SET_EPH						(0xE9)	//ĞÇÀú×°¶©
-#define CMD_SET_EPH_RSP					(0xEA)	//ĞÇÀú×°¶©»Ø¸´
+//MSG Ö¸ï¿½ï¿½-ï¿½ï¿½ï¿½ï¿½
+#define CMD_GET_EPH					(0xE7)	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¡
+#define CMD_GET_EPH_RSP				(0xE8)	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¡ï¿½Ø¸ï¿½
+#define CMD_SET_EPH					(0xE9)	//ï¿½ï¿½ï¿½ï¿½×°ï¿½ï¿½
+#define CMD_SET_EPH_RSP				(0xEA)	//ï¿½ï¿½ï¿½ï¿½×°ï¿½ï¿½ï¿½Ø¸ï¿½
 
-//MSG-Ö¸Áî-SD
-#define CMD_SD_READ_FILE				(0x50)	//¶ÁÈ¡SD¿¨ÎÄ¼ş
-#define CMD_SD_INIT					(0x51)	//¶ÁÈ¡SD¿¨ÎÄ¼ş
+//MSG-Ö¸ï¿½ï¿½-SD
+#define CMD_SD_READ_FILE			(0x50)	//ï¿½ï¿½È¡SDï¿½ï¿½ï¿½Ä¼ï¿½
+#define CMD_SD_INIT					(0x51)	//ï¿½ï¿½È¡SDï¿½ï¿½ï¿½Ä¼ï¿½
 
-//MSG-Ö¸Áî-ËÅ·ş
-#define CMD_SRV_ZERO_ENCAP_REQ		(0x40)	//ËÅ·şÁãÎ»×°¶©ÇëÇó
-#define CMD_SRV_CTRL_REQ				(0x42)	//ËÅ·ş¿ØÖÆÇëÇó			// 0x42 ËÅ·şÊ±Ğò - Éè¶¨
-#define CMD_SRV_MINLOOP_REQ			(0x44)	//ËÅ·şĞ¡»ØÂ·²âÁ¿ÇëÇó	// 0x44 ËÅ·şÊ±Ğò - Ğ¡»ØÂ·²âÊÔ - ¿ªÊ¼
-#define CMD_SRV_BOOKMODE				(0x48)	//ËÅ·ş×°¶©Ä£Ê½Ê¹ÄÜ		// 0x48 ËÅ·şÊ±Ğò - ÁãÎ»×°¶©
-#define CMD_SRV_GET_ID					(0x4A)
-#define CMD_SRV_SAVE					(0x4C)
-#define CMD_SRV_SET_ID					(0x4E)
+//MSG-Ö¸ï¿½ï¿½-ï¿½Å·ï¿½
+#define CMD_SRV_ZERO_ENCAP_REQ		(0x40)	//ï¿½Å·ï¿½ï¿½ï¿½Î»×°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+#define CMD_SRV_CTRL_REQ			(0x42)	//ï¿½Å·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½			// 0x42 ï¿½Å·ï¿½Ê±ï¿½ï¿½ - ï¿½è¶¨
+#define CMD_SRV_MINLOOP_REQ			(0x44)	//ï¿½Å·ï¿½Ğ¡ï¿½ï¿½Â·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½	// 0x44 ï¿½Å·ï¿½Ê±ï¿½ï¿½ - Ğ¡ï¿½ï¿½Â·ï¿½ï¿½ï¿½ï¿½ - ï¿½ï¿½Ê¼
+#define CMD_SRV_BOOKMODE			(0x48)	//ï¿½Å·ï¿½×°ï¿½ï¿½Ä£Ê½Ê¹ï¿½ï¿½		// 0x48 ï¿½Å·ï¿½Ê±ï¿½ï¿½ - ï¿½ï¿½Î»×°ï¿½ï¿½
 
-//MSG-Ö¸Áî-µç³Ø
-#define CMD_BATT_CMD					(0x46)	//µç³ØÖ¸Áî
+//MSG-Ö¸ï¿½ï¿½-ï¿½ï¿½ï¿½
+#define CMD_BATT_CMD				(0x46)	//ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½
 
-//MSG-Ö¸Áî-FLASH
-#define CMD_FLASH_CTRL_REQ				(0x60)	//FLASH¿ØÖÆÇëÇó
-#define CMD_FLASH_CTRL_RSP				(0x61)	//FLASH¿ØÖÆ½á¹û
-#define CMD_FLASH_ENCAP_REQ				(0x62)	//FLASHÊı¾İÉÏĞĞÇëÇó
-#define CMD_FLASH_ENCAP_RSP				(0x63)	//FLASHÊı¾İÉÏĞĞ½á¹û
+//MSG-Ö¸ï¿½ï¿½-FLASH
+#define CMD_FLASH_CTRL_REQ			(0x60)	//FLASHï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+#define CMD_FLASH_CTRL_RSP			(0x61)	//FLASHï¿½ï¿½ï¿½Æ½ï¿½ï¿½
+#define CMD_FLASH_ENCAP_REQ			(0x62)	//FLASHï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+#define CMD_FLASH_ENCAP_RSP			(0x63)	//FLASHï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ğ½ï¿½ï¿½
 
-#define CMD_FLASH_QUERY_REQ				(0x64)	//FLASH²éÑ¯
-#define CMD_FLASH_QUERY_RSP				(0x65)	//FLASH²éÑ¯½á¹û
-#define CMD_FLASH_CHECK_REQ				(0x66)	//FLASHĞ£ÑéÇëÇó
-#define CMD_FLASH_CHECK_RSP				(0x67)	//FLASHĞ£Ñé½á¹û
-#define CMD_FLASH_LOAD_REQ				(0x68)	//ÖîÔªÊı¾İ¼ÓÔØ
-#define CMD_FLASH_LOAD_RSP				(0x69)	//ÖîÔªÊı¾İ¼ÓÔØ·´À¡
-#define CMD_FLASH_CLEAR_REQ				(0x6A)	//ÖîÔªÊı¾İÇå³ı
-#define CMD_FLASH_CLEAR_RSP				(0x6B)	//Çå³ı»Ø¸´
+#define CMD_FLASH_QUERY_REQ			(0x64)	//FLASHï¿½ï¿½Ñ¯
+#define CMD_FLASH_QUERY_RSP			(0x65)	//FLASHï¿½ï¿½Ñ¯ï¿½ï¿½ï¿½
+#define CMD_FLASH_CHECK_REQ			(0x66)	//FLASHĞ£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+#define CMD_FLASH_CHECK_RSP			(0x67)	//FLASHĞ£ï¿½ï¿½ï¿½ï¿½
+#define CMD_FLASH_LOAD_REQ			(0x68)	//ï¿½ï¿½Ôªï¿½ï¿½ï¿½İ¼ï¿½ï¿½ï¿½
+#define CMD_FLASH_LOAD_RSP			(0x69)	//ï¿½ï¿½Ôªï¿½ï¿½ï¿½İ¼ï¿½ï¿½Ø·ï¿½ï¿½ï¿½
+#define CMD_FLASH_CLEAR_REQ			(0x6A)	//ï¿½ï¿½Ôªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+#define CMD_FLASH_CLEAR_RSP			(0x6B)	//ï¿½ï¿½ï¿½ï¿½Ø¸ï¿½
 
-#define CMD_MSN_UPDATE                  (0x13)	// 0x13 Ê×Ò³ - ¼ÓÔØÈÎÎñ
-#define CMD_MSN_NEWPT                   (0x21)	// 0x21 ¿ÉÄÜÊÇ ÈÎÎñ±à¼­ - ·ÉĞĞº½µã
-//---------------------×ÜÏß---------------------------------------------
-#define BUS_SLAVER_REPORT				(0x9F)
-#define BUS_SLAVER_CMD					(0x9E)
+#define CMD_MSN_UPDATE              (0x13)	// 0x13 ï¿½ï¿½Ò³ - ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+#define CMD_MSN_NEWPT               (0x21)	// 0x21 ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½à¼­ - ï¿½ï¿½ï¿½Ğºï¿½ï¿½ï¿½
+//---------------------ï¿½ï¿½ï¿½ï¿½---------------------------------------------
+#define BUS_SLAVER_REPORT			(0x9F)
+#define BUS_SLAVER_CMD				(0x9E)
 
-//MSG-×ÜÏß-¹ß×é
-#define BUS_IMU_INFO_REPORT				(0x93)	//¹âÏË¹ß×é·¢ËÍÖÁ·É¿Ø¼ÆËã»úµÄ²âÊÔ½á¹û
-#define BUS_IMU_INFO_SEND				(0x94)	//·É¿Ø¼ÆËã»úÖÁ¹âÏË¹ß×é·¢ËÍµÄÇëÇó
-#define BUS_IMU_INFO_SEND_EPH		    (0x3A)	//add by Li@20230514£¬·É¿Ø·¢ËÍ¸ø¹ß×éĞÇÀúĞ­ÒéµÄÇëÇó
-#define BUS_IMU_SIMU_GPSIMU			(0xA0)	//°ëÊµÎï·ÂÕæ¹ß×éÓëGPSÊı¾İ½á¹¹ÌåÖ±´«
+//MSG-ï¿½ï¿½ï¿½ï¿½-ï¿½ï¿½ï¿½ï¿½
+#define BUS_IMU_INFO_REPORT			(0x93)	//ï¿½ï¿½ï¿½Ë¹ï¿½ï¿½é·¢ï¿½ï¿½ï¿½ï¿½ï¿½É¿Ø¼ï¿½ï¿½ï¿½ï¿½ï¿½Ä²ï¿½ï¿½Ô½ï¿½ï¿½
+#define BUS_IMU_INFO_SEND			(0x94)	//ï¿½É¿Ø¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ë¹ï¿½ï¿½é·¢ï¿½Íµï¿½ï¿½ï¿½ï¿½ï¿½
+#define BUS_IMU_INFO_SEND_EPH		(0x3A)	//add by Li@20230514ï¿½ï¿½ï¿½É¿Ø·ï¿½ï¿½Í¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ğ­ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+#define BUS_IMU_SIMU_GPSIMU			(0xA0)	//ï¿½ï¿½Êµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½GPSï¿½ï¿½ï¿½İ½á¹¹ï¿½ï¿½Ö±ï¿½ï¿½
 
-#define BUS_NAV_INIT_DATA				(0xE0)	//°²×°Ä£Ê½ÉèÖÃ
-#define BUS_NAV_FOCUS					(0xE2)	//¶Ô×¼ÇëÇó
-#define BUS_NAV_START_NAV				(0x3A)	//×ªµ¼º½
-#define BUS_NAV_IGNATION				(0x3B)	//·¢Éä
-#define BUS_NAV_IMUDATA				(0x3C)	//¸ß¾«¶ÈÊı¾İËÍµ¼º½°å
+#define BUS_NAV_INIT_DATA			(0xE0)	//ï¿½ï¿½×°Ä£Ê½ï¿½ï¿½ï¿½ï¿½
+#define BUS_NAV_FOCUS				(0xE2)	//ï¿½ï¿½×¼ï¿½ï¿½ï¿½ï¿½
+#define BUS_NAV_START_NAV			(0x3A)	//×ªï¿½ï¿½ï¿½ï¿½
+#define BUS_NAV_IGNATION			(0x3B)	//ï¿½ï¿½ï¿½ï¿½
+#define BUS_NAV_IMUDATA				(0x3C)	//ï¿½ß¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Íµï¿½ï¿½ï¿½ï¿½ï¿½
 
-//----------------------------Ò£²â--------------------------------------------
-//MSG-Ò£²â
-#define TM_FLIGHT						(0x9A)
-#define TM_OTHER						(0x99)
-//-----------------------------ÔØºÉ--------------------------------------------
-//MSG-ÔØºÉ-Ö¸Áî
+//----------------------------Ò£ï¿½ï¿½--------------------------------------------
+//MSG-Ò£ï¿½ï¿½
+#define TM_FLIGHT					(0x9A)
+#define TM_OTHER					(0x99)
+//-----------------------------ï¿½Øºï¿½--------------------------------------------
+//MSG-ï¿½Øºï¿½-Ö¸ï¿½ï¿½
 
-//MSG-ÔØºÉ-·É¿Ø-×ÜÏß
-#define BUS_FLIGHT_REPORT				(0xB0)
-#define BUS_FLIGHT_LUNCH				(0xBA)
+//MSG-ï¿½Øºï¿½-ï¿½É¿ï¿½-ï¿½ï¿½ï¿½ï¿½
+#define BUS_FLIGHT_REPORT			(0xB0)
+#define BUS_FLIGHT_LUNCH			(0xBA)
 #define BUS_FLIGHT_INFO				(0xBF)
 
 //MSG-SCOUT
-#define SCOUT_AFRAME            (0XAA)
-#define SCOUT_BFRAME            (0XBB)
-#define TEMPLATE_TXT            (0XB1)
-#define IMAGE_INFO              (0XB2)
-#define IMAGE_REBACK            (0XB3)
-#define SOFT_UPDATE             (0XD1)
-#define SOFT_REBACKE            (0XD2)
-#define CMD_USER_SETTARGET    (0xD3)
-#define CMD_SET_IMAGEMODE		(0xD4)
-//MSG¶¨ÒåÍê-----------------------------------------------------------------------
+#define SCOUT_AFRAME            	(0XAA)
+#define SCOUT_BFRAME            	(0XBB)
+#define TEMPLATE_TXT            	(0XB1)
+#define IMAGE_INFO              	(0XB2)
+#define IMAGE_REBACK            	(0XB3)
+#define SOFT_UPDATE             	(0XD1)
+#define SOFT_REBACKE            	(0XD2)
+#define CMD_USER_SETTARGET    		(0xD3)
+#define CMD_SET_IMAGEMODE			(0xD4)
+//MSGï¿½ï¿½ï¿½ï¿½ï¿½ï¿½-----------------------------------------------------------------------
 #pragma pack(1)
 typedef struct
 {
 	/***************
-	 * ÈëÒ£²â²¿·Ö
+	 * ï¿½ï¿½Ò£ï¿½â²¿ï¿½ï¿½
 	 * *************/
 
-	 /** workStage	¹¤×÷×´Ì¬ */
-	// DOM_INTERACTIVE	= 0x1,		// ½»»¥¹ı³Ì£¬°üº¬ÁËµ÷ÊÔµ½·¢Éä¹ı³ÌÖĞµÄÒ»ÇĞ½»»¥Âß¼­£¬ÎªÉäÇ°¹ı³Ì
-	// DOM_SIMIMUDAT	= 0x1<<1,	// Ä£Äâ·ÉĞĞÄ£Ê½£¬IMUÊı¾İ´ÓFLASH¶ÁÈ¡
-	// DOM_SIMSRVDAT	= 0x1<<2,	// ËÅ·şĞ¡»ØÂ·Ä£Ê½£¬ËÅ·şÊı¾İÓÉµØÃæ¸ø³ö£¬×Ô¶¯Éú³É²¢Ìæ»»Êä³ö
-	// DOM_TRIGGERON	= 0x1<<3,	// Ê±Ğò¿ª¹Ø£¬ÊÇ·ñÊä³öÊ±Ğò¶¯×÷
-	// DOM_AUTOMATIC	= 0x1<<4,	// ×Ô¶¯¹ı³Ì£¬Éäºó×Ô¶¯Ö´ĞĞµÄ¹ı³Ì£¬ÖÜÆÚµ÷ÓÃ
-	// DOM_HILSMODE		= 0x1<<5,	// °ëÊµÎïÄ£Ê½
-	// DOM_NAVON		= 0x1<<6,	// ¿ªÆôµ¼º½
-	FUNC_DOMAIN workStage;	//¹¤×÷½×¶Î
+	 /** workStage	ï¿½ï¿½ï¿½ï¿½×´Ì¬ */
+	// DOM_INTERACTIVE	= 0x1,		// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ì£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ëµï¿½ï¿½Ôµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ğµï¿½Ò»ï¿½Ğ½ï¿½ï¿½ï¿½ï¿½ß¼ï¿½ï¿½ï¿½Îªï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½
+	// DOM_SIMIMUDAT	= 0x1<<1,	// Ä£ï¿½ï¿½ï¿½ï¿½ï¿½Ä£Ê½ï¿½ï¿½IMUï¿½ï¿½ï¿½İ´ï¿½FLASHï¿½ï¿½È¡
+	// DOM_SIMSRVDAT	= 0x1<<2,	// ï¿½Å·ï¿½Ğ¡ï¿½ï¿½Â·Ä£Ê½ï¿½ï¿½ï¿½Å·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Éµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô¶ï¿½ï¿½ï¿½ï¿½É²ï¿½ï¿½æ»»ï¿½ï¿½ï¿½
+	// DOM_TRIGGERON	= 0x1<<3,	// Ê±ï¿½ò¿ª¹Ø£ï¿½ï¿½Ç·ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½
+	// DOM_AUTOMATIC	= 0x1<<4,	// ï¿½Ô¶ï¿½ï¿½ï¿½ï¿½Ì£ï¿½ï¿½ï¿½ï¿½ï¿½Ô¶ï¿½Ö´ï¿½ĞµÄ¹ï¿½ï¿½Ì£ï¿½ï¿½ï¿½ï¿½Úµï¿½ï¿½ï¿½
+	// DOM_HILSMODE		= 0x1<<5,	// ï¿½ï¿½Êµï¿½ï¿½Ä£Ê½
+	// DOM_NAVON		= 0x1<<6,	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	FUNC_DOMAIN workStage;	//ï¿½ï¿½ï¿½ï¿½ï¿½×¶ï¿½
 	
-	/** ¸÷µ¥»úÍ¨ĞÅ×´Ì¬£¬³õÊ¼ÉèÖÃÎª200tick£¬Ã¿¸ötickµ÷ÓÃ-1£¬Ã¿´ÎÊÕµ½Êı¾İ»Ö¸´200.±£Ö¤ÔÚÍ¨Ñ¶ÖĞ¶Ï1ÃëÄÚÄÜ¹»·´À¡µ½Ò£²â */
-	OS_U8 srvCountDown;	// Éè±¸Í¨ĞÅ×´Ì¬
-	OS_U8 battCountDown;	// Éè±¸Í¨ĞÅ×´Ì¬
-	OS_U8 navCountDown;	// Éè±¸Í¨ĞÅ×´Ì¬
-    OS_U8 powerCountDown;	// Éè±¸Í¨ĞÅ×´Ì¬
-	OS_U8 ecuCountDown;	// Éè±¸Í¨ĞÅ×´Ì¬
+	/** ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¨ï¿½ï¿½×´Ì¬ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½Îª200tickï¿½ï¿½Ã¿ï¿½ï¿½tickï¿½ï¿½ï¿½ï¿½-1ï¿½ï¿½Ã¿ï¿½ï¿½ï¿½Õµï¿½ï¿½ï¿½ï¿½İ»Ö¸ï¿½200.ï¿½ï¿½Ö¤ï¿½ï¿½Í¨Ñ¶ï¿½Ğ¶ï¿½1ï¿½ï¿½ï¿½ï¿½ï¿½Ü¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò£ï¿½ï¿½ */
+	OS_U8 srvCountDown;	// ï¿½è±¸Í¨ï¿½ï¿½×´Ì¬
+	OS_U8 battCountDown;	// ï¿½è±¸Í¨ï¿½ï¿½×´Ì¬
+	OS_U8 navCountDown;	// ï¿½è±¸Í¨ï¿½ï¿½×´Ì¬
+    OS_U8 powerCountDown;	// ï¿½è±¸Í¨ï¿½ï¿½×´Ì¬
+	OS_U8 ecuCountDown;	// ï¿½è±¸Í¨ï¿½ï¿½×´Ì¬
 	OS_U8 pwrStatePos;
-	OS_U8 hilCountDown;	// Éè±¸Í¨ĞÅ×´Ì¬
-    OS_U8 imuCountDown;	// Éè±¸Í¨ĞÅ×´Ì¬
-    OS_U8 scoutCountDown;	// Éè±¸Í¨ĞÅ×´Ì¬
-    OS_U8 fuseCountDown;	// Éè±¸Í¨ĞÅ×´Ì¬£¨ÊÇ²»ÊÇÃ»ÓÃÉÏ£¿£©
+	OS_U8 hilCountDown;	// ï¿½è±¸Í¨ï¿½ï¿½×´Ì¬
+    OS_U8 imuCountDown;	// ï¿½è±¸Í¨ï¿½ï¿½×´Ì¬
+    OS_U8 scoutCountDown;	// ï¿½è±¸Í¨ï¿½ï¿½×´Ì¬
+    OS_U8 fuseCountDown;	// ï¿½è±¸Í¨ï¿½ï¿½×´Ì¬ï¿½ï¿½ï¿½Ç²ï¿½ï¿½ï¿½Ã»ï¿½ï¿½ï¿½Ï£ï¿½ï¿½ï¿½
     
-	//Ê±ĞòÅäµçÆ÷µÄÅäµç×´Ì¬
+	//Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×´Ì¬
 	OS_U8 pwrStateB1:1;
 	OS_U8 pwrStateB2:1;
 	OS_U8 pwrStateB3:1;
@@ -273,23 +270,23 @@ typedef struct
 	OS_U8 pwrStateN15:1;
 	OS_U8 pwrState5V:1;
 
-	OS_U8 luanchState;//Î´ÓÃµ½	
-	OS_U8 detachState;//Î´ÓÃµ½
-	OS_FLOAT temperature;	//·É¿ØÎÂ¶È
-	OS_U8 luanchStart;		//·¢Éä×¼±¸Íê³É±êÊ¶£¬ÓÃÓÚ½âËø
+	OS_U8 luanchState;//Î´ï¿½Ãµï¿½	
+	OS_U8 detachState;//Î´ï¿½Ãµï¿½
+	OS_FLOAT temperature;	//ï¿½É¿ï¿½ï¿½Â¶ï¿½
+	OS_U8 luanchStart;		//ï¿½ï¿½ï¿½ï¿½×¼ï¿½ï¿½ï¿½ï¿½É±ï¿½Ê¶ï¿½ï¿½ï¿½ï¿½ï¿½Ú½ï¿½ï¿½ï¿½
 	
-	OS_DOUBLE flightStartTime;	// Æğ·ÉÊ±¼ä£¬¼´·É¿Ø³õÊ¼»¯Ê±£¬È¥µôÆğ·ÉÊ±¿ÌµÃµ½·É¿ØÊ±¼ä£¬µ¥Î» s
-	OS_U64 CurrTick;	// ³ÌĞò³õÊ¼»¯Ê±´Ó0Ôö¼Ó£¬Ã¿5ms+1£»Æğ·ÉÊ±£¬DoIgnitionº¯ÊıÖĞ£¬¸³Öµ0£¬´ó×´Ì¬»úÖĞ£¬Ã¿5ms+1
-	OS_DOUBLE currTime;// ³ÌĞò³õÊ¼»¯´Ó0Ôö¼Ó+0.005s£»Æğ·ÉÊ±ÖÃ0£¬ÖØĞÂ´Ó0Ôö¼Ó+0.005s	// µ¥Î» s
-	OS_U64 BJTimeSecond;//×éºÏµ¼º½Êä³ö±±¾©Ê±¼ä£¬ÄêÔÂÈÕ£¬Ê±·ÖÃë
-	OS_U16 BJTimeMS;	//ÊÚÊ±ºÁÃë
+	OS_DOUBLE flightStartTime;	// ï¿½ï¿½ï¿½Ê±ï¿½ä£¬ï¿½ï¿½ï¿½É¿Ø³ï¿½Ê¼ï¿½ï¿½Ê±ï¿½ï¿½È¥ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ÌµÃµï¿½ï¿½É¿ï¿½Ê±ï¿½ä£¬ï¿½ï¿½Î» s
+	OS_U64 CurrTick;	// ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½Ê±ï¿½ï¿½0ï¿½ï¿½ï¿½Ó£ï¿½Ã¿5ms+1ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½DoIgnitionï¿½ï¿½ï¿½ï¿½ï¿½Ğ£ï¿½ï¿½ï¿½Öµ0ï¿½ï¿½ï¿½ï¿½×´Ì¬ï¿½ï¿½ï¿½Ğ£ï¿½Ã¿5ms+1
+	OS_DOUBLE currTime;// ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½0ï¿½ï¿½ï¿½ï¿½+0.005sï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½0ï¿½ï¿½ï¿½ï¿½ï¿½Â´ï¿½0ï¿½ï¿½ï¿½ï¿½+0.005s	// ï¿½ï¿½Î» s
+	OS_U64 BJTimeSecond;//ï¿½ï¿½Ïµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ä£¬ï¿½ï¿½ï¿½ï¿½ï¿½Õ£ï¿½Ê±ï¿½ï¿½ï¿½ï¿½
+	OS_U16 BJTimeMS;	//ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½
 }DeviceState;
 
 typedef struct
 {
-	OS_DOUBLE FzOnStamp_s;	// fuse power-on time	// µ¥Î» s
-	// OS_DOUBLE sysTime_s;	// ÏµÍ³Ê±¼ä£¬³ÌĞòÆô¶¯Ê±0	// µ¥Î» s
-	OS_U8 msgFromGCS;	// message from Ground Control Station // ÓÃÓÚÆô¶¯SD¿¨ÎÄ¼şĞ´Èë¡£³õÊ¼»¯Ê±ÉèÖÃÎª0x00£¬ÊÕµ½Êı¾İÁ´´«À´Êı¾İÊ±ÉèÖÃÎª0x01
+	OS_DOUBLE FzOnStamp_s;	// fuse power-on time	// ï¿½ï¿½Î» s
+	// OS_DOUBLE sysTime_s;	// ÏµÍ³Ê±ï¿½ä£¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±0	// ï¿½ï¿½Î» s
+	OS_U8 msgFromGCS;	// message from Ground Control Station // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½SDï¿½ï¿½ï¿½Ä¼ï¿½Ğ´ï¿½ë¡£ï¿½ï¿½Ê¼ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½Îª0x00ï¿½ï¿½ï¿½Õµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½Îª0x01
 }DeviceStatus;
 #pragma pack()
 extern DeviceState g_DeviceState;

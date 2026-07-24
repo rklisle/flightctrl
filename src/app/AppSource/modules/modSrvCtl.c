@@ -1,7 +1,7 @@
 /*
  * modSrvCtl.c
  *
- *  Created on: 2021Äê10ÔÂ16ÈÕ
+ *  Created on: 2021??10??16??
  *      Author: QL
  */
 
@@ -13,11 +13,12 @@
 #include "../interface/interface_gpio.h"
 #include "../interface/interface_can.h"
 #include "../interface/interface_uart.h"
-#include "../Interface/interface_timer.h"  // ĞÂÔötimer½Ó¿Ú
+#include "../Interface/interface_timer.h"  // ????timer???
 #include "../core/BusInteract.h"
 #include "../core/DataPool.h"
 // #include "../flight/os_flight_io.h"
 #include "../support/os_bufferLoop.h"
+#include "tx_api.h"
 
 #include <math.h>
 #include <string.h>
@@ -52,13 +53,13 @@ static FREQ_SCAN fs = {
 
 OS_U8 AutoZero();
     
-//OS_U8 InitSrv()	//¶æ»ú: Ã»ÈËµ÷ÁË£¬ÕâÊÇÔ­ÏÈ´®¿ÚµÄInit
+//OS_U8 InitSrv()	//???: ??????????????????Init
 //{
-//    // ³õÊ¼»¯CANÍ¨ĞÅ£¨¼ÙÉèÒÑ¾­ÓĞCAN³õÊ¼»¯º¯Êı£©
-//    // CAN_Init(500000); // 500Kbps²¨ÌØÂÊ
+//    // ?????CAN?????????????CAN???????????
+//    // CAN_Init(500000); // 500Kbps??????
 //    
-//    // ³õÊ¼»¯PWM£¨5¡¢6ºÅ¶æ»ú£©
-//    // PWM_Init(); // ³õÊ¼»¯PWMÊä³ö
+//    // ?????PWM??5??6??????
+//    // PWM_Init(); // ?????PWM???
 
 //	buffLoop[RT_SRV].syncHead_A = 0xEE;
 //	buffLoop[RT_SRV].syncHead_B = 0x00;
@@ -71,7 +72,7 @@ OS_U8 AutoZero();
 //    return 0;
 //}
 
-OS_U16 ChkSrvFrame(OS_MEM* pmData)	//¶æ»ú ĞèÒª¸üĞÂCANÖ¡¼ì²éÂß¼­ Õâ¸öÃ»ÈËµ÷ÁË¡£ÊÇÔ­ÏÈ´®¿ÚµÄ¡£
+OS_U16 ChkSrvFrame(OS_MEM* pmData)	//??? ???????CAN??????? ????????????????????
 {
 	if(pmData == PTR_NULL)
 		return 0;
@@ -102,23 +103,23 @@ OS_U16 ChkSrvFrame(OS_MEM* pmData)	//¶æ»ú ĞèÒª¸üĞÂCANÖ¡¼ì²éÂß¼­ Õâ¸öÃ»ÈËµ÷ÁË¡£ÊÇ
 }
 
 /**
- * @brief ½Ç¶È×ª»»ÎªCAN¶æ»úÎ»ÖÃÖµ
- * @param angle ½Ç¶ÈÖµ£¨-100.0¡ã µ½ +100.0¡ã£©
- * @param high Êä³ö¸ß×Ö½Ú
- * @param low Êä³öµÍ×Ö½Ú
- * @return 0:³É¹¦, 1:½Ç¶È³¬³ö·¶Î§
+ * @brief ???????CAN????????
+ * @param angle ??????-100.0?? ?? +100.0??
+ * @param high ????????
+ * @param low ????????
+ * @return 0:???, 1:??????????
  */
 uint8_t AngleToPosition_CAN(double angle, uint8_t *high, uint8_t *low)
 {
-    // ½Ç¶È·¶Î§¼ì²é
+    // ?????????
     if (angle < SERVO_MIN_ANGLE || angle > SERVO_MAX_ANGLE) {
         return 1;
     }
     
-    // ½Ç¶È¡Á10µÃµ½ÕûÊı£¨¾«¶È0.1¡ã£©
+    // ????10?????????????0.1??
     int16_t pos_value = (int16_t)(angle * 10.0);
     
-    // Ö±½ÓÊ¹ÓÃint16_t£¨±¾Éí¾ÍÊÇ²¹Âë´æ´¢£©
+    // ??????int16_t?????????????????
     *low = (uint8_t)(pos_value & 0xFF);
     *high = (uint8_t)((pos_value >> 8) & 0xFF);
     
@@ -126,218 +127,250 @@ uint8_t AngleToPosition_CAN(double angle, uint8_t *high, uint8_t *low)
 }
 
 /**
- * @brief CAN¶æ»úÎ»ÖÃÖµ×ª»»Îª½Ç¶È
- * @param high ¸ß×Ö½Ú
- * @param low µÍ×Ö½Ú
- * @return ½Ç¶ÈÖµ
+ * @brief CAN???????????????
+ * @param high ?????
+ * @param low ?????
+ * @return ????
  */
 double PositionToAngle_CAN(uint8_t high, uint8_t low)
 {
-    // ½«Á½¸ö×Ö½Ú×éºÏ³É16Î»ÓĞ·ûºÅÕûÊı
+    // ?????????????16????????????
     int16_t pos_value = (high << 8) | low;
     
-    // ×ª»»Îª½Ç¶È
+    // ???????
     return (double)pos_value / 10.0;
 }
 
 /**
- * @brief ÉèÖÃCAN¶æ»ú½Ç¶È
- * @param node ¶æ»ú½ÚµãID
- * @param angle Ä¿±ê½Ç¶È£¨-100.0¡ã µ½ +100.0¡ã£©
- * @return 0:³É¹¦, 1:½Ç¶È³¬³ö·¶Î§, 2:CAN·¢ËÍÊ§°Ü
+ * @brief ????CAN??????
+ * @param node ??????ID
+ * @param angle ??????-100.0?? ?? +100.0??
+ * @return 0:???, 1:??????????, 2:CAN???????
  */
 OS_U8 Servo_SetAngle_CAN(ServoNodeID node, double angle)
 {
     uint8_t high, low;
     
-    // ½Ç¶È×ª»»ÎªÎ»ÖÃÖµ
+    // ????????????
     if (AngleToPosition_CAN(angle, &high, &low) != 0) {
-        return 1;  // ½Ç¶È³¬³ö·¶Î§
+        return 1;  // ??????????
     }
     
-    // ¹¹½¨CANÊı¾İÖ¡£¨Î»ÖÃÉèÖÃÃüÁî£©
+    // ????CAN???????????????????
     uint8_t data[8] = {
-        0x22,       // ×Ö½Ú1£º¹Ì¶¨
-        0x03,       // ×Ö½Ú2£ºÎ»ÖÃÉèÖÃË÷Òı
-        0x60,       // ×Ö½Ú3£º×ÓË÷Òı
-        0x00,       // ×Ö½Ú4£º¹Ì¶¨
-        low,        // ×Ö½Ú5£ºÎ»ÖÃµÍ×Ö½Ú
-        high,       // ×Ö½Ú6£ºÎ»ÖÃ¸ß×Ö½Ú
-        0x00,       // ×Ö½Ú7£º±£Áô
-        0x00        // ×Ö½Ú8£º±£Áô
+        0x22,       // ???1?????
+        0x03,       // ???2??????????????
+        0x60,       // ???3????????
+        0x00,       // ???4?????
+        low,        // ???5??????????
+        high,       // ???6??????????
+        0x00,       // ???7??????
+        0x00        // ???8??????
     };
     
-    // ¼ÆËãCAN ID£¨Ö¸ÁîID»ùÖ· + ½ÚµãºÅ£©
-    uint32_t can_id = CAN_CMD_ID_BASE | node;
+    // ????CAN ID??KST???? V3.72??29bit??? + ?????
+    uint32_t can_id = KST_CAN_SDO_TX_ID(node);
     
-    // ·¢ËÍCANÖ¡
+    // ????CAN?
     return Servo_SendCANFrame(can_id, data, 8);
 }
 
 /**
- * @brief ·¢ËÍCANÖ¡µ½¶æ»ú
- * @param id CANÀ©Õ¹ID£¨29Î»£©
- * @param data Êı¾İ
- * @param len Êı¾İ³¤¶È
- * @return 0:³É¹¦, 1:Ê§°Ü
+ * @brief ????CAN??????
+ * @param id CAN???ID??29????
+ * @param data ????
+ * @param len ???????
+ * @return 0:???, 1:???
  */
 OS_U8 Servo_SendCANFrame(OS_U32 id, OS_U8 *data, OS_U8 len)
 {
-    // Ê¹ÓÃFDCAN1£¨fdCan[0]£©·¢ËÍ¶æ»ú¿ØÖÆÖ¸Áî
-    // ¶æ»úÊ¹ÓÃCANÀ©Õ¹Ö¡£¨29Î»ID£©,500Kbps
     if (SendCanFrameExt(CAN_RT_SRV, id, len, data) == 0) {
-        return 0;  // ³É¹¦
-    } else {
-        return 1;  // Ê§°Ü
+        return 0;
+    }
+    return 1;
+}
+
+static OS_U8 Servo_IsKstSdoResponse(const OS_U8 *data)
+{
+    switch (data[0]) {
+    case 0x4B:
+    case 0x43:
+    case 0x4F:
+    case 0x60:
+    case 0x80:
+        return 1;
+    default:
+        return 0;
     }
 }
 
-// ÅäÖÃ²ÎÊı
-// #define PSC_VALUE       23      // ·ÖÆµ24
-// #define ARR_VALUE       30029   // ÖÜÆÚ30030¼ÆÊı
-#define CNT_TIME_US     0.1f    // Ã¿¸ö¼ÆÊı0.1¦Ìs
+static void Servo_ApplyAngleReadback(OS_U8 node, double angle)
+{
+    switch (node) {
+    case SERVO_NODE_1:
+        SETDATA(pDataPoolSrv, "Sr1Read", (OS_S16)(angle * 100), OS_S16);
+        break;
+    case SERVO_NODE_2:
+        SETDATA(pDataPoolSrv, "Sr2Read", (OS_S16)(angle * 100), OS_S16);
+        break;
+    case SERVO_NODE_3:
+        SETDATA(pDataPoolSrv, "Sr3Read", (OS_S16)(angle * 100), OS_S16);
+        break;
+    case SERVO_NODE_4:
+        SETDATA(pDataPoolSrv, "Sr4Read", (OS_S16)(angle * 100), OS_S16);
+        break;
+    case SERVO_NODE_5:
+        SETDATA(pDataPoolSrv, "Sr5Read", (OS_S16)(angle * 100), OS_S16);
+        break;
+    case SERVO_NODE_6:
+        SETDATA(pDataPoolSrv, "Sr6Read", (OS_S16)(angle * 100), OS_S16);
+        break;
+    default:
+        break;
+    }
+}
 
-#define PULSE_MIN_US    900     // ×îĞ¡Âö¿í
-#define PULSE_MAX_US    2100    // ×î´óÂö¿í
-#define PULSE_CENTER_US 1500    // ÖĞĞÄÂö¿í£¨0¡ã£©
-#define US_PER_DEG      10.0f   // Ã¿¶È¶ÔÓ¦µÄ¦ÌsÊı
+// ????????
+// #define PSC_VALUE       23      // ???24
+// #define ARR_VALUE       30029   // ????30030????
+#define CNT_TIME_US     0.1f    // ???????0.1??s
+
+#define PULSE_MIN_US    900     // ????????
+#define PULSE_MAX_US    2100    // ???????
+#define PULSE_CENTER_US 1500    // ??????????0??
+#define US_PER_DEG      10.0f   // ????????s??
 
 #define CCR_MIN         ((uint32_t)(PULSE_MIN_US / CNT_TIME_US))      // 9000
 #define CCR_MAX         ((uint32_t)(PULSE_MAX_US / CNT_TIME_US))      // 21000
 
 uint32_t angle_to_ccr(double angle_deg) {
-    // ½Ç¶È×ªÂö¿í£º1500¦Ìs + angle¡Á10¦Ìs
+    // ??????????1500??s + angle??10??s
     double pulse_us = PULSE_CENTER_US + (angle_deg * US_PER_DEG);
 
-    // Âö¿í×ªCCR£ºpulse_us / 0.1
+    // ?????CCR??pulse_us / 0.1
     uint32_t ccr = (uint32_t)(pulse_us / CNT_TIME_US);
     
-    // È·±£ÔÚÓĞĞ§·¶Î§ÄÚ
+    // ???????????????
     if (ccr < CCR_MIN) ccr = CCR_MIN;
     if (ccr > CCR_MAX) ccr = CCR_MAX;
     
     return ccr;
 }
-//#define SERVO_CAN
 /***********************************************************
- * º¯ÊıÃû³Æ: MsgToSrv()
- * º¯Êı¹¦ÄÜ: ËÅ·ş¶îÍâÒªÇóÖ¸Áî¼ÆÊı¼°·¢ËÍÖ¡¼ÆÊı£¬Òò´Ë°şÀëÒ»²ã¿ØÖÆÊı¾İ£¬ÔÙ·¢ËÍ
- * ×÷Õß:	Î´Öª
+ * ????????: MsgToSrv()
+ * ????????: ???????????????????????????????????????????????????
+ * ????:	???
  ***********************************************************/
-OS_U8 MsgToSrv(OS_DOUBLE ctrlDeg[6], OS_U8 ctrlMode/*control = 0x02, 0x44=setZero*/)//04 ´æÈëÊı¾İ³Ø ¿ØÖÆ¶æ»ú
+OS_U8 MsgToSrv(OS_DOUBLE ctrlDeg[SRV_CHANNEL_COUNT], OS_U8 ctrlMode, OS_U8 srvCount)/*control=0x02, setZero=0x44*/
 {
-    // ctrlDeg[0]=-1.02248;
-    // ctrlDeg[1]=1.02448;
-    // ctrlDeg[2]=0.254778;
-    // ctrlDeg[3]=0.258698;
-    // ctrlDeg[4]=0.160908;
-    // ctrlDeg[5]=0.150381;
-#ifdef SERVO_CAN
-    SETDATA(pDataPoolSrv, "Sr1Cmd", ctrlDeg[2] * 100, OS_S16); 
-	SETDATA(pDataPoolSrv, "Sr2Cmd", ctrlDeg[3] * 100, OS_S16);
-    SETDATA(pDataPoolSrv, "Sr3Cmd", ctrlDeg[0] * 100, OS_S16);
-    SETDATA(pDataPoolSrv, "Sr4Cmd", ctrlDeg[1] * 100, OS_S16);
+    if (srvCount > SRV_CHANNEL_COUNT)
+        srvCount = SRV_CHANNEL_COUNT;
+    if (srvCount < 6)
+        srvCount = 6;
+    SETDATA(pDataPoolSrv, "Sr1Cmd", ctrlDeg[0] * 100, OS_S16); 
+	SETDATA(pDataPoolSrv, "Sr2Cmd", ctrlDeg[1] * 100, OS_S16);
+    SETDATA(pDataPoolSrv, "Sr3Cmd", ctrlDeg[2] * 100, OS_S16);
+    SETDATA(pDataPoolSrv, "Sr4Cmd", ctrlDeg[3] * 100, OS_S16);
     SETDATA(pDataPoolSrv, "Sr5Cmd", ctrlDeg[4] * 100, OS_S16);
     SETDATA(pDataPoolSrv, "Sr6Cmd", ctrlDeg[5] * 100, OS_S16);
-#else
-    SETDATA(pDataPoolSrv, "Sr1Read", ctrlDeg[2] * 100, OS_S16); 
-	SETDATA(pDataPoolSrv, "Sr2Read", ctrlDeg[3] * 100, OS_S16);
-    SETDATA(pDataPoolSrv, "Sr3Read", ctrlDeg[0] * 100, OS_S16);
-    SETDATA(pDataPoolSrv, "Sr4Read", ctrlDeg[1] * 100, OS_S16);
-    SETDATA(pDataPoolSrv, "Sr5Read", ctrlDeg[4] * 100, OS_S16);
-    SETDATA(pDataPoolSrv, "Sr6Read", ctrlDeg[5] * 100, OS_S16);
-#endif
 	if (ctrlMode == 0x02) 
 	{
-		// Õı³£¿ØÖÆÄ£Ê½
 #ifdef SERVO_CAN
 		Servo_SetAngle_CAN(SERVO_NODE_1, ctrlDeg[1]);       
 		Servo_SetAngle_CAN(SERVO_NODE_2, ctrlDeg[2]);       
 		Servo_SetAngle_CAN(SERVO_NODE_3, ctrlDeg[3]);       
 		Servo_SetAngle_CAN(SERVO_NODE_4, ctrlDeg[4]);      
-        Servo_SetAngle_CAN(SERVO_NODE_5, ctrlDeg[5]);       
-		Servo_SetAngle_CAN(SERVO_NODE_6, ctrlDeg[6]);      
+        Servo_SetAngle_CAN(SERVO_NODE_5, ctrlDeg[0]);       
+		Servo_SetAngle_CAN(SERVO_NODE_6, ctrlDeg[5]);      
 #else
-        AngleServo_SetAngle(SERVO_PWM1, (float)ctrlDeg[1]);	
-        AngleServo_SetAngle(SERVO_PWM2, (float)ctrlDeg[2]);	
-        AngleServo_SetAngle(SERVO_PWM3, (float)ctrlDeg[3]);	
-        AngleServo_SetAngle(SERVO_PWM4, (float)ctrlDeg[4]);	
-        AngleServo_SetAngle(SERVO_PWM5, (float)ctrlDeg[0]);	
-        AngleServo_SetAngle(SERVO_PWM6, (float)ctrlDeg[5]);	
+        AngleServo_SetAngle(SERVO_PWM1, (float)ctrlDeg[4]);	//å®æ§èˆµæœºèˆªå‘å·¦
+        AngleServo_SetAngle(SERVO_PWM2, (float)ctrlDeg[2]);	//å®æ§èˆµæœºå‰¯ç¿¼å·¦
+        AngleServo_SetAngle(SERVO_PWM3, (float)ctrlDeg[0]);	//å®æ§èˆµæœºä¿¯ä»°å·¦
+        AngleServo_SetAngle(SERVO_PWM4, (float)ctrlDeg[1]);	//å®æ§èˆµæœºä¿¯ä»°å³
+        AngleServo_SetAngle(SERVO_PWM5, (float)ctrlDeg[3]);	//å®æ§èˆµæœºå‰¯ç¿¼å³
+        AngleServo_SetAngle(SERVO_PWM6, (float)ctrlDeg[5]);	//å®æ§èˆµæœºèˆªå‘å³
+        // AngleServo_SetAngle(SERVO_PWM1, (float)ctrlDeg[0]); 	
+        // AngleServo_SetAngle(SERVO_PWM2, (float)ctrlDeg[1]);	
+        // AngleServo_SetAngle(SERVO_PWM3, (float)ctrlDeg[2]);	
+        // AngleServo_SetAngle(SERVO_PWM4, (float)ctrlDeg[3]);	
+        // AngleServo_SetAngle(SERVO_PWM5, (float)ctrlDeg[4]);	
+        // AngleServo_SetAngle(SERVO_PWM6, (float)ctrlDeg[5]);	
+        if (srvCount >= 7)
+            AngleServo_SetAngle(SERVO_PWM7, (float)ctrlDeg[6]);
 #endif
     }
 	else if (ctrlMode == 0x44) 
 	{
-		// ÉèÖÃÁãµãÄ£Ê½
-        // ¶ÔÓÚCAN¶æ»ú£¬·¢ËÍÉèÖÃÖĞµãÃüÁî
 #ifdef SERVO_CAN
         Servo_SetMidpoint_CAN(SERVO_NODE_1);
         Servo_SetMidpoint_CAN(SERVO_NODE_2);
         Servo_SetMidpoint_CAN(SERVO_NODE_3);
         Servo_SetMidpoint_CAN(SERVO_NODE_4);
+        Servo_SetMidpoint_CAN(SERVO_NODE_5);
+        Servo_SetMidpoint_CAN(SERVO_NODE_6);
 #else
         AngleServo_SetAngle(SERVO_PWM2, 0.0f);
         AngleServo_SetAngle(SERVO_PWM3, 0.0f);
         AngleServo_SetAngle(SERVO_PWM4, 0.0f);
         AngleServo_SetAngle(SERVO_PWM5, 0.0f);
-#endif
-        // PWM¶æ»úÁãµãÉèÖÃ
-        // PWM¶æ»úÍ¨³£ĞèÒª»úĞµµ÷Áã£¬ÕâÀï½öÈÃ¶æ»ú»Ø¹é0¡ãÎ»ÖÃ
         AngleServo_SetAngle(SERVO_PWM1, 0.0f);
         AngleServo_SetAngle(SERVO_PWM6, 0.0f);
+        if (srvCount >= 7)
+            AngleServo_SetAngle(SERVO_PWM7, 0.0f);
+#endif
     }
     return 0;
 }
 
 /**
- * @brief ÉèÖÃCAN¶æ»úÖĞµã£¨Áãµã£©
+ * @brief ????CAN??????????
  */
 OS_U8 Servo_SetMidpoint_CAN(ServoNodeID node)
 {
     uint8_t data[8] = {
-        0x22,  // ×Ö½Ú1£º¹Ì¶¨
-        0x09,  // ×Ö½Ú2£ºÉèÖÃÖĞµãË÷Òı
-        0x30,  // ×Ö½Ú3£º×ÓË÷Òı
-        0x00,  // ×Ö½Ú4£º¹Ì¶¨
-        0x00, 0x00, 0x00, 0x00  // ±£Áô
+        0x22,  // ???1?????
+        0x09,  // ???2??????????????
+        0x30,  // ???3????????
+        0x00,  // ???4?????
+        0x00, 0x00, 0x00, 0x00  // ????
     };
     
-    uint32_t can_id = CAN_CMD_ID_BASE | node;
+    uint32_t can_id = KST_CAN_SDO_TX_ID(node);
     
     return Servo_SendCANFrame(can_id, data, 8);
 }
 
 /**
- * @brief ÉèÖÃCAN¶æ»úÅ¤Á¦Îª0£¨×ÔÓÉ×ª¶¯£©
+ * @brief ????CAN???????0???????????
  */
 OS_U8 Servo_SetTorqueZero_CAN(ServoNodeID node)
 {
     uint8_t data[8] = {
-        0x22,  // ×Ö½Ú1£º¹Ì¶¨
-        0x10,  // ×Ö½Ú2£ºÅ¤Á¦Îª0ÃüÁîË÷Òı
-        0x30,  // ×Ö½Ú3£º×ÓË÷Òı
-        0x00,  // ×Ö½Ú4£º¹Ì¶¨
-        0x00, 0x00, 0x00, 0x00  // ±£Áô
+        0x22,  // ???1?????
+        0x10,  // ???2??????0????????
+        0x30,  // ???3????????
+        0x00,  // ???4?????
+        0x00, 0x00, 0x00, 0x00  // ????
     };
     
-    uint32_t can_id = CAN_CMD_ID_BASE | node;
+    uint32_t can_id = KST_CAN_SDO_TX_ID(node);
     
     return Servo_SendCANFrame(can_id, data, 8);
 }
 
 /***********************************************************
- * º¯ÊıÃû³Æ: ServoCtlOnce_6Rudder()
- * º¯Êı¹¦ÄÜ: µ¥´Î¼ÆËã¼°ËÅ·ş¿ØÖÆ£¬ÓÉ·É¿Ø´úÂëµ÷ÓÃ£¬´«ÈëÎª6¸ö¶æµÄÆ«×ª½Ç¶È
- * ×÷Õß:	Î´Öª
+ * ????????: ServoCtlOnce_6Rudder()
+ * ????????: ????????????????????????????????6??????????
+ * ????:	???
  ***********************************************************/
 OS_U8 ServoCtlOnce_6Rudder( double actDeg_1,
                             double actDeg_2,
                             double actDeg_3,
                             double actDeg_4,
                             double actDeg_5,
-                            double actDeg_6)	//03 ¿ØÖÆ¶æ»ú
+                            double actDeg_6)	//03 ??????
 {
-    double deg[6];
+    double deg[SRV_CHANNEL_COUNT] = {0};
     deg[0] = actDeg_1; 
     deg[1] = actDeg_2; 
     deg[2] = actDeg_3; 
@@ -345,30 +378,30 @@ OS_U8 ServoCtlOnce_6Rudder( double actDeg_1,
     deg[4] = actDeg_5; 
     deg[5] = actDeg_6; 
     
-    MsgToSrv(deg, 0x02);  // 0x02ÎªÕı³£¿ØÖÆÄ£Ê½
+    MsgToSrv(deg, 0x02, 6);
     
     return 0;
 }
 
-// OS_U8 SaveSrvInDataPool(STRU_SRV_INFO *data);	//º¯ÊıÉùÃ÷
+// OS_U8 SaveSrvInDataPool(STRU_SRV_INFO *data);	//????????
 
 // /***********************************************************
-//  * º¯ÊıÃû³Æ: ServoRtHandler()
-//  * º¯Êı¹¦ÄÜ: ËÅ·ş×ÜÏß´¦Àíº¯Êı£¬ËÅ·şµÄÉè¶¨ÊÇ²»»á¶¨Ê±¸øÖÇÄÜ¿ØÖÆÆ÷·¢ËÍÄÚÈİµÄ£¬½öÔÚÊÕµ½ÖÇÄÜ¿ØÖÆÆ÷µÄÖ¸Áîºó»Ø¸´¡£²â·¢¿Ø½×¶Î£¬¾ùĞèÏÂ´«µØÃæ
-//  * 			±¾ĞÍºÅÖÇÄÜ¿ØÖÆÆ÷½ÓÊÕËÅ·ş·¢³öµÄÖ¸Áî:
-//  * 			1.ËÅ·ş×Ô¼ì»Ø¸´0x11		: µØÃæÒÑÈ¡Ïû×Ô¼ìÃüÁî£¬Òò´ËÒ²ÊÕ²»µ½Õâ¸ö»Ø¸´ÁË£¬Ğ­ÒéÖĞ¹æ¶¨µÄ¸ñÊ½Óë¿ØÖÆ»Ø¸´ÏàÍ¬¡£
-//  * 			2.ËÅ·ş¿ØÖÆ»Ø¸´0x22		: ´æÊı¾İ³Ø£¬ËÅ·şµÄ¾ø´ó¶àÊıÄÚÈİÀ´×Ô¿ØÖÆ»Ø¸´£¬°üÀ¨µØÃæ¿ØÖÆÖ¸Áî¡¢Ğ¡»ØÂ·Ö¸Áî¡¢·¢ÉäºóµÄ¿ØÖÆÖ¸Áî¡£
-//  * 			3.ËÅ·şµ÷Áã»Ø¸´0x23		: ´æÊı¾İ³Ø
-//  * ²Î¿¼×ÊÁÏ: <TXII-Y1 422¼ıÉÏÍ¨ĞÅĞ­Òé>
-//  * ×÷Õß:	³Éºê­Z
+//  * ????????: ServoRtHandler()
+//  * ????????: ???????????????????????????????????????????????????????????????????????????????????????????????
+//  * 			??????????????????????????????:
+//  * 			1.????????0x11		: ???????????????????????????????????????????????????????????
+//  * 			2.?????????0x22		: ?????????????????????????????????????????????????????????????????????
+//  * 			3.?????????0x23		: ???????
+//  * ????????: <TXII-Y1 422???????????>
+//  * ????:	???Z
 //  ***********************************************************/
 // OS_U32 SrvRtHandler(STRU_422_MSG_INFO * srvMsg)	
 // {
-// 	//¶æ»ú£¬ÕâÊÇ280ÓÃµÄ´®¿ÚµÄ»Øµ÷º¯Êı£¬014ÏîÄ¿²»ÓÃ
-// 	//Ê×ÏÈÅĞ¶ÏÊÇÊ²Ã´ÀàĞÍµÄÖ¸Áî
-// 	//¶ÔÊı¾İÇøÇ°ËÄ×Ö½Ú½øĞĞÅĞ¶Ï
+// 	//?????????280???????????????014???????
+// 	//????????????????????
+// 	//?????????????????????
 // 	RECV_CMD_ID recvCmdId = srvMsg->u8MsgID;
-// 	//¸ù¾İ·´À¡Ö¸Áî×ö´¦Àí
+// 	//????????????????
 // 	switch(recvCmdId)
 // 	{
 // 		case 0x11:
@@ -383,100 +416,95 @@ OS_U8 ServoCtlOnce_6Rudder( double actDeg_1,
 // }
 
 /**
- * @brief CAN¶æ»ú½ÓÊÕ»Øµ÷º¯Êı
+ * @brief CAN?????????????
  * @param id CAN ID
- * @param ext_id ÊÇ·ñÀ©Õ¹Ö¡
- * @param data Êı¾İ
- * @param len Êı¾İ³¤¶È
+ * @param ext_id ???????
+ * @param data ????
+ * @param len ???????
  */
 OS_U8 CanRtServoHandler(OS_U32 id, OS_BOOL ext_id, const OS_U8* data, OS_U8 len)
 {
-	//¶æ»ú£¬ÕâÊÇĞÂµÄCAN¶æ»úµÄ»Øµ÷º¯Êı
-    // Ö»´¦ÀíÀ©Õ¹Ö¡
+    OS_U8 node;
+
     if (!ext_id) {
-        return -1;
+        return (OS_U8)-1;
     }
-    
-    // ¼ì²éÊÇ·ñÊÇ¶æ»úÏìÓ¦Ö¡£¨0x00000580 + ½ÚµãºÅ£©
-    if ((id & 0xFFFFFE00) == 0x00000580UL) {
-        // ÌáÈ¡½ÚµãºÅ
-        ServoNodeID node = id & 0xFF;
-        
-        // ´¦Àí²»Í¬ÀàĞÍµÄÏìÓ¦
-        switch (data[1]) {
-            case 0x02:  // Î»ÖÃ¶ÁÈ¡ÏìÓ¦
-                if (data[0] == 0x4B) {
-                    // ´¦ÀíÎ»ÖÃÊı¾İ
-                    double angle = PositionToAngle_CAN(data[5], data[4]);
-                    // ±£´æµ½Êı¾İ³Ø
-                    switch (node) {
-                        case SERVO_NODE_1:
-                            SETDATA(pDataPoolSrv, "Sr1Read", (OS_S16)(angle * 100), OS_S16);//µ¥Î»0.01¡ã
-                            break;
-                        case SERVO_NODE_2:
-                            SETDATA(pDataPoolSrv, "Sr2Read", (OS_S16)(angle * 100), OS_S16);
-                            break;
-                        case SERVO_NODE_3:
-                            SETDATA(pDataPoolSrv, "Sr3Read", (OS_S16)(angle * 100), OS_S16);
-                            break;
-                        case SERVO_NODE_4:
-                            SETDATA(pDataPoolSrv, "Sr4Read", (OS_S16)(angle * 100), OS_S16);
-                            break;
-                        default:
-                            break;
-                    }
-                }
-                break;
-                
-            case 0x05:  // ×´Ì¬¶ÁÈ¡ÏìÓ¦
-                if (data[0] == 0x43) {
-                    // ´¦ÀíµçÁ÷ºÍÎÂ¶ÈÊı¾İ
-                    // µçÁ÷£ºX1X2±íÊ¾¹¤×÷µçÁ÷£¬µ¥Î»10mA
-                    OS_U16 current_ma = (data[5] << 8) | data[4];
-                    double current_a = current_ma / 100.0;
-                    // ±£´æµ½Êı¾İ³Ø
-                    switch (node) {
-                        case SERVO_NODE_1:
-                            SETDATA(pDataPoolSrv, "Sr1A", (OS_S16)(current_a * 1000), OS_S16);//µ¥Î»ÊÇA
-                            break;
-                        case SERVO_NODE_2:
-                            SETDATA(pDataPoolSrv, "Sr2A", (OS_S16)(current_a * 1000), OS_S16);
-                            break;
-                        case SERVO_NODE_3:
-                            SETDATA(pDataPoolSrv, "Sr3A", (OS_S16)(current_a * 1000), OS_S16);
-                            break;
-                        case SERVO_NODE_4:
-                            SETDATA(pDataPoolSrv, "Sr4A", (OS_S16)(current_a * 1000), OS_S16);
-                            break;
-                        default:
-                            break;
-                    }
-                    
-                    // ÎÂ¶È£ºX3±íÊ¾¹¤×÷ÎÂ¶È£¬²¹Âë±íÊ¾
-                    // int8_t temp_c = (int8_t)data[6];
-                    
-                    // ±£´æµ½Êı¾İ³Ø
-                    // ÕâÀï¿ÉÒÔ¸ù¾İĞèÒª±£´æµçÁ÷ºÍÎÂ¶È
-                }
-                break;
-                
-            // ¿ÉÒÔÌí¼ÓÆäËûÏìÓ¦ÀàĞÍµÄ´¦Àí
-            default:
-                break;
+
+    if (KST_CAN_IS_SDO_RX_ID(id)) {
+        node = (OS_U8)(id & 0xFFU);
+
+        if (len >= 2U && !Servo_IsKstSdoResponse(data)) {
+            double angle = PositionToAngle_CAN(data[1], data[0]);
+            Servo_ApplyAngleReadback(node, angle);
+            g_DeviceState.srvCountDown = 200;
+            return 0;
         }
+
+        switch (data[1]) {
+        case 0x02:
+            if (data[0] == 0x4B && len >= 6U) {
+                Servo_ApplyAngleReadback(node, PositionToAngle_CAN(data[5], data[4]));
+            }
+            break;
+        case 0x05:
+            if (data[0] == 0x43 && len >= 7U) {
+                OS_U16 current_ma = (OS_U16)((data[5] << 8) | data[4]);
+                double current_a = current_ma / 100.0;
+                switch (node) {
+                //case SERVO_NODE_1:
+                    //SETDATA(pDataPoolSrv, "Sr1A", (OS_S16)(current_a * 1000), OS_S16);
+                    //break;
+                //case SERVO_NODE_2:
+                    //SETDATA(pDataPoolSrv, "Sr2A", (OS_S16)(current_a * 1000), OS_S16);
+                  //  break;
+                //case SERVO_NODE_3:
+                    //SETDATA(pDataPoolSrv, "Sr3A", (OS_S16)(current_a * 1000), OS_S16);
+                   // break;
+                //case SERVO_NODE_4:
+                  //  SETDATA(pDataPoolSrv, "Sr4A", (OS_S16)(current_a * 1000), OS_S16);
+                //    break;
+                case SERVO_NODE_5:
+                    SETDATA(pDataPoolSrv, "Sr5A", (OS_S16)(current_a * 1000), OS_S16);
+                    break;
+                case SERVO_NODE_6:
+                    SETDATA(pDataPoolSrv, "Sr6A", (OS_S16)(current_a * 1000), OS_S16);
+                    break;
+                default:
+                    break;
+                }
+            }
+            break;
+        default:
+            break;
+        }
+
+        g_DeviceState.srvCountDown = 200;
+        return 0;
     }
-	g_DeviceState.srvCountDown = 200;
-	return 0;
+
+    if (KST_CAN_IS_ALARM_ID(id) && len >= 2U) {
+        if (data[0] == 0x0A && data[1] == 0x02) {
+            g_DeviceState.srvCountDown = 0;
+        }
+        return 0;
+    }
+
+    if (KST_CAN_IS_GUARD_ID(id) && len >= 1U) {
+        g_DeviceState.srvCountDown = 200;
+        return 0;
+    }
+
+    return 0;
 }
 
 /***********************************************************
- * º¯ÊıÃû³Æ: InsertServoTestData()
- * º¯Êı¹¦ÄÜ: ËÅ·şĞ¡»ØÂ·²âÊÔ×¨ÓÃº¯Êı¡£Ğ¡»ØÂ·²âÊÔÇ°£¬µØÃæ»áÍ¨¹ıĞ¡»ØÂ·²âÊÔÖ¸ÁîÉÏ´«É¨ÆµÏà¹Ø²ÎÊı£¬¼ûFREQ_SCAN½á¹¹
- * 			²¢ĞŞ¸Ä×´Ì¬»ú×´Ì¬ÎªËÅ·şĞ¡»ØÂ·Ä£Ê½¡£ÔÚ¸ÃÄ£Ê½ÏÂ£¬·É¿Ø´úÂë»áÃ¿5ms£¨ÓÉ×´Ì¬»ú´¥·¢µÄ¶¨Ê±Æ÷µ÷ÓÃ·É¿Ø´úÂë£©
- * 			µ÷ÓÃ±¾º¯Êı£¬¼ÆËã³öÃ¿´ÎµÄÏß¿Ø¶æÆ«³¤¶È£¬Í¨¹ıÖ¸Õë·µ»Ø¡£
- * ×÷Õß:	³Éºê­Z
+ * ????????: InsertServoTestData()
+ * ????????: ???????????????????????????????????????????????????????????????????????FREQ_SCAN??
+ * 			?????????????????????????????????????????5ms????????????????????????????
+ * 			????????????????????????????????????????
+ * ????:	???Z
  ***********************************************************/
-//¸Ãº¯Êı5msµ÷ÓÃÒ»´Î£¬ÊµÏÖÉ¨Æµ
+//??????5ms??????????????
 int InsertServoTestData(
 	double* actuator_I,
 	double* actuator_II,
@@ -488,14 +516,14 @@ int InsertServoTestData(
 {
 	static unsigned int tickOffset=0;
 	//static unsigned int freqIndex = 0;
-	/*Ëã·¨¹«Ê½¼ÆËã¹ı³Ì£¬ÆÁ±Î¹«Ê½ÍÆµ¼¹ı³Ì
+	/*???????????????????????????
 	double k = freq * 2*PI;
 	double x = tickOffset*fs.tickStep;
 	double b = 0;
 	double x0 = kx;
-	double maxX = 2*PI;		//ÕıÏÒÒ»ÂÖÊÇ2pi
+	double maxX = 2*PI;		//?????????2pi
 	 */
-	//É¨ÆµÆµÂÊ×îµÍ0.1£¬µÍÓÚ0.1²»´¦Àí¡£×î´ó15
+	//????????0.1??????0.1???????????15
 	if(fs.freq>0.049 && fs.freq < 15.001 && tickOffset*fs.tickStep *fs.freq <= cycleCount)
 			//&& tickOffset*fs.tickStep*fs.freqs[freqIndex] <= fs.scanCnt[freqIndex])
 	{
@@ -512,7 +540,7 @@ int InsertServoTestData(
 	else
 	{
 		tickOffset=0;
-		//²âÊÔ½áÊø£¬¹Ø±Õ×´Ì¬»ú
+		//????????????????
 		g_DeviceState.workStage &=  ~((unsigned int)DOM_SIMSRVDAT);
 		return -1;
 	}
@@ -520,7 +548,7 @@ int InsertServoTestData(
 }
 
 OS_U16 waitForStart = 0;
-OS_U8 MiniLoopSimulation()	//¶æ»ú  // 5msÔËĞĞÒ»´Î
+OS_U8 MiniLoopSimulation()	//???  // 5ms???????
 {
 	if((g_DeviceState.workStage & DOM_SIMSRVDAT) != DOM_SIMSRVDAT)
 		return -1;
@@ -535,13 +563,13 @@ OS_U8 MiniLoopSimulation()	//¶æ»ú  // 5msÔËĞĞÒ»´Î
 
 	ServoCtlOnce_6Rudder(a1,a2,a3,a4,a5,a6);
 
-    // ´Ë´¦ĞÂÔö¶æ»úµÄĞ¡»ØÂ·²âÊÔ - µÚ7Â·
+    // ?????????????????????? - ??7??
     AngleServo_SetAngle(SERVO_PWM7, (float)a7);
 
 	return 0;
 }
 
-// OS_U8 SaveSrvInDataPool(STRU_SRV_INFO *data)	//280»Øµ÷
+// OS_U8 SaveSrvInDataPool(STRU_SRV_INFO *data)	//280???
 // {
 //     SETDATA(pDataPoolSrv, "Sr1Read", data->srv1Read / 10,	OS_S16);
 // 	SETDATA(pDataPoolSrv, "Sr2Read", data->srv2Read / 10,	OS_S16);
@@ -565,53 +593,63 @@ OS_U8 StartMiniLoop(float freq, float amp, float zero, OS_U8 enable[7])
 	fs.ampAngle = amp;
 	fs.zeroAngle = zero;
 	memcpy(fs.enable, enable, 7*sizeof(OS_U8));
-	//¿ªÆôÉ¨Æµ
+	//??????
 	g_DeviceState.workStage |= DOM_SIMSRVDAT;
 	return 0;
 }
 /***********************************************************
- * º¯ÊıÃû³Æ: ServoCmdHandler()
- * º¯Êı¹¦ÄÜ: ËÅ·şÖ¸Áî´¦Àíº¯Êı£¬±¾ĞÍºÅÖÇÄÜ¿ØÖÆÆ÷½ÓÊÕµØÃæ·¢³öµÄÖ¸Áî:
- * 			1.ËÅ·ş²âÁ¿ÇëÇó0x42: ¶ÔËÅ·ş½øĞĞ¿ØÖÆ£¬Ö¸¶¨ËÅ·şÒÆ¶¯¹Ì¶¨Î»ÖÃ£¬Ö±½Ó×ª·¢ÖÁËÅ·şÇı¶¯Æ÷¡£»Ø¸´µØÃæ²»ÓÉ±¾º¯Êı¿ØÖÆ
- * 			2.ËÅ·şÁãÎ»×°¶©0x40: ¶ÔËÅ·ş½øĞĞµ÷Áã£¬½Ó×ª·¢ÖÁËÅ·şÇı¶¯Æ÷¡£»Ø¸´µØÃæ²»ÓÉ±¾º¯Êı¿ØÖÆ
- * 			3.Ğ¡»ØÂ·²âÊÔ0x44	: Ğ¡»ØÂ·²âÊÔÓĞ×¨ÃÅµÄ×´Ì¬»ú×´Ì¬¡£½ÓÊÕÖ¸Áîºó¿ªÊ¼Ğ¡»ØÂ·²âÊÔ£¬²¢Á¢¼´·µ»Ø£¨Ö´ĞĞÖĞ0x11)£¬µ±²âÊÔÍê³ÉºóÔÙ
- * 							: ÓÉÆäËüº¯Êı·µ»Ø£¨Ö´ĞĞÍê³É0x22£©
- * ²Î¿¼×ÊÁÏ: <TXII-Y1 ¼ıµØÍ¨ĞÅĞ­Òé>
- * ×÷Õß:	³Éºê­Z
+ * ????????: ServoCmdHandler()
+ * ????????: ???????????????????????????????????M???????:
+ * 			1.???????????0x42: ?????????????????????????????????????????????????????????????????????
+ * 			2.??????????0x40: ??????????????????????????????????????????????????
+ * 			3.??????????0x44	: ????????????????????????????????????????????????????????????0x11)??????????????
+ * 							: ?????????????????????0x22??
+ * ????????: <TXII-Y1 ???????????>
+ * ????:	???Z
  ***********************************************************/
-OS_U32 ServoCmdHandler(STRU_422_MSG_INFO * frame)//03¸ù¾İÊı¾İÁ´¹ıÀ´µÄÖ¸Áî£¬¾ßÌå¸É»î	//¶æ»ú
+OS_U32 ServoCmdHandler(STRU_422_MSG_INFO * frame)//03?????????????????????????	//???
 {
 	OS_U8 msgID = frame->u8MsgID;
 	switch(msgID)
 	{
-	case CMD_SRV_CTRL_REQ://0x42 ËÅ·ş¿ØÖÆÇëÇó
+	case CMD_SRV_CTRL_REQ://0x42 ???????????
 	{
-		OS_S16 ctrlDegi[6];
-        OS_DOUBLE ctrlDeg[6];
-		memcpy(ctrlDegi, frame->au8Data, sizeof(OS_S16) * 6);
-		for(int i=0;i<6;i++)
+		OS_S16 ctrlDegi[SRV_CHANNEL_COUNT] = {0};
+        OS_DOUBLE ctrlDeg[SRV_CHANNEL_COUNT] = {0};
+		OS_U8 srvCount = (OS_U8)(frame->u16Len / sizeof(OS_S16));
+		if (srvCount > SRV_CHANNEL_COUNT)
+			srvCount = SRV_CHANNEL_COUNT;
+		if (srvCount < 6)
+			srvCount = 6;
+		memcpy(ctrlDegi, frame->au8Data, sizeof(OS_S16) * srvCount);
+		for(int i=0;i<srvCount;i++)
 		{
 			ctrlDeg[i] = ctrlDegi[i] * 0.01;
 		}
-        MsgToSrv(ctrlDeg, 0x02);
+        MsgToSrv(ctrlDeg, 0x02, srvCount);
 	}
 		break;
     case CMD_SRV_BOOKMODE:
     {
-		OS_S16 ctrlDegi[6];
-        OS_DOUBLE ctrlDeg[6];
-		memcpy(ctrlDegi, frame->au8Data, sizeof(OS_S16) * 6);
-		for(int i=0;i<6;i++)
+		OS_S16 ctrlDegi[SRV_CHANNEL_COUNT] = {0};
+        OS_DOUBLE ctrlDeg[SRV_CHANNEL_COUNT] = {0};
+		OS_U8 srvCount = (OS_U8)(frame->u16Len / sizeof(OS_S16));
+		if (srvCount > SRV_CHANNEL_COUNT)
+			srvCount = SRV_CHANNEL_COUNT;
+		if (srvCount < 6)
+			srvCount = 6;
+		memcpy(ctrlDegi, frame->au8Data, sizeof(OS_S16) * srvCount);
+		for(int i=0;i<srvCount;i++)
 		{
 			ctrlDeg[i] = ctrlDegi[i] * 0.01;
 		}
-        MsgToSrv(ctrlDeg, 0x44);  // ÁãµãÉèÖÃÄ£Ê½
+        MsgToSrv(ctrlDeg, 0x44, srvCount);
 	}
 		break;
-	case CMD_SRV_MINLOOP_REQ://0x44 ËÅ·şĞ¡»ØÂ·
+	case CMD_SRV_MINLOOP_REQ://0x44 ?????????
 		{
 			STRU_SERVO_MinLoopTest_REQUEST* srvPtr = (STRU_SERVO_MinLoopTest_REQUEST*)frame->au8Data;
-			//ÉèÖÃÉ¨Æµ²ÎÊı
+			//??????????
 			OS_U8 enable[7];
 			for(int i=0;i<7;i++)
 			{
@@ -625,23 +663,23 @@ OS_U32 ServoCmdHandler(STRU_422_MSG_INFO * frame)//03¸ù¾İÊı¾İÁ´¹ıÀ´µÄÖ¸Áî£¬¾ßÌå¸
 					0,
 					enable
 					);
-			//¿ªÆôËÅ·şĞ¡»ØÂ·Ä£Ê½ºó£¬ÓÉ·É¿ØÈí¼ş¼ÆËã²¢ÏòËÅ·ş·¢ËÍÊı¾İ£¬´Ë´¦²»ÔÙ×ª·¢ËÅ·ş
+			//????????????????????????????????????????????????????????
 		}
 		break;
 	}
 	return 0;
 }
 
-OS_U8 SrvStatusUpdata()	//¶æ»ú
+OS_U8 SrvStatusUpdata()	//???
 {
-	MiniLoopSimulation();	//ËÅ·şĞ¡»ØÂ·
-	//ËÅ·şÎ»ÖÃ²éÑ¯£¬Ã¿ÂÖÑ­»·Ö»²éÑ¯Ò»¸öËÅ·ş£¬ÒÔ¾¡Á¿±ÜÃâcan³åÍ»
+	MiniLoopSimulation();	//?????????
+	//???????????????????????????????????????can???
 	/*int srvIndex = g_DeviceState.CurrTick % 4;
 	//if(g_DeviceState.CurrTick % 100 == 0)
 	MsgToSrv(srvIndex + 1, CMD_GET_CTRL , 0);
 	//
 	//DoSrvProtect();
-	//ËÅ·şÁãÎ»×°¶©¼ì²â
+	//?????????????
 	if(SrvEncp > 0)
 	{
 		SrvEncp--;
@@ -664,26 +702,26 @@ OS_U8 SrvStatusUpdata()	//¶æ»ú
 	return 0;
 }
 
-OS_U8 DoSrvProtect()//03¶æ»ú½Ç¶È¿ØÖÆÎª0	//¶æ»ú £¨280Ä¿Ç°²»ÓÃ£©
+OS_U8 DoSrvProtect()//03??????????0	//??? ??280???????
 {
 	if(SrvProtect > 0)
 	{
-		 double deg[6] = {0};
-		MsgToSrv(deg, 0x02);
+		 double deg[SRV_CHANNEL_COUNT] = {0};
+		MsgToSrv(deg, 0x02, SRV_CHANNEL_COUNT);
 	}
 	return 0;
 }
 
 OS_U16 AutoZeroCount = 0;
 
-OS_U8 AutoZero()//03¶æ»ú½Ç¶È¿ØÖÆÎª0	//¶æ»ú £¨280Ä¿Ç°²»ÓÃ£©
+OS_U8 AutoZero()//03??????????0	//??? ??280???????
 {
 	if(BookingMode == 1)
 		return 1;
 	if(AutoZeroCount > 0)
 	{
-        double deg[6] = {0};
-		MsgToSrv(deg, 0x02);
+        double deg[SRV_CHANNEL_COUNT] = {0};
+		MsgToSrv(deg, 0x02, SRV_CHANNEL_COUNT);
 		AutoZeroCount--;
 	}
 	return 0;

@@ -18,6 +18,8 @@
 #include <math.h>
 #define d2r		(57.29577951308402)
 STRU_HIL_INPUT hilInput;
+OS_U16 g_hilEchoSequence = 0;
+static OS_U16 g_hilPendingSequence = 0;
 float fwxhil,fwyhil,fwzhil;
 OS_DOUBLE pitchspd, yawspd;
 extern void *g_pControl;
@@ -172,6 +174,9 @@ OS_U32 HilRtHandler(STRU_422_MSG_INFO * frame)// RT_HIL
 		{
 			Stru_Sim_Data_OUTPUT hilInfoSrc = {0};
 			memcpy(&hilInfoSrc, frame->au8Data, sizeof(hilInfoSrc));
+			/* DD4 在模型协议中未使用，作为 16 位 HIL 环回序号。 */
+			if(hilInfoSrc.DD4 >= 0.0 && hilInfoSrc.DD4 <= 65535.0)
+				g_hilPendingSequence = (OS_U16)hilInfoSrc.DD4;
 			STRU_HIL_INPUT hilInfo = {0};
 			HilSimOutputToInput(&hilInfoSrc, &hilInfo);
 			SaveHilInDataPool(&hilInfo);
@@ -193,7 +198,7 @@ OS_U32 HilRtHandler(STRU_422_MSG_INFO * frame)// RT_HIL
 					HilReinitControl();//???????
 				}
 			}
-			SETDATA(pDataPoolMsn,	"autoStep",	13,	OS_U8);
+			SETDATA(pDataPoolMsn,	"autoStep",	15,	OS_U8);
 		}
 		break;
 	case CMD_LAUNCH_REQ:	//0xFA ???????
@@ -205,8 +210,131 @@ OS_U32 HilRtHandler(STRU_422_MSG_INFO * frame)// RT_HIL
 	return 0;
 }
 
+static double HilYawToNavDirTelemetry(double yaw_deg)
+{
+	double dir = -yaw_deg;
+
+	while (dir < 0.0) {
+		dir += 360.0;
+	}
+	while (dir >= 360.0) {
+		dir -= 360.0;
+	}
+	return dir;
+}
+
+static void HilWriteSimAirTelemetry(void)
+{
+	SETDATA(pDataPoolSelf, "AirSpd", (OS_S16)(hilInput.airSpd * 10.0), OS_S16);
+	SETDATA(pDataPoolSelf, "AirPress", (OS_S16)(hilInput.DD1 * 0.1), OS_S16);
+	//SETDATA(pDataPoolSelf, "AirHigh", (OS_S16)g_ins_data.height, OS_S16);
+}
+
+static void HilWriteSimSeekerTelemetry(void)
+{
+	SETDATA(pDataPoolFly, "sctLock", (OS_U8)(hilInput.seeker_state != 0U), OS_U8);
+	SETDATA(pDataPoolFly, "sctPitch", (OS_S16)(hilInput.qf / 0.01), OS_S16);
+	SETDATA(pDataPoolFly, "sctYaw", (OS_S16)(hilInput.qh / 0.01), OS_S16);
+	SETDATA(pDataPoolFly, "viewPitc", (OS_S16)(hilInput.qf / 0.01), OS_S16);
+	SETDATA(pDataPoolFly, "viewYaw", (OS_S16)(hilInput.qh / 0.01), OS_S16);
+	SETDATA(pDataPoolFly, "vPitchSp", (OS_S16)(hilInput.dqf / 0.002), OS_S16);
+	SETDATA(pDataPoolFly, "vYawSp", (OS_S16)(hilInput.dqh / 0.002), OS_S16);
+}
+
+static void HilWriteSimNavTelemetry(void)
+{
+	double dir = HilYawToNavDirTelemetry(g_ins_data.psi);
+	double groundSpd = sqrt(g_ins_data.vtx * g_ins_data.vtx
+		+ g_ins_data.vty * g_ins_data.vty
+		+ g_ins_data.vtz * g_ins_data.vtz);
+
+	SETDATA(pDataPoolImu, "imuAx", g_ins_data.ax, OS_FLOAT);
+	SETDATA(pDataPoolImu, "imuAy", g_ins_data.ay, OS_FLOAT);
+	SETDATA(pDataPoolImu, "imuAz", g_ins_data.az, OS_FLOAT);
+	SETDATA(pDataPoolImu, "imuWx", g_ins_data.wx, OS_FLOAT);
+	SETDATA(pDataPoolImu, "imuWy", g_ins_data.wy, OS_FLOAT);
+	SETDATA(pDataPoolImu, "imuWz", g_ins_data.wz, OS_FLOAT);
+
+	SETDATA(pDataPoolImu, "navPitch", (OS_S16)(g_ins_data.zeta * 100.0), OS_S16);
+	SETDATA(pDataPoolImu, "navRoll", (OS_S16)(g_ins_data.gama * 100.0), OS_S16);
+	SETDATA(pDataPoolImu, "navDir", (OS_U16)(dir * 100.0), OS_U16);
+
+	SETDATA(pDataPoolImu, "navLon", (OS_S32)(g_ins_data.longitude * 1e7), OS_S32);
+	SETDATA(pDataPoolImu, "navLat", (OS_S32)(g_ins_data.latitude * 1e7), OS_S32);
+	SETDATA(pDataPoolImu, "navHigh", g_ins_data.height, OS_FLOAT);
+	SETDATA(pDataPoolImu, "navVn", (OS_S16)(g_ins_data.vtx * 100.0), OS_S16);
+	SETDATA(pDataPoolImu, "navVs", (OS_S16)(g_ins_data.vty * 100.0), OS_S16);
+	SETDATA(pDataPoolImu, "navVe", (OS_S16)(g_ins_data.vtz * 100.0), OS_S16);
+
+	SETDATA(pDataPoolImu, "gpsLon", (OS_S32)(g_ins_data.longitude * 1e7), OS_S32);
+	SETDATA(pDataPoolImu, "gpsLat", (OS_S32)(g_ins_data.latitude * 1e7), OS_S32);
+	SETDATA(pDataPoolImu, "gpsAlt", (OS_S16)g_ins_data.height, OS_S16);
+	SETDATA(pDataPoolImu, "gpsVn", (OS_S16)(g_ins_data.vtx * 100.0), OS_S16);
+	SETDATA(pDataPoolImu, "gpsVs", (OS_S16)(g_ins_data.vty * 100.0), OS_S16);
+	SETDATA(pDataPoolImu, "gpsVe", (OS_S16)(g_ins_data.vtz * 100.0), OS_S16);
+	SETDATA(pDataPoolImu, "gpsDir", (OS_U16)(dir * 100.0), OS_U16);
+
+	if (flightSeq.luanched) {
+		SETDATA(pDataPoolImu, "navState", (OS_U8)0x64, OS_U8);
+	} else if (hilInput.nav_state != 0U) {
+		SETDATA(pDataPoolImu, "navState", hilInput.nav_state, OS_U8);
+	} else {
+		SETDATA(pDataPoolImu, "navState", (OS_U8)0, OS_U8);
+	}
+
+	SETDATA(pDataPoolSelf, "GrdSpd", (OS_S16)(groundSpd * 10.0), OS_S16);
+	HilWriteSimAirTelemetry();
+	SETDATA(pDataPoolSelf, "ecuGetRp", (OS_U16)(hilInput.rpm_engine_state * 10.0), OS_U16);
+	SETDATA(pDataPoolSelf, "ecuState", hilInput.engine_state, OS_U16);
+	SETDATA(pDataPoolFly, "EngineRp", (OS_U16)(hilInput.rpm_engine_state * 10.0), OS_U16);
+
+	//HilWriteSimSeekerTelemetry();
+}
+
+static void HilLoadNavFromDataPool(void)
+{
+	OS_FLOAT tempf;
+	OS_S16 temps16;
+	OS_U16 tempu16;
+
+	GetDataFast(pDataPoolImu, "imuWx", &tempf);
+	g_ins_data.wx = tempf;
+	GetDataFast(pDataPoolImu, "imuWy", &tempf);
+	g_ins_data.wy = tempf;
+	GetDataFast(pDataPoolImu, "imuWz", &tempf);
+	g_ins_data.wz = tempf;
+	GetDataFast(pDataPoolImu, "imuAx", &tempf);
+	g_ins_data.ax = tempf;
+	GetDataFast(pDataPoolImu, "imuAy", &tempf);
+	g_ins_data.ay = tempf;
+	GetDataFast(pDataPoolImu, "imuAz", &tempf);
+	g_ins_data.az = tempf;
+
+	GetDataFast(pDataPoolImu, "navPitch", &temps16);
+	g_ins_data.zeta = temps16 * 0.01;
+	GetDataFast(pDataPoolImu, "navDir", &tempu16);
+	g_ins_data.psi = -(tempu16 * 0.01);
+	if (g_ins_data.psi > 180.0) {
+		g_ins_data.psi -= 360.0;
+	}
+	if (g_ins_data.psi < -180.0) {
+		g_ins_data.psi += 360.0;
+	}
+	GetDataFast(pDataPoolImu, "navRoll", &temps16);
+	g_ins_data.gama = temps16 * 0.01;
+
+	GetDataFast(pDataPoolImu, "navVn", &temps16);
+	g_ins_data.vtx = temps16 * 0.01;
+	GetDataFast(pDataPoolImu, "navVs", &temps16);
+	g_ins_data.vty = temps16 * 0.01;
+	GetDataFast(pDataPoolImu, "navVe", &temps16);
+	g_ins_data.vtz = temps16 * 0.01;
+}
+
 OS_U8 HilFlightStage()
 {
+	/* 此序号对应本周期实际送入 ControlRun 的 HIL 样本。 */
+	g_hilEchoSequence = g_hilPendingSequence;
 	g_ins_data.wx = hilInput.wx;
 	g_ins_data.wy = hilInput.wy;
 	g_ins_data.wz = hilInput.wz;
@@ -225,148 +353,30 @@ OS_U8 HilFlightStage()
 	g_ins_data.longitude = hilInput.lon;
 	g_ins_data.latitude = hilInput.lat;
 	g_ins_data.height = hilInput.alt;
-	//????????
 	g_ins_data.GPS_status = hilInput.nav_state;
 
-	//????????
 	g_engine_data.rpm_engine = hilInput.rpm_engine_state;
 	g_engine_data.ECU_work_status = hilInput.engine_state;
 
-	//???????
 	g_baro_data.static_pressure = hilInput.DD1;
 	g_baro_data.total_pressure = hilInput.DD2;
 
-	//???????
 	g_seeker_data.pitch_LOS_rate = hilInput.dqf;
 	g_seeker_data.yaw_LOS_rate = hilInput.dqh;
 	g_seeker_data.pitch_LOS_angle = hilInput.qf;
 	g_seeker_data.yaw_LOS_angle = hilInput.qh;
-	g_seeker_data.flag_seize_stable = hilInput.seeker_state;//??????0??????????????????0?????????
-	g_seeker_data.flag_seize_stable = 0;//????????
-	
-	//GetDataFast(pDataPoolImu, "navState", &g_ins_data.GPS_status);// pDataPoolNav
-	//GetDataFast(pDataPoolSelf, "ecuGetRp", &g_engine_data.rpm_engine);//?????????
-	//GetDataFast(pDataPoolSelf, "ecuState", &g_engine_data.ECU_work_status);//????????
+	g_seeker_data.flag_seize_stable = hilInput.seeker_state;
+	g_seeker_data.flag_seize_stable = 0;
 
-	// pInput->Luanched = flightSeq.luanched;	// 014?????
-
-	// double V   = sqrt(pow(g_ins_data.vtx,2) + pow(g_ins_data.vty,2) + pow(g_ins_data.vtz,2));   // ???????
-    // //?????????????????????????
-    // pInput->airSpd = V;
-
-	// pInput->DD1 = hilInput.DD1; // 014?????
-    // pInput->DD2 = hilInput.DD2;
-    
-    // if(g_DeviceState.srvCountDown > 0)
-    // {
-    //     OS_S16 srv1,srv2;
-    //     GetDataFast(pDataPoolSrv, "Sr1Read", &srv1);
-    //     GetDataFast(pDataPoolSrv, "Sr2Read", &srv2);
-    //     pInput->DD1 = srv1 * 0.01; // 014?????
-    //     pInput->DD2 = srv2 * 0.01;
-    // }
-
-	SETDATA(pDataPoolImu, "imuAx", g_ins_data.ax,	OS_FLOAT);//?????
-	SETDATA(pDataPoolImu, "imuAy", g_ins_data.ay,	OS_FLOAT);
-	SETDATA(pDataPoolImu, "imuAz", g_ins_data.az,	OS_FLOAT);
-
-	//SETDATA(pDataPoolImu, "imuWx", g_ins_data.wx,	OS_FLOAT);//?????
-	//SETDATA(pDataPoolImu, "imuWY", g_ins_data.wy ,	OS_FLOAT);
-	//SETDATA(pDataPoolImu, "imuWZ", g_ins_data.wz,	OS_FLOAT);
-
-	//?????????????
-	//SETDATA(pDataPoolSelf, "AirPress", hilInput.DD1*0.1, OS_S16);
-	//g_baro_data.static_pressure = hilInput.DD1;//???
-	//g_baro_data.total_pressure  = hilInput.DD2;//???
-
-	//??????
-	hilInput.useNav = 0;
-   	if(hilInput.useNav)
-	{
-		//?????
-        OS_FLOAT tempf;
-		GetDataFast(pDataPoolImu, "imuWx",	&tempf);g_ins_data.wx = tempf;
-		GetDataFast(pDataPoolImu, "imuWy",	&tempf);g_ins_data.wy = tempf;
-		GetDataFast(pDataPoolImu, "imuWz", 	&tempf);g_ins_data.wz = tempf;
-		//?????
-		OS_S16 temps16;
-		OS_U16 tempu16;
-		GetDataFast(pDataPoolImu, "navPitch", 	&temps16);//
-		g_ins_data.zeta = temps16 * 0.01;
-		GetDataFast(pDataPoolImu, "navDir", 	&tempu16);
-		g_ins_data.psi = -tempu16 * 0.01;
-		if(g_ins_data.psi < -180)
-            g_ins_data.psi += 360;
-		double dir = -g_ins_data.psi;
-		if(dir < 0)
-		{
-			dir += 360;
-		}
-		GetDataFast(pDataPoolImu, "navRoll", 	&temps16);
-		g_ins_data.gama = temps16 * 0.01;
-    }
-	else
-	{		
-		SETDATA(pDataPoolImu, "imuWx", g_ins_data.wx,	OS_FLOAT);//?????
-		SETDATA(pDataPoolImu, "imuWY", g_ins_data.wy ,	OS_FLOAT);
-		SETDATA(pDataPoolImu, "imuWZ", g_ins_data.wz,	OS_FLOAT);
-
-		SETDATA(pDataPoolImu, "navPitch", g_ins_data.wx,	OS_FLOAT);//?????
-		SETDATA(pDataPoolImu, "navDir", g_ins_data.wy ,	OS_FLOAT);
-		SETDATA(pDataPoolImu, "navRoll", g_ins_data.wz,	OS_FLOAT);
-	}
-	//????
-    double groundSpd = sqrt(pow(g_ins_data.vtx,2) + pow(g_ins_data.vty,2) + pow(g_ins_data.vtz,2));
-    SETDATA(pDataPoolSelf, "GrdSpd", groundSpd * 10, OS_S16);//
-
-	SETDATA(pDataPoolImu, "navLon", g_ins_data.longitude * 1e7, OS_S32);//??????
-	SETDATA(pDataPoolImu, "navLat", g_ins_data.latitude * 1e7, OS_S32);//????????
-	SETDATA(pDataPoolImu, "navHigh", g_ins_data.height , OS_FLOAT);//?????
-
-	SETDATA(pDataPoolImu, "navVn", g_ins_data.vtx* 100,	OS_S16);//
-	SETDATA(pDataPoolImu, "navVs", g_ins_data.vty* 100,	OS_S16);//
-	SETDATA(pDataPoolImu, "navVe", g_ins_data.vtz* 100,	OS_S16);//
-
-//	SETDATA(pDataPoolImu, "navRoll", g_ins_data.gama * 100,	OS_S16);//
-//	SETDATA(pDataPoolImu, "navPitch", g_ins_data.zeta * 100,	OS_S16);//
-//**************************  MML 20260417*****************************
-	if(flightSeq.luanched)	
-	{
-		SETDATA(pDataPoolImu, "navState", 0x64, OS_U8);//????????
-	}
-	else
-	{
-		SETDATA(pDataPoolImu, "navState", 0, OS_U8);//?????????
+	if (hilInput.useNav) {
+		HilLoadNavFromDataPool();
+		HilWriteSimSeekerTelemetry();
+		SETDATA(pDataPoolFly, "EngineRp", (OS_U16)(hilInput.rpm_engine_state * 10.0), OS_U16);
+	} else {
+		HilWriteSimNavTelemetry();
 	}
 
-	
-	// SETDATA(pDataPoolImu, "navDir", dir * 100,		OS_U16);
-	// SETDATA(pDataPoolSelf, "AirSpd", pInput->airSpd * 10, OS_S16);
-	
-	// OS_S16 temps16;
-	// OS_U8 locked;
-	// GetDataFast(pDataPoolFly,	"sctLock",	 &(locked));
-	// GetDataFast(pDataPoolFly,	"vPitchSp",	 &temps16);
-	// pInput->scoutPitchSpd = (double)temps16 * 0.002 / 57.3;	// 014?????
-	// GetDataFast(pDataPoolFly,	"vYawSp",	 &temps16);
-	// pInput->scoutYawSpd = (double)temps16 * 0.002 / 57.3;	// 014?????
-	// pInput->scoutLocked = locked;	// 014?????
-//		if(pInput->scoutLocked == 0 && locked == 1)	// 014?????
-//		{
-//			enableDelayTick--;
-//			if(enableDelayTick == 0)
-//			{
-//				pInput->scoutLocked = 1;	// 014?????
-//			}
-//			else if(pInput->scoutLocked == 0)	// 014?????
-//			{
-//				enableDelayTick = 2;
-//			}
-//		}
-//		pInput->scoutLocked = 1;	// 014?????
-//		pInput->scoutPitchSpd = pitchspd / 57.3;	// 014?????
-//		pInput->scoutYawSpd = yawspd /57.3;	// 014?????
-		return 0;
+	return 0;
 }
 
 

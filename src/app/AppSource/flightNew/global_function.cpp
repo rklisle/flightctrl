@@ -2,6 +2,59 @@
 //#include "MissileModel_src/environment_earth_model.h"
 #include "port/flightPort.h"
 
+//APM 内置简化算法
+//等矩形投影（简化椭球），近距离，即运动范围<10km，计算精度mm 级，计算最快（无迭代）
+//计算起点到目标点真北方位角，正北为零，顺时针方向增大，即北偏东为正，取值范围0~360deg
+double CFlightGlobalFun::get_bearing(double lon1, double lat1, double lon2, double lat2)
+{
+	double dlon = lon1 - lon2;	  // 经度差
+    // 经度跨180°修正，限制范围 [-180, 180]
+    if (dlon > 180.0)  dlon -= 360.0;
+    if (dlon < -180.0) dlon += 360.0;
+	
+	double lat_avg = (lat1 + lat2) * 0.5;// 平均纬度
+    double lat_rad = lat_avg / RTOA;  // 转弧度
+    double scale = cos(lat_rad);     // 纬度缩放
+    scale = (scale < 0.01) ? 0.01 : scale;// 极区保护，防止除零
+
+	double dlat = lat2 - lat1;  // 纬度差
+
+	double bearing = (PI * 0.5) + atan2(- dlat / scale, dlon);
+	if (bearing < 0.0f) bearing += 2.0 * PI;
+	
+    return bearing; 
+}
+
+//APM 内置简化算法
+//等矩形投影（简化椭球，WGS-84参考椭球，平均海平面MSL），近距离，即运动范围<10km，计算精度mm 级，计算最快（无迭代）
+//计算两点水平距离
+double CFlightGlobalFun::get_distance(double lon1, double lat1, double lon2, double lat2)
+{
+    // ===================== 1. 纬度差（直接计算）=====================
+    double dlat = lat2 - lat1;
+    // ===================== 2. 经度差 + 跨180°修正（无函数调用）=====
+    double dlon = lon1 - lon2;
+    if (dlon > 180.0)  dlon -= 360.0;
+    if (dlon < -180.0) dlon += 360.0;
+
+    // ===================== 3. 经度缩放系数（无函数调用）=============
+    double lat_avg = (lat1 + lat2) * 0.5;// 平均纬度
+    double lat_rad = lat_avg / RTOA;		// 转弧度
+    double scale = cos(lat_rad);
+    scale = (scale < 0.01) ? 0.01 : scale;// 极区防错保护
+
+    // ===================== 4. APM原版距离公式计算 ===================
+    double north = dlat * LAT_TO_METER;          // 北向距离(m)
+    double east  = dlon * LAT_TO_METER * scale;  // 东向距离(m)
+    double distance = sqrt(north * north + east * east);        // 水平距离
+    
+    return distance;
+}
+
+//Tomas反解
+//根据起始点经度lon1、纬度lat1，目标点经度lon2、纬度lat2，计算两点相对距离Sdm，相对方位a12
+//方位角定义，r12矢量方向，真北为0°，顺时针递增，即北偏东为正，取值范围0~360deg
+//椭球模型（子午圈 / 卯酉圈半径），适用于中距离，即运动范围<100km，计算精度为mm 级，计算较快（无迭代）
 void CFlightGlobalFun::Tomas(double lon1, 
 							 double lat1, 
 							 double lon2, 
@@ -75,7 +128,7 @@ void CFlightGlobalFun::Tomas(double lon1,
 	dSigma2 = E_CONST * E_CONST * (n1 - n2 + n3) / 64.0;
 
 	if(sdm != 0)
-		*sdm = RE * sigma - RE * tmp3 * (dSigma1 - dSigma2);/*弹目距离*/
+		*sdm = RE * sigma - RE * tmp3 * (dSigma1 - dSigma2);
 
 	M1 = 32.0 * tmp5 - (20.0 * tmp5 - A1) * X1 - (8.0 * tmp5 * tmp5 + 4.0) * Y1;
 	F1 = 2.0 * Y1 - 2.0 * tmp4 * (4.0 - X1);
@@ -89,10 +142,15 @@ void CFlightGlobalFun::Tomas(double lon1,
 	t2 = -QATN(-tmp2 * cos(dL), tmp3 * sin(dL));
 
 	if(a12 != 0)
-		*a12 = (t1 + t2 - 2.0 * PI * (int)((t1 + t2) / (2.0 * PI)))*RTOA;/*大地方位角*/
+		*a12 = (t1 + t2 - 2.0 * PI * (int)((t1 + t2) / (2.0 * PI)))*RTOA;
 }
 
-
+/*Vincenty正解, 是基于 WGS-84 地球椭球模型 的高精度大地测量解算算法，
+属于大地测量正解问题核心算法。该算法以起始点经纬坐标、真北方位角、地面大地距离为输入，
+通过迭代计算消除地球椭球曲率带来的误差，高精度解算目标终点的经纬坐标，同时可输出终点处的反方位角。
+算法迭代收敛精度高，适用于全球范围内任意距离的导航定位解算，是无人机、飞行器、测绘领域的标准定位解算方案。*/
+//输入：起点经度vin_l1、纬度vin_b1、真北方位角alfa12、大地距离s
+//输出：目标点经度vin_l2_ptr纬度vin_b2_ptr
 void CFlightGlobalFun::Vincenty_Forward(double vin_l1,
 										double vin_b1,
 										double s,
@@ -163,6 +221,10 @@ void CFlightGlobalFun::Vincenty_Forward(double vin_l1,
 
 }
 
+//Vincenty反解，根据起始点经度、纬度，目标点经度、纬度，计算两点相对距离，相对方位
+//输入：起点经度vin_l1、纬度vin_b1、目标点经度vin_l2_ptr纬度vin_b2_ptr
+//输出：真北方位角alfa12、大地距离s
+//严格椭球模型（迭代求解），全球范围 mm 级，计算较慢（需迭代）
 void CFlightGlobalFun::Vincenty_Backward(IN double vin_l1,
 								  IN double vin_b1,			
 								  IN double vin_l2,				
@@ -180,10 +242,10 @@ void CFlightGlobalFun::Vincenty_Backward(IN double vin_l1,
 	double sin_sigma,cos_sigma,c_2sigma;
 	double temp;
 
-	//相对距离很近，小于1m，特殊处理	
-	if(fabs(vin_b1-vin_b2)<0.00001 && fabs(vin_l1-vin_l2)<0.00001)
+	//相对距离很近，小于0.1m，特殊处理	
+	if(fabs(vin_b1-vin_b2)<0.000001 && fabs(vin_l1-vin_l2)<0.000001)
 	{
-		(*S_ptr)= 1.0; (*Alfa12_ptr)=0.0; 
+		(*S_ptr)= 0.1; (*Alfa12_ptr)=0.0; 
 		return;
 	}
 
@@ -236,8 +298,92 @@ void CFlightGlobalFun::Vincenty_Backward(IN double vin_l1,
 	(*Alfa12_ptr)=v_alfa12;
 }
 
+/**
+ * @brief 单通道野值剔除（制导专用，连续3帧超限后放开更新基准）
+ * @param curr_val  当前接收传感器数据
+ * @param base_val  基准值（传入指针，函数内部自动更新）
+ * @param over_cnt  连续超限帧数计数（传入指针）
+ * @param delta_max 单次最大允许变化量阈值
+ * @return 滤波后可用值（送入制导解算）
+ */
+double CFlightGlobalFun::Reject_outlier(double curr_val, double *base_val, int *over_cnt, double delta_max)
+{
+    double delta = fabs(curr_val - *base_val);
 
-double CFlightGlobalFun::Nozero_FUN(double denominator)//防止分母为零
+    if (delta <= delta_max)
+    {
+        // 1. 变化在阈值内：正常数据，更新基准，清零超限计数
+        *base_val = curr_val;
+        *over_cnt = 0;
+        return curr_val;
+    }
+    else
+    {
+        // 2. 超出阈值，连续超限计数自增
+        (*over_cnt)++;
+
+        if (*over_cnt < 3)
+        {
+            // 连续不足3帧：野点，沿用旧基准
+            return *base_val;
+        }
+        else
+        {
+            // 连续3帧以上超限：第四帧判定为真实跳变，更新基准、重置计数
+            *base_val = curr_val;
+            *over_cnt = 0;
+            return curr_val;
+        }
+    }
+}
+
+/***********************************************************
+函数名称:  Tustin_FirstIO
+描    述:  一阶离散变换
+滤波参数:  a1,a2,b1,b2,ts	
+	当a1=0, a2=b2=1时，b1近似为滤波时间常数；
+	例如，b1 = 0.005时，低通滤波约为31.85Hz；
+
+输    入:  r[2] 0-最新值 1-上一拍
+输    出： f[2] 0-最新值 1-上一拍
+************************************************************/
+void CFlightGlobalFun::Tustin_FirstIO(double a1,double a2,double b1,double b2,double *r,double *f,double ts)
+{
+    double m1=0.0;
+    double n0=0.0;
+    double n1=0.0;
+
+	m1 = (2.*b1-b2*ts)/(2.*b1+b2*ts);  //前一时刻输出变量的系数
+	n0 = (2.*a1+a2*ts)/(2.*b1+b2*ts);  //当前时刻输入变量的系数
+	n1 = (-2.*a1+a2*ts)/(2.*b1+b2*ts); //前一时刻输入变量的系数
+	f[0] = m1*f[1]+n0*r[0]+n1*r[1];
+}
+
+/***********************************************************
+函数名称:  Tustin_SecondIO
+描    述:  二阶离散变换
+滤波参数:  a1,a2,a3,b1,b2,b3
+采样时间:  ts
+输    入:  r[3] 0-最新值 1-上一拍 2-上二拍
+输    出： f[3] 0-最新值 1-上一拍 2-上二拍
+************************************************************/
+void CFlightGlobalFun::Tustin_SecondIO(double a1, double a2, double a3, double b1, double b2, double b3,
+                     double *r, double *f, double ts)
+{
+    double m1, m2, n0, n1, n2;
+    double T = 0;
+    T = ts;
+    m1 = (8. * b1 - 2. * b3 * T * T) / (4. * b1 + 2. * b2 * T + b3 * T * T);
+    m2 = (2. * b2 * T - b3 * T * T - 4. * b1) / (4. * b1 + 2. * b2 * T + b3 * T * T);
+    n0 = (4. * a1 + 2 * a2 * T + a3 * T * T) / (4. * b1 + 2. * b2 * T + b3 * T * T);
+    n1 = (2. * a3 * T * T - 8. * a1) / (4. * b1 + 2. * b2 * T + b3 * T * T);
+    n2 = (4. * a1 - 2. * a2 * T + a3 * T * T) / (4. * b1 + 2. * b2 * T + b3 * T * T);
+    f[0] = m1 * f[1] + m2 * f[2] + n0 * r[0] + n1 * r[1] + n2 * r[2];
+}
+
+
+//防止分母为零
+double CFlightGlobalFun::Nozero_FUN(double denominator)
 {
 	double m_ftemp=0.0;
 
@@ -335,7 +481,7 @@ double CFlightGlobalFun::Range2(double dData, double dMax, double dMin)
 	}
 	else if (dData < dMin)
 	{
-		m_fret = dMax;
+		m_fret = dMin;
 	}
 	else
 	{
@@ -367,7 +513,7 @@ double CFlightGlobalFun::Norm(int vector_length, double *in_vector)
 	return norm;
 }
 
-
+//正数 = 偏右，负数 = 偏左，0 = 正好在航线上
 double CFlightGlobalFun::CalcDist(double lon1, 
 								  double lat1, 
 								  double lon2, 

@@ -16,6 +16,7 @@
 #define RUD_G_ANGLE_MAX	20.0//deg  当俯仰与滚转共用物理舵时，滚转舵最大角度
 #define RUD_H_ANGLE_MAX	20.0//deg  水平舵最大角度，滚转舵和俯仰舵不共用，后续优化为发射初段
 #define RUD_V_ANGLE_MAX	20.0//deg  航向舵最大角度
+
 typedef struct  _Stru_Control_Out_Input
 {
 	double u25g;//PD
@@ -65,7 +66,7 @@ private:
 	void Get_Data();
 	void Calc_Data();
 	void Send_Data();
-	// void Monitor_Data();
+	//void Monitor_Data();
 	
 	double RudAgl2MotorAglH1(double rud_angle);//-51~＋30
 	double RudAgl2MotorAglH2(double rud_angle);//-30~＋51
@@ -80,6 +81,7 @@ private:
 	double m_urg_record;
 	double m_urh;
 	double m_urf;
+	double m_urf_record;
 	
 	double m_u25g;
 	double m_u4g;

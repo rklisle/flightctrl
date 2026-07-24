@@ -554,53 +554,66 @@ static void Queue_Hover()
 static void SideToSide_Hover()
 {}
 
-//????M??????????????    
+/* 紧急返航：从装订航路 g_route_data 取 route_mode==6 的回收点，在线追加为下一目标 */
+#define RECYCLE_ROUTE_MODE  6
+
 OS_U8 DoReturnHomeward()
 {
-	
-    //???????????????????+300??
-		RecoverMark = 1;
-    // groundCmd = Arp[0];
-    // groundCmd.h = Arp[0].h + 300;
-	// 	groundCmd.V_cmd = 100;
-	// 	//groundCmd.outTrack = -1;
-	// 	groundCmd.w = 5;
-    for (int i = 0; i < AUTO_MSN_PT_MAX_COUNT; i++)
-    {
-        if (Arp[i].w == 5)
-        {
-            // groundCmd = Arp[i];
-			g_DLtoCtrl_sig.update_count++;
-			g_DLtoCtrl_sig.num_waypoint_updated = 1;
-			g_DLtoCtrl_sig.longitude[0]		= Arp[i].lon;
-			g_DLtoCtrl_sig.latitude[0]		= Arp[i].lat;
-			g_DLtoCtrl_sig.height[0]		= Arp[i].h;
-			g_DLtoCtrl_sig.route_mode[0]	= Arp[i].w;
-			g_DLtoCtrl_sig.formation_mode[0]= 0;
-			g_DLtoCtrl_sig.dltTime[0]		= Arp[i].t;
-			g_DLtoCtrl_sig.turn_radius[0]	= 0;
-			g_DLtoCtrl_sig.velocity[0]		= Arp[i].V_cmd;
-			g_DLtoCtrl_sig.accept_radius[0]	= 0;
-            break;
-        }
-    }
-    //????????????????????????????????
+	int i;
+	int found = 0;
+	double lon = 0.0;
+	double lat = 0.0;
+	double alt = 0.0;
+	double speed = 0.0;
+	int num_col;
+	RecoverMark = 1;
+	if(g_route_data.p_route_data == NULL || g_route_data.num_rows <= 0)
+	{
+		return 0;
+	}
 
-		// OS_U16 curpoint;
-		// curpoint = pOutput->curPtNo;
-    double curLon = selfStatus.lon * 1e-7;
-    double curLat = selfStatus.lat * 1e-7;
-    double tarLon = g_DLtoCtrl_sig.longitude[0];
-    double tarLat = g_DLtoCtrl_sig.latitude[0];
-    double dir = calculateBearing(curLat, curLon, tarLat, tarLon);
+	num_col = g_route_data.num_columns;
+	if(num_col <= 0)
+	{
+		num_col = 11;
+	}
 
-	g_DLtoCtrl_sig.turn_angle[0] = dir;
+	/* 取最后一个回收航点（与末点回收装订一致）*/
+	for(i = 0; i < g_route_data.num_rows; i++)
+	{
+		int idx = i * num_col;
 
-    // //groundCmd.inTrack = dir;
-    // groundCmd.sn = curpoint + 1;
-	// 	groundCmd.outTrack = dir;
-	// 	updateNewRP(&groundCmd, 1, curpoint + 1, ptCount);
-    return 0;
+		if((int)g_route_data.p_route_data[idx + 4] == RECYCLE_ROUTE_MODE)
+		{
+			lon   = g_route_data.p_route_data[idx + 1];
+			lat   = g_route_data.p_route_data[idx + 2];
+			alt   = g_route_data.p_route_data[idx + 3];
+			speed = g_route_data.p_route_data[idx + 7];
+			found = 1;
+		}
+	}
+	if(!found)
+	{
+		return 0;
+	}
+
+	g_DLtoCtrl_sig.update_count++;
+	g_DLtoCtrl_sig.num_waypoint_updated = 1;
+	g_DLtoCtrl_sig.longitude[0]         = lon;
+	g_DLtoCtrl_sig.latitude[0]          = lat;
+	g_DLtoCtrl_sig.height[0]            = alt;
+	g_DLtoCtrl_sig.route_mode[0]        = RECYCLE_ROUTE_MODE;
+	g_DLtoCtrl_sig.formation_mode[0]    = 0;
+	g_DLtoCtrl_sig.dltTime[0]           = 0;
+	g_DLtoCtrl_sig.turn_radius[0]       = 0;
+	g_DLtoCtrl_sig.velocity[0]          = speed;
+	g_DLtoCtrl_sig.accept_radius[0]     = 0; /* 飞控侧 route_mode==6 时默认 100 m */
+	{
+		double curLon = selfStatus.lon * 1e-7;
+		double curLat = selfStatus.lat * 1e-7;
+		g_DLtoCtrl_sig.turn_angle[0] = calculateBearing(curLat, curLon, lat, lon);
+	}
+	return 0;
 }
 
 //??????????????????????????????????????
@@ -618,25 +631,19 @@ static void GenerateTeamMsn()
 		return;
 	}
 
-	// ???????????????????????????????1??
-	// if(pOutput->enginge_off == 1)
+	// 回收策略执行：control_flight_basic 置位后，由 mission 层调用 ECU/开伞
 	if(g_controller_to_switch.flag_engine_shutdown == 1)
 	{
-		// SETDATA(pDataPoolMsn,	"msnComm2",	pOutput->enginge_off, OS_U8);
 		SETDATA(pDataPoolMsn,	"msnComm2",	g_controller_to_switch.flag_engine_shutdown, OS_U8);
-		StopEngine();
+		StopEngine();	/* 协议：飞控发停车指令，软件停 ECU */
 	}
-	//SETDATA(pDataPoolMsn, "OpenUm", 0,	OS_U8);
-	// if(pOutput->open_umbrella == 1)
 	if(g_controller_to_switch.flag_open_umbrella == 1)
 	{
-		//??????
-		SETDATA(pDataPoolSelf,  "flyError", 4,  OS_U8);//????????
-		DoOpenUm();//????????????(??????????)
-		// pOutput->open_umbrella = 0;
+		SETDATA(pDataPoolSelf,  "flyError", 4,  OS_U8);
+		DoOpenUm();		/* 协议：满足开伞条件后发开伞指令 */
 		g_controller_to_switch.flag_open_umbrella = 0;
 		return;
-	}  
+	}
 	/*
 	//??????????????
 	static int curNavPt = 0;
@@ -893,20 +900,23 @@ void UpdatePredictMsnByGround(STRU_422_MSG_INFO * frame)
 				memcpy(&type,	ptBuffer + 17 * i + 14, 1);
 				memcpy(&speed,	ptBuffer + 17 * i + 15, 2);
 
-				g_route_data.p_route_data[i * 11 + 0] = i;  // ???
-				g_route_data.p_route_data[i * 11 + 1] = lon * 1e-7;  // ????
-				g_route_data.p_route_data[i * 11 + 2] = lat * 1e-7;  // ????
+				g_route_data.p_route_data[i * 11 + 0] = i;          // 
+				g_route_data.p_route_data[i * 11 + 1] = lon * 1e-7; // 
+				g_route_data.p_route_data[i * 11 + 2] = lat * 1e-7; // 
 				g_route_data.p_route_data[i * 11 + 3] = alt;
-				g_route_data.p_route_data[i * 11 + 4] = type;		//????????
-				g_route_data.p_route_data[i * 11 + 5] = 0;			//??????????????
-				g_route_data.p_route_data[i * 11 + 6] = 0;			//???????
-				g_route_data.p_route_data[i * 11 + 7] = speed;	//?????????? ?? ??????????? ?? ??????
-				g_route_data.p_route_data[i * 11 + 8] = dir*0.01;			//???????????????????
-				g_route_data.p_route_data[i * 11 + 9] = radis;		//??????
-				g_route_data.p_route_data[i * 11 + 10]= 0;			//????????????
+				g_route_data.p_route_data[i * 11 + 4] = type;		//
+				g_route_data.p_route_data[i * 11 + 5] = 0;			//
+				g_route_data.p_route_data[i * 11 + 6] = 0;			//
+				g_route_data.p_route_data[i * 11 + 7] = speed;	    //
+				g_route_data.p_route_data[i * 11 + 8] = dir*0.01;	//
+				g_route_data.p_route_data[i * 11 + 9] = radis;		//转弯半径
+				g_route_data.p_route_data[i * 11 + 10]= 500.00;	    //接收半径
 				
 				if(i==0)
+				{
 					dir_of_wp0=dir;
+					g_route_data.p_route_data[10]=120;
+				}
 			}
 			// updateRP(Arp, ptCount);	// 014 ?????
 			navInput.InitLon  = g_route_data.p_route_data[1];
@@ -918,27 +928,19 @@ void UpdatePredictMsnByGround(STRU_422_MSG_INFO * frame)
 			g_initial_data.longitude_launch = g_route_data.p_route_data[1];
 			g_initial_data.latitude_launch  = g_route_data.p_route_data[2];
 			g_initial_data.height_launch    = g_route_data.p_route_data[3];
-			g_initial_data.initial_parameter1 = 15;
-			g_initial_data.initial_parameter2 = 85;
-			g_initial_data.launch_time		= 0;
-			g_initial_data.lauch_azimuth	= dir_of_wp0 * 0.01;
-			g_initial_data.lauch_pitch		= 12;
-			g_initial_data.lauch_booster_pitch = 32;
+			g_initial_data.initial_parameter1 = 15;//预留初始参数1，例如发射点温度等，用于估算 声速、大气等模型
+			g_initial_data.initial_parameter2 = 170;//预留初始参数2，飞行仿真模式
+			g_initial_data.launch_time		= 0;                //发射时间
+			g_initial_data.lauch_azimuth	= dir_of_wp0 * 0.01;//发射方位角
+			g_initial_data.lauch_pitch		= 12;               //发射俯仰角
+			g_initial_data.lauch_booster_pitch = 20;//助推器俯仰角
+			g_initial_data.climb_ktheta_enc = 8.0;  //初始段爬升角
+			g_initial_data.cruise_ktheta_enc = 2.0; //起飞完成后平飞攻角
 
 			SETDATA(pDataPoolFly, "DataLon", (g_route_data.p_route_data[1] * 1e7), OS_S32); 
 			SETDATA(pDataPoolFly, "DataLat", (g_route_data.p_route_data[2] * 1e7), OS_S32); 
 			SETDATA(pDataPoolFly, "DataHigh", g_route_data.p_route_data[3], 	   OS_S16);
 			SETDATA(pDataPoolFly, "DataDir", (OS_U16)dir_of_wp0, OS_U16); 
-
-			// pInput->initLon = Arp[0].lon;	// 014 ?????
-			// pInput->initLat = Arp[0].lat;
-			// pInput->initHigh =Arp[0].h;
-			// pInput->initDir = Arp[0].outTrack;
-			
-			// SETDATA(pDataPoolFly, "DataLon", (pInput->initLon / 0.0000001), OS_S32); //
-			// SETDATA(pDataPoolFly, "DataLat",  pInput->initLat / 0.0000001, OS_S32); //
-			// SETDATA(pDataPoolFly, "DataHigh", pInput->initHigh, OS_S16);//
-			// SETDATA(pDataPoolFly, "DataDir", pInput->initDir / 0.01, OS_U16); //
 			SETDATA(pDataPoolMsn,   "msnDevID", selfID, OS_U8);
 			SETDATA(pDataPoolMsn,   "msnGrpID", groupID, OS_U8);
         }

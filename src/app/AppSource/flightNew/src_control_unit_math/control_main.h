@@ -34,10 +34,11 @@ public:
 	CMathControlMain();
 	void Initial();
 	void Run();
+	void Choose_Target_ID();
 	double flight_time;
 	int time_tick;
 	int missile_ID;
-//	Stru_Debug_Monitor				* p_st_debug_monitor;//调试/监控接口
+	//Stru_Debug_Monitor				* p_st_debug_monitor;//调试/监控接口
 	//输入
 	Stru_Data_Seeker_To_Controller		* p_st_data_seeker_to_controller;//协议接口数据
 	Stru_Data_INS_To_Controller			* p_st_data_ins_to_controller;
@@ -59,25 +60,25 @@ public:
 private:
 	void Update_Input_Data(MODULE_TYPE MODULE_NAME);
 	void Update_Output_Data();
-	CMathControlFlightBasic					m_math_control_flight_basic;
-	CMathControlRoll						m_math_control_roll;
+	CMathControlFlightBasic				m_math_control_flight_basic;
+	CMathControlRoll					m_math_control_roll;
 	CMathControlYaw						m_math_control_yaw;
-	CMathControlPitch						m_math_control_pitch;
+	CMathControlPitch					m_math_control_pitch;
 	CMathControlEngine					m_math_control_engine;
 	CMathControlOut						m_math_control_out;
 	
-	Stru_Flight_Basic_Input					m_st_flight_basic_input;
-	Stru_Flight_Basic_Output				m_st_flight_basic_output;
-	Stru_Roll_Control_Input					m_st_roll_control_input;
-	Stru_Roll_Control_Output				m_st_roll_control_output;
+	Stru_Flight_Basic_Input				m_st_flight_basic_input;
+	Stru_Flight_Basic_Output			m_st_flight_basic_output;
+	Stru_Roll_Control_Input				m_st_roll_control_input;
+	Stru_Roll_Control_Output			m_st_roll_control_output;
 	Stru_Yaw_Control_Input				m_st_yaw_control_input;
 	Stru_Yaw_Control_Output				m_st_yaw_control_output;
-	Stru_Pitch_Control_Input				m_st_pitch_control_input;
-	Stru_Pitch_Control_Output				m_st_pitch_control_output;
-	Stru_Control_Out_Input					m_st_control_out_input;
+	Stru_Pitch_Control_Input			m_st_pitch_control_input;
+	Stru_Pitch_Control_Output			m_st_pitch_control_output;
+	Stru_Control_Out_Input				m_st_control_out_input;
 	Stru_Control_Out_Output				m_st_control_out_output;
-	Stru_Engine_Control_Input				m_st_engine_control_input;
-	Stru_Engine_Control_Output				m_st_engine_control_output;
+	Stru_Engine_Control_Input			m_st_engine_control_input;
+	Stru_Engine_Control_Output			m_st_engine_control_output;
 	int m_target_attack_ID;
 };
 #endif

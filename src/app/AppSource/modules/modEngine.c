@@ -9,12 +9,15 @@
 #include "modOnceBattery.h"
 #include "../core/DataPool.h"
 #include "../core/BusInteract.h"
+#include "../StateMachine.h"
+#include "../controller/controller.h"
 #include "../Interface/interface_uart.h"
 
 OS_U32 CurEngineRpm = 0;    //014 ���Űٷֱ�*10 ȡֵ[0~1000]��  280 ת��
 OS_U32 EngineRpmCmd = 0;
 OS_U8 EngineStartStatus = 0;
 OS_U8 SyncToGround = 0;     //������Ƶģ������Ƿ�����洫������
+OS_U8 EngineRunningFlag = 0;
 
 void EngineInit()
 {
@@ -22,11 +25,11 @@ void EngineInit()
 }
 
 /** ��������
- * ��Σ����Űٷֱ� ȡֵ0~100.0
+ * ��Σ����Űٷֱ�? ȡֵ0~100.0
  */
 void SetEngineThrot(float percent)
 {
-    // unsigned int rpm = percent * 10.0f;//Ϊ������ң��������ǽ���������ת��һ��
+    // unsigned int rpm = percent * 10.0f;//Ϊ������ң��������ǽ����������?��һ��
     // SETDATA(pDataPoolSelf,	"engSetRp",	rpm,  OS_U16);
     modECU_setThrottle_percent(percent);
 }
@@ -43,7 +46,7 @@ void StopEngine()
     modECU_stopEngine();
 }
 
-/** �������������������Ҳ���ǵ����ң��ָ��
+/** �������������������Ҳ���ǵ����ң��ָ��?
  * ����ת��ָ������ݳء��ط�����ת��
  * ��ȡ����������������Ӧ����
  * ��ȡ���в�����
@@ -133,23 +136,27 @@ void EngineHandler()   // HACK: TEST ECU restore & display
         SETDATA(pDataPoolSelf, "ecuError",	engineStatus.ecuError,	OS_U8);
 
     /** **************** ������������ʾ ******************* */
-        param30.runningStatus = engineStatus.CntState;
-        param30.fuel_pressure = engineStatus.fuel_pressure;
-        param30.jet1_duty = engineStatus.jet1_duty;
-        param30.curRpm = engineStatus.rpm;
-        param30.ambient_temp = engineStatus.ambient_temp;
-        param30.jet2_duty = engineStatus.jet2_duty;
-        param30.battV = engineStatus.battV * 0.01;
-        param30.battA = engineStatus.battA * 0.1;
+        param30.runningStatus = engineStatus.CntState;         //当前发动机的状�?
+        param30.error = engineStatus.ecuError;                 // 发动机错�?�?
+        param30.fuel_pressure = engineStatus.fuel_pressure;    //实际油压
+        param30.jet1_duty = engineStatus.jet1_duty;            // 实际喷油1脉�??
+        param30.curRpm = engineStatus.rpm;                     // 实际�?�?
+        param30.ambient_temp = engineStatus.ambient_temp;      // �?境温�?
+        param30.jet2_duty = engineStatus.jet2_duty;            // 实际喷油2脉�??
+        param30.battV = engineStatus.battV * 0.01;             // 系统输入电压
+        param30.battA = engineStatus.battA * 0.1;              // 系统输入电流
         // param30.actual_throttle = engineStatus.actual_throttle;//97
-        param30.actual_throttle = engineStatus.expect_throttle;//86
+        param30.actual_throttle = engineStatus.expect_throttle;// 期望的油门位�?
         param30.ch1_temp = engineStatus.ch1_temp;
         param30.ch2_temp = engineStatus.ch2_temp;
         param30.ch3_temp = engineStatus.ch3_temp;
         param30.ch4_temp = engineStatus.ch4_temp;
-        param30.error = engineStatus.ecuError;
-
-        if(SyncToGround)
+        param30.outputW = 0;
+				if(engineStatus.fuel_pressure != 0)
+				{
+					g_DeviceState.ecuCountDown = 200;
+				}
+        if((SyncToGround==1)||(EngineRunningFlag==5))
         {
             MsgToDevice(RT_DATA_LINK, 0x30, sizeof(STRU_RUNNING_INFO), (OS_U8 *)&param30);
     //         MsgToDevice(RT_DATA_LINK, 0x31, sizeof(STRU_START_PARAM_INFO), (OS_U8 *)&param31);
@@ -169,9 +176,19 @@ OS_U8 AutoDriveEnginePwm()//ÿ100ms��������һ��engine���
     {
         if(((DOM_AUTOMATIC & g_DeviceState.workStage) == DOM_AUTOMATIC) && flightSeq.umOpen != 1)
         {
-            // ״̬���������У���δ�յ�ɡ�����        ���Ʒ�����������
             GetDataFast(pDataPoolFly, "EngineRp", &CurEngineRpm);
-			SetEngineThrot(CurEngineRpm *0.1f);// ȫ�ֱ����д��Ӧ���ǿ��Ƹ��������ſ��� * 10
+			SetEngineThrot(CurEngineRpm *0.1f);
+        }
+        else if(flightSeq.umOpen != 1)
+        {
+            OS_U8 autoStep = 0;
+
+            GetDataFast(pDataPoolMsn, "autoStep", &autoStep);
+            if(autoStep >= 9 && autoStep <= 13)
+            {
+                GetDataFast(pDataPoolFly, "EngineRp", &CurEngineRpm);
+                SetEngineThrot(CurEngineRpm * 0.1f);
+            }
         }
     }
 	return 0;

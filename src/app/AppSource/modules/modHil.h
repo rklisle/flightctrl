@@ -1,7 +1,7 @@
 /*
  * modHil.h
  *
- *  Created on: 2024Äê4ÔÂ6ÈÕ
+ *  Created on: 2024ï¿½ï¿½4ï¿½ï¿½6ï¿½ï¿½
  *      Author: lenovo
  */
 
@@ -13,7 +13,7 @@
 typedef struct
 {
 	OS_U8 runStop;	///1:run,0:stop
-	OS_U8 useNav;	//0:ÓÃ·ÂÕæÊı¾İ£¬1:ÓÃIMUÊı¾İ
+	OS_U8 useNav;	//0:ï¿½Ã·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½İ£ï¿½1:ï¿½ï¿½IMUï¿½ï¿½ï¿½ï¿½
 	
 	double wx;
 	double wy;
@@ -32,19 +32,19 @@ typedef struct
 	double vs;
 	double ve;
 
-	OS_U16 nav_state;//×éºÏµ¼º½×´Ì¬0x60¹ßĞÔµ¼º½£¬0x64×éºÏµ¼º½£¬×ªµ¼º½ºóÆäËûÖµÎªµ¼º½Òì³£
+	OS_U16 nav_state;//ï¿½ï¿½Ïµï¿½ï¿½ï¿½×´Ì¬0x60ï¿½ï¿½ï¿½Ôµï¿½ï¿½ï¿½ï¿½ï¿½0x64ï¿½ï¿½Ïµï¿½ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÖµÎªï¿½ï¿½ï¿½ï¿½ï¿½ì³£
 	
-	double DD1;	// ¿ÕËÙ¹Ü ¾²Ñ¹
-	double DD2;	// ¿ÕËÙ¹Ü ×ÜÑ¹
+	double DD1;	// ï¿½ï¿½ï¿½Ù¹ï¿½ ï¿½ï¿½Ñ¹
+	double DD2;	// ï¿½ï¿½ï¿½Ù¹ï¿½ ï¿½ï¿½Ñ¹
 
-	double rpm_engine_state;//·¢¶¯»ú×ªËÙ
-	OS_U16 engine_state;//·¢¶¯»ú¿ØÖÆ
+	double rpm_engine_state;//å‘åŠ¨æœºçŠ¶æ€è½¬é€Ÿ
+	OS_U16 engine_state;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	
-	double qf;//µ¼ÒıÍ·Êı¾İ
-	double qh;//µ¼ÒıÍ·Êı¾İ
-	double dqf;//µ¼ÒıÍ·
-	double dqh;//µ¼ÒıÍ·Êı¾İ
-	OS_U16	seeker_state;//Î´Ëø¶¨0x00£¬Ä³ÖµÎªËø¶¨
+	double qf;//ä¿¯ä»°å®ç°è§’
+	double qh;//èˆªå‘è§†çº¿è§’
+	double dqf;//ä¿¯ä»°è§†çº¿è§’é€Ÿåº¦
+	double dqh;///èˆªå‘è§†çº¿è§’é€Ÿåº¦
+	OS_U16	seeker_state;//å¯¼å¼•å¤´é”å®šæ ‡è¯†ï¼Œé»˜è®¤å€¼0x00ä¸ºæœªé”å®šï¼›
 } STRU_HIL_INPUT;
 typedef struct _Stru_Sim_Data_OUTPUT
 {
@@ -104,4 +104,6 @@ typedef struct NAV_INPUT_SIMU
 extern OS_U8 HilFlightStage();
 extern OS_U32 HilRtHandler(STRU_422_MSG_INFO * frame);
 extern STRU_HIL_INPUT hilInput;
+/* ï¿½ï¿½Î»ï¿½ï¿½Ğ´ï¿½ï¿½ HIL DD4 ï¿½ï¿½ï¿½ï¿½Å£ï¿½0x82 res1 Ô­ï¿½ï¿½ï¿½Ø´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú²ï¿½ï¿½ï¿½ HIL ï¿½ï¿½È¦ï¿½Ó³Ù¡ï¿½ */
+extern OS_U16 g_hilEchoSequence;
 #endif /* SRC_MODULES_MODHIL_H_ */

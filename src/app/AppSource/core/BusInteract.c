@@ -50,7 +50,6 @@ void InitCanRts()
 	fdCan[0] = app_can_init(NULL, &hfdcan1, CanRtServoHandler, 0);  // 改为舵机处理函数
 #endif
     fdCan[1] = app_can_init(NULL, &hfdcan2, CanRtPwrSeqHandler, 1);	//MML配电板
-
 }
 /***********************************************************
  * 函数名称:InitRts()
