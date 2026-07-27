@@ -91,7 +91,7 @@ static void FlightSeqOutputHandle()
 		}
 		/* After T+20 s: fire landing pyrotechnic once when touchdown is detected */
 		static OS_U8 yijinggesan = 0;
-		if(waitOneSec > 4000 && yijinggesan == 0)//ZXT-014不需要割�?
+		if(waitOneSec > 4000 && yijinggesan == 0)//ZXT-014不需要割伞
 		{
 			// OS_S16 navVs;
 			// GetDataFast(pDataPoolImu, "navVs", &navVs);
@@ -148,71 +148,71 @@ static void FlightSeqOutputHandle()
 ***********************************************************/
 void FlightTMOutputHandle()	
 {
-	SETDATA(pDataPoolMsn,	"curPtNo",	g_CtrltoDL_tel.curPtNo,	OS_U8);         		//当前�?点号
-	SETDATA(pDataPoolMsn,	"tarLon",	g_CtrltoDL_tel.curTargetLon * 1e7, OS_S32 );	//当前�?标航点经�?
-	SETDATA(pDataPoolMsn,	"tarLat",	g_CtrltoDL_tel.curTargetLat * 1e7, OS_S32 );	//当前�?标航点纬�?
-	SETDATA(pDataPoolMsn,	"tarAlt",	g_CtrltoDL_tel.curTargetAlt, OS_S16 );			//当前�?标航点高�?
-	SETDATA(pDataPoolFly,	"rollCmd",	g_CtrltoDL_tel.rudderRollCmd* 100,	OS_S16);	//通道舵副�?
-	SETDATA(pDataPoolFly,	"pitchCmd",	g_CtrltoDL_tel.rudderPitchCmd * 100,OS_S16);	//通道舵升�?	
-	SETDATA(pDataPoolFly,	"yawCmd",	g_CtrltoDL_tel.rudderYawCmd* 100,	OS_S16);	//通道舵航�?
+	SETDATA(pDataPoolMsn,	"curPtNo",	g_CtrltoDL_tel.curPtNo,	OS_U8);         		//当前航点号
+	SETDATA(pDataPoolMsn,	"tarLon",	g_CtrltoDL_tel.curTargetLon * 1e7, OS_S32 );	//当前目标航点经度
+	SETDATA(pDataPoolMsn,	"tarLat",	g_CtrltoDL_tel.curTargetLat * 1e7, OS_S32 );	//当前目标航点纬度
+	SETDATA(pDataPoolMsn,	"tarAlt",	g_CtrltoDL_tel.curTargetAlt, OS_S16 );			//当前目标航点高度
+	SETDATA(pDataPoolFly,	"rollCmd",	g_CtrltoDL_tel.rudderRollCmd* 100,	OS_S16);	//通道舵副翼
+	SETDATA(pDataPoolFly,	"pitchCmd",	g_CtrltoDL_tel.rudderPitchCmd * 100,OS_S16);	//通道舵升降	
+	SETDATA(pDataPoolFly,	"yawCmd",	g_CtrltoDL_tel.rudderYawCmd* 100,	OS_S16);	//通道舵航向
 
-	SETDATA(pDataPoolFly,	"gamaCmd",	g_CtrltoDL_tel.gamaCmd * 1e2, OS_S16 );			//滚转角指�?
-	SETDATA(pDataPoolFly,	"nycCmd",	g_CtrltoDL_tel.nycCmd * 1e2, OS_S16 ); 			//升力面过载指�?
-	SETDATA(pDataPoolFly,	"varthCmd",	g_CtrltoDL_tel.varthetaCmd * 1e2, OS_S16 );     //�?仰�?�指�?
-	SETDATA(pDataPoolFly,	"highCmd",	g_CtrltoDL_tel.heightCmd , OS_S16 );			//高度指令
-	SETDATA(pDataPoolFly,	"vyCmd",	g_CtrltoDL_tel.vyCmd/0.003 , OS_S16 );			    //垂速指�?
-	SETDATA(pDataPoolFly,	"ac_dL",	g_CtrltoDL_tel.ac_dL * 100, OS_U32);			//待�?�距
-	SETDATA(pDataPoolFly,	"ac_dZ",	g_CtrltoDL_tel.ac_dZ * 100, OS_U16);			//侧边�?
-	SETDATA(pDataPoolFly,   "fcstate",  g_CtrltoDL_tel.flight_control_state,OS_U32);    //飞�?�状�?
+	SETDATA(pDataPoolFly,	"gamaCmd",	g_CtrltoDL_tel.gamaCmd * 1e2, OS_S16 );			//滚转角指令
+	SETDATA(pDataPoolFly,	"nycCmd",	g_CtrltoDL_tel.nycCmd * 1e2, OS_S16 ); 			//升力面过载指令
+	SETDATA(pDataPoolFly,	"varthCmd",	g_CtrltoDL_tel.varthetaCmd * 1e2, OS_S16 );     //俯仰角指令
+	SETDATA(pDataPoolFly,	"highCmd",	g_CtrltoDL_tel.heightCmd/0.1,OS_S16 );			//高度指令
+	SETDATA(pDataPoolFly,	"vyCmd",	g_CtrltoDL_tel.vyCmd/0.003 , OS_S16 );			//垂速指令
+	SETDATA(pDataPoolFly,	"ac_dL",	g_CtrltoDL_tel.ac_dL * 100, OS_U32);			//待飞距
+	SETDATA(pDataPoolFly,	"ac_dZ",	g_CtrltoDL_tel.ac_dZ * 100, OS_U16);			//侧边距
+	SETDATA(pDataPoolFly,   "fcstate",  g_CtrltoDL_tel.flight_control_state,OS_U32);    //飞行状态
 	
-	SETDATA(pDataPoolFly,   "thrusCmd", g_CtrltoDL_tel.thrustCmd*10,OS_U16);            //推力指令，例如油门开�?Kc 无�?�号
-	SETDATA(pDataPoolFly,   "rpmState", g_CtrltoDL_tel.rpmState/2,OS_U16);             	//发动机状态转�?
+	SETDATA(pDataPoolFly,   "thrusCmd", g_CtrltoDL_tel.thrustCmd*10,OS_U16);            //推力指令，例如油门开度Kc 无符号
+	SETDATA(pDataPoolFly,   "rpmState", g_CtrltoDL_tel.rpmState/2,OS_U16);             	//发动机状态转速
 	SETDATA(pDataPoolFly,	"ac_Vz",	g_CtrltoDL_tel.ac_Vz/0.003,	OS_S16);			//侧向速度
 	SETDATA(pDataPoolFly,	"ac_Vy",	g_CtrltoDL_tel.ac_Vy/0.003,OS_S16);				//天向速度	
 	SETDATA(pDataPoolFly,	"ac_Vx",	g_CtrltoDL_tel.ac_Vx/0.003,	OS_S16);			//射向速度
-	SETDATA(pDataPoolFly,	"ac_dR",	g_CtrltoDL_tel.ac_dR * 10, OS_S16 );			//圆轨迹侧边距，未去掉�?�?半径
-	SETDATA(pDataPoolFly,	"azimuth",	g_CtrltoDL_tel.cur_azimuth/0.006, OS_S16 );		//�?段方位�??
-	SETDATA(pDataPoolFly,	"thetav",	g_CtrltoDL_tel.cur_thetav/0.003, OS_S16 );		//轨迹倾�??
-	SETDATA(pDataPoolFly,	"psicv",	g_CtrltoDL_tel.cur_psicv/0.006, OS_S16 );		//轨迹偏�??
+	SETDATA(pDataPoolFly,	"ac_dR",	g_CtrltoDL_tel.ac_dR * 10, OS_S16 );			//圆轨迹侧边距，未去掉转弯半径
+	SETDATA(pDataPoolFly,	"azimuth",	g_CtrltoDL_tel.cur_azimuth/0.006, OS_S16 );		//航段方位角
+	SETDATA(pDataPoolFly,	"thetav",	g_CtrltoDL_tel.cur_thetav/0.003, OS_S16 );		//轨迹倾角
+	SETDATA(pDataPoolFly,	"psicv",	g_CtrltoDL_tel.cur_psicv/0.006, OS_S16 );		//轨迹偏角
 	SETDATA(pDataPoolFly,	"Vcmd",	    g_CtrltoDL_tel.Vcmd * 10, OS_S16 );				//速度指令 
-	SETDATA(pDataPoolFly,	"nyCmd",	g_CtrltoDL_tel.nyCmd_Guidance * 100 , OS_S16 );	//�?制�?�纵向过载指�?
-	SETDATA(pDataPoolFly,	"nzCmd",	g_CtrltoDL_tel.nzCmd_Guidance * 100, OS_S16 );	//�?制�?�侧向过载指�?
-	SETDATA(pDataPoolFly,	"wyCmd",	g_CtrltoDL_tel.wyCmd * 100, OS_S16 );			//�?向�?�速度指令
+	SETDATA(pDataPoolFly,	"nyCmd",	g_CtrltoDL_tel.nyCmd_Guidance * 100 , OS_S16 );	//末制导纵向过载指令
+	SETDATA(pDataPoolFly,	"nzCmd",	g_CtrltoDL_tel.nzCmd_Guidance * 100, OS_S16 );	//末制导侧向过载指令
+	SETDATA(pDataPoolFly,	"wyCmd",	g_CtrltoDL_tel.wyCmd * 100, OS_S16 );			//航向角速度指令
 
-	SETDATA(pDataPoolFly,	"pitch_nT",	g_CtrltoDL_tel.pitch_rate_nT_filterOut * 1000, OS_S16 );//�?仰�?�线角速度滤波
+	SETDATA(pDataPoolFly,	"pitch_nT",	g_CtrltoDL_tel.pitch_rate_nT_filterOut * 1000, OS_S16 );//俯仰视线角速度滤波
 	SETDATA(pDataPoolFly,	"yaw_nT",	g_CtrltoDL_tel.yaw_rate_nT_filterOut * 1000, OS_S16 );  //偏航视线角速度滤波
-	SETDATA(pDataPoolFly,	"deltaR",	g_CtrltoDL_tel.deltaR*100,	OS_U32);			//弹目距�?�，打击�?
-	SETDATA(pDataPoolFly,	"dRn",		g_CtrltoDL_tel.dRn,	OS_S16);					//弹目北向距�??
-	SETDATA(pDataPoolFly,	"dRu",		g_CtrltoDL_tel.dRu,	OS_S16);					//弹目天向距�??
-	SETDATA(pDataPoolFly,	"dRe",		g_CtrltoDL_tel.dRe,	OS_S16);					//弹目东向距�??
-	SETDATA(pDataPoolFly,	"PitchPre",	g_CtrltoDL_tel.Pitch_Preset_Angle * 100,OS_S16);//理�?�俯仰�?�架�?
-	SETDATA(pDataPoolFly,	"YawPre",	g_CtrltoDL_tel.Yaw_Preset_Angle * 100,OS_S16);	//理�?�偏�?框架�?
-	SETDATA(pDataPoolFly,	"DusState",	g_CtrltoDL_tel.Dubins_stage, OS_S32);			//杜�?�斯�?
-	SETDATA(pDataPoolFly,	"DusType1",	g_CtrltoDL_tel.dubins_type1, OS_S32);			//杜�?�斯类型
-	SETDATA(pDataPoolFly,	"DusType2",	g_CtrltoDL_tel.dubins_type2, OS_S32);			//杜�?�斯类型
-	SETDATA(pDataPoolFly,	"DusType3",	g_CtrltoDL_tel.dubins_type3, OS_S32);			//杜�?�斯类型
-	SETDATA(pDataPoolFly,	"DbsLen",	g_CtrltoDL_tel.Dubins_length , OS_FLOAT);		//杜�?�斯段航�?
+	SETDATA(pDataPoolFly,	"deltaR",	g_CtrltoDL_tel.deltaR*100,	OS_U32);			//弹目距离，打击点
+	SETDATA(pDataPoolFly,	"dRn",		g_CtrltoDL_tel.dRn,	OS_S16);					//弹目北向距离
+	SETDATA(pDataPoolFly,	"dRu",		g_CtrltoDL_tel.dRu,	OS_S16);					//弹目天向距离
+	SETDATA(pDataPoolFly,	"dRe",		g_CtrltoDL_tel.dRe,	OS_S16);					//弹目东向距离
+	SETDATA(pDataPoolFly,	"PitchPre",	g_CtrltoDL_tel.Pitch_Preset_Angle * 100,OS_S16);//理论俯仰框架角
+	SETDATA(pDataPoolFly,	"YawPre",	g_CtrltoDL_tel.Yaw_Preset_Angle * 100,OS_S16);	//理论偏航框架角
+	SETDATA(pDataPoolFly,	"DusState",	g_CtrltoDL_tel.Dubins_stage, OS_S32);			//杜宾斯段
+	SETDATA(pDataPoolFly,	"DusType1",	g_CtrltoDL_tel.dubins_type1, OS_S32);			//杜宾斯类型
+	SETDATA(pDataPoolFly,	"DusType2",	g_CtrltoDL_tel.dubins_type2, OS_S32);			//杜宾斯类型
+	SETDATA(pDataPoolFly,	"DusType3",	g_CtrltoDL_tel.dubins_type3, OS_S32);			//杜宾斯类型
+	SETDATA(pDataPoolFly,	"DbsLen",	g_CtrltoDL_tel.Dubins_length , OS_FLOAT);		//杜宾斯段航程
 	SETDATA(pDataPoolFly,	"gamacCom",	g_CtrltoDL_tel.gamac_compensate/0.003,OS_S16);	//滚转角指令补偿量
-	SETDATA(pDataPoolFly,	"uz_gamac",	g_CtrltoDL_tel.uz_gamac/0.003,OS_S16);			//侧偏控制�?
-	SETDATA(pDataPoolFly,	"mx_ESO",	g_CtrltoDL_tel.mx_ESO*100,OS_S16);				//干扰估�?�状态量z2
+	SETDATA(pDataPoolFly,	"uz_gamac",	g_CtrltoDL_tel.uz_gamac/0.003,OS_S16);			//侧偏控制量
+	SETDATA(pDataPoolFly,	"mx_ESO",	g_CtrltoDL_tel.mx_ESO*100,OS_S16);				//干扰估计状态量z2
 	SETDATA(pDataPoolFly,	"ADRC",	    g_CtrltoDL_tel.fduox_ADRC * 100, OS_S16);		//ADRC舵偏
 	SETDATA(pDataPoolFly,	"Qv",	    g_CtrltoDL_tel.Qv * 100, OS_U32);				//动压
-	SETDATA(pDataPoolFly,   "alphaIns", g_CtrltoDL_tel.alpha_ins*100,	OS_S16);		//地速攻�?
-	SETDATA(pDataPoolFly,   "betaIns",  g_CtrltoDL_tel.beta_ins*100,	OS_S16);        //地速侧滑�??	
+	SETDATA(pDataPoolFly,   "alphaIns", g_CtrltoDL_tel.alpha_ins*100,	OS_S16);		//地速攻角
+	SETDATA(pDataPoolFly,   "betaIns",  g_CtrltoDL_tel.beta_ins*100,	OS_S16);        //地速侧滑角	
 	SETDATA(pDataPoolFly,	"nyflt",	g_CtrltoDL_tel.nyflt/0.001, OS_S16 );			//体轴法向过载
 	SETDATA(pDataPoolFly,	"nzflt",	g_CtrltoDL_tel.nzflt/0.001, OS_S16 );			//体轴侧向过载
 	SETDATA(pDataPoolFly,   "cnt_alti", g_CtrltoDL_tel.count_altitude_change,OS_U32);   //高度机动次数
-	SETDATA(pDataPoolFly,	"mass_cal",	g_CtrltoDL_tel.mass_calc/0.01, OS_S16 );		//质量估�??
-	SETDATA(pDataPoolFly,	"ugfZetac", g_CtrltoDL_tel.ugf_zetac/0.001, OS_S16 );		//高度控制�?
-	SETDATA(pDataPoolFly,	"uqkf",		g_CtrltoDL_tel.uqkf/0.001, OS_S16 );			//前�?�控制量
+	SETDATA(pDataPoolFly,	"mass_cal",	g_CtrltoDL_tel.mass_calc/0.01, OS_S16 );		//质量估计
+	SETDATA(pDataPoolFly,	"ugfZetac", g_CtrltoDL_tel.ugf_zetac/0.001, OS_S16 );		//高度控制量
+	SETDATA(pDataPoolFly,	"uqkf",		g_CtrltoDL_tel.uqkf/0.001, OS_S16 );			//前馈控制量
 
 	SETDATA(pDataPoolFly,	"curLon",	g_CtrltoDL_tel.curLon * 1e7, OS_S32 );    //当前经度
-	SETDATA(pDataPoolFly,	"curLat",	g_CtrltoDL_tel.curLat * 1e7, OS_S32 );	  //当前�?�?
-	SETDATA(pDataPoolFly,	"curAlt",	g_CtrltoDL_tel.curAlt, OS_S16 );		  //当前高度
+	SETDATA(pDataPoolFly,	"curLat",	g_CtrltoDL_tel.curLat * 1e7, OS_S32 );	  //当前纬度
+	SETDATA(pDataPoolFly,	"curAlt",	g_CtrltoDL_tel.curAlt/0.1,OS_S16 );		  //当前高度
 
 	// SETDATA(pDataPoolFly,	"tokenlon",	g_CtrltoDL_tel.token_long, OS_U8 );			//纵向令牌
 	// SETDATA(pDataPoolFly,	"tokenlat",	g_CtrltoDL_tel.token_late, OS_U8 );			//侧向令牌
-    // SETDATA(pDataPoolNav, "MaxRpm", g_CtrltoDL_tel.MaxRpm*100,	OS_S16);			//最大转�?
+    // SETDATA(pDataPoolNav, "MaxRpm", g_CtrltoDL_tel.MaxRpm*100,	OS_S16);			//最大转速
 	// SETDATA(pDataPoolNav, "DFT_freq", g_CtrltoDL_tel.DFT_freq_max*100,	OS_S16);	//辨识运动频率
 	if(g_controller_to_switch.flag_missle_takeoff == 1)
 	{
@@ -254,7 +254,7 @@ void FlightEngineOutputHandle()//02 ????????????????????????????????????????????
 		//????????????????????
 		if(OutSafeArea)
 		{
-			//?????????????????????
+			//slow down the speed
 			// CurEngineRpm = 18000;
 			//?????????
 			//StopEngine();
@@ -359,6 +359,9 @@ void FlightInputGenerate()
 
 		g_baro_data.static_pressure = static_pressure;
 		g_baro_data.total_pressure = total_pressure;
+		//导引头后续赋值
+		g_seeker_data.flag_combat_status=0;
+		g_seeker_data.flag_combat_status=0;
 
 		double V   = sqrt(pow(g_ins_data.vtx,2) + pow(g_ins_data.vty,2) + pow(g_ins_data.vtz,2)); /* ground speed m/s */
 		SETDATA(pDataPoolSelf, "GrdSpd", V * 10, OS_S16);

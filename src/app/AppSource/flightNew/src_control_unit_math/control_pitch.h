@@ -4,11 +4,6 @@
 // Copyright (c) 2016 
 // All rights reserved.
 //
-// 摘要: 飞控俯仰通道控制模块
-//        
-//
-// 当前版本: 1.0
-// 作者: wym
 // 完成日期: 
 //==================================================================/
 //#include "../../debug_monitor.h"
@@ -57,6 +52,7 @@ typedef struct  _Stru_Pitch_Control_Output
 {
 	double uqkf;//俯仰前馈量
 	double u2f;
+	double u4f;
 	double u5f;
 	double ugf;
 	double urf_zd;
@@ -91,6 +87,7 @@ private:
 	double m_k0f;//内环前馈
 	double m_k2f;//内环比例
 	double m_k5f;//内环微分
+	double m_k4f;//内环积分
 	double m_k3f;//外环比例
 	double m_k7f;//外环微分
 	double m_k6f;//外环积分
@@ -106,6 +103,7 @@ private:
 	double m_uqkf;	//前馈量
 	double m_u2f;	//内回路比例舵控，输出给舵控分配1
 	double m_u5f;	//内回路微分舵控，积分形式伪攻角三回路过载控制复用为“角速度控制系数”，输出给舵控分配2
+	double m_u4f;	//内回路积分量舵控，爬升或下降过程使用20260717
 	double m_u3f;	//外回路比例，高度偏差
 	double m_u7f;	//外回路微分，速度(与指令速度偏差）
 	double m_u6f;	//外回路积分，高度偏差积分
@@ -180,6 +178,7 @@ private:
 	double m_gama_command_compensate;
 
 	bool   m_flag_altitude_integral_set;//高度积分
+	bool   m_flag_zeta_integral_set;//俯仰角积分
 	int m_high_maneuver_state_record;
 	int m_high_maneuver_state;//高度机动状态，0初始，1起飞过程，2定高控制，3爬升，4下滑，5末制导，6末制导(测试，需要俯冲拉起)，7俯冲拉起(测试末制导结束后)，8伞降回收状态
 };

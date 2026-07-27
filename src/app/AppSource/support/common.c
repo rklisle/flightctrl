@@ -12,6 +12,7 @@
 #include "common.h"
 #include "os_bufferLoop.h"
 #include <math.h>
+#include "log_ctrl.h"
 
 ERROR_RESULT RecvMessageS422FPGA(OS_U8 recvBuf[MAX_SIMUL_FRAME][RECV_422_MAX_LEN + 1], OS_U8 rtIndex, OS_U16 pu16Length[MAX_SIMUL_FRAME]);
 STRU_STANDARD_FRAME recvStandFrame;
@@ -106,6 +107,10 @@ const STRU_STANDARD_FRAME* PeekStandardMessage()
 		{
 			if((u16Length[i] > 0) && ( rtList[rtIndex].ptr_ChkFrameSum != NULL))
 			{
+				// if(rtIndex == RT_FUSE)
+				// {
+				// 	LOG_HEX16(pmData[i], "pmData[0] = ");
+				// }
 				//先做帧校验检查，再压栈
 				//调整pmData[n]的内部排列，使其满足标准帧要求
 				OS_U16 standFrameLen = rtList[rtIndex].ptr_ChkFrameSum(pmData[i]);

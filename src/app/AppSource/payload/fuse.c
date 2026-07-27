@@ -13,6 +13,7 @@
 #include "../core/BusInteract.h"
 #include "../support/common.h"
 #include "../support/os_bufferLoop.h"
+#include "log_ctrl.h"
 
 #define SWAP_U16(x)  ((OS_U16)(((x) >> 8) | ((x) << 8)))
 
@@ -43,23 +44,24 @@ OS_U16 ChkFuseStandardFrame(OS_MEM* pmData)
 		return 0;
 	}
     
-    static uint32_t s_frm_index = 0;
-		static uint32_t s_error_cnt = 0;
-		static uint32_t s_total_cnt = 0;
-		s_total_cnt++;
-		uint32_t temp_index = pmData[4] * 0x10000 + pmData[5] * 0x100 + pmData[6];
-    if((s_frm_index + 1) != temp_index)
+    static uint32_t last_check = 0;
+    static uint32_t s_error_cnt = 0;
+    static uint32_t s_total_cnt = 0;
+    s_total_cnt++;
+    uint32_t cur_check = pmData[4]*0x10000 + pmData[5]*0x100 + pmData[6];
+    if((last_check + 1) != cur_check)
     {
-        s_frm_index = temp_index;
         s_error_cnt++;
+		LOG_VAL("s_error_cnt = %d\n", s_error_cnt);
     }
+    last_check = cur_check;
 
 	// pmData[26] * 0x100 + pmData[27]
-    OS_U16 checkSumRecv = pmData[buffLoop[RT_FUSE].fixedLen - 1] * 0x100 + pmData[buffLoop[RT_FUSE].fixedLen];	//�����
+    OS_U16 checkSumRecv = pmData[buffLoop[RT_FUSE].fixedLen - 1] * 0x100 + pmData[buffLoop[RT_FUSE].fixedLen];	// Big-endian
     OS_U16 checkSumCalc = crc16_xmodem(pmData + 1, buffLoop[RT_FUSE].fixedLen - 2);
     
    if(checkSumRecv != checkSumCalc)
-	{//У�鲻ͨ��
+	{//Verification failed
 		static int errorCount32 = 0;
         errorCount32++;
 		OS_U8 errorCount = (errorCount32 & 0xFF);
@@ -67,21 +69,13 @@ OS_U16 ChkFuseStandardFrame(OS_MEM* pmData)
 		return 0;
 	}
 
-	/** ������֡ */
-	pmData[3] = 17;		//au8Data����
-	pmData[4] = 0;		// ����
+	/** Assemble into a standard frame */
+	pmData[3] = 17;		//au8Data lenth
+	pmData[4] = 0;		// 
 	pmData[5] = 0;		// u8Seq
-	pmData[6] = 0x11;	// u8MsgID  // �˴�������280
+	pmData[6] = 0x11;	// u8MsgID  // accoding to 280
 	memcpy(pmData+7, pmData+9, 17);// au8Data 
 	return pmData[3] + 7 + 2;
-
-	// /** ԭ��280���� */
-    // memmove(pmData + 7, pmData + 6, pmData[3]);	// BUG �˴��Ƿ��ָ����˱������
-    // memcpy(data,pmData, 100);
-	// pmData[4] = 0;
-	// pmData[5] = 0;
-	// pmData[6] = 0x11;
-	// return pmData[3] + 5;
 }
 
 OS_U32 FuseRtHandler(STRU_422_MSG_INFO *data)

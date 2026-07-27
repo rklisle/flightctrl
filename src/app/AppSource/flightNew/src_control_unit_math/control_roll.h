@@ -6,9 +6,6 @@
 //
 // 摘要: 飞控滚动通道控制模块
 //        
-//
-// 当前版本: 1.0
-// 作者: wym
 // 完成日期: 
 //==================================================================/
 //#include "../../debug_monitor.h"
@@ -132,7 +129,8 @@ private:
 	double m_u25g;
 	double m_urg_record;
 	double m_uz;	//侧向干扰
-	double m_uz1_record;
+	double m_uz1_record;//直航侧偏控制记录
+	double m_uz2_record;//转弯侧偏控制记录
 	
 	double m_mass;	//估计质量
 	double m_v;		//空速
@@ -143,7 +141,7 @@ private:
 	double m_g;
 	
 	double m_gama;
-	double m_gama_record1;//助推器分离时刻滚转角
+	double m_gama_record1;//起飞完成时刻滚转角
 	double m_gama_record2;//入转弯准备后，滚转角
 	double m_gama_record3;//进入末制导时刻滚转角
 	double m_gama_command;
@@ -155,7 +153,7 @@ private:
 	
 	//侧向机动，装订航迹解算
 	double m_gama_turn_nominal;
-	double m_turn_angle;
+	double m_turn_angle;//北偏东为正，即右转为正
 	double m_turn_radius;
 	double m_target_velocity;
 	

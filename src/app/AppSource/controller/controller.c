@@ -29,6 +29,7 @@
 #include "../interface/interface_power.h"
 #include <math.h>
 #include "fuse.h"
+#include "log_ctrl.h"
 
 // /******************** Test umbrella Servo & ECU(PWM)***************************/
 // #include "interface_timer.h"
@@ -38,7 +39,7 @@ OS_U8 LunchDetective();
 float Read_CPU_Temperature(void) ;
 extern long calcTimeCpu0;
 extern int sd_card_fault;
-OS_U8 EngineStartCmd = 0;    //鏉ヨ嚜鍦伴潰鐨勬帶鍒跺弬鏁帮紝 1锛氬惎鍔ㄥ彂鍔ㄦ満锛?0锛氬仠姝㈠彂鍔ㄦ満
+OS_U8 EngineStartCmd = 0;    //来自地面的控制参数， 1：启动发动机；0：停止发动机
 float System_GetCoreTemperature();
 extern void ReConnectUart();
 extern void *g_pControl;
@@ -121,7 +122,6 @@ OS_U8 AutoLuanchProcess()  // 5ms运行一次
 	OS_FLOAT curHigh;
 	double dist;
 	double h_m;
-	const char* msg_log;
 
 	if(AutoStep == 14)
 	return 0;
@@ -239,8 +239,7 @@ OS_U8 AutoLuanchProcess()  // 5ms运行一次
 
 		if(g_DeviceState.CurrTick % 200 == 0)
 		{
-			msg_log = "waiting for CMD_MSN_UPDATE\n";
-			fcs_uart_send(RT_LOG, (const uint8_t*)msg_log, strlen(msg_log));    
+			LOG_STR("waiting for CMD_MSN_UPDATE\n");
 		}
 
 		if(msnID != 0xFF)
@@ -269,8 +268,7 @@ OS_U8 AutoLuanchProcess()  // 5ms运行一次
 		{
 			if(g_DeviceState.CurrTick % 200 == 0)
 			{
-				msg_log = "FOCUSING\n";
-				fcs_uart_send(RT_LOG, (const uint8_t*)msg_log, strlen(msg_log));    
+				LOG_STR("Focusing...\n");
 			}
 		}
 
@@ -282,8 +280,7 @@ OS_U8 AutoLuanchProcess()  // 5ms运行一次
 
 			if(g_DeviceState.CurrTick % 200 == 0)
 			{
-				msg_log = "FOCUS DONE\n";
-				fcs_uart_send(RT_LOG, (const uint8_t*)msg_log, strlen(msg_log));    
+				LOG_STR("Focus Done\n");
 			}
 		}
 		
@@ -310,8 +307,7 @@ OS_U8 AutoLuanchProcess()  // 5ms运行一次
 	{
         if(g_DeviceState.CurrTick % 200 == 0)
         {
-            msg_log = "waiting for ECU Start\n";
-            fcs_uart_send(RT_LOG, (const uint8_t*)msg_log, strlen(msg_log));    
+			LOG_STR("waiting for ECU Start\n");
         }
 
 		if(EngineStartCmd == 1)
@@ -343,8 +339,7 @@ OS_U8 AutoLuanchProcess()  // 5ms运行一次
 					case ENGINE_WARMUP://等待启动
 							if(g_DeviceState.CurrTick % 200 == 0)
 							{
-								msg_log = "ENGINE_WARMUP\n";
-								fcs_uart_send(RT_LOG, (const uint8_t*)msg_log, strlen(msg_log));    
+								LOG_STR("ENGINE_WARMUP...\n");
 							}
 							break;
 					case ENGINE_SHUTTING_DOWN:
@@ -352,15 +347,13 @@ OS_U8 AutoLuanchProcess()  // 5ms运行一次
 					case ENGINE_ERROR:
 							if(g_DeviceState.CurrTick % 200 == 0)
 							{
-								msg_log = "ENGINE_ERROR\n";
-								fcs_uart_send(RT_LOG, (const uint8_t*)msg_log, strlen(msg_log));    
+								LOG_STR("ENGINE_ERROR\n");
 							}
 							break;
 					case ENGINE_RUNNING:
 							if(g_DeviceState.CurrTick % 200 == 0)
 							{
-								msg_log = "ENGINE_RUNNING\n";
-								fcs_uart_send(RT_LOG, (const uint8_t*)msg_log, strlen(msg_log));    
+								LOG_STR("ENGINE_RUNNING\n");
 							}
 							/* 运行到这里表示：
 							1、启动成功*/
@@ -400,6 +393,10 @@ OS_U8 AutoLuanchProcess()  // 5ms运行一次
 	//8.预发射完成，等待地面解锁指令
 	if(AutoStep == 11)
 	{
+		if(g_DeviceState.CurrTick % 200 == 0)
+		{
+			LOG_STR("waiting for unlock...\n");
+		}
 		if(EngineStartCmd == 0)
 		{
 			//用户手动又发送了停机指令         
@@ -416,6 +413,10 @@ OS_U8 AutoLuanchProcess()  // 5ms运行一次
 	//9.地面解锁已经完成，等待火箭激发
 	if(AutoStep == 12)
 	{
+		if(g_DeviceState.CurrTick % 200 == 0)
+		{
+			LOG_STR("waiting for lauch...\n");
+		}
 		if(EngineStartCmd == 0)
 		{
 			//用户手动又发送了停机指令
@@ -501,10 +502,8 @@ OS_U8 AutoLuanchProcess()  // 5ms运行一次
 	SETDATA(pDataPoolMsn,	"autoStep",	AutoStep,	OS_U8);	
     if(g_DeviceState.CurrTick % 200 == 0)
     {
-		char info[50] = {0};
-		sprintf(info,"AutoStep = %d, NAVnavState = 0x%x, ecuState = %d\n", 
-						AutoStep, 			navStatus,		curState);
-        fcs_uart_send(RT_LOG, (const uint8_t*)info, strlen(info));
+		LOG_VAL("AutoStep = %d, NAVnavState = 0x%x, ecuState = %d\n", 
+            AutoStep, navStatus, curState);
     }
 
 	//判断导引头是否连接，如果连接则类型为0b11 = 3，如果未连接类型为0b10 = 2

@@ -11,7 +11,10 @@ CMathControlYaw::CMathControlYaw()
 	p_st_yaw_control_output = NULL;
 	//p_st_debug_monitor = NULL;
 	m_k5h = 0.0;
+	m_uh_adrc = 0.0;
+	m_urh_record = 0.0;
 	m_knih = 0.0;
+	m_knph = 0.0;
 	m_kwih = 0.0;
 	m_u5h = 0.0;
 	m_unwih = 0.0;
@@ -41,22 +44,145 @@ CMathControlYaw::CMathControlYaw()
 	m_g = 0.0;
 	m_gama = 0.0;
 	m_unih = 0.0;
+	m_unph = 0.0;
 	m_ubh = 0.0;
 	m_ubh_record = 0.0;
 	m_wy_record = 0.0;
 	m_gama_command_compensate = 0.0;
-	m_time_v70 = MAX_TIME;
-	m_time_v60 = MAX_TIME;
-	m_time_v100 = MAX_TIME;
-	m_time_v140 = MAX_TIME;
+
+	m_flag_v30 = false;
+	m_count_v30 = 0;
+	m_time_v30 = MAX_TIME;
 	m_time_separate_booster = MAX_TIME;
+	m_time_missile_takeoff = MAX_TIME;
 	m_time_combat_status = MAX_TIME;
 	m_time_combat_delay = MAX_TIME;
 }
 void CMathControlYaw::Initial()
 {
 
+	y_eso_init_takeoff();
+	y_eso_init_cruise();
+	y_eso_init_attack();
 }
+
+void CMathControlYaw::y_eso_init_takeoff()
+{
+	para_y_eso_takeoff.z1 = 0.0;
+    para_y_eso_takeoff.z2 = 0.0;
+    para_y_eso_takeoff.z1_pre = 0.0;
+    para_y_eso_takeoff.z2_pre = 0.0;
+    para_y_eso_takeoff.uy = 0.0;
+    para_y_eso_takeoff.y = 0.0;
+    para_y_eso_takeoff.y_pre = 0.0;
+	para_y_eso_takeoff.k = 5.0;
+    para_y_eso_takeoff.Ts = 0.005;
+}
+void CMathControlYaw::y_eso_calc_takeoff(double b0, double d0, double Keso)
+{
+	double Ts       = para_y_eso_takeoff.Ts;
+    double z1_pre   = para_y_eso_takeoff.z1_pre;
+    double z2_pre   = para_y_eso_takeoff.z2_pre;
+    double y_meas  = para_y_eso_takeoff.y;
+    double uy = para_y_eso_takeoff.uy;
+
+    double w0 = 2.5;
+    double w_eso = Keso * w0;
+
+	double l1 = 2*1.0*w_eso - b0;
+	double l2 = w_eso*w_eso;
+
+    double z1 = (1 - Ts*b0 - Ts*l1)*z1_pre + Ts*z2_pre + Ts*d0*uy + Ts*l1*y_meas;
+    double z2 = z2_pre - Ts*l2*z1_pre + Ts*l2*y_meas;
+
+
+    para_y_eso_takeoff.z1_pre = para_y_eso_takeoff.z1;
+    para_y_eso_takeoff.z2_pre = para_y_eso_takeoff.z2;
+
+    para_y_eso_takeoff.z1 = z1;
+    para_y_eso_takeoff.z2 = z2;
+
+    para_y_eso_takeoff.y_pre = para_y_eso_takeoff.y;
+}
+
+void CMathControlYaw::y_eso_init_cruise()
+{
+	para_y_eso_cruise.z1 = 0.0;
+    para_y_eso_cruise.z2 = 0.0;
+    para_y_eso_cruise.z1_pre = 0.0;
+    para_y_eso_cruise.z2_pre = 0.0;
+    para_y_eso_cruise.uy = 0.0;
+    para_y_eso_cruise.y = 0.0;
+    para_y_eso_cruise.y_pre = 0.0;
+	para_y_eso_cruise.k = 5.0;
+    para_y_eso_cruise.Ts = 0.005;
+}
+void CMathControlYaw::y_eso_calc_cruise(double b0, double d0, double Keso)
+{
+	double Ts       = para_y_eso_cruise.Ts;
+    double z1_pre   = para_y_eso_cruise.z1_pre;
+    double z2_pre   = para_y_eso_cruise.z2_pre;
+    double y_meas  = para_y_eso_cruise.y;
+    double uy = para_y_eso_cruise.uy;
+
+    double w0 = 2.5;
+    double w_eso = Keso * w0;
+
+	double l1 = 2*1.0*w_eso - b0;
+	double l2 = w_eso*w_eso;
+
+    double z1 = (1 - Ts*b0 - Ts*l1)*z1_pre + Ts*z2_pre + Ts*d0*uy + Ts*l1*y_meas;
+    double z2 = z2_pre - Ts*l2*z1_pre + Ts*l2*y_meas;
+
+
+    para_y_eso_cruise.z1_pre = para_y_eso_cruise.z1;
+    para_y_eso_cruise.z2_pre = para_y_eso_cruise.z2;
+
+    para_y_eso_cruise.z1 = z1;
+    para_y_eso_cruise.z2 = z2;
+
+    para_y_eso_cruise.y_pre = para_y_eso_cruise.y;
+}
+
+void CMathControlYaw::y_eso_init_attack()
+{
+	para_y_eso_attack.z1 = 0.0;
+    para_y_eso_attack.z2 = 0.0;
+    para_y_eso_attack.z1_pre = 0.0;
+    para_y_eso_attack.z2_pre = 0.0;
+    para_y_eso_attack.uy = 0.0;
+    para_y_eso_attack.y = 0.0;
+    para_y_eso_attack.y_pre = 0.0;
+	para_y_eso_attack.k = 5.0;
+    para_y_eso_attack.Ts = 0.005;
+}
+void CMathControlYaw::y_eso_calc_attack(double b0, double d0, double Keso)
+{
+	double Ts       = para_y_eso_attack.Ts;
+    double z1_pre   = para_y_eso_attack.z1_pre;
+    double z2_pre   = para_y_eso_attack.z2_pre;
+    double y_meas  = para_y_eso_attack.y;
+    double uy = para_y_eso_attack.uy;
+
+    double w0 = 2.5;
+    double w_eso = Keso * w0;
+
+	double l1 = 2*1.0*w_eso - b0;
+	double l2 = w_eso*w_eso;
+
+    double z1 = (1 - Ts*b0 - Ts*l1)*z1_pre + Ts*z2_pre + Ts*d0*uy + Ts*l1*y_meas;
+    double z2 = z2_pre - Ts*l2*z1_pre + Ts*l2*y_meas;
+
+
+    para_y_eso_attack.z1_pre = para_y_eso_attack.z1;
+    para_y_eso_attack.z2_pre = para_y_eso_attack.z2;
+
+    para_y_eso_attack.z1 = z1;
+    para_y_eso_attack.z2 = z2;
+
+    para_y_eso_attack.y_pre = para_y_eso_attack.y;
+}
+
 void CMathControlYaw::Run()
 {
 	Get_Data();
@@ -67,6 +193,7 @@ void CMathControlYaw::Run()
 void CMathControlYaw::Get_Data()
 {
 	m_time_separate_booster = p_st_yaw_control_input->time_separate_booster;
+	m_time_missile_takeoff = p_st_yaw_control_input->time_missile_takeoff;
 	m_time_combat_status = p_st_yaw_control_input->time_combat_status;
 	m_time_combat_delay = p_st_yaw_control_input->time_combat_delay;
 	m_wx = p_st_yaw_control_input->wx;
@@ -87,6 +214,22 @@ void CMathControlYaw::Get_Data()
 	m_gama_command_compensate = p_st_yaw_control_input->gama_command_compensate;
 	m_qh_leader = p_st_yaw_control_input->qh_leader;
 	m_det_qh = p_st_yaw_control_input->det_qh;
+
+	if(m_v > 30.0)
+	{
+		m_count_v30++;
+	}
+	else
+	{
+		m_count_v30 = 0;
+	}
+	
+	if((m_count_v30 >=3) && (!m_flag_v30))
+	{
+		m_flag_v30 = 1;
+		m_time_v30 = flight_time;
+	}
+	
 }
 void CMathControlYaw::Send_Data()
 {
@@ -107,78 +250,134 @@ void CMathControlYaw::Calc_Data()
 
 	//��������
 	m_u5h = m_k5h * (m_wy - m_wy_command);
+	
+
+	//������: PI + ADRC �Կ��Ź��ؿ���
+	if(m_v < m_time_v30)
+	{
+		//ADRC��ʼ��
+		m_uh_adrc = 0.0;
+		para_y_eso_takeoff.z1 = (m_nbz + para_y_eso_takeoff.k*m_wy/RTOA);
+		para_y_eso_takeoff.z1_pre = (m_nbz + para_y_eso_takeoff.k*m_wy/RTOA);
+		para_y_eso_takeoff.z2 = m_urh_record/RTOA*16.4631;
+		para_y_eso_takeoff.z2_pre= para_y_eso_takeoff.z2;
+		para_y_eso_takeoff.y = (m_nbz + para_y_eso_takeoff.k*m_wy/RTOA);
+		para_y_eso_takeoff.y_pre = (m_nbz + para_y_eso_takeoff.k*m_wy/RTOA);
+
+		//ֻ��΢�ֿ��ƣ���ADRC���ƣ��޹��ؿ���
+		m_k5h = 0.6982;
+		m_u5h = m_k5h * (m_wy - m_wy_command);
+		m_unih = 0.0;
+		m_unph = 0.0;
+	}
+	else if(flight_time < m_time_missile_takeoff)
+	{
+		//ADRC ����
+		para_y_eso_takeoff.y = (m_nbz + para_y_eso_takeoff.k*m_wy/RTOA);
+		para_y_eso_takeoff.uy = m_urh_record/RTOA;
+		y_eso_calc_takeoff(3.4611, 16.4631, 5.0);
+		
+		m_uh_adrc = RTOA*para_y_eso_takeoff.z2/ 16.4631;
+
+		//���ģ�͹��ؿ���
+		// [kp ki kw] = 8.0015   11.2768    0.6982
+		m_knph = -8.0015;
+		m_knih = -11.2768;
+		m_k5h = 0.6982;
+
+		m_unph = m_knph*(m_nbz - m_nz_command);
+		m_unih = m_knih*(m_nbz - m_nz_command)*STEP_5ms; 
+		m_u5h = m_k5h * (m_wy - m_wy_command);
+		//�����޷�����������
+
+		//Ѳ��״̬��ֵ
+		para_y_eso_cruise.z1 = (m_nbz + para_y_eso_cruise.k*m_wy/RTOA);
+		para_y_eso_cruise.z1_pre = (m_nbz + para_y_eso_cruise.k*m_wy/RTOA);
+		para_y_eso_cruise.z2 = m_urh_record/RTOA*16.4631;
+		para_y_eso_cruise.z2_pre= para_y_eso_cruise.z2;
+		para_y_eso_cruise.y = (m_nbz + para_y_eso_cruise.k*m_wy/RTOA);
+		para_y_eso_cruise.y_pre = (m_nbz + para_y_eso_cruise.k*m_wy/RTOA);
+	}
+	//Ѳ��״̬
+	else if(flight_time < m_time_combat_status + m_time_combat_delay)
+	{	
+		//ADRC ����
+		para_y_eso_cruise.y = (m_nbz + para_y_eso_cruise.k*m_wy/RTOA);
+		para_y_eso_cruise.uy = m_urh_record/RTOA;
+		y_eso_calc_cruise(3.4611, 16.4631, 5.0);
+		
+		m_uh_adrc = RTOA*para_y_eso_cruise.z2/ 16.4631;
+
+		//���ģ�͹��ؿ���
+		// [kp ki kw] = 8.0015   11.2768    0.6982
+		m_knph = -8.0015;
+		m_knih = -11.2768;
+		m_k5h = 0.6982;
+
+		m_unih = m_knih*(m_nbz - m_nz_command)*STEP_5ms; 
+		m_unph = m_knph*(m_nbz - m_nz_command);
+		m_u5h = m_k5h * (m_wy - m_wy_command);
+		//�����޷�����������
+
+		//���״̬��ֵ
+		para_y_eso_attack.z1 = (m_nbz + para_y_eso_attack.k*m_wy/RTOA);
+		para_y_eso_attack.z1_pre = (m_nbz + para_y_eso_attack.k*m_wy/RTOA);
+		para_y_eso_attack.z2 = m_urh_record/RTOA*16.4631;
+		para_y_eso_attack.z2_pre= para_y_eso_attack.z2;
+		para_y_eso_attack.y = (m_nbz + para_y_eso_attack.k*m_wy/RTOA);
+		para_y_eso_attack.y_pre = (m_nbz + para_y_eso_attack.k*m_wy/RTOA);
+	}
+	//ĩ�Ƶ�״̬
+	else
+	{
+		//ADRC ����
+		para_y_eso_attack.y = (m_nbz + para_y_eso_attack.k*m_wy/RTOA);
+		para_y_eso_attack.uy = m_urh_record/RTOA;
+		y_eso_calc_attack(3.4611, 16.4631, 5.0);
+		
+		m_uh_adrc = RTOA*para_y_eso_attack.z2/ 16.4631;
+
+		//���ģ�͹��ؿ���
+		// [kp ki kw] = 8.0015   11.2768    0.6982
+		m_knph = -8.0015;
+		m_knih = -11.2768;
+		m_k5h = 0.6982;
+
+		m_unih = m_knih*(m_nbz - m_nz_command)*STEP_5ms; 
+		m_unph = m_knph*(m_nbz - m_nz_command);
+		m_u5h = m_k5h * (m_wy - m_wy_command);
+		//�����޷�����������
+
+		//���������תѲ��״̬��׼��
+		para_y_eso_cruise.z1 = (m_nbz + para_y_eso_cruise.k*m_wy/RTOA);
+		para_y_eso_cruise.z1_pre = (m_nbz + para_y_eso_cruise.k*m_wy/RTOA);
+		para_y_eso_cruise.z2 = m_urh_record/RTOA*16.4631;
+		para_y_eso_cruise.z2_pre= para_y_eso_cruise.z2;
+		para_y_eso_cruise.y = (m_nbz + para_y_eso_cruise.k*m_wy/RTOA);
+		para_y_eso_cruise.y_pre = (m_nbz + para_y_eso_cruise.k*m_wy/RTOA);
+	}
+	//���������������𣬴���
+	m_uh_adrc = CFlightGlobalFun::Range(m_uh_adrc, 6.0);
 	if(flight_time < m_time_separate_booster)
 		m_u5h = CFlightGlobalFun::Range(m_u5h, 6.0);
+	m_unih = CFlightGlobalFun::Range(m_unih, 5.0);
+	m_unph = CFlightGlobalFun::Range(m_unph, 10.0);
 
-	//���Ե�����Ծ��Ӧ����
-// 	m_nz_command = 0.0;
-// 	if (flight_time > (m_time_combat_status + 3.0)) m_nz_command = 0.2;	
-
-	//��׼����·���ؿ���
-// 	m_unwih += (RTOA * m_knih * (m_nz_command + m_nbz) + m_kwih * (m_wy - m_wy_command)) * STEP_5ms;
-// 	m_unwih = CFlightGlobalFun::Range(m_unwih, 5.0);
-// 	m_urh_zd = m_unwih + m_u5h;
-// 	m_urh_zd = CFlightGlobalFun::Range(m_urh_zd, 6.0);
-	if(flight_time < m_time_combat_status + m_time_combat_delay)// + 1.0)
-	{
-		//�������Ͳ໬��Ϊ�����
-		//m_nvz = -m_nby*sin(m_gama/RTOA) + m_nbz*cos(m_gama/RTOA);
-		m_nvz = m_nbz;
-		m_unih += RTOA * m_knih * (0.0 + m_nvz) * STEP_5ms; 
-		m_unih = CFlightGlobalFun::Range(m_unih, 10.0);
-	}
-	else
-	{
-		//������ʽ��α�໬������·���ؿ��� 
-		m_unih += RTOA * m_knih * (m_nz_command + m_nbz) * STEP_5ms; 
-		m_unih = CFlightGlobalFun::Range(m_unih, 12.0);
-	}
+	//�����ص�ѹ
+	m_urh_zd = m_unih + m_unph + m_u5h + m_uh_adrc;
+	//���ƶ�ֻ����΢�ֿ��� m_u5h;
+	m_urh_zd = CFlightGlobalFun::Range(m_urh_zd, 15.0);
+	//Ϊ�˲���
+	//m_urh_zd = m_u5h;
 	
-	m_ubh = k2 * m_ubh_record + m_kwih * k1 * m_wy_record;
-	m_ubh_record = m_ubh;
-	m_wy_record = m_wy - m_wy_command;//Сƫ�����Ի�ģ��
+	//��¼���Ƶ�ѹ
+	m_urh_record = m_unih + m_unph + m_u5h + m_uh_adrc;
+	m_urh_record = CFlightGlobalFun::Range(m_urh_record, 15.0);
+}
+void CMathControlYaw::Calc_Control_Gain_ADRC()
+{
 
-	temp_urh_zd = m_unih + m_ubh + m_u5h;
-
-	//���ظ���
-	if(flight_time < m_time_separate_booster)
-	{
-		m_urh_zd = temp_urh_zd;
-		m_urh_record_separate_booster = m_urh_zd;
-	}
-	//���ɵ�Ѳ��
-	else if (flight_time < m_time_separate_booster + 3.0)
-	{
-		m_urh_zd = m_urh_record_separate_booster * (3.0 - flight_time + m_time_separate_booster)/3.0 + temp_urh_zd *(flight_time - m_time_separate_booster)/3.0;
-	}
-	//Ѳ����
-	else if(flight_time < m_time_combat_status + m_time_combat_delay)
-	{
-		m_urh_zd = temp_urh_zd;
-		m_urh_record_begin_combat = m_urh_zd;
-	}
-	//�����(���໬��) ���� ��ĩ�Ƶ���ĩ�Ƶ���֮��1s
-	else if (flight_time < m_time_combat_status + m_time_combat_delay + 1.0)
-	{
-		m_urh_zd = m_urh_record_begin_combat * (1.0 - flight_time + (m_time_combat_status + m_time_combat_delay))/1.0 + temp_urh_zd *(flight_time - (m_time_combat_status + m_time_combat_delay))/1.0;
-	}
-	else
-	{
-		//˵��: ��m_nz_command �б����������߽��ٶȼ���õ���Ϊ����-|m_nz_command|��������������ء������أ�������Ŀ��
-		//m_urh_zd = temp_urh_zd;
-
-		//������Ϊ�����ʹ��BTTĩ�Ƶ���С����ʹ��STTĩ�Ƶ�???...
-		//˵����Ĭ�Ͻ���ĩ�Ƶ�ǰ���������Ѷ�׼Ŀ�꣬�Ҳ�ƫ��С������ĩ�Ƶ�ʱ�̡���ת�ǡ���Ӧ����̬������ء����ţ�
-		//���������Žϴ󣬳���STTĩ�Ƶ�����������BTTĩ�Ƶ������ؼ����ת��ָ��gama_cmd�����л�STTĩ�Ƶ�
-		//���������Ž�С�����򣩣��л�ΪSTTĩ�Ƶ�����ת��ָ��gama_cmdΪ��
-
-		//ĩ���Ƶ�������ͷä��
-		if((m_distance_target > 25.0)&&(m_hz > 100.0 + 5.0))
-			//����ϴ�ʱ����
-			m_urh_zd = temp_urh_zd;
-		//else
-			//��������һ��ֵ����
-	}
+	return;
 }
 
 void CMathControlYaw::Calc_Control_Gain()
@@ -200,32 +399,9 @@ void CMathControlYaw::Calc_Control_Gain()
 	 * ��3���߶� > 3km    �� ʹ�� 3km ��Ӧ��������3�У�
 	 * ��4���߶ȵ�λ��0��1000��2000��3000 m �� ��Ӧ������ 0��1��2��3
 	 *****************************************************************/
-	static double hight_uh_stage1_array[4] = {0.0, 1000.0, 2000.0, 3000.0};//�߶�
-	static double vel_uh_stage1_array[4] = {30.0, 40.0, 50.0, 70.0};//�ٶ�
-	// ���ػ������� kni[�߶���][�ٶ���]
-	/*double knih_stage1_matrix[4][4] = {
-	    {-0.4806, -0.2027, -0.1038, -0.0378},
-	    {-0.5295, -0.2234, -0.1144, -0.0417},
-	    {-0.5848, -0.2467, -0.1263, -0.0460},
-	    {-0.6474, -0.2731, -0.1398, -0.0510}    // �߶� 3000m
-	};
+	double hight_uh_stage1_array[4] = {0.0, 1000.0, 2000.0, 3000.0};//�߶�
+	double vel_uh_stage1_array[4] = {30.0, 40.0, 50.0, 70.0};//�ٶ�
 
-	// �໬������ kwi[�߶���][�ٶ���]
-	double kwih_stage1_matrix[4][4] = {
-	    {-2.0709, -0.9505, -0.4365,  0.0055},
-		{-2.3391, -1.1013, -0.5328, -0.0435},
-		{-2.6418, -1.2715, -0.6417, -0.0988},
-		{-2.9844, -1.4641, -0.7649, -0.1615}    // �߶� 3000m
-	};
-
-	// ���ٶ����� k5[�߶���][�ٶ���]
-	double k5h_stage1_matrix[4][4] = {
-	    {-0.1208, -0.0904, -0.0720, -0.0507},
-	    {-0.1208, -0.0904, -0.0720, -0.0508},
-	    {-0.1207, -0.0904, -0.0721, -0.0509},
-	    {-0.1207, -0.0904, -0.0721, -0.0509}    // �߶� 3000m
-	};
-	//����ʱ�䳣����0.30s*/
 	double knih_stage1_matrix[4][4] = {
 	    {-0.3470, -0.1236, -0.0537, -0.0148},
     	{-0.4107, -0.1476, -0.0645, -0.0178},
@@ -263,9 +439,9 @@ void CMathControlYaw::Calc_Control_Gain()
 	 * ����ṹ��Kp[������][��ѹ��]��Kd[������][��ѹ��]
 	 *****************************************************************/
 	// ������ֵ���������� 0,1,2��
-	static double mass_uh_stage2_array[3] = {102.0, 133.0, 165.0};
+	double mass_uh_stage2_array[3] = {102.0, 133.0, 165.0};
 	// ��ѹ��ֵ���������� 0~5��
-	static double q_uh_stage2_array[6] = {500.0, 1000.0, 1500.0, 2000.0, 2500.0, 3000.0};
+	double q_uh_stage2_array[6] = {500.0, 1000.0, 1500.0, 2000.0, 2500.0, 3000.0};
 	//����һ����������ѹ�Կ��Ʋ���Ӱ�첻�󣬲���������Ϊ���룬����һά���Ʋ�����ֵ��
 	//double knih_stage2_array[3] = {-0.10, -0.10, -0.10};
 	//double kwih_stage2_array[3] = {-0.4363, -0.4630, -0.4799};
@@ -304,16 +480,15 @@ void CMathControlYaw::Calc_Control_Gain()
 	 * ��3���߶� > 3km    �� ʹ�� 3km ��Ӧ��������3�У�
 	 * ��4���߶ȵ�λ��0��1000��2000��3000 m �� ��Ӧ������ 0��1��2��3
 	 *****************************************************************/
-	static double hight_uh_stage3_array[4] = {0.0, 1000.0, 2000.0, 3000.0};//�߶�
-	static double vel_uh_stage3_array[4] = {40.0, 50.0, 60.0, 70.0};//�ٶ�
+	double hight_uh_stage3_array[4] = {0.0, 1000.0, 2000.0, 3000.0};//�߶�
+	double vel_uh_stage3_array[4] = {40.0, 50.0, 60.0, 70.0};//�ٶ�
 	// ���ػ������� kni[�߶���][�ٶ���]
 	double knih_stage3_matrix[4][4] = {
-	        {-0.1102f, -0.0920f, -0.0786f, -0.0684f},
-			{-0.1142f, -0.0958f, -0.0820f, -0.0714f},
-			{-0.1184f, -0.0997f, -0.0855f, -0.0746f},
-			{-0.1226f, -0.1038f, -0.0893f, -0.0781f}    // �߶� 3000m
+        {-0.1102f, -0.0920f, -0.0786f, -0.0684f},
+		{-0.1142f, -0.0958f, -0.0820f, -0.0714f},
+		{-0.1184f, -0.0997f, -0.0855f, -0.0746f},
+		{-0.1226f, -0.1038f, -0.0893f, -0.0781f} // �߶� 3000m
 	};
-
 	// �໬������ kwi[�߶���][�ٶ���]
 	double kwih_stage3_matrix[4][4] = {
 	    {-0.0179f, -0.0285f, -0.0306f, -0.0299f},
@@ -369,9 +544,9 @@ void CMathControlYaw::Calc_Control_Gain()
 	}
 
 	//�߼����Ѿ��Ǹ�����
-	m_knih = m_knih;
-	m_kwih = - m_kwih;
-	m_k5h = - m_k5h;
+	m_knih = m_knih;	//��
+	m_kwih = - m_kwih;	//��
+	m_k5h = - m_k5h;	//��
 }
 
 void CMathControlYaw::Calc_Control_Commond()
@@ -415,14 +590,12 @@ void CMathControlYaw::Calc_Control_Commond()
 			m_wy_command_comp_record = m_wy_command_comp;
 		}
 		
-		//Ϊ�˲���???...
+		//Ϊ�˲��ԣ������й�ת����������ſ�???...
 		m_wy_command_comp_record = 0.0;
 		
 		m_wy_command = m_wy_command + m_wy_command_comp_record; 
 		//���ٶȽ�Сʱ��������
 	}
-
-	
 
 	//����������:  ���뵼��ǰ������ָ��Ϊ�㣬��ֻ���в�������
 	if(flight_time < (m_time_combat_status + m_time_combat_delay))
@@ -432,28 +605,27 @@ void CMathControlYaw::Calc_Control_Commond()
 	}
 	else
 	{
-// 		double knz;
-// 		if(m_distance_target > 2000.0)
-// 			knz = 4.5;
-// 		else
-// 			knz = 3.5 + cos((2000.0 - m_distance_target) * PI / 2000.0);
-// 
-// 		if(knz > 4.5)
-// 			knz = 4.5;
-// 		if(knz <= 2.5)
-// 			knz = 2.5;
-
-// 		if(flight_time < (m_time_combat_status + m_time_combat_delay + 1.0))
-// 		{
-// 			m_nz_command = (flight_time - (m_time_combat_status + m_time_combat_delay)) * m_nz_command;
-// 		}	
-// 		m_nz_command = CFlightGlobalFun::Range(m_nz_command, 0.15);
-
-//		//��Ŀ�����������STT�Ƶ�������أ�������ΪBTT�Ƶ�
-//		double knz = 3.0;	
-//		m_nz_command = knz * m_v * m_dqh / RTOA / m_g;
-//		m_nz_command = CFlightGlobalFun::Range(m_nz_command, 2.0);
 		m_nz_command = m_nz_command_guidance;
 	}
 }
+/*
+void CMathControlYaw::Monitor_Data()
+{
+	extern CSimMonitor sim_monitor;
+	if (sim_monitor.flag_monitor2_valid)
+	{
+		sim_monitor.Get_Variable(m_wy_command,"wycx",ENUM_FILE_CONTROL1);
+		sim_monitor.Get_Variable(-m_nz_command,"nzc",ENUM_FILE_CONTROL1);
+		sim_monitor.Get_Variable(m_urh_zd,"m_urh_zd",ENUM_FILE_CONTROL1);
 
+		//�������
+		sim_monitor.Get_Variable(m_wy,"wy",ENUM_FILE_CONTROL1);	//������ٶ�
+		sim_monitor.Get_Variable(m_nbz,"nzb",ENUM_FILE_CONTROL1);	//������أ�ĩ�Ƶ����ظ���
+	}
+	if (sim_monitor.flag_monitor3_valid)
+	{
+		sim_monitor.Get_Variable(m_k5h,"k5h",ENUM_FILE_AERO1);
+		sim_monitor.Get_Variable(m_knih,"knih",ENUM_FILE_AERO1);
+		sim_monitor.Get_Variable(m_kwih,"kwih",ENUM_FILE_AERO1);
+	}
+}*/

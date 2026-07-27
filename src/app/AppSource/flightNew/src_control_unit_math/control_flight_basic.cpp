@@ -5,6 +5,7 @@
 #include "../global_function.h"
 //#include "../../sim_monitor.h"
 
+
 // ��׼��������
 #define P0      101325.0f    // ��ƽ���׼��ѹ (Pa)
 #define T0      288.15f      // ��ƽ���׼�¶� (K)
@@ -183,7 +184,7 @@ CMathControlFlightBasic::CMathControlFlightBasic()
 	m_gama_turn_nominal = 0.0;//BTTת���ת�Ǳ��ֵ
 	m_x_coordinate_turn = 0.0;//Բ������
 	m_z_coordinate_turn = 0.0;
-
+	
 	step_open_umbrella = 0;
 	step_altitude_change_lauch = 0;
 	step_dualplane_guidance = 0;
@@ -228,6 +229,7 @@ CMathControlFlightBasic::CMathControlFlightBasic()
 	m_ktheta_lauch_enc = 12.0;
 	m_ktheta_climb_enc = 6.0;
 	
+	//p_st_debug_monitor = NULL;
 	p_st_initial_data = NULL;
 	p_st_route_data_preflight = NULL;
 	p_st_flight_basic_input = NULL;	//����
@@ -373,21 +375,33 @@ void CMathControlFlightBasic::Update_Task_Info()
 		//������ɡ�������յ�
 		if(m_st_way_point[count_num].route_mode == 6)
 		{
-			m_st_way_point[count_num].recycle_ground_hight = m_st_way_point[count_num].height;	//����߶�Ϊ����߶�
+			m_st_way_point[count_num].recycle_ground_hight = m_target_height_ground;//m_st_way_point[count_num].height;	//����߶�Ϊ����߶�
 
 			//ǰһ������Ϊ�������㣬���𹥵�
 			if(m_st_way_point[count_num - 1].route_mode == 5)
 			{
-				m_st_way_point[count_num].height = m_st_way_point[count_num - 1].height + 100.0;//���յ�ǰһ������֮��100m��ȷ��ĩ�Ƶ��󣬸�������
-				//��Ե���߶ȹ���
-				if(m_st_way_point[count_num].height < m_st_way_point[count_num].recycle_ground_hight + 300.0)
+				//m_st_way_point[count_num].height = m_st_way_point[count_num - 1].height + 100.0;//回收点前一个航点之上100m，确保末制导后，俯冲拉起
+				if(m_st_way_point[count_num].height < m_st_way_point[count_num - 1].height + 100.0)
 				{
-					m_st_way_point[count_num].height = m_st_way_point[count_num].recycle_ground_hight + 300.0;//���300m	
+					m_st_way_point[count_num].height = m_st_way_point[count_num - 1].height + 100.0;//回收点前一个航点之上100m，确保末制导后，俯冲拉起
+				}
+					
+				//相对地面高度过低
+				if(m_st_way_point[count_num].height < m_st_way_point[count_num].recycle_ground_hight + 250.0)
+				{
+					m_st_way_point[count_num].height = m_st_way_point[count_num].recycle_ground_hight + 250.0;//���300m	
 				}
 			}
 			else
 			{
-				m_st_way_point[count_num].height = m_st_way_point[count_num].recycle_ground_hight + 300.0;//���300m
+				if(m_st_way_point[count_num].height < m_st_way_point[count_num].recycle_ground_hight + 250.0)
+				{
+					m_st_way_point[count_num].height = m_st_way_point[count_num].recycle_ground_hight + 250.0;//���300m
+				}
+				else
+				{
+					//��������		
+				}
 			}
 		}
 		else
@@ -396,10 +410,16 @@ void CMathControlFlightBasic::Update_Task_Info()
 			m_st_way_point[count_num].recycle_ground_hight = p_st_initial_data->height_launch;
 			//m_st_way_point[count_num].height
 		}
-		
+	}
+	//如果最后一个目标点是回收点，前一个目标点为佯攻点，目标点设置为佯攻点
+	if((m_st_way_point[m_num_way_point - 1].route_mode == 6) && (m_st_way_point[m_num_way_point - 2].route_mode == 5))
+	{
+		m_st_target.height = m_st_way_point[m_num_way_point - 2].height;
+		m_st_target.longitude	= m_st_way_point[m_num_way_point - 2].longitude;
+		m_st_target.latitude	= m_st_way_point[m_num_way_point - 2].latitude;
 	}
 
-	//����ת��Ǽ����κ���
+	//计算转弯角及初段航程
 	double distance_BC = 0.0;
 	double distance_delta = 0.0;
 	double alpha_BC = 0.0;
@@ -423,168 +443,7 @@ void CMathControlFlightBasic::Update_Task_Info()
 		m_total_distance += distance_delta;
 	}
 }
-/*
-void CMathControlFlightBasic::Change_Task_Info_Online()
-{
-	//�ں������������󣬼������������͵ĺ������У�����ԭ�������ܺ�����£������ܺ���
-	m_num_way_point = m_num_way_point_target 
-		+ p_st_flight_basic_input->st_datalink_data.st_mission_update_data[m_missile_ID].num_waypoint_updated;//��ǰ���� �� ����������
-	for (int count_num=m_num_way_point_target; count_num<m_num_way_point; count_num++)
-	{
-		m_st_way_point[count_num].num = count_num;
-		m_st_way_point[count_num].longitude		= 
-			p_st_flight_basic_input->st_datalink_data.st_mission_update_data[m_missile_ID].longitude[count_num - m_num_way_point_target];
-		m_st_way_point[count_num].latitude		= 
-			p_st_flight_basic_input->st_datalink_data.st_mission_update_data[m_missile_ID].latitude[count_num - m_num_way_point_target];
-		m_st_way_point[count_num].height		= 
-			p_st_flight_basic_input->st_datalink_data.st_mission_update_data[m_missile_ID].height[count_num - m_num_way_point_target];
-		m_st_way_point[count_num].route_mode	= 
-			p_st_flight_basic_input->st_datalink_data.st_mission_update_data[m_missile_ID].route_mode[count_num - m_num_way_point_target];
-		m_st_way_point[count_num].formation_mode	= 
-			p_st_flight_basic_input->st_datalink_data.st_mission_update_data[m_missile_ID].formation_mode[count_num - m_num_way_point_target];
-		m_st_way_point[count_num].dltTime	= 
-			p_st_flight_basic_input->st_datalink_data.st_mission_update_data[m_missile_ID].dltTime[count_num - m_num_way_point_target];
-		m_st_way_point[count_num].turn_angle	= 
-			p_st_flight_basic_input->st_datalink_data.st_mission_update_data[m_missile_ID].turn_angle[count_num - m_num_way_point_target];
-		m_st_way_point[count_num].turn_radius	= 
-			p_st_flight_basic_input->st_datalink_data.st_mission_update_data[m_missile_ID].turn_radius[count_num - m_num_way_point_target];
-		m_st_way_point[count_num].velocity	= 
-			p_st_flight_basic_input->st_datalink_data.st_mission_update_data[m_missile_ID].velocity[count_num - m_num_way_point_target];
-		m_st_way_point[count_num].accept_radius	= 
-			p_st_flight_basic_input->st_datalink_data.st_mission_update_data[m_missile_ID].accept_radius[count_num - m_num_way_point_target];		
-		
-		//����������:��ʶ
-		//[����ʱ���ʶ��1��Ч��0��Ч��]
-		if(m_st_way_point[count_num].dltTime > 0)
-			m_st_way_point[count_num].if_flightime_ctrl = 1;
-		else
-			m_st_way_point[count_num].if_flightime_ctrl = 0;	
-		//[��Ը߶ȣ�����߶ȣ����Ʊ�ʶ��1��Ч��0��Ч]
-		if(m_st_way_point[count_num].height < 0)
-			m_st_way_point[count_num].if_relativehigh_ctrl = 1;
-		else
-			m_st_way_point[count_num].if_relativehigh_ctrl = 0;	
-		//[ָ����б�ʶ��1��Ч��0��Ч��]
-		if(m_st_way_point[count_num].route_mode == 2)
-			m_st_way_point[count_num].if_heading_hold = 1;
-		else
-			m_st_way_point[count_num].if_heading_hold = 0;	
-		//[���ٿ��Ʊ�ʶ��1���٣�0���٣�]
-		if(m_st_way_point[count_num].velocity < 0)
-			m_st_way_point[count_num].if_groundspeed_ctrl = 1;
-		else
-			m_st_way_point[count_num].if_groundspeed_ctrl = 0;	
-		//[�����Ǳ�ʶ��1ָ����ǣ�0��Լ����]
-		if(((m_st_way_point[count_num].route_mode == 4) || (m_st_way_point[count_num].route_mode == 5))&&(m_st_way_point[count_num].turn_angle < 0.0))
-		{
-			m_st_way_point[count_num].if_attackangle_ctrl = 1;//����Ϊ������
-			m_st_way_point[count_num].attack_angle = -m_st_way_point[count_num].turn_angle;
-		}
-		else
-		{
-			m_st_way_point[count_num].if_attackangle_ctrl = 0;	
-			m_st_way_point[count_num].attack_angle = 0.0;
-		}
-		
-		if(m_st_way_point[count_num].route_mode == 3)
-		{	
-			//[Ԥ������ʶ��1��Ч��0��Ч��]
-			m_st_way_point[count_num].if_prepare_hover = 1;
-			m_st_way_point[count_num].hover_round = (int)m_st_way_point[count_num].turn_angle;
-			//[����ת�䷽���ʶ����ת1����ת0��]	
-			if(m_st_way_point[count_num].hover_round > 0)
-				m_st_way_point[count_num].if_turndir_set = 1;
-			else
-				m_st_way_point[count_num].if_turndir_set = 0;	
-		}
-		else
-		{
-			m_st_way_point[count_num].if_prepare_hover = 0;
-			m_st_way_point[count_num].hover_round = 0;
-		}
-	}
-	//��󺽼���߶ȣ�����ΪĿ���߶�
-	m_st_way_point[m_num_way_point - 1].height = m_st_target.height;
-	//����Ŀ��㾭�ȡ�ά��
-	m_st_target.longitude	= m_st_way_point[m_num_way_point - 1].longitude;
-	m_st_target.latitude	= m_st_way_point[m_num_way_point - 1].latitude;
 
-	//��ʼ����: ����㵽��һ�������㣬���롢��λ
-	CFlightGlobalFun::Tomas(p_st_initial_data->longitude_launch, p_st_initial_data->latitude_launch,
-		m_st_way_point[0].longitude, m_st_way_point[0].latitude,
-		&m_total_distance, &m_alpha_AB);
-	
-	//����ת��Ǽ��ܺ���
-	double distance_BC = 0.0;
-	double distance_delta = 0.0;
-	double alpha_BC = 0.0;
-	for(int i=0; i<(m_num_way_point - 1); i++)
-	{
-		CFlightGlobalFun::Tomas(m_st_way_point[i].longitude, m_st_way_point[i].latitude,
-			m_st_way_point[i + 1].longitude, m_st_way_point[i + 1].latitude,
-			&distance_BC, &alpha_BC);		
-		m_st_way_point[i].turn_angle = alpha_BC - m_alpha_AB;
-		m_st_way_point[i].turn_angle = CFlightGlobalFun::Adjust(m_st_way_point[i].turn_angle, 180.0);
-		m_alpha_AB = alpha_BC;
-		m_total_distance += distance_BC;
-		distance_delta = 2 * m_st_way_point[i].turn_radius 
-			* (PI * fabs(m_st_way_point[i].turn_angle) / 360.0 
-			- tan((fabs(m_st_way_point[i].turn_angle) / 2.0) / RTOA));
-		m_total_distance += distance_delta;
-	}
-
-	//���µ�ǰĿ���ת��Ƕ�
-	////////Ŀ��㵽��һ����롢��λ
-	CFlightGlobalFun::Tomas(m_st_way_point[m_num_way_point_target].longitude, m_st_way_point[m_num_way_point_target].latitude,
-		m_st_way_point[m_num_way_point_target + 1].longitude, m_st_way_point[m_num_way_point_target + 1].latitude,
-		&distance_BC, &alpha_BC);
-	////////��ǰ�㵽Ŀ�����롢��λ
-	CFlightGlobalFun::Tomas(m_longitude, m_latitude,
-		m_st_way_point[m_num_way_point_target].longitude, m_st_way_point[m_num_way_point_target].latitude,
-		&distance_BC, &m_alpha_AB);
-	////////������ƫ���ΪĿ���ת���
-	m_st_way_point[m_num_way_point_target].turn_angle = alpha_BC - m_alpha_AB;
-	m_st_way_point[m_num_way_point_target].turn_angle = CFlightGlobalFun::Adjust(m_st_way_point[m_num_way_point_target].turn_angle, 180.0);
-
-	//���µ�ǰ����״̬
-	////////��ǰ�㡢Ŀ��㼰��һ�㣬��������ÿ�����ٷ���������
-	m_longitude_A = m_longitude;
-	m_latitude_A = m_latitude;
-	m_longitude_B = m_st_way_point[m_num_way_point_target].longitude;
-	m_latitude_B = m_st_way_point[m_num_way_point_target].latitude;
-	m_longitude_C = m_st_way_point[m_num_way_point_target + 1].longitude;
-	m_latitude_C = m_st_way_point[m_num_way_point_target + 1].latitude;
-	////////ת����Ϣ����
-	m_turn_angle = m_st_way_point[m_num_way_point_target].turn_angle;
-	m_turn_radius = m_st_way_point[m_num_way_point_target].turn_radius;
-	m_target_velocity = m_st_way_point[m_num_way_point_target].velocity;
-	////////�ؽ����ߣ�������롢��λ��
-	double distance_AB = 0.0;
-	CFlightGlobalFun::Tomas(m_longitude_A, m_latitude_A, 
-		m_longitude_B, m_latitude_B, 
-		&distance_AB, &m_A);
-	m_A = - m_A;
-	m_A = CFlightGlobalFun::Adjust(m_A, 180.0);
-
-	////////������С���ܵ���ʱ�䣬ת���ʶ����Ϊ��Ч
-	double angle_PB = 0.0;
-	CFlightGlobalFun::Tomas(m_longitude, m_latitude,
-		m_longitude_B, m_latitude_B,
-		&m_distance_BP, &angle_PB);
-	double temp_v = m_v_average_10s + 20.0;
-	if(temp_v >=  VEL_COMMAND_MAX_LIMIT)
-	{
-		temp_v = VEL_COMMAND_MAX_LIMIT; 
-	}
-	else if(temp_v <= VEL_COMMAND_MIN_LIMIT)
-	{
-		temp_v = VEL_COMMAND_MIN_LIMIT;
-	}
-	double distance_to_go = fabs(m_distance_BP - m_turn_radius * tan(fabs(m_turn_angle / RTOA) / 2.0));
-	double min_time = distance_to_go / temp_v;
-	m_st_control_time.time_arrive_minimum = flight_time + min_time;
-	m_st_control_flag.flag_waypoint_turn = false;
-}*/
 void CMathControlFlightBasic::Change_Task_Info_Online()
 {
 	//�ں������������󣬼������������͵ĺ������У�����ԭ�������ܺ�����£������ܺ���
@@ -667,21 +526,28 @@ void CMathControlFlightBasic::Change_Task_Info_Online()
 		//������ɡ�������յ�
 		if(m_st_way_point[count_num].route_mode == 6)
 		{
-			m_st_way_point[count_num].recycle_ground_hight = m_st_way_point[count_num].height;	//����߶�Ϊ����߶�
+			m_st_way_point[count_num].recycle_ground_hight = m_target_height_ground;//m_st_way_point[count_num].height;	//����߶�Ϊ����߶�
 
 			//ǰһ������Ϊ�������㣬���𹥵�
 			if(m_st_way_point[count_num - 1].route_mode == 5)
 			{
 				m_st_way_point[count_num].height = m_st_way_point[count_num - 1].height + 100.0;//���յ�ǰһ������֮��100m��ȷ��ĩ�Ƶ��󣬸�������
 				//��Ե���߶ȹ���
-				if(m_st_way_point[count_num].height < m_st_way_point[count_num].recycle_ground_hight + 300.0)
+				if(m_st_way_point[count_num].height < m_st_way_point[count_num].recycle_ground_hight + 250.0)
 				{
-					m_st_way_point[count_num].height = m_st_way_point[count_num].recycle_ground_hight + 300.0;//���300m	
+					m_st_way_point[count_num].height = m_st_way_point[count_num].recycle_ground_hight + 250.0;//���300m	
 				}
 			}
 			else
 			{
-				m_st_way_point[count_num].height = m_st_way_point[count_num].recycle_ground_hight + 300.0;//���300m
+				if(m_st_way_point[count_num].height < m_st_way_point[count_num].recycle_ground_hight + 250.0)
+				{
+					m_st_way_point[count_num].height = m_st_way_point[count_num].recycle_ground_hight + 250.0;//���300m
+				}
+				else
+				{
+					//��������		
+				}
 			}
 		}
 		else
@@ -691,14 +557,23 @@ void CMathControlFlightBasic::Change_Task_Info_Online()
 			//m_st_way_point[count_num].height
 		}
 	}
-	
-	//��󺽼���ΪĿ��㣬Ŀ��߶�ʹ�ó�ʼװ��ֵ��������
-	m_st_way_point[m_num_way_point - 1].height = m_st_target.height;
-	//����Ŀ��㾭�ȡ�ά��
+	 
+	//最后航迹点为目标点，目标高度使用初始装订值，不更新
+	//m_st_way_point[m_num_way_point - 1].height = m_st_target.height;
+	//更新目标点经度、维度
+	m_st_target.height = m_st_way_point[m_num_way_point - 1].height;
 	m_st_target.longitude	= m_st_way_point[m_num_way_point - 1].longitude;
 	m_st_target.latitude	= m_st_way_point[m_num_way_point - 1].latitude;
+	//如果最后一个目标点是回收点，前一个目标点为佯攻点，目标点设置为佯攻点
+	if((m_st_way_point[m_num_way_point - 1].route_mode == 6) && (m_st_way_point[m_num_way_point - 2].route_mode == 5))
+	{
+		m_st_target.height = m_st_way_point[m_num_way_point - 2].height;
+		m_st_target.longitude	= m_st_way_point[m_num_way_point - 2].longitude;
+		m_st_target.latitude	= m_st_way_point[m_num_way_point - 2].latitude;
+	}
 
-	//��ʼ����: ����㵽��һ�������㣬���롢��λ
+	
+	//初始航线: 发射点到第一个航迹点，距离、方位
 	CFlightGlobalFun::Tomas(p_st_initial_data->longitude_launch, p_st_initial_data->latitude_launch,
 		m_st_way_point[0].longitude, m_st_way_point[0].latitude,
 		&m_total_distance, &m_alpha_AB);
@@ -749,7 +624,8 @@ void CMathControlFlightBasic::Change_Task_Info_Online()
 	m_turn_radius = m_st_way_point[m_num_way_point_target].turn_radius;
 	m_target_velocity = m_st_way_point[m_num_way_point_target].velocity;
 	m_accept_radius = m_st_way_point[m_num_way_point_target].accept_radius;
-	////////�ؽ����ߣ�������롢��λ��
+	
+	//�ؽ����ߣ��������£�������롢��λ��
 	double distance_AB = 0.0;
 	CFlightGlobalFun::Tomas(m_longitude_A, m_latitude_A, 
 		m_longitude_B, m_latitude_B, 
@@ -789,6 +665,8 @@ void CMathControlFlightBasic::Initial()
 	//��ǰ�����������װ��
 	Update_Task_Info();
 
+	//����߶�
+	m_target_height_ground = m_hz = p_st_initial_data->height_launch;
 	//��ʼλ�á�ǰ��A\B\C��λ��
 	m_longitude = p_st_initial_data->longitude_launch;//������뺽���0Ϊ��ͬ
 	m_latitude = p_st_initial_data->latitude_launch;
@@ -800,7 +678,7 @@ void CMathControlFlightBasic::Initial()
 	m_longitude_C = m_st_way_point[2].longitude;//�ڶ�����
 	m_latitude_C = m_st_way_point[2].latitude;
 	
-	//�����ʼ���ߣ���λ������
+	//��ɼ����ʼ���ߣ���λ������
 	double distance_AB = 0.0;
 	CFlightGlobalFun::Tomas(m_longitude_A, m_latitude_A, 
 		m_longitude_B, m_latitude_B, 
@@ -873,7 +751,6 @@ void CMathControlFlightBasic::Get_Data()
 	//m_radioalt_hight = p_st_flight_basic_input->st_radioalt_data.radioalt_hight;
 	//m_radioalt_status = p_st_flight_basic_input->st_radioalt_data.radioalt_status;
 	//��Ұֵ���˲��㷨������
-	//δ���ӣ����Դ���???...
 	m_radioalt_hight = m_hz;
 	m_radioalt_status = 0xFF;
 
@@ -910,10 +787,6 @@ void CMathControlFlightBasic::Get_Data()
 		m_static_pressure_flt = m_static_pressure;
 		m_total_pressure_flt = m_total_pressure;
 	
-		//Tustin_FirstIO(0,1,0.02,1,control_para.acc_yin,control_para.acc_yout, pGuide_para.con_fTimerStep);
-		//m_baro_data_filter[0].inputdata[0],m_baro_data_filter[0].inputdata[1],
-		//m_baro_data_filter[0].outputdata[0], m_baro_data_filter[0].outputdata[1],double *r,double *f,double ts
-		
 
 		//������ѹ�߶ȡ�����
 		Calc_BaroHigh();
@@ -1046,8 +919,7 @@ void CMathControlFlightBasic::Calc_Data()
 		Change_Task_Info_Online();
 		//count_update = p_st_flight_basic_input->st_datalink_data.st_mission_update_data[m_missile_ID].update_count;
 		count_update = p_st_flight_basic_input->st_datalink_datasig.update_count;
-	}
-
+	}		
 	//���м���
 	Calc_Flight_Data();
 	//��������
@@ -1363,7 +1235,7 @@ void CMathControlFlightBasic::Calc_Command()
 		m_st_control_time.time_altitude_control = flight_time + 0.5;
 	}
 	///5.2��������
-	if((flight_time >= dlt_time_tg + 10.0)
+	if((flight_time >= dlt_time_tg + 25.0)
 		&&(!m_st_control_flag.flag_altitude_control_set))
 	{
 		//��Ϊ������
@@ -1490,7 +1362,7 @@ void CMathControlFlightBasic::Calc_Command()
 			//��������ʽ���ģʽʱ������ĩ�Ƶ��ҷ������ػ�
 			//m_st_control_flag.flag_engine_shutdown = true;
 			//m_st_control_time.time_engine_shutdown = flight_time;
-			m_ECU_work_cmd = 0x44;
+			//m_ECU_work_cmd = 0x44;
 		}
 	}
 	//�����������ѵ��ģʽ�����չ��ɣ���󺽼���Ϊ��ɡ��
@@ -1528,11 +1400,11 @@ void CMathControlFlightBasic::Calc_Command()
 			//�����ڲ���ģʽʱ������ĩ�Ƶ��ҷ�����δ�ػ������뵡��ģʽ
 			//m_st_control_flag.flag_engine_shutdown = true;	
 			//m_st_control_time.time_engine_shutdown = flight_time;
-			m_ECU_work_cmd = 0x11;//����������
+			//m_ECU_work_cmd = 0x11;//����������
 		}
 
-		//7.3 ������������ת��������֮�󶨸�Ѳ�����𲽵ֽ�Ŀ���
-		if((m_st_control_flag.flag_combat_status)&&(m_hz - m_target_height < 0.0))
+		//7.3 虚拟打击结束后，转俯冲拉起，之后定高巡航，逐步抵近目标点
+		if((m_st_control_flag.flag_combat_status)&&(m_hz - m_st_target.height - 100.0 < 0.0))
 		{
 			count_combat_dive_ok++;
 		}
@@ -1545,9 +1417,9 @@ void CMathControlFlightBasic::Calc_Command()
 		{
 			m_st_control_flag.flag_combat_dive_ok_set = true;
 			m_st_control_time.time_combat_dive_ok = flight_time + 0.10;
-			m_ECU_work_cmd = 0x33;//�������ٶȿ���
+			//m_ECU_work_cmd = 0x33;//发动机速度控制
 
-			//������ת��������ս��ָ����Ч
+			//虚拟打击转俯冲拉起，战斗指令无效
 			m_st_control_flag.flag_combat_status = false;	
 			m_st_control_time.time_combat_status = MAX_TIME;
 		}
@@ -1580,7 +1452,8 @@ void CMathControlFlightBasic::Calc_Command()
 		//��һ��:�жϽ������Ȧ��������հ뾶������ֵ300m����������ͣ�������߼��ٿ���
 		else if(step_open_umbrella == 1)
 		{
-			if(m_distance_target < m_accept_radius)
+			//if(m_distance_target < m_accept_radius)
+			if(m_distance_BP < m_accept_radius)
 			{
 				count_distance_recycle++;
 			}
@@ -1612,7 +1485,7 @@ void CMathControlFlightBasic::Calc_Command()
 				count_v50_recycle = 0;
 			}
 
-			if((m_v_air < 54.0) && (m_hz - m_target_height_ground < 300.0))
+			if((m_v_air < 54.0) && (m_hz - m_target_height_ground < 280.0))
 			{
 				count_h300_v54_recycle++;
 			}
@@ -1625,13 +1498,14 @@ void CMathControlFlightBasic::Calc_Command()
 			if((count_v50_recycle > 3)|| (count_h300_v54_recycle > 3))
 			{
 				step_open_umbrella = 3;
-				m_st_control_flag.flag_open_umbrella = true;//��ɡ����
+				m_st_control_flag.flag_open_umbrella = true;//开伞回收
 				m_st_control_time.time_open_umbrella = flight_time;				
 			}
 			else
 			{
-				//������δ���㣬��Ȧ��
-				if(m_accept_radius > m_distance_target + 50.0)
+				//备份条件：主条件未满足，出圈后
+				//if(m_accept_radius > m_distance_target + 50.0)
+				if(m_distance_BP > m_accept_radius + 50.0)
 				{
 					count_distance_out_recycle++;
 				}
@@ -1669,7 +1543,8 @@ void CMathControlFlightBasic::Calc_Command()
 				count_h250_recycle = 0;
 			}
 
-			if(m_distance_target > 600.0)
+			//if(m_distance_target > 600.0)
+			if(m_distance_BP > 600.0)
 			{
 				count_distance_out600_recycle ++;
 			}
@@ -1924,8 +1799,6 @@ void CMathControlFlightBasic::Calc_Flight_Data()
 	m_ny = m_ayflt / m_g;
 	m_nz = m_azflt / m_g;
 
-	
-
 	//���㺽��ƫ��
 	double temp = m_vtx * m_vtx + m_vtz * m_vtz;
 	if(fabs(temp) < 1e-10)
@@ -1954,25 +1827,7 @@ void CMathControlFlightBasic::Calc_Flight_Data()
 	//����ת������й�������Ǳ��ֵ�����ټ���
 	m_gama_turn_nominal = atan(m_v * m_v / m_turn_radius / m_g) * RTOA;
 	m_gama_turn_nominal = CFlightGlobalFun::Range(m_gama_turn_nominal, ROLL_COMMAND_DYNMIC_LIMIT);
-
-	//Ϊ�˵���???...
-	if(	flight_time > 80.0)///
-	{
-		double temp_a = 1.0;
-	}
-	if(	flight_time > 232.3)///
-	{
-		double temp_a = 1.0;
-	}
-	if(	flight_time > 232.5)///
-	{
-		double temp_a = 1.0;
-	} 
-	if(	flight_time > 232.7)///
-	{
-		double temp_a = 1.0;
-	}
-
+	
 	//����ת������е�����Բ�ľ��롢�����ٶȣ�����ֱ�����̲�ƫ
 	//if (flight_time > m_st_control_time.time_turn_in_start 
 	//	&& flight_time <= m_st_control_time.time_turn_out_end)
@@ -2137,20 +1992,29 @@ void CMathControlFlightBasic::Calc_LOS_Rate()
 	//б�����
 	m_slant_distance_target = sqrt(m_distance_target * m_distance_target + det_Y * det_Y);
 
+	//无导引头状态，为了测试???...
+	m_seeker_state_track = 0x00;
+	
 	//���ݵ���ͷ����״̬��ѡ�����߽��ٶ���Դ
 	if(m_seeker_state_track == 0x03 || m_seeker_state_track == 0x04)
 	{
 		//����������Ұֵ�㷨����ʱ������
 		
 		//ʹ�õ���ͷ�䣬����ϵ���߽��ٶȣ�ת��Ϊ����ϵ
-		m_dqf = m_seeker_dqf*cos(m_gama / RTOA) + m_seeker_dqh*sin(m_gama / RTOA);
-		m_dqh = -m_seeker_dqf*sin(m_gama / RTOA) + m_seeker_dqh*cos(m_gama / RTOA);
+		//m_dqh = m_seeker_dqh*cos(m_gama / RTOA) - m_seeker_dqf*sin(m_gama / RTOA);//��ת����任
+		//m_dqf = m_seeker_dqh*sin(m_gama / RTOA) + m_seeker_dqf*cos(m_gama / RTOA);
+		m_dqh = m_seeker_dqh*cos(m_gama / RTOA) + m_seeker_dqf*sin(m_gama / RTOA);//��ת����任
+		m_dqf = -m_seeker_dqh*sin(m_gama / RTOA) + m_seeker_dqf*cos(m_gama / RTOA);
 		
 		//���ݵ���ͷ���߽ǡ�Ŀ��װ���߶ȣ�����Ŀ��λ��
 		//˵������絼��ͷ���޷�̽�ⵯĿ���룬��Ҫ�������߽Ǻ͸߶Ȳ���㣬���λ��ʸ������һ������Ŀ��λ��
 		m_Qf = m_seeker_qf;
-		m_Qn = m_seeker_qh;
-		m_Qh = m_Qn + m_A;//�溽�����߽�
+		//m_Qn = m_seeker_qh;
+		//m_Qh = m_Qn + m_A;//�溽�����߽�
+		//���󣬵���ͷ������ǵ���ϵ�������߽ǣ��޸�
+		m_Qf = m_seeker_qf;
+		m_Qh = m_seeker_qh;
+		m_Qn = m_Qh - m_A;
 
 		//���ݸ߶Ȳ���߽ǹ��Ƶ�Ŀ���룬��һ������Ŀ��λ�ã���Ŀ�꾭�ȡ�Ŀ��ά��
 		//double temp_slant_distance = det_Y/CFlightGlobalFun::Nozero_FUN(sin(m_dqf / RTOA));
@@ -2174,11 +2038,38 @@ void CMathControlFlightBasic::Calc_LOS_Rate()
 	} 
 	else
 	{
-		//���߽Ǽ���
-		m_Qf = atan(-det_Y / m_distance_target) * RTOA;//deg
-		m_Qh = m_alpha_target;//deg
-		m_Qn = m_Qh - m_A;
-		m_Qn = CFlightGlobalFun::Adjust(m_Qn, 180.0);
+		//�ⲿ�֣����߽ǽ������???...
+		if((m_distance_target > 50.0)&&(det_Y > 10.0))
+		{
+			//���߽Ǽ���
+			m_Qf = atan(-det_Y / m_distance_target) * RTOA;//deg
+			m_Qh = m_alpha_target;//deg
+			m_Qn = m_Qh - m_A;
+			m_Qn = CFlightGlobalFun::Adjust(m_Qn, 180.0);
+
+			//���߽��ٶ�
+			dqh_t = RTOA * (m_vtx * sin(m_Qh/RTOA) + m_vtz * cos(m_Qh/RTOA))
+				/CFlightGlobalFun::Nozero_FUN(m_slant_distance_target);
+			dqf_t = RTOA * ((-m_vtx * cos(m_Qh/RTOA)+ m_vtz * sin(m_Qh/RTOA)) * det_Y - m_vs * m_distance_target)
+				/CFlightGlobalFun::Nozero_FUN(m_slant_distance_target * m_slant_distance_target);
+			dqg_t = RTOA * ((-m_vty * cos(m_Qh/RTOA)+ m_vtz * sin(m_Qh/RTOA)) * det_Y - m_vs * m_distance_target)
+				/CFlightGlobalFun::Nozero_FUN(m_slant_distance_target * m_slant_distance_target);	
+
+			//ת��������ϵ���ٴӵ���ϵ��ת����
+			//dqf_t -> dqf_b
+			//dqh_t -> dqh_b
+			//dqg_t -> dqg_b
+			//���Ը����ǡ������ƫ�ֻ���й�ת����
+			//���߽��ٶȣ�����ϵת��������ϵ???...
+
+			//���߽ǹ�ת����???...������
+		
+			//����ϵ��ת����
+			m_dqh = dqh_t*cos(m_gama/RTOA) + dqf_t*sin(m_gama/RTOA); //��ת�����任
+			m_dqf = - dqh_t*sin(m_gama/RTOA) + dqf_t*cos(m_gama/RTOA) ;
+			
+		}
+		
 
 		//���߽��ٶȼ���
 		//ˮƽ���������ֵ
@@ -2228,7 +2119,8 @@ void CMathControlFlightBasic::Calc_LOS_Rate()
 				m_dqf = dqf_t*cos(m_gama/RTOA) - dqh_t*sin(m_gama/RTOA);
 				m_dqh = dqf_t*sin(m_gama/RTOA) + dqh_t*cos(m_gama/RTOA);
 				*/
-				
+
+				/*
 				//��������ʸ������
 				//���ݵ���Ŀ��γ�ȣ��������λ��ʸ��������ϵ������ ���ݵ�Ŀ���롢�������߽ǡ��������߽�
 				m_Rmt_n[0] = m_slant_distance_target*cos(m_Qf / RTOA)*cos(m_Qn / RTOA);
@@ -2256,6 +2148,7 @@ void CMathControlFlightBasic::Calc_LOS_Rate()
 				//��ת����
 				m_dqf = dq_b[2]*cos(m_gama/RTOA) - dq_b[1]*sin(m_gama/RTOA);
 				m_dqh = dq_b[2]*sin(m_gama/RTOA) + dq_b[1]*cos(m_gama/RTOA);
+				*/
 			}
 			//����������ֵ����
 			//else
@@ -2303,7 +2196,6 @@ void CMathControlFlightBasic::Calc_LOS_Rate()
 		m_phih = RTOA * asin(CFlightGlobalFun::FSign(SinPhih));
 	}
 	//�������-180~180degͨ�û�����
-
 	double SinPhif = (cos(m_Qn/RTOA) * cos(m_Qf/RTOA) * (-sin(m_zeta/RTOA) * cos(m_psin/RTOA) * cos(m_gama/RTOA) + sin(m_gama/RTOA) * sin(m_psin/RTOA))
 		+ sin(m_Qf/RTOA) * cos(m_zeta/RTOA) * cos(m_gama/RTOA)
 		- cos(m_Qf/RTOA) * sin(m_Qn/RTOA) * (sin(m_zeta/RTOA) * cos(m_gama/RTOA) * sin(m_psin/RTOA) + sin(m_gama/RTOA) * cos(m_psin/RTOA))) 
@@ -2437,7 +2329,7 @@ void CMathControlFlightBasic::Coord_Rebuild()
 		m_turn_radius = m_st_way_point[m_num_way_point_target].turn_radius;	//ת��뾶
 		m_accept_radius = m_st_way_point[m_num_way_point_target].accept_radius;//������հ뾶
 		
-		//�ؽ����Ʒ�λ��
+		//����ת����ɣ���ǰ����Ŀ��㽨���ߣ����㺽�η�λ��
 		double distance_AB = 0.0;
 		CFlightGlobalFun::Tomas(m_longitude_A, m_latitude_A, 
 			m_longitude_B, m_latitude_B, 
@@ -2494,7 +2386,7 @@ void CMathControlFlightBasic::Coord_Rebuild()
 		m_turn_radius = m_st_way_point[m_num_way_point_target].turn_radius;
 		m_accept_radius = m_st_way_point[m_num_way_point_target].accept_radius;//������հ뾶
 		m_target_velocity = m_st_way_point[m_num_way_point_target].velocity;
-		//�ؽ����Ʒ�λ��
+		//�����л������½������ߣ����㷽λ��
 		double distance_AB = 0.0;
 		CFlightGlobalFun::Tomas(m_longitude_A, m_latitude_A, 
 			m_longitude_B, m_latitude_B, 
@@ -2543,10 +2435,10 @@ void CMathControlFlightBasic::Coord_Rebuild()
 		m_hover_round = m_st_way_point[m_num_way_point_target].hover_round;
 	}
 	//�������� Ϊ ���պ���
-	if(m_route_mode == 6)
-	{
-		m_target_height_ground = m_st_way_point[m_num_way_point_target].recycle_ground_hight;
-	}
+	//if(m_route_mode == 6)
+	//{
+	//	m_target_height_ground = m_st_way_point[m_num_way_point_target].recycle_ground_hight;
+	//}
 }
 
 void CMathControlFlightBasic::Control_Turn()
@@ -2563,14 +2455,14 @@ void CMathControlFlightBasic::Control_Turn()
 		m_st_control_time.time_launch_turn = flight_time;
 			
 		m_turn_angle = m_psicn - m_A;
-		m_turn_angle = CFlightGlobalFun::Adjust(m_turn_angle, 180.0);//20260408--wym
+		m_turn_angle = CFlightGlobalFun::Adjust(m_turn_angle, 180.0);//20260408
 		
 		//ת��Ƕȴ���5deg����ʼ����ת�䣬ת����ɺ����½�������
 		if(fabs(m_turn_angle) > 5.0)		//ȥ�����䷽λ��Ŀ��нǴ���30�������������
 		{
 			m_st_control_time.time_turn_in_start = flight_time;
 			m_st_control_time.time_turn_in_end = m_st_control_time.time_turn_in_start 
-				+ m_gama_turn_nominal / ROLL_RATE_COMMAND;	
+				+ (m_gama_turn_nominal - m_gama) / ROLL_RATE_COMMAND;	//����  - m_gama������ָ��ͻ��
 			m_st_control_time.time_turn_out_start = MAX_TIME;
 			m_st_control_time.time_turn_out_end = MAX_TIME;
 			m_st_control_flag.flag_turn_out_set = false;
@@ -2611,7 +2503,8 @@ void CMathControlFlightBasic::Control_Turn()
 		}
 
 		//��ת����ǰ���룬�Ƕȹ��ɲ���
-		m_distance_turn_in_compensate = 1.25 * fabs(m_gama_turn_nominal * m_v / ROLL_RATE_COMMAND);
+		//m_distance_turn_in_compensate = 1.25 * fabs(m_gama_turn_nominal * m_v / ROLL_RATE_COMMAND);
+		m_distance_turn_in_compensate = 1.0 * fabs(m_gama_turn_nominal * m_v / ROLL_RATE_COMMAND);
 		m_distance_turn_in_compensate = CFlightGlobalFun::Range(m_distance_turn_in_compensate, 150.0);
 		//��ת����ǰ���룬���β��� + �Ƕȹ��ɲ���
 		double temp_tan_psi = 1.0;
@@ -2661,12 +2554,7 @@ void CMathControlFlightBasic::Control_Turn()
 					- m_distance_turn_in_compensate * cos(m_psicn / RTOA);
 				m_z_coordinate_turn = - m_turn_radius * cos (m_psicn / RTOA) * CFlightGlobalFun::FSign(m_turn_angle)
 					+ m_distance_turn_in_compensate * sin(m_psicn / RTOA);
-
-				//m_x_coordinate_turn = m_turn_radius * sin (m_psicn / RTOA) * CFlightGlobalFun::FSign(m_turn_angle) 
-				//	- m_distance_turn_in_compensate * cos(m_psicn / RTOA);
-				//m_z_coordinate_turn = m_turn_radius * cos (m_psicn / RTOA) * CFlightGlobalFun::FSign(m_turn_angle)
-				//	+ m_distance_turn_in_compensate * sin(m_psicn / RTOA);
-				
+	
 				m_psit_t_turn_in = m_psit;
 			}
 			//�����к���ת�䣬�л���һĿ��㣬������Ŀ����к���
@@ -2735,7 +2623,7 @@ void CMathControlFlightBasic::Control_Turn()
 				{				
 					//��ת�Ƕ�Ӧ��ת����ٶ�
 					double Omega = fabs(m_g * tan(m_gama / RTOA) / m_v);
-					//???...�ӳ�ʱ�䣬�������
+					//�ӳ�ʱ�䣬���㷽���޸�
 					//double time_turn_out_delay = fabs(acos(1 - fabs((m_sz - m_turn_radius) * Omega / m_v)))/CFlightGlobalFun::Nozero_FUN(Omega) - 3.5;
 					double time_turn_out_delay = fabs(acos(1 - fabs((m_sz) * Omega / m_v)))/CFlightGlobalFun::Nozero_FUN(Omega) - 2.0;
 					//ʵ��ת��뾶ƫС����ǰ����ת�䣬������ʼ��ƫ����
@@ -2842,8 +2730,8 @@ void CMathControlFlightBasic::Calc_Dualplane_Guidance()
 		//ĩ�Ƶ�ʱ����ת�Ǻ�С����������ؽ�С��ת��Ϊ��ĩ�Ƶ� STT�Ƶ���
 		step_dualplane_guidance = 3;
 
-		//Ϊ�˲��ԣ�����BTT�Ƶ�
-		//step_dualplane_guidance = 2;
+		//˵��������̬���Խϲ�����ͣ���ĩ�Ƶ� STT�Ƶ���Ч���ܲҲ����BTT�Ƶ�
+		step_dualplane_guidance = 2;
 	}
 	if((flight_time > m_st_control_time.time_combat_dive_ok)
 		&& ( (step_dualplane_guidance == 2) || (step_dualplane_guidance == 3) ))
@@ -2865,7 +2753,7 @@ void CMathControlFlightBasic::Calc_Dualplane_Guidance()
 	temp_ny_command = 4.0 * m_v * m_dqf / m_g / RTOA + 1.00*cos(m_zeta / RTOA);
 	temp_ny_command = CFlightGlobalFun::Range2(temp_ny_command, 2.0, -0.5);
 	double temp_nz_command = 0.0;
-	temp_nz_command = 3.0 * m_v * m_dqh / RTOA / m_g;
+	temp_nz_command = -3.0 * m_v * m_dqh / RTOA / m_g;
 	temp_nz_command = CFlightGlobalFun::Range(temp_nz_command, 1.5);
 	double temp_nyz_command = 0.0;
 	temp_nyz_command = sqrt(temp_ny_command*temp_ny_command + temp_nz_command*temp_nz_command) * CFlightGlobalFun::FSign(temp_ny_command);
@@ -3021,21 +2909,7 @@ void CMathControlFlightBasic::Control_Altitude_Change()
 			count_altitude_change_energy_enable = 0;
 			delta_h_target = m_target_height - m_hz;
 		}
-		//�������
-		//if(step_altitude_change_lauch == 1)
-		//{
-		//	step_altitude_change_lauch = 2;
-		//	delta_h_target = m_hz - m_target_height;
-		//}
-		
-		
-		//�߶ȱ仯С��20m
-		//if(fabs(delta_h_target) < 20.0)
-		//{
-		//	altitude_change_delay = 2.0;
-		//	m_st_control_flag.flag_alltitude_climb = false;
-		//	m_st_control_flag.flag_alltitude_decline = false;//���ָ߶ȸ��٣�ָ��߶ȹ��ɸ���
-		//}
+
 		//�߶��»�
 		//else if(delta_h_target > 0.0)
 		if(delta_h_target < 0.0)
@@ -3047,22 +2921,6 @@ void CMathControlFlightBasic::Control_Altitude_Change()
 		//�߶�����
 		else
 		{
-			/*
-			//�����߶�С��20m
-			if(fabs(delta_h_target) < 20.0)
-			{
-				altitude_change_delay = 2.0;
-			}
-			//�����߶ȴ��ڵ���20m��С��2000m
-			else if(fabs(delta_h_target) < 2000.0)
-			{
-				altitude_change_delay = fabs(delta_h_target)/5.0;
-			}
-			//�����߶ȴ��ڵ���2000m
-			else
-			{
-				altitude_change_delay = 400.0;
-			}*/
 			altitude_change_delay = 2.0;
 			m_st_control_flag.flag_alltitude_climb = true;//����
 			m_st_control_flag.flag_alltitude_decline = false;
@@ -3091,15 +2949,6 @@ void CMathControlFlightBasic::Control_Altitude_Change()
 		{
 			count_altitude_change_end = 0;
 		}
-		
-		//if ((fabs(m_hz - m_target_height) <= 20.0))
-		//{
-		//	count_altitude_change_end++;
-		//}
-		//else
-		//{
-		//	count_altitude_change_end = 0;
-		//}
 
 		if(count_altitude_change_end >= 3)
 		{
@@ -3124,8 +2973,10 @@ void CMathControlFlightBasic::Monitor_Data()
 		sim_monitor.Get_Variable(m_A,"A",ENUM_FILE_CONTROL1);//��λ�ǣ���������ʱ���£�ת��ǶȺ�С �� ת�����
 		sim_monitor.Get_Variable(m_hz,"hz",ENUM_FILE_CONTROL1);//��ϸ߶�
 		sim_monitor.Get_Variable(m_vs,"vs",ENUM_FILE_CONTROL1);//��ϴ���
-		sim_monitor.Get_Variable(m_ny,"ny",ENUM_FILE_CONTROL1);//����ϵY������� 5
-		sim_monitor.Get_Variable(m_nz,"nz",ENUM_FILE_CONTROL1);//����ϵZ�������
+		//sim_monitor.Get_Variable(m_ny,"ny",ENUM_FILE_CONTROL1);//����ϵY������� 5
+		sim_monitor.Get_Variable(m_au,"ny",ENUM_FILE_CONTROL1);//����ϵY������� 5
+		//sim_monitor.Get_Variable(m_nz,"nz",ENUM_FILE_CONTROL1);//����ϵZ�������
+		sim_monitor.Get_Variable(m_anz,"nz",ENUM_FILE_CONTROL1);//����ϵZ�������
 		sim_monitor.Get_Variable(m_sz,"sz",ENUM_FILE_CONTROL1);//��ƫ
 		sim_monitor.Get_Variable(m_vnz,"vz",ENUM_FILE_CONTROL1);//�����ٶ�
 		sim_monitor.Get_Variable(m_dqf,"dqf",ENUM_FILE_CONTROL1);//�������߽��ٶ�
@@ -3152,5 +3003,6 @@ void CMathControlFlightBasic::Monitor_Data()
 		sim_monitor.Get_Variable(m_st_control_flag.flag_waypoint_turn,"FlagWaypointTurn",ENUM_FILE_CONTROL1);
 		sim_monitor.Get_Variable(m_st_control_flag.flag_alltitude_change,"FlagAlltitudeChange",ENUM_FILE_CONTROL1);
 		sim_monitor.Get_Variable(count_altitude_change,"countAltitudeChange",ENUM_FILE_CONTROL1);///������ 4
+		sim_monitor.Get_Variable((int)m_state_rpm,"state_rpm",ENUM_FILE_CONTROL1);//������״̬ת�� rpm
 	}
 }*/

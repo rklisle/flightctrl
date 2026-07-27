@@ -4,11 +4,6 @@
 // Copyright (c) 2016 
 // All rights reserved.
 //
-// 摘要: 飞控输出模块，包括舵解耦，舵限幅，舵输出等
-//        
-//
-// 当前版本: 1.0
-// 作者: wym
 // 完成日期: 
 //==================================================================/
 //#include "../../debug_monitor.h"
@@ -24,6 +19,7 @@ typedef struct  _Stru_Control_Out_Input
 	double ug_adrc;//内回路ADRC
 	double uqkf;//前馈
 	double u2f;//P
+	double u4f;//I
 	double u5f;//D
 	double ugf;//高度控制PID
 	double u5h;//D
@@ -70,6 +66,8 @@ private:
 	
 	double RudAgl2MotorAglH1(double rud_angle);//-51~＋30
 	double RudAgl2MotorAglH2(double rud_angle);//-30~＋51
+	double RudAgl2MotorAglH3(double rud_angle);//-51~＋30
+	double RudAgl2MotorAglH4(double rud_angle);//-30~＋51
 	double RudAgl2MotorAglV1(double rud_angle);//-36~26
 	double RudAgl2MotorAglV2(double rud_angle);//-26~+36
 	
@@ -88,6 +86,7 @@ private:
 	double m_ug_adrc;
 	double m_uqkf;
 	double m_u2f;
+	double m_u4f;
 	double m_u5f;
 	double m_u5h;
 	double m_ugf;

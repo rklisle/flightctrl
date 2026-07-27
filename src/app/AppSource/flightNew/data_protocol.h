@@ -1,7 +1,7 @@
 #ifndef _DATA_PROTOCOL_H_
 #define _DATA_PROTOCOL_H_
 //==================================================================/
-// 摘要: 定义仿真所需各模块间通讯数据内容
+
 //==================================================================/
 //#include "..\load_data.h"
 //#include "..\datalink_sim_main.h"
@@ -9,8 +9,9 @@
 #include <stdbool.h>
 // #include "port/flightPort.h"
 
-#define E_CONST		(1.0/298.257)
 #define RE			(6378137.0)
+#define F_CONST		(1.0/298.257)
+#define E_CONST		0.00669437999
 //***************** 外部仿真控制给导弹输入数据 ********************//
 #define MAX_ROUTE_NUMBER 64 
 #define MAX_CONNECT_NUMBER 16
@@ -142,14 +143,13 @@ typedef struct _Stru_Target_State_Data
 }Stru_Target_State_Data;
 typedef struct _Stru_Jamming_Data_In
 {
-	//干扰条件编号 0
-	double temperature_environment;//发射温度，即助推器平均推力及时长拉偏ok
-	int    flag_wind;//突变风拉偏 ok，暂不参与其他耦合
+	double temperature_environment;
+	int    flag_wind;
 	double velocity_wind;
 	double psi_wind;
-	double theta_wind;///5
+	double theta_wind;
 	
-	double lp_pitch;//气动拉偏 ok
+	double lp_pitch;
 	double lp_yaw;
 	double lp_roll;
 	double lp_lift;
@@ -157,59 +157,47 @@ typedef struct _Stru_Jamming_Data_In
 	double lp_side;
 	double lp_wx;
 	double lp_wy;
-	double lp_wz;///14
+	double lp_wz;
 	
-	double lp_rotary_inertia;//惯量拉偏 ok ///15
-	int    flag_jggr;//结构干扰，1为正干扰力矩，-1为负干扰力矩，0为无干扰 ok
-	double det_mass;//质量偏差拉偏 kg ok
-	double det_x_centroid;//质心拉偏，m，结构系j ok
+	double lp_rotary_inertia;
+	int    flag_jggr;
+	double det_mass;
+	double det_x_centroid;
 	double det_y_centroid;
 	double det_z_centroid;
-	double gama0;	//初始姿态偏差，认为对准误差很小，一般惯导安装误差 ok ///21
+	double gama0;
 	double zeta0;
 	double psi0;
-	double wxerr;	//角速度偏差，认为惯导零偏 ok
+	double wxerr;
 	double wyerr;
-	double wzerr;	///26
+	double wzerr;
 	
-	double lp_dx;	//舵效拉偏 ok
+	double lp_dx;
 	double lp_dy;
-	double lp_dz;///29
+	double lp_dz;
 
-	double Lp_trust_det;//推力拉偏
-	double Lp_eng_flowvol;//耗油率或流量拉偏
-	//结构系，经Xj轴周向角，得到偏心系
-	//推力偏心，取值范围0~0.01m
-	//+推力偏心周向角，Yj向为零，结构系绕Xj轴转为正，取值范围-180~180deg，即后向前看逆时针为正
+	double Lp_trust_det;
+	double Lp_eng_flowvol;
 	double trust_det_pos;
-	double trust_det_angle;// 33
+	double trust_det_angle;
 
-	//体轴系，经过Xj轴旋转 周向角gama，再经过Zj' 俯仰角，得到推力线坐标系
-	//推力偏斜俯仰角，取值范围0~90.0deg，无负值
-	//推力偏斜周向角，Yj向为零，结构系绕Xj轴转为正，取值范围-180~180deg，即后向前看逆时针为正
 	double trust_det_alpha;
-	double trust_det_gama;// 35 
+	double trust_det_gama;
 
-	//助推器推力偏斜俯仰角、周向角
-	//说明：质心配置方法决定不存在推力偏心，只有推力偏斜角、周向角
-	double booster_det_alpha;//推力偏斜俯仰角
-	double booster_det_gama;// 37 推力偏斜周向角
+	double booster_det_alpha;
+	double booster_det_gama;
 
-	//大气参数拉偏
-	double lp_air_density;//空气密度拉偏
-	double lp_air_pressure;//大气压力拉偏
-}Stru_Jamming_Data_In;	//导弹飞行干扰条件数据???...
+	double lp_air_density;
+	double lp_air_pressure;
+}Stru_Jamming_Data_In;
 
 typedef struct _Stru_Mission_Data_In
 {
 	Stru_Jamming_Data_In st_jamming_data_in;
 	Stru_Initial_Data *	p_st_initial_data;
 	Stru_Route_Data	  *	p_st_route_data;
-}Stru_Mission_Data_In;	//任务数据
+}Stru_Mission_Data_In;
 
-//****************** 弹体内部各设备间通讯数据 *********************//
-
-//空速管给综控机数据包
 typedef struct _Stru_Data_Baro_To_Controller  
 {
 	double static_pressure; //静压传感器输出
@@ -305,21 +293,14 @@ typedef struct _Stru_Data_Engine_To_Controller
 
 typedef struct _Stru_Data_Controller_To_Seeker  
 {
-	bool flag_seeker_on;		//导引头开机
-	bool flag_lock_on_permit;//目标锁定允许或引导搜指令，飞控发送
-	bool flag_target_lock;	//闭锁指令
-	//情况一，飞控根据导引头搜索到的目标信息，指定目标编号或像素中心点，导引头依此捕获、跟踪目标；
-	//情况二，如果装订了目标模板或视场只有一个目标，导引头自动匹配识别目标，并捕获、跟踪目标；过程中，可进行目标切换，飞控发送闭锁指令后，不再切换；
-	//当飞控判断，导弹距目标一定距离后未捕获，虚拟导引打击；
+	bool flag_seeker_on;
+	bool flag_lock_on_permit;
+	bool flag_target_lock;
 
-	//目标锁定允许或引导搜指令，附加信息
-	double pitch_gimbal_angle_calc;	//俯仰框架角指令
-	double yaw_gimbal_angle_calc;		//航向框架角指令
-	//闭锁指令，附加信息
-	//采用情况二，只有指令，无附加信息；
+	double pitch_gimbal_angle_calc;
+	double yaw_gimbal_angle_calc;
 	int target_num__choosen;
 
-	//目标位置解算，相关导航信息
 	double wz;
 	double wy;
 	double gama;

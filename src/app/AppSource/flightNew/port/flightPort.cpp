@@ -47,7 +47,7 @@ extern "C"{
         p->p_st_data_ins_to_controller      = &g_ins_data;
         p->p_st_data_engine_to_controller   = &g_engine_data;
         p->p_st_data_baro_to_controller     = &g_baro_data;
-        // p->p_st_data_seeker_to_controller = &g_seeker_data;
+        p->p_st_data_seeker_to_controller = &g_seeker_data;
         // p->p_st_data_datalink_to_controller = &g_datalink_data;
         // p->p_st_data_radioalt_to_controller = &g_radioalt_data;
         

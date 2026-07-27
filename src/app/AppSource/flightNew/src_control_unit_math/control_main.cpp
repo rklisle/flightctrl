@@ -22,7 +22,7 @@ CMathControlMain::CMathControlMain()
 	p_st_initial_data = NULL;
 	//p_st_debug_monitor = NULL;
 
-	//ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½İ»ï¿½ï¿½ï¿½
+	//³õÊ¼»¯Êı¾İ»º´æ
 	memset(&m_st_flight_basic_input  , 0, sizeof(Stru_Flight_Basic_Input));
 	memset(&m_st_flight_basic_output , 0, sizeof(Stru_Flight_Basic_Output));
 	memset(&m_st_roll_control_input  , 0, sizeof(Stru_Roll_Control_Input));			
@@ -36,7 +36,7 @@ CMathControlMain::CMathControlMain()
 	memset(&m_st_engine_control_input	 , 0, sizeof(Stru_Engine_Control_Input));
 	memset(&m_st_engine_control_output	 , 0, sizeof(Stru_Engine_Control_Output));
 
-	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	//°ó¶¨ÊäÈëÊä³ö»º´æ
 	m_math_control_flight_basic.p_st_flight_basic_input = &m_st_flight_basic_input;
 	m_math_control_flight_basic.p_st_flight_basic_output = &m_st_flight_basic_output;
 	m_math_control_roll.p_st_roll_control_input = &m_st_roll_control_input;
@@ -79,14 +79,14 @@ void CMathControlMain::Initial()
 
 void CMathControlMain::Run()
 {
-	//Ä¿ï¿½ï¿½Ñ¡ï¿½ï¿½
+	//Ä¿±êÑ¡Ôñ
 	Choose_Target_ID();
 	
-	//ï¿½ï¿½ï¿½ï¿½ï¿½Ğ»ï¿½ï¿½ï¿½ï¿½Æµï¿½ï¿½ï¿½Â·
+	//º½¼£ÇĞ»»£¬ÖÆµ¼»ØÂ·
 	Update_Input_Data(ENUM_FLIGHT_BASIC);
 	m_math_control_flight_basic.Run();
 
-	//ï¿½ï¿½Í¨ï¿½ï¿½ï¿½ï¿½ï¿½Æ£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ò¼°¹ï¿½×ª
+	//ÈıÍ¨µÀ¿ØÖÆ£¬¸©Ñö¡¢º½Ïò¼°¹ö×ª
 	Update_Input_Data(ENUM_CONTROL_ROLL);	
 	m_math_control_roll.Run();
 	Update_Input_Data(ENUM_CONTROL_YAW);
@@ -94,28 +94,21 @@ void CMathControlMain::Run()
 	Update_Input_Data(ENUM_CONTROL_PITCH);
 	m_math_control_pitch.Run();
 	
-	//ï¿½Ù¶È¿ï¿½ï¿½ï¿½
+	//ËÙ¶È¿ØÖÆ
 	Update_Input_Data(ENUM_CONTROL_ENGINE);
 	m_math_control_engine.Run();
 	
-	//ï¿½ï¿½Ø·ï¿½ï¿½ï¿½
+	//¶æ¿Ø·ÖÅä
 	Update_Input_Data(ENUM_CONTROL_OUT);
 	m_math_control_out.Run();
 	
-	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½è±¸
+	//¿ØÖÆÊä³ö¸ø¸öÉè±¸
 	Update_Output_Data();	
 }
 
-//Ä¿ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½ã·¨
-//ï¿½ï¿½ï¿½Ü£ï¿½ï¿½ï¿½ï¿½İµï¿½ï¿½ï¿½Í·ï¿½ï¿½Ï¢ï¿½ï¿½Î»ï¿½Ã¡ï¿½ï¿½ß¶Èµï¿½ï¿½ï¿½Ï¢ï¿½ï¿½È·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½IDï¿½ï¿½
-//ï¿½ï¿½ï¿½ë£ºï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½Í·Ä¿ï¿½ï¿½ï¿½ï¿½ï¿½İ£ï¿½ï¿½ï¿½ï¿½ï¿½Í·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä£ï¿½â£¬
-//		Ä¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½(Ö¸ï¿½ï¿½)p_st_data_seeker_to_controller+kï¿½ï¿½k=0...15
-//		ï¿½ï¿½à²»ï¿½ï¿½ï¿½ï¿½16ï¿½ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½é£¬ï¿½ï¿½ï¿½ï¿½0ï¿½ï¿½Ê¾ï¿½ï¿½Ò»ï¿½ï¿½Ä¿ï¿½ê£¬kï¿½ï¿½Ê¾ï¿½ï¿½k+1ï¿½ï¿½Ä¿ï¿½ï¿½
-//Ëµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½çµ¼ï¿½ï¿½Í·ï¿½Ó³ï¿½ï¿½Ğ£ï¿½Ö»ï¿½ï¿½Ò»ï¿½ï¿½Ä¿ï¿½ê£¬Ö»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½0Ä¿ï¿½ï¿½ï¿½ï¿½Ğ§ï¿½ï¿½		
-//ï¿½ï¿½ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½IDï¿½ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½ID == -1Ê±ï¿½ï¿½ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½Ğ§Ä¿ï¿½ê£¬ï¿½ï¿½ï¿½ï¿½ÎªÑ¡ï¿½ï¿½Ä¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 void CMathControlMain::Choose_Target_ID()
 {	
-	//ï¿½İ²ï¿½ï¿½ï¿½ï¿½Ó£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ä£¬ï¿½ï¿½Ê±ï¿½è¶¨Îªï¿½ï¿½0ï¿½ï¿½Ä¿ï¿½ê£¬ï¿½ï¿½ï¿½ï¿½Ä¿ï¿½ê¡°Õ½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×´Ì¬ï¿½ï¿½ï¿½ï¿½È·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½Ç·ï¿½ï¿½ï¿½Ğ§ï¿½ï¿½
+	//Ôİ²»Ìí¼Ó£¬ºóĞø²¹³ä£¬ÔİÊ±Éè¶¨ÎªµÚ0¸öÄ¿±ê£¬¸ù¾İÄ¿±ê¡°Õ½¶·¼°¸ú×Ù×´Ì¬¡±£¬È·¶¨¾ßÌåĞÅÏ¢ÊÇ·ñÓĞĞ§£»
 	m_target_attack_ID = 0;
 }
 
@@ -123,14 +116,14 @@ void CMathControlMain::Update_Input_Data(MODULE_TYPE MODULE_NAME)
 {
 	switch (MODULE_NAME)
 	{
-	case ENUM_FLIGHT_BASIC:			//ï¿½ï¿½ï¿½Â»ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½ï¿½Ä£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	case ENUM_FLIGHT_BASIC:			//¸üĞÂ»ù±¾ĞÅÏ¢¼ÆËãÄ£¿éÊäÈë
 		m_st_flight_basic_input.missile_ID = missile_ID;
-		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Ö¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½IDï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ú»ï¿½Â·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É¿Ø½ï¿½Ä¿ï¿½ï¿½IDï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í·Êµï¿½ï¿½Ä¿ï¿½ï¿½Ñ¡ï¿½ï¿½Êµï¿½ï¿½ï¿½È¶ï¿½ï¿½ï¿½ï¿½ï¿½
+		//Êı¾İÁ´ Ö¸¶¨ ¹¥»÷Ä¿±êID£¬¼´ ÈËÔÚ»ØÂ·Ëø¶¨£¬·É¿Ø½«Ä¿±êID¼°ÌØÕ÷ĞÅÏ¢£¬·¢¶¯¸øµ¼ÒıÍ·ÊµÏÖÄ¿±êÑ¡Ôñ£¬ÊµÏÖÎÈ¶¨¸ú×Ù
 		//m_target_attack_ID = p_st_data_datalink_to_controller->st_mission_update_data[missile_ID].target_ID;
 		m_math_control_flight_basic.flight_time = flight_time;
 		m_math_control_flight_basic.time_tick = time_tick;
 		
-		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+		//·¢¶¯»ú¿ØÖÆ ¸ø »ù´¡¿ØÖÆ²ÎÊı½âËã
 		m_st_flight_basic_input.engine_cmd_Kc = 
 			m_st_engine_control_output.control_Kc;
 		m_st_flight_basic_input.engine_cmd_rpm = 
@@ -152,20 +145,20 @@ void CMathControlMain::Update_Input_Data(MODULE_TYPE MODULE_NAME)
 			p_st_data_ins_to_controller,
 			sizeof(Stru_Data_INS_To_Controller));
 
-		//ï¿½ï¿½ï¿½İ¹ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½IDï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½Ä¿ï¿½ï¿½ï¿½ï¿½Ï¢
+		//¸ù¾İ¹¥»÷Ä¿±êID£¬µ¼ÈëÑ¡ÔñÄ¿±êĞÅÏ¢
 		memcpy(&m_st_flight_basic_input.st_seeker_data,
 			&p_st_data_seeker_to_controller[m_target_attack_ID],
 			sizeof(Stru_Data_Seeker_To_Controller));
-		//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+		//µØÃæÊı¾İÁ´´¦Àí
 		memcpy(&m_st_flight_basic_input.st_datalink_datasig,
 			p_st_data_datalink_to_controllersig,
 			sizeof(Stru_Data_Datalink_To_ControllerSig));
-		// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½İ£ï¿½ï¿½ï¿½Ê±ï¿½ï¿½Ê¹ï¿½ï¿½
+		// ×éÍøÊı¾İÁ´Êı¾İ£¬ÔİÊ±²»Ê¹ÓÃ
 		//memcpy(&m_st_flight_basic_input.st_datalink_data,
 		//	p_st_data_datalink_to_controller,
 		//	sizeof(Stru_Data_Datalink_To_Controller));
 		break;
-	case ENUM_CONTROL_ROLL:			//ï¿½ï¿½ï¿½Â¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	case ENUM_CONTROL_ROLL:			//¸üĞÂ¹ö¶¯¿ØÖÆÄ£¿éÊäÈë
 		m_math_control_roll.flight_time = flight_time;
 		m_math_control_roll.time_tick = time_tick;
 		m_st_roll_control_input.mass = m_st_flight_basic_output.mass_calc;
@@ -175,15 +168,6 @@ void CMathControlMain::Update_Input_Data(MODULE_TYPE MODULE_NAME)
 		m_st_roll_control_input.v	 = m_st_flight_basic_output.v;
 		m_st_roll_control_input.vnz	 = m_st_flight_basic_output.vnz;
 		m_st_roll_control_input.g	 = m_st_flight_basic_output.g;
-		//if (p_st_data_seeker_to_controller[m_target_attack_ID].flag_combat_status
-		//	/*&&(m_st_flight_basic_output.num_way_point_target == (p_st_route_data_preflight->num_rows - 1))*/)
-		//{
-		//	m_st_roll_control_input.dqh	= p_st_data_seeker_to_controller[m_target_attack_ID].yaw_LOS_rate;
-		//} 
-		//else
-		//{
-		//	m_st_roll_control_input.dqh	= m_st_flight_basic_output.dqh;
-		//}
 		m_st_roll_control_input.gama_command_guidance = m_st_flight_basic_output.gama_command;
 		m_st_roll_control_input.angle_zw = m_st_flight_basic_output.angle_zw;
 		m_st_roll_control_input.radius_zw = m_st_flight_basic_output.radius_zw;
@@ -208,7 +192,7 @@ void CMathControlMain::Update_Input_Data(MODULE_TYPE MODULE_NAME)
 		//m_st_roll_control_input.time_combat_delay = 
 		//	m_st_flight_basic_output.st_control_time.time_combat_delay;
 		m_st_roll_control_input.time_combat_dive_sidectrl = 
-			m_st_flight_basic_output.st_control_time.time_combat_dive_sidectrl;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ó£¬²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+			m_st_flight_basic_output.st_control_time.time_combat_dive_sidectrl;//ĞéÄâ´ò»÷ºó£¬²àÏò¿ØÖÆ
 		m_st_roll_control_input.time_turn_in_start =
 			m_st_flight_basic_output.st_control_time.time_turn_in_start;
 		m_st_roll_control_input.time_turn_in_end =
@@ -218,7 +202,7 @@ void CMathControlMain::Update_Input_Data(MODULE_TYPE MODULE_NAME)
 		m_st_roll_control_input.time_turn_out_end =
 			m_st_flight_basic_output.st_control_time.time_turn_out_end;
 		break;
-	case ENUM_CONTROL_YAW:			//ï¿½ï¿½ï¿½Âºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	case ENUM_CONTROL_YAW:			//¸üĞÂº½Ïò¿ØÖÆÄ£¿éÊäÈë
 		m_math_control_yaw.flight_time = flight_time;
 		m_math_control_yaw.time_tick = time_tick;
 		m_st_yaw_control_input.mass = m_st_flight_basic_output.mass_calc;
@@ -230,21 +214,14 @@ void CMathControlMain::Update_Input_Data(MODULE_TYPE MODULE_NAME)
 		m_st_yaw_control_input.g	= m_st_flight_basic_output.g;
 		m_st_yaw_control_input.qh	= m_st_flight_basic_output.qh;
 		m_st_yaw_control_input.tgo	= m_st_flight_basic_output.time_to_go;
-		//if (p_st_data_seeker_to_controller[m_target_attack_ID].flag_combat_status
-		//	/*&&(m_st_flight_basic_output.num_way_point_target == (p_st_route_data_preflight->num_rows - 1))*/)
-		//{
-		//	m_st_yaw_control_input.dqh	= p_st_data_seeker_to_controller[m_target_attack_ID].yaw_LOS_rate;
-		//} 
-		//else
-		//{
-		//	m_st_yaw_control_input.dqh	= m_st_flight_basic_output.dqh;
-		//}
 		m_st_yaw_control_input.nbz = m_st_flight_basic_output.nbz;
 		m_st_yaw_control_input.nby = m_st_flight_basic_output.nby;
 		m_st_yaw_control_input.nz_command_guidance = m_st_flight_basic_output.nz_command;
 		m_st_yaw_control_input.distance_target = m_st_flight_basic_output.distance_target;
 		m_st_yaw_control_input.time_separate_booster = 
 			m_st_flight_basic_output.st_control_time.time_separate_booster;
+		m_st_yaw_control_input.time_missile_takeoff = 
+			m_st_flight_basic_output.st_control_time.time_missile_takeoff;
 		m_st_yaw_control_input.time_combat_status = 
 			m_st_flight_basic_output.st_control_time.time_combat_status;
 		m_st_yaw_control_input.time_combat_delay = 
@@ -252,7 +229,7 @@ void CMathControlMain::Update_Input_Data(MODULE_TYPE MODULE_NAME)
 		m_st_yaw_control_input.gama_command_compensate =
 			m_st_roll_control_output.gama_command_compensate;
 		break;
-	case ENUM_CONTROL_PITCH:		//ï¿½ï¿½ï¿½Â¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	case ENUM_CONTROL_PITCH:		//¸üĞÂ¸©Ñö¿ØÖÆÄ£¿éÊäÈë
 		m_math_control_pitch.flight_time = flight_time;
 		m_math_control_pitch.time_tick = time_tick;
 		//m_st_pitch_control_input.ktheta_lauch_enc = m_st_flight_basic_output.ktheta_lauch_enc;
@@ -266,16 +243,6 @@ void CMathControlMain::Update_Input_Data(MODULE_TYPE MODULE_NAME)
 		m_st_pitch_control_input.v    = m_st_flight_basic_output.v;
 		m_st_pitch_control_input.vs   = m_st_flight_basic_output.vs;
 		m_st_pitch_control_input.g    = m_st_flight_basic_output.g;
-		//ï¿½ï¿½ï¿½İµï¿½ï¿½ï¿½Í·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Í· ï¿½ï¿½ ï¿½Ì¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß½ï¿½ï¿½Ù¶ï¿½
-		//if (p_st_data_seeker_to_controller[m_target_attack_ID].flag_combat_status
-		//	/*&&(m_st_flight_basic_output.num_way_point_target == (p_st_route_data_preflight->num_rows - 1))*/)
-		//{
-		//	m_st_pitch_control_input.dqf = p_st_data_seeker_to_controller[m_target_attack_ID].pitch_LOS_rate;
-		//} 
-		//else
-		//{
-		//	m_st_pitch_control_input.dqf = m_st_flight_basic_output.dqf;
-		//}
 		m_st_pitch_control_input.nby  = m_st_flight_basic_output.nby;
 		m_st_pitch_control_input.ny_command_guidance = m_st_flight_basic_output.ny_command;
 		m_st_pitch_control_input.distance_target = m_st_flight_basic_output.distance_target;
@@ -286,39 +253,39 @@ void CMathControlMain::Update_Input_Data(MODULE_TYPE MODULE_NAME)
 		m_st_pitch_control_input.count_altitude_change = 
 			m_st_flight_basic_output.count_altitude_change;
 		m_st_pitch_control_input.time_control =
-			m_st_flight_basic_output.st_control_time.time_control;//ï¿½ï¿½ï¿½ï¿½
+			m_st_flight_basic_output.st_control_time.time_control;//Æô¿Ø
 		m_st_pitch_control_input.time_separate_booster = 
-			m_st_flight_basic_output.st_control_time.time_separate_booster;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+			m_st_flight_basic_output.st_control_time.time_separate_booster;//ÖúÍÆÆ÷·ÖÀë
 		m_st_pitch_control_input.time_missile_takeoff = 
-			m_st_flight_basic_output.st_control_time.time_missile_takeoff;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+			m_st_flight_basic_output.st_control_time.time_missile_takeoff;//Æğ·ÉÍê³É
 		m_st_pitch_control_input.time_altitude_control =
-			m_st_flight_basic_output.st_control_time.time_altitude_control;//ï¿½ß¶È¿ï¿½ï¿½ï¿½
+			m_st_flight_basic_output.st_control_time.time_altitude_control;//¸ß¶È¿ØÖÆ
 		m_st_pitch_control_input.time_combat_status = 
-			m_st_flight_basic_output.st_control_time.time_combat_status;//Ä©ï¿½Æµï¿½
+			m_st_flight_basic_output.st_control_time.time_combat_status;//Ä©ÖÆµ¼
 		m_st_pitch_control_input.time_combat_dive_pullup = 
-			m_st_flight_basic_output.st_control_time.time_combat_dive_pullup;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+			m_st_flight_basic_output.st_control_time.time_combat_dive_pullup;//ĞéÄâ´ò»÷£¬¸©³åÀ­Æğ
 		m_st_pitch_control_input.time_combat_delay = 
-			m_st_roll_control_output.time_combat_delay;		//Ä©ï¿½Æµï¿½ï¿½Ó³ï¿½
+			m_st_roll_control_output.time_combat_delay;		//Ä©ÖÆµ¼ÑÓ³Ù
 		m_st_pitch_control_input.time_altitude_change_start =
-			m_st_flight_basic_output.st_control_time.time_altitude_change_start;//ï¿½ß¶È»ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼
+			m_st_flight_basic_output.st_control_time.time_altitude_change_start;//¸ß¶È»ú¶¯¿ªÊ¼
 		m_st_pitch_control_input.time_altitude_change_end =
-			m_st_flight_basic_output.st_control_time.time_altitude_change_end;//ï¿½ß¶È»ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼	
+			m_st_flight_basic_output.st_control_time.time_altitude_change_end;//¸ß¶È»ú¶¯¿ªÊ¼	
 		m_st_pitch_control_input.gama_command_compensate = 
 			m_st_roll_control_output.gama_command_compensate;
 		break;
-	case ENUM_CONTROL_ENGINE:		//ï¿½ï¿½ï¿½Â·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	case ENUM_CONTROL_ENGINE:		//¸üĞÂ·¢¶¯»ú¿ØÖÆÄ£¿éÊäÈë
 		m_math_control_engine.flight_time = flight_time;
 		m_math_control_engine.time_tick = time_tick;
-		m_st_engine_control_input.mass = m_st_flight_basic_output.mass_calc;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-		m_st_engine_control_input.h = m_st_flight_basic_output.hz;//ï¿½ï¿½ï¿½Î¸ß¶ï¿½
-		m_st_engine_control_input.h_ini = m_st_flight_basic_output.h_ini;//ï¿½ï¿½Ê¼ï¿½ß¶ï¿½
+		m_st_engine_control_input.mass = m_st_flight_basic_output.mass_calc;//¹À¼ÆÖÊÁ¿
+		m_st_engine_control_input.h = m_st_flight_basic_output.hz;//º£°Î¸ß¶È
+		m_st_engine_control_input.h_ini = m_st_flight_basic_output.h_ini;//³õÊ¼¸ß¶È
 		//m_st_engine_control_input.temperature_ground = m_st_flight_basic_output.ground_temperature;
-		m_st_engine_control_input.target_time = m_st_flight_basic_output.target_time;//Ä¿ï¿½ï¿½Ê±ï¿½ï¿½
-		m_st_engine_control_input.target_velocity = m_st_flight_basic_output.target_velocity;//Ä¿ï¿½ï¿½ï¿½Ù¶ï¿½
-		m_st_engine_control_input.missile_average_velocity = m_st_flight_basic_output.velocity_average_10s;//×´Ì¬ï¿½ï¿½ï¿½ï¿½
-		m_st_engine_control_input.mach = m_st_flight_basic_output.mach;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-		m_st_engine_control_input.sonic_speed = m_st_flight_basic_output.sonic_speed;//ï¿½ï¿½ï¿½ï¿½
-		m_st_engine_control_input.radius_zw = m_st_flight_basic_output.radius_zw;//×ªï¿½ï¿½ë¾¶
+		m_st_engine_control_input.target_time = m_st_flight_basic_output.target_time;//Ä¿±êÊ±¼ä
+		m_st_engine_control_input.target_velocity = m_st_flight_basic_output.target_velocity;//Ä¿±êËÙ¶È
+		m_st_engine_control_input.missile_average_velocity = m_st_flight_basic_output.velocity_average_10s;//×´Ì¬µØËÙ
+		m_st_engine_control_input.mach = m_st_flight_basic_output.mach;//¿ÕËÙÂíºÕÊı
+		m_st_engine_control_input.sonic_speed = m_st_flight_basic_output.sonic_speed;//ÉùËÙ
+		m_st_engine_control_input.radius_zw = m_st_flight_basic_output.radius_zw;//×ªÍä°ë¾¶
 		m_st_engine_control_input.flag_launch_turn = m_st_flight_basic_output.flag_launch_turn;
 		m_st_engine_control_input.flag_alltitude_change = m_st_flight_basic_output.flag_altitude_change;
 		m_st_engine_control_input.flag_waypoint_turn = m_st_flight_basic_output.flag_waypoint_turn;
@@ -333,7 +300,7 @@ void CMathControlMain::Update_Input_Data(MODULE_TYPE MODULE_NAME)
 		m_st_engine_control_input.flag_combat_status = m_st_flight_basic_output.st_command.flag_combat_status;
 		m_st_engine_control_input.flag_combat_dive_pullup = m_st_flight_basic_output.st_command.flag_combat_dive_pullup;
 		break;
-	case ENUM_CONTROL_OUT:			//ï¿½ï¿½ï¿½Â¶ï¿½ï¿½ï¿½ï¿½Ä£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	case ENUM_CONTROL_OUT:			//¸üĞÂ¶æ·ÖÅäÄ£¿éÊäÈë
 		m_math_control_out.flight_time = flight_time;
 		m_math_control_out.time_tick = time_tick;
 		m_st_control_out_input.gama	= m_st_flight_basic_output.gama;
@@ -342,6 +309,7 @@ void CMathControlMain::Update_Input_Data(MODULE_TYPE MODULE_NAME)
 		m_st_control_out_input.ug_adrc = m_st_roll_control_output.ug_adrc;
 		m_st_control_out_input.uqkf	= m_st_pitch_control_output.uqkf;
 		m_st_control_out_input.u2f	= m_st_pitch_control_output.u2f;
+		m_st_control_out_input.u4f	= m_st_pitch_control_output.u4f;
 		m_st_control_out_input.u5f	= m_st_pitch_control_output.u5f;
 		m_st_control_out_input.ugf	= m_st_pitch_control_output.ugf;
 		m_st_control_out_input.u5h	= m_st_yaw_control_output.u5h;
@@ -363,68 +331,61 @@ void CMathControlMain::Update_Input_Data(MODULE_TYPE MODULE_NAME)
 
 void CMathControlMain::Update_Output_Data()
 {	
-	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	//Êä³öÊı¾İÁ´Êı¾İ
 	p_st_data_controller_to_datalinktel->curPtNo = m_st_flight_basic_output.num_way_point_target;//m_st_flight_basic_output;
 	p_st_data_controller_to_datalinktel->curTargetLon = m_st_flight_basic_output.target_long;
 	p_st_data_controller_to_datalinktel->curTargetLat = m_st_flight_basic_output.target_lat;
 	p_st_data_controller_to_datalinktel->curTargetAlt = m_st_flight_basic_output.target_height;
-	p_st_data_controller_to_datalinktel->rudderRollCmd = m_st_control_out_output.ug;	//Í¨ï¿½ï¿½ï¿½æ¸±ï¿½ï¿½
-	p_st_data_controller_to_datalinktel->rudderPitchCmd = m_st_control_out_output.uf;	//Í¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-	p_st_data_controller_to_datalinktel->rudderYawCmd = m_st_control_out_output.uh;		//Í¨ï¿½ï¿½ï¿½æº½ï¿½ï¿½
+	p_st_data_controller_to_datalinktel->rudderRollCmd = m_st_control_out_output.ug;	//Í¨µÀ¶æ¸±Òí
+	p_st_data_controller_to_datalinktel->rudderPitchCmd = m_st_control_out_output.uf;	//Í¨µÀ¶æÉı½µ
+	p_st_data_controller_to_datalinktel->rudderYawCmd = m_st_control_out_output.uh;		//Í¨µÀ¶æº½Ïò
 
-	p_st_data_controller_to_datalinktel->Vcmd = m_st_flight_basic_output.target_velocity;//ï¿½Ù¶ï¿½Ö¸ï¿½ï¿½ 
-	p_st_data_controller_to_datalinktel->thrustCmd = m_st_engine_control_output.control_Kc;// ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½
-	p_st_data_controller_to_datalinktel->rpmState = m_st_flight_basic_output.rpmState;//ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½
+	p_st_data_controller_to_datalinktel->Vcmd = m_st_flight_basic_output.target_velocity;//ËÙ¶ÈÖ¸Áî 
+	p_st_data_controller_to_datalinktel->thrustCmd = m_st_engine_control_output.control_Kc;// ÍÆÁ¦Ö¸Áî
+	p_st_data_controller_to_datalinktel->rpmState = m_st_flight_basic_output.rpmState;//¹À¼Æ×ªËÙ
 	
-	p_st_data_controller_to_datalinktel->gamaCmd = m_st_roll_control_output.gama_command;	//ï¿½ï¿½×ªï¿½ï¿½Ö¸ï¿½ï¿½	
-	p_st_data_controller_to_datalinktel->nycCmd = m_st_pitch_control_output.ny_command;	//ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½î£¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-	p_st_data_controller_to_datalinktel->varthetaCmd = m_st_pitch_control_output.zeta_command;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½
-	p_st_data_controller_to_datalinktel->heightCmd = m_st_pitch_control_output.h_command;//ï¿½ß¶ï¿½Ö¸ï¿½ï¿½
-	p_st_data_controller_to_datalinktel->vyCmd = m_st_pitch_control_output.h_rate_command;//ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½
+	p_st_data_controller_to_datalinktel->gamaCmd = m_st_roll_control_output.gama_command;	//¹ö×ª½ÇÖ¸Áî	
+	p_st_data_controller_to_datalinktel->nycCmd = m_st_pitch_control_output.ny_command;	//¹ıÔØÖ¸Áî£¬ÉıÁ¦Ãæ¹ıÔØ
+	p_st_data_controller_to_datalinktel->varthetaCmd = m_st_pitch_control_output.zeta_command;//¸©Ñö½ÇÖ¸Áî
+	p_st_data_controller_to_datalinktel->heightCmd = m_st_pitch_control_output.h_command;//¸ß¶ÈÖ¸Áî
+	p_st_data_controller_to_datalinktel->vyCmd = m_st_pitch_control_output.h_rate_command;//´¹ËÙÖ¸Áî
 
 	
-	p_st_data_controller_to_datalinktel->nyCmd_Guidance = m_st_pitch_control_output.ny_command;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½î£¬ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½î¸´ï¿½ï¿½
-	p_st_data_controller_to_datalinktel->nzCmd_Guidance = m_st_yaw_control_output.nz_command;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½î£¬ï¿½ï¿½ï¿½ï¿½Ïµï¿½ï¿½ï¿½ï¿½
+	p_st_data_controller_to_datalinktel->nyCmd_Guidance = m_st_pitch_control_output.ny_command;//×İÏò¹ıÔØÖ¸Áî£¬Óë¹ıÔØÖ¸Áî¸´ÓÃ
+	p_st_data_controller_to_datalinktel->nzCmd_Guidance = m_st_yaw_control_output.nz_command;//²àÏò¹ıÔØÖ¸Áî£¬ÌåÖáÏµ¹ıÔØ
 	p_st_data_controller_to_datalinktel->wyCmd = m_st_yaw_control_output.wy_command;
 	
-	p_st_data_controller_to_datalinktel->ac_dL = m_st_flight_basic_output.target_distance;//ï¿½ï¿½ï¿½É¾à£¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½distance_target
-	p_st_data_controller_to_datalinktel->ac_dZ = m_st_flight_basic_output.sz;// ï¿½ï¿½ß¾ï¿½
-	p_st_data_controller_to_datalinktel->flight_control_state = m_st_flight_basic_output.flight_control_state;//ï¿½ï¿½ï¿½ï¿½×´Ì¬
-	//p_st_data_controller_to_datalinktel->token_long = m_st_flight_basic_output.token_long;// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-	//p_st_data_controller_to_datalinktel->token_late = m_st_flight_basic_output.token_lat;// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-	//p_st_data_controller_to_datalinktel->ac_dPsi = m_st_flight_basic_output.dlt_psic;//ï¿½ï¿½ï¿½ï¿½ï¿½Æ«ï¿½ï¿½
+	p_st_data_controller_to_datalinktel->ac_dL = m_st_flight_basic_output.target_distance;//´ı·É¾à£¬´ò»÷µã¾àÀë¸ÄÎªº½¶ÎÄ¿±êµã¾àÀëdistance_target
+	p_st_data_controller_to_datalinktel->ac_dZ = m_st_flight_basic_output.sz;// ²à±ß¾à
+	p_st_data_controller_to_datalinktel->flight_control_state = m_st_flight_basic_output.flight_control_state;//·ÉĞĞ×´Ì¬
 	p_st_data_controller_to_datalinktel->ac_Vz = m_st_flight_basic_output.vnz;
 	p_st_data_controller_to_datalinktel->ac_Vy = m_st_flight_basic_output.vs;
 	p_st_data_controller_to_datalinktel->ac_Vx = m_st_flight_basic_output.vnx;
-	p_st_data_controller_to_datalinktel->ac_dR = m_st_flight_basic_output.sz_circle;// Ô²ï¿½ì¼£ï¿½ï¿½ß¾à£¬Î´ï¿½Ãµï¿½
-	p_st_data_controller_to_datalinktel->cur_azimuth= m_st_flight_basic_output.azimuth;//ï¿½ï¿½ï¿½Î·ï¿½Î»ï¿½ï¿½
-	p_st_data_controller_to_datalinktel->cur_thetav = m_st_flight_basic_output.theta;//ï¿½ì¼£ï¿½ï¿½ï¿½
-	p_st_data_controller_to_datalinktel->cur_psicv = m_st_flight_basic_output.psicn;//ï¿½ì¼£Æ«ï¿½ï¿½
+	p_st_data_controller_to_datalinktel->ac_dR = m_st_flight_basic_output.sz_circle;// Ô²¹ì¼£²à±ß¾à£¬Î´ÓÃµ½
+	p_st_data_controller_to_datalinktel->cur_azimuth= m_st_flight_basic_output.azimuth;//º½¶Î·½Î»½Ç
+	p_st_data_controller_to_datalinktel->cur_thetav = m_st_flight_basic_output.theta;//¹ì¼£Çã½Ç
+	p_st_data_controller_to_datalinktel->cur_psicv = m_st_flight_basic_output.psicn;//¹ì¼£Æ«½Ç
 	
-	p_st_data_controller_to_datalinktel->pitch_rate_nT_filterOut = m_st_flight_basic_output.dqf;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß½ï¿½ï¿½Ù¶ï¿½ï¿½Ë²ï¿½
-	p_st_data_controller_to_datalinktel->yaw_rate_nT_filterOut = m_st_flight_basic_output.dqh;//Æ«ï¿½ï¿½ï¿½ï¿½ï¿½ß½ï¿½ï¿½Ù¶ï¿½ï¿½Ë²ï¿½
-	p_st_data_controller_to_datalinktel->deltaR = m_st_flight_basic_output.distance_target;//ï¿½ï¿½Ä¿ï¿½ï¿½ï¿½ï¿½
-	p_st_data_controller_to_datalinktel->dRn = m_st_flight_basic_output.Rmt_n[0]; //ï¿½ï¿½Ä¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ë£¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò£ï¿½ï¿½
-	p_st_data_controller_to_datalinktel->dRu = m_st_flight_basic_output.Rmt_n[1]; //ï¿½ï¿½Ä¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ë£¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò£ï¿½ï¿½
-	p_st_data_controller_to_datalinktel->dRe = m_st_flight_basic_output.Rmt_n[2]; //ï¿½ï¿½Ä¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ë£¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò£ï¿½ï¿½
-	p_st_data_controller_to_datalinktel->Pitch_Preset_Angle = m_st_flight_basic_output.phif;//ï¿½ï¿½ï¿½Û¸ï¿½ï¿½ï¿½ï¿½ï¿½Ü½ï¿½
-	p_st_data_controller_to_datalinktel->Yaw_Preset_Angle = m_st_flight_basic_output.phih;//ï¿½ï¿½ï¿½ï¿½Æ«ï¿½ï¿½ï¿½ï¿½Ü½ï¿½
-	p_st_data_controller_to_datalinktel->Dubins_stage = 0;//ï¿½Å±ï¿½Ë¹ï¿½ï¿½
-	p_st_data_controller_to_datalinktel->dubins_type1 = 0;//ï¿½Å±ï¿½Ë¹ï¿½ï¿½ï¿½ï¿½
-	p_st_data_controller_to_datalinktel->dubins_type2 = 0;//ï¿½Å±ï¿½Ë¹ï¿½ï¿½ï¿½ï¿½
-	p_st_data_controller_to_datalinktel->dubins_type3 = 0;//ï¿½Å±ï¿½Ë¹ï¿½ï¿½ï¿½ï¿½
-	p_st_data_controller_to_datalinktel->Dubins_length = 0.0;//ï¿½Å±ï¿½Ë¹ï¿½Îºï¿½ï¿½ï¿½
-	//p_st_data_controller_to_datalinktel->test1 = 0.0;//ï¿½ï¿½ï¿½ï¿½
-	//p_st_data_controller_to_datalinktel->Min_IAS2Vel = 0.0;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½
+	p_st_data_controller_to_datalinktel->pitch_rate_nT_filterOut = m_st_flight_basic_output.dqf;//¸©ÑöÊÓÏß½ÇËÙ¶ÈÂË²¨
+	p_st_data_controller_to_datalinktel->yaw_rate_nT_filterOut = m_st_flight_basic_output.dqh;//Æ«º½ÊÓÏß½ÇËÙ¶ÈÂË²¨
+	p_st_data_controller_to_datalinktel->deltaR = m_st_flight_basic_output.distance_target;//µ¯Ä¿¾àÀë
+	p_st_data_controller_to_datalinktel->dRn = m_st_flight_basic_output.Rmt_n[0]; //µ¯Ä¿±±Ïò¾àÀë£¬½öÓÃÓÚÒ£²â
+	p_st_data_controller_to_datalinktel->dRu = m_st_flight_basic_output.Rmt_n[1]; //µ¯Ä¿ÌìÏò¾àÀë£¬½öÓÃÓÚÒ£²â
+	p_st_data_controller_to_datalinktel->dRe = m_st_flight_basic_output.Rmt_n[2]; //µ¯Ä¿¶«Ïò¾àÀë£¬½öÓÃÓÚÒ£²â
+	p_st_data_controller_to_datalinktel->Pitch_Preset_Angle = m_st_flight_basic_output.phif;//ÀíÂÛ¸©Ñö¿ò¼Ü½Ç
+	p_st_data_controller_to_datalinktel->Yaw_Preset_Angle = m_st_flight_basic_output.phih;//ÀíÂÛÆ«º½¿ò¼Ü½Ç
+	p_st_data_controller_to_datalinktel->Dubins_stage = 0;//¶Å±öË¹¶Î
+	p_st_data_controller_to_datalinktel->dubins_type1 = 0;//¶Å±öË¹ÀàĞÍ
+	p_st_data_controller_to_datalinktel->dubins_type2 = 0;//¶Å±öË¹ÀàĞÍ
+	p_st_data_controller_to_datalinktel->dubins_type3 = 0;//¶Å±öË¹ÀàĞÍ
+	p_st_data_controller_to_datalinktel->Dubins_length = 0.0;//¶Å±öË¹¶Îº½³Ì
 	p_st_data_controller_to_datalinktel->gamac_compensate = m_st_roll_control_output.gama_command_compensate;
 	p_st_data_controller_to_datalinktel->uz_gamac = m_st_roll_control_output.uz;
 	p_st_data_controller_to_datalinktel->mx_ESO = m_st_roll_control_output.z2_adrc;
-	p_st_data_controller_to_datalinktel->fduox_ADRC = m_st_roll_control_output.ug_adrc;//ADRCï¿½ï¿½Æ«
-	p_st_data_controller_to_datalinktel->Qv = m_st_flight_basic_output.dynamic_pressure;//ï¿½ï¿½Ñ¹
-	p_st_data_controller_to_datalinktel->alpha_ins = m_st_flight_basic_output.alpha_vg;	//ï¿½ï¿½ï¿½Ù¹ï¿½ï¿½ï¿½
-	p_st_data_controller_to_datalinktel->beta_ins = m_st_flight_basic_output.beita_vg;	//ï¿½ï¿½ï¿½Ù²à»¬ï¿½ï¿½
-	//p_st_data_controller_to_datalinktel->MaxRpm = 0.0; 		//ï¿½ï¿½ï¿½×ªï¿½ï¿½
-	//p_st_data_controller_to_datalinktel->DFT_freq_max = 0.0;//ï¿½ï¿½Ê¶ï¿½Ë¶ï¿½Æµï¿½ï¿½
+	p_st_data_controller_to_datalinktel->fduox_ADRC = m_st_roll_control_output.ug_adrc;//ADRC¶æÆ«
+	p_st_data_controller_to_datalinktel->Qv = m_st_flight_basic_output.dynamic_pressure;//¶¯Ñ¹
+	p_st_data_controller_to_datalinktel->alpha_ins = m_st_flight_basic_output.alpha_vg;	//µØËÙ¹¥½Ç
+	p_st_data_controller_to_datalinktel->beta_ins = m_st_flight_basic_output.beita_vg;	//µØËÙ²à»¬½Ç
 	p_st_data_controller_to_datalinktel->nyflt = m_st_flight_basic_output.nby;
 	p_st_data_controller_to_datalinktel->nzflt = m_st_flight_basic_output.nbz;
 	p_st_data_controller_to_datalinktel->count_altitude_change = m_st_flight_basic_output.count_altitude_change;
@@ -432,20 +393,20 @@ void CMathControlMain::Update_Output_Data()
 	p_st_data_controller_to_datalinktel->ugf_zetac = m_st_pitch_control_output.ugf;
 	p_st_data_controller_to_datalinktel->uqkf = m_st_pitch_control_output.uqkf;
 	p_st_data_controller_to_datalinktel->flight_time = flight_time;
-	//ï¿½ï¿½ï¿½ä£¬ï¿½ï¿½ï¿½Ú·ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾ï¿½È¹ï¿½ï¿½Ü²ï¿½ï¿½ï¿½
-	p_st_data_controller_to_datalinktel->rudder_I_cmd = m_st_control_out_output.u1;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	//²¹³ä£¬ÓÃÓÚ·ÂÕæÏÔÊ¾µÈ¹¦ÄÜ²¹³ä
+	p_st_data_controller_to_datalinktel->rudder_I_cmd = m_st_control_out_output.u1;//ÎïÀí¶æ
 	p_st_data_controller_to_datalinktel->rudder_II_cmd = m_st_control_out_output.u2;
 	p_st_data_controller_to_datalinktel->rudder_III_cmd = m_st_control_out_output.u3;
 	p_st_data_controller_to_datalinktel->rudder_IV_cmd = m_st_control_out_output.u4;
 	p_st_data_controller_to_datalinktel->rudder_V_cmd = m_st_control_out_output.u5;
 	p_st_data_controller_to_datalinktel->rudder_VI_cmd = m_st_control_out_output.u6;
-	//ï¿½ï¿½ï¿½ä£¬ï¿½ï¿½ï¿½Ú·ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾ï¿½È¹ï¿½ï¿½Ü²ï¿½ï¿½ï¿½
-	p_st_data_controller_to_datalinktel->Kc_cmd = m_st_engine_control_output.control_Kc;//ï¿½ï¿½ï¿½ï¿½
-	p_st_data_controller_to_datalinktel->curLon = m_st_flight_basic_output.longitude;//ï¿½ï¿½ï¿½È¡ï¿½Î³ï¿½È¡ï¿½ï¿½ß¶ï¿½
+	//²¹³ä£¬ÓÃÓÚ·ÂÕæÏÔÊ¾µÈ¹¦ÄÜ²¹³ä
+	p_st_data_controller_to_datalinktel->Kc_cmd = m_st_engine_control_output.control_Kc;//ÓÍÃÅ
+	p_st_data_controller_to_datalinktel->curLon = m_st_flight_basic_output.longitude;//¾­¶È¡¢Î³¶È¡¢¸ß¶È
 	p_st_data_controller_to_datalinktel->curLat = m_st_flight_basic_output.latitude;
-	p_st_data_controller_to_datalinktel->curAlt = m_st_flight_basic_output.hz;//ï¿½ï¿½Ï¸ß¶ï¿½
+	p_st_data_controller_to_datalinktel->curAlt = m_st_flight_basic_output.hz;//×éºÏ¸ß¶È
 
-	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	//Êä³ö¸ø¶æÊı¾İ
 	p_st_data_controller_to_actuator->control_voltage_I   = m_st_control_out_output.u1;
 	p_st_data_controller_to_actuator->control_voltage_II  = m_st_control_out_output.u2;
 	p_st_data_controller_to_actuator->control_voltage_III = m_st_control_out_output.u3;
@@ -453,12 +414,12 @@ void CMathControlMain::Update_Output_Data()
 	p_st_data_controller_to_actuator->control_voltage_V  = m_st_control_out_output.u5;
 	p_st_data_controller_to_actuator->control_voltage_VI  = m_st_control_out_output.u6;
 	
-	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-	p_st_data_controller_to_engine->control_Kc = m_st_engine_control_output.control_Kc;//ï¿½ï¿½ï¿½Å¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-	p_st_data_controller_to_engine->control_rpm = m_st_engine_control_output.control_rpm;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½Ö¸ï¿½î£¬Î´Ê¹ï¿½ï¿½
-	p_st_data_controller_to_engine->ECU_work_cmd = m_st_flight_basic_output.ECU_work_cmd;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½î£¬Î´Ê¹ï¿½ï¿½
+	//Êä³ö¸ø·¢¶¯»úÊı¾İ
+	p_st_data_controller_to_engine->control_Kc = m_st_engine_control_output.control_Kc;//ÓÍÃÅ¿ØÖÆÊä³ö
+	p_st_data_controller_to_engine->control_rpm = m_st_engine_control_output.control_rpm;//·¢¶¯»ú×ªËÙÖ¸Áî£¬Î´Ê¹ÓÃ
+	p_st_data_controller_to_engine->ECU_work_cmd = m_st_flight_basic_output.ECU_work_cmd;//·¢¶¯»ú¿ØÖÆÖ¸Áî£¬Î´Ê¹ÓÃ
 	
-	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í·ï¿½ï¿½ï¿½ï¿½
+	//Êä³öµ¼ÒıÍ·Êı¾İ
 	p_st_data_controller_to_seeker->flag_seeker_on = m_st_flight_basic_output.st_command.flag_seeker_on;
 	p_st_data_controller_to_seeker->flag_lock_on_permit = m_st_flight_basic_output.st_command.flag_lock_on_permit;
 	p_st_data_controller_to_seeker->flag_target_lock = m_st_flight_basic_output.st_command.flag_target_lock;
@@ -466,12 +427,12 @@ void CMathControlMain::Update_Output_Data()
 	p_st_data_controller_to_seeker->pitch_gimbal_angle_calc = m_st_flight_basic_output.phif;
 	p_st_data_controller_to_seeker->yaw_gimbal_angle_calc = m_st_flight_basic_output.phih;
 	
-	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-	p_st_data_controller_to_switch_output->flag_launch_missile_wing = m_st_flight_basic_output.st_command.flag_launch_missile_wing;//ï¿½ï¿½ï¿½ï¿½Õ¹ï¿½ï¿½ï¿½ï¿½Î´ï¿½Ãµï¿½(Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä£ï¿½Í´ï¿½ï¿½ï¿½)
-	p_st_data_controller_to_switch_output->flag_separate_booster = m_st_flight_basic_output.st_command.flag_separate_booster;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ë£¬ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä£ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½á£©ï¿½ï¿½ï¿½ï¿½Êµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-	p_st_data_controller_to_switch_output->flag_engine_start = m_st_flight_basic_output.st_command.flag_engine_start;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ğ»ï¿½ï¿½ï¿½ï¿½Ş»ï¿½Æ·ï¿½ï¿½Î´ï¿½Ãµï¿½
-	p_st_data_controller_to_switch_output->flag_missle_takeoff = m_st_flight_basic_output.st_command.flag_missile_takeoff;//ï¿½ï¿½É£ï¿½Ö»ï¿½ï¿½ï¿½ï¿½Ê¶ï¿½ï¿½ï¿½ï¿½Ö´ï¿½Ğ¼Ìµï¿½ï¿½ï¿½ï¿½ï¿½Î´ï¿½Ãµï¿½
-	p_st_data_controller_to_switch_output->flag_engine_shutdown = m_st_flight_basic_output.st_command.flag_engine_shutdown;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö´ï¿½Ğ£ï¿½Î´ï¿½Ãµï¿½
-	p_st_data_controller_to_switch_output->flag_open_umbrella = m_st_flight_basic_output.st_command.flag_open_umbrella;//ï¿½ï¿½É¡ï¿½ï¿½ï¿½ï¿½É¡ï¿½ï¿½ï¿½Ö´ï¿½Ğ£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä£ï¿½ï¿½
-	p_st_data_controller_to_switch_output->flag_fuze_unlock = m_st_flight_basic_output.st_command.flag_fuze_unlock;//ï¿½ï¿½ï¿½Å½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö´ï¿½ï¿½
+	//Êä³ö¸øµçÆø¿ª¹ØÁ¿Êı¾İ
+	p_st_data_controller_to_switch_output->flag_launch_missile_wing = m_st_flight_basic_output.st_command.flag_launch_missile_wing;//µ¯ÒíÕ¹¿ª£¬Î´ÓÃµ½(Ò»°ãÁ¦¼°Á¦¾ØÄ£ĞÍ´¦Àí)
+	p_st_data_controller_to_switch_output->flag_separate_booster = m_st_flight_basic_output.st_command.flag_separate_booster;//ÖúÍÆÆ÷·ÖÀë£¬Á¦¼°Á¦¾ØÄ£ĞÍĞèÒª£¨·ÖÀëºóÖÊÁ¿¼õÇá£©£¬°ëÊµÎï·ÂÕæÔö¼Ó
+	p_st_data_controller_to_switch_output->flag_engine_start = m_st_flight_basic_output.st_command.flag_engine_start;//·¢¶¯»ú¿ª»ú£¬·¢¶¯»úÓÍÃÅÇĞ»»£¬ÎŞ»ğ¹¤Æ·£¬Î´ÓÃµ½
+	p_st_data_controller_to_switch_output->flag_missle_takeoff = m_st_flight_basic_output.st_command.flag_missile_takeoff;//Æğ·É£¬Ö»×ö±êÊ¶£¬ÎŞÖ´ĞĞ¼ÌµçÆ÷£¬Î´ÓÃµ½
+	p_st_data_controller_to_switch_output->flag_engine_shutdown = m_st_flight_basic_output.st_command.flag_engine_shutdown;//·¢¶¯»ú¹Ø»ú£¬·¢¶¯»úÖ´ĞĞ£¬Î´ÓÃµ½
+	p_st_data_controller_to_switch_output->flag_open_umbrella = m_st_flight_basic_output.st_command.flag_open_umbrella;//¿ªÉ¡£¬¿ªÉ¡¶æ»úÖ´ĞĞ£¬ºóĞø¹ØÁªÆø¶¯Ä£ĞÍ
+	p_st_data_controller_to_switch_output->flag_fuze_unlock = m_st_flight_basic_output.st_command.flag_fuze_unlock;//ÒıĞÅ½âËø£¬ÒıĞÅÖ´ĞĞ
 }

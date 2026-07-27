@@ -198,7 +198,7 @@ OS_U32 HilRtHandler(STRU_422_MSG_INFO * frame)// RT_HIL
 					HilReinitControl();//???????
 				}
 			}
-			SETDATA(pDataPoolMsn,	"autoStep",	15,	OS_U8);
+			SETDATA(pDataPoolMsn,	"autoStep",	13,	OS_U8);
 		}
 		break;
 	case CMD_LAUNCH_REQ:	//0xFA ???????

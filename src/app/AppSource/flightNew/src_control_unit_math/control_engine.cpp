@@ -6,7 +6,7 @@
 
 CMathControlEngine::CMathControlEngine()
 {
-	// p_st_debug_monitor = NULL;
+	//p_st_debug_monitor = NULL;
 	p_st_engine_control_input = NULL;
 	p_st_engine_control_output = NULL;
 	m_p = 0.0;
@@ -14,29 +14,18 @@ CMathControlEngine::CMathControlEngine()
 	m_p1 = 0.0;
 	m_p2 = 0.0;
 	m_p3 = 0.0;
-	//m_n0 = 0.0;
-	//m_n1 = 0.0;
-	//m_n2 = 0.0;
-	//m_n3 = 0.0;
 	m_dltKc_time = 0.0;
 	m_dltVg_time = 0.0;
-#ifdef __VEL__CONTROL__MODE__KC__
-	m_Kc0 = 42.0;//ÂúÔØ165kg£¬Æğ·É×´Ì¬£»
+	m_Kc0 = KC_COMMAND_MIN_LIMIT;
 	m_Kc1 = 0;
 	m_Kc1_record = 0.0;
 	m_Kc2 = 0;
 	m_Kc2_record = 0.0;
 	m_Kc3 = 0;
 	m_Kc4 = 0;
-	m_control_Kc = 70.0;
+	m_control_Kc = KC_COMMAND_MIN_LIMIT;
 	m_count_vel_pidctrl = 0;
-#else
-	m_n0 = 5500;//ÂúÔØ165kg£¬Æğ·É×´Ì¬£»
-	m_n1 = 0;
-	m_n2 = 0;
-	m_n3 = 0;
-	m_control_rpm = 5500;
-#endif
+
 	//m_state_rpm = 0.0;
 	m_fuel_comsumped = 0.0;
 	m_mass_calc = 165.0;
@@ -59,9 +48,9 @@ CMathControlEngine::CMathControlEngine()
 	m_flag_combat_status = false;
 	m_flag_combat_dive_pullup = false;
 
-	m_flag_engine_start = false;//ÖúÍÆÆ÷·ÖÀëºó£¬ÓÍÃÅÓÉµ¡ËÙ¼ÓËÙµ½±£»¤ÓÍÃÅ
-	m_flag_missile_takeoff = false;//Æğ·ÉÍê³É£¬¿ªÊ¼ËÙ¶È¿ØÖÆ
-	m_flag_engine_stop = false;//·¢¶¯»ú¹Ø»ú£¬Ö¸ÁîÓÍÃÅÎªÁã
+	m_flag_engine_start = false;//ÉµÙ¼Ùµ
+	m_flag_missile_takeoff = false;//É£Ê¼Ù¶È¿
+	m_flag_engine_stop = false;//Ø»Ö¸Îª
 }
 void CMathControlEngine::Initial()
 {
@@ -72,32 +61,27 @@ void CMathControlEngine::Get_Data()
 {
 	m_mass_calc = p_st_engine_control_input->mass;
 	
-	m_missile_height = p_st_engine_control_input->h;	//·ÉĞĞ¸ß¶È
+	m_missile_height = p_st_engine_control_input->h;	//Ğ¸ß¶
 	m_missile_height_initial = p_st_engine_control_input->h_ini;
 	//m_temperature_ground = p_st_engine_control_input->temperature_ground;
 	
-	m_target_velocity = p_st_engine_control_input->target_velocity;//Ä¿±êËÙ¶È
-	m_target_time = p_st_engine_control_input->target_time;	//µ½´ïÊ±¼ä
+	m_target_velocity = p_st_engine_control_input->target_velocity;//Ä¿Ù¶
+	m_target_time = p_st_engine_control_input->target_time;	//Ê±
 	
-	//·½·¨Ò»£º¸ù¾İ¸ß¶È¼ÆËã¿ÕÆøÃÜ¶È±È£¬Ò»Î¬²åÖµ
-	//double hight_array[7] = {0, 1000, 2000, 3000, 4000, 4500,5000};
-	//double Vsonic_array[7] = {340.3, 336.4, 332.5, 328.6, 324.6, 322.6 ,320.5};//¸ß¶È£¬¿ÕÆøÃÜ¶È±È
-	//m_Vsonic = CFlightGlobalFun::LAQL1(7,  hight_array,  Vsonic_array, m_missile_height);//·ÉĞĞËÙ¶È
-	//·½·¨¶ş£ºÔØÈëÉùËÙ£¬±ÜÃâ´æÔÚÆ«²î
-	m_Vsonic = p_st_engine_control_input->sonic_speed;//ÉùËÙ
-	m_mach = p_st_engine_control_input->mach;//ÂíºÕÊı
-	m_air_velocity = m_mach*m_Vsonic;//¿ÕËÙ
+	m_Vsonic = p_st_engine_control_input->sonic_speed;//
+	m_mach = p_st_engine_control_input->mach;//
+	m_air_velocity = m_mach*m_Vsonic;//
 
 	m_turn_radius = p_st_engine_control_input->radius_zw;	
-	m_flag_launch_turn = p_st_engine_control_input->flag_launch_turn;		//ÉÈÃæ×ªÍä
-	m_flag_waypoint_turn = p_st_engine_control_input->flag_waypoint_turn;	//º½¼£×ªÍä
-	m_flag_alltitude_change = p_st_engine_control_input->flag_alltitude_change;//¸ß¶È »ú¶¯
-	m_flag_alltitude_climb = p_st_engine_control_input->flag_alltitude_climb;	//ÅÀÉı
-	m_flag_alltitude_decline = p_st_engine_control_input->flag_alltitude_decline;//ÏÂ½µ
+	m_flag_launch_turn = p_st_engine_control_input->flag_launch_turn;		//×ª
+	m_flag_waypoint_turn = p_st_engine_control_input->flag_waypoint_turn;	//×ª
+	m_flag_alltitude_change = p_st_engine_control_input->flag_alltitude_change;//ß¶ 
+	m_flag_alltitude_climb = p_st_engine_control_input->flag_alltitude_climb;	//
+	m_flag_alltitude_decline = p_st_engine_control_input->flag_alltitude_decline;//Â½
 	
-	m_flag_velocity_control = p_st_engine_control_input->flag_velocity_control;//ËÙ¶È¿ØÖÆ±êÊ¶£¬1ÒıÈëµØËÙ¿ØÖÆ£¬Î´ÓÃµ½
-	m_missile_velocity = p_st_engine_control_input->missile_average_velocity;//µØËÙ
-	m_flag_flightime_ctrl = p_st_engine_control_input->flag_flightime_ctrl;	//µ½´ïÊ±¼ä±êÊ¶
+	m_flag_velocity_control = p_st_engine_control_input->flag_velocity_control;//Ù¶È¿Æ±Ê¶1Ù¿Æ£Î´Ãµ
+	m_missile_velocity = p_st_engine_control_input->missile_average_velocity;//
+	m_flag_flightime_ctrl = p_st_engine_control_input->flag_flightime_ctrl;	//Ê±Ê¶
 	
 	m_flag_engine_start = p_st_engine_control_input->flag_engine_start;
 	m_flag_engine_stop = p_st_engine_control_input->flag_engine_stop;
@@ -106,69 +90,46 @@ void CMathControlEngine::Get_Data()
 	m_flag_combat_status = p_st_engine_control_input->flag_combat_status;
 	m_flag_combat_dive_pullup = p_st_engine_control_input->flag_combat_dive_pullup;
 
-	/*ÎªÁËµ÷ÊÔ???...
-	m_mass_calc = 150.0;
-	m_mach = 0.15;
-	m_missile_height = 120.0;
-	m_missile_height_initial = 100.0;
-	m_target_velocity = 50.0;
-	m_missile_velocity = 50.0;
-	m_target_time = 10.0;
-	m_temperature_ground = 15.0;
-	m_turn_radius = 500.0;
-	
-	m_flag_launch_turn = 0;		//ÉÈÃæ×ªÍä
-	m_flag_alltitude_change = 1;//¸ß¶È »ú¶¯
-	m_flag_waypoint_turn = 0;	//º½¼£×ªÍä
-	m_flag_alltitude_climb = 0;	//ÅÀÉı£¬ÎŞĞ§
-	m_flag_alltitude_decline = 0;//ÏÂ½µ£¬ÎŞĞ§
-
-	m_flag_engine_start = 1;
-	m_flag_engine_stop = 0;
-	m_flag_missile_takeoff = 1;*/
 }
 
 void CMathControlEngine::Run()
 {
 	Get_Data();
 	
-#ifdef __VEL__CONTROL__MODE__KC__
-	//Æğ·ÉÖÁÖúÍÆÆ÷·ÖÀëºó1s£¨Ô¼3.0s£©£¬µ¡ËÙÓÍÃÅ
+
+	//1sÔ¼3.0s
 	if(!m_flag_engine_start)
 	{
 		m_control_Kc = KC_COMMAND_MIN_LIMIT;
 	}
-	//ÖúÍÆÆ÷·ÖÀëºó1.0sÖÁÆğ·ÉÍê³É(Ô¼10.0s)£¬µ¡ËÙÓÍÃÅ->±£»¤ÓÍÃÅ70%
-	//ËµÃ÷£º°´ÕÕ10degµ¯µÀÇã½Ç£¬50m/sËÙ¶È£¬Ô¤¹À×èÁ¦¹¦ÂÊ£¬¹ÀËãÖá¹¦ÂÊÔ¼27kW£»70%ÓÍÃÅÈÔ´¦ÓÚ¼õËÙ×´Ì¬£»
+	//1.0s(Ô¼10.0s)->70%
+	//Ëµ10degÇ£50m/sÙ¶È£Ô¤Ê£á¹¦Ô¼27kW70%Ô´Ú¼×´Ì¬
 	else if(!m_flag_missile_takeoff)
 	{
 		m_control_Kc = KC_COMMAND_CRUISE;
 	}
-	//Æğ·ÉÎÈ¶¨ºóÖÁÄ©ÖÆµ¼·¢¶¯»ú¹Ø»ú£¬×ªËÙ¿ØÖÆ£¬¼ÆËãÓÍÃÅÇÒ·Å¿ª±£»¤ÓÍÃÅ
+	//È¶Ä©ÆµØ»×ªÙ¿Æ£Ò·Å¿
 	else if(!m_flag_engine_stop)
 	{
-		//½øÈëĞéÄâ´ò»÷¹ı³Ì£¬·¢ËÍ»ú¿ØÖÆ×ªµ¡ËÙ
+		//20260718 Ş¸Ä£È¥Öª
+		
+		//Ì£Í»×ª
 		if(m_flag_combat_status == true)
 		//if(m_missile_velocity > 60.0)
 		{
-			m_control_Kc = KC_COMMAND_MIN_LIMIT;
+			m_control_Kc = KC_COMMAND_MIN_LIMIT + 20.0;
 		}
-		//ÍË³öĞéÄâ´ò»÷Á÷³Ì£¬·¢¶¯»úµ¡ËÙ×ª¿ØÖÆ
+		//Ë³Ì£×ª
 		else
 		{
 			Calc_Data_Kc();
 		}		
 	}
-	//¹Ø»úºó£¬Ö¸ÁîÓÍÃÅÎªÁã
+	//Ø»Ö¸Îª
 	else
 	{
 		m_control_Kc = 0.0;
 	}
-#else
-	Calc_Data_Rpm();
-#endif
-	//Calc_Data();
-	//Calc_Data_Kc();
 	
 	Send_Data();
 
@@ -177,17 +138,17 @@ void CMathControlEngine::Run()
 
 
 
-#ifdef __VEL__CONTROL__MODE__KC__
-//ËÙ¶È¿ØÖÆ£¬Êä³öÓÍÃÅ
+
+//Ù¶È¿Æ£
 void CMathControlEngine::Calc_Data_Kc()
 {
-	double target_velocity = VEL_COMMAND_CRUISE;//³õÖµ
+	double target_velocity = VEL_COMMAND_CRUISE;//Öµ
 	double dlt_air_velocity_comp = 0.0;
 	double dlt_velocity = 0.0;
 	double dlt_velocity_cmd = 0.0;
 	double target_velocity_cmd = VEL_COMMAND_CRUISE;
 	
-	//×ªËÙÏŞÖÆ¼°ÍÆÁ¦µ±Á¿
+	//×ªÆ¼
 	double kp = 8.0;//10.0;///2.0;
 	double ki = 0.8;///1.0;///0.2;
 	double m_array[3] = {100.0, 133.0, 165.0};//{100.0, 125.0, 150.0}
@@ -196,33 +157,27 @@ void CMathControlEngine::Calc_Data_Kc()
 	double Kc0_matrix[3][6] = {{71.6599, 72.3680, 73.0528, 74.0607, 75.2552, 77.1943},
 						{73.3871, 74.2679, 75.5284, 77.4114, 79.2842, 82.0228},
 						{75.4301, 77.0857, 78.8006, 81.2730, 86.1428, 93.9886}};
-	//double kp_matrix[3][6] = {{2.4034, 3.0302, 3.7191, 4.4933, 5.2596, 6.0561},
-	//						{3.9243, 4.6577, 5.3846, 6.1504, 6.9307, 7.7314},
-	//						{5.2932, 5.9977, 6.7500, 7.5242, 8.5148, 9.7978}};
-	//double ki_matrix[3][6] = {{0.5465, 0.5939, 0.6455, 0.7047, 0.7624, 0.8237},
-	//					{0.6616, 0.7171, 0.7719, 0.8309, 0.8899, 0.9518},
-	//					{0.7655, 0.8192, 0.8761, 0.9359, 1.0223, 1.1421}};
 
-	//¸ù¾İµ±Ç°ÖÊÁ¿£¬¸ß¶È£¬²åÖµ¼ÆËã»ù×¼ÓÍÃÅ
+	//İµÇ°ß¶È£Öµ×¼
 	m_Kc0 = CFlightGlobalFun::LAQL2(3,  6,  m_array,  h_array, &Kc0_matrix[0][0], m_mass_calc, m_missile_height);
-	m_Kc0 = m_Kc0 - 25.0;
+	m_Kc0 = m_Kc0 - 5.0;
 	
-	//×ªÍä²¹³¥£º
+	//×ªä²¹
 	double gama_array[5] = {10, 20, 30, 45, 60};
 	double Kc1_matrix[4][5] = {{0.374960938, 1.597629353, 4.019899216, 12.05905532, 36.17264967},    
 								{0.239975,     1.022482786, 2.572735498, 7.717795407, 23.15049579},    
 								{0.166649306,  0.71005749,  1.786621874, 5.359580144, 16.07673319},    
 								{0.122436225,  0.521674891, 1.312620152, 3.937650718, 11.81147744}};
-	//¸ù¾İ×ªÍä°ë¾¶ºÍ¿ÕËÙ£¬¹À¼Æ±ê³Æ¹ö×ª½Ç
+	//×ªë¾¶Í¿Ù£Æ±Æ¹×ª
 	double temp_gama = 20.0;
 	double temmp_az = m_air_velocity*m_air_velocity/CFlightGlobalFun::Nozero_FUN(m_turn_radius);
-	temp_gama = RTOA*atan(temmp_az/9.8);//È¡Öµ·¶Î§-90~90deg
+	temp_gama = RTOA*atan(temmp_az/9.8);//È¡ÖµÎ§-90~90deg
 	temp_gama = fabs(temp_gama);
-	//¹ö×ª½ÇÁĞ¡¢ËÙ¶ÈĞĞ²åÖµ£¬»ñµÃ³õ²½ÓÍÃÅ²¹³¥Á¿
+	//×ªĞ¡Ù¶Ğ²ÖµÃ³Å²
 	double temp_Kc1 = 10.0;
 	temp_Kc1 = CFlightGlobalFun::LAQL2(3,  6,  V_array,  gama_array, &Kc1_matrix[0][0], m_air_velocity, temp_gama);
 	
-	//¸ù¾İ¸ß¶È»ñÈ¡¿ÕÆøÃÜ¶È£¬½øÒ»²½¼ÆËã²¹³¥ÏµÊı
+	//İ¸ß¶È»È¡Ü¶È£Ò»ã²¹Ïµ
 	double rho_array[6] = {1.2252, 1.1119, 1.0067, 0.9095, 0.8195, 0.7366};
 	double temp_Kc_rho_factor = 1.0;
 	double temp_rho = 1.0;
@@ -230,26 +185,20 @@ void CMathControlEngine::Calc_Data_Kc()
 	temp_Kc_rho_factor = 1/temp_rho;
 	temp_Kc_rho_factor = CFlightGlobalFun::Range2(temp_Kc_rho_factor, 0.8, 1.36);
 
-	//¸ù¾İ¹À¼ÆÖÊÁ¿¼ÆËã£¬¼ÆËã²¹³¥ÏµÊı
+	//İ¹ã£¬ã²¹Ïµ
 	double temp_Kc_mass_factor = 1.0;
 	temp_Kc_mass_factor = (m_mass_calc/133.0)*(m_mass_calc/133.0);
 	temp_Kc_mass_factor = CFlightGlobalFun::Range2(temp_Kc_mass_factor, 0.59, 1.54);
 
-	//¾­¹ı¿ÕÆøÃÜ¶ÈÏµÊı£¨¸ß¶È¶ÔÓ¦£©ºÍÖÊÁ¿ÏµÊı²¹³¥£¬»ñµÃÓÍÃÅ²¹³¥Á¿
+	//Ü¶Ïµß¶È¶Ó¦ÏµÅ²
 	temp_Kc1 = temp_Kc1*temp_Kc_rho_factor*temp_Kc_mass_factor;
 	
-	//ÅÀÉı²¹³¥£º5.7degÅÀÉı½Ç£¬ÓÍÃÅ²¹³¥Á¿½üËÆµÈÓÚ30%¸½½ü£¬²»×ö´¦Àí
-	double temp_Kc2 = 30.0;
-
-	//ÎªÁË²âÊÔ???...
-	if(flight_time > 1175.0)
-	{
-		double temp_a = 1.0;
-	}
+	//5.7degÇ£Å²Æµ30%
+	double temp_Kc2 = 25.0;
 	
-	//µ±Ç°Ö»ÓĞ¿ÕËÙ¿ØÖÆ
-	//Èç¹ûµ±Ç°Ö¸Áî¿ÕËÙ´óÓÚ×î´óËÙ¶È£¬µÈÓÚ×î´óËÙ¶È
-	//Èç¹ûµ±Ç°Ö¸Áî¿ÕËÙĞ¡ÓÚ×îĞ¡ËÙ¶È£¬µÈÓÚ×îĞ¡ËÙ¶È
+	//Ç°Ö»Ğ¿Ù¿
+	//Ç°Ö¸Ù´Ù¶È£Ù¶
+	//Ç°Ö¸Ğ¡Ğ¡Ù¶È£Ğ¡Ù¶
 	if(m_target_velocity > VEL_COMMAND_MAX_LIMIT)
 	{
 		target_velocity = VEL_COMMAND_MAX_LIMIT;
@@ -263,7 +212,7 @@ void CMathControlEngine::Calc_Data_Kc()
 		target_velocity = m_target_velocity;
 	}
 
-	//×ªÍä¹ı³Ì²¹³¥×ªËÙ
+	//×ªÌ²×ª
 	if (m_flag_waypoint_turn || m_flag_launch_turn)
 	{
 		m_Kc1 = temp_Kc1;//20.0;
@@ -273,114 +222,78 @@ void CMathControlEngine::Calc_Data_Kc()
 		m_Kc1 = 0.0;
 	}
 
-	//Çó¸ß¶È»ú¶¯²¹³¥×ªËÙ
+	//ß¶È»×ª
 	if(!m_flag_altitude_control)
 	{
-		//½øÈë¸ß¶È¿ØÖÆÇ°£¬´¦ÓÚ³õÊ¼ÅÀÉı¹ı³Ì	
+		//ß¶È¿Ç°Ú³Ê¼	
 		m_Kc2 = temp_Kc2;
 	}
 	else if (m_flag_alltitude_change)
 	{
-		//ÅÀÉı
+		//
 		if (m_flag_alltitude_climb)
 		{
 			m_Kc2 = temp_Kc2;//30;
 		}
-		//ÏÂ»¬
+		//Â»
 		if (m_flag_alltitude_decline)
 		{
 			m_Kc2 = 0.0;
 		}
 	} 
-	//ÎŞ¸ß¶È»ú¶¯
+	//Ş¸ß¶È»
 	else
 	{
 		m_Kc2 = 0.0;
 	}
 
-	//Ê±¼ä¿ØÖÆ£¬Ôö¼ÓÖ¸ÁîËÙ¶È²¹³¥£¬¼´Ôö¼Ó¿ÕËÙ£¬´ıÔö¼Ó
-	//Êµ¼ÊµØËÙ Óë ÆÚÍûµØËÙ¶È=Ê£Óà¾àÀë/(µ½´ïÊ±¼ä - ·ÉĞĞÊ±¼ä)±È½Ï
-	//´óÓÚ2.5m/sÊ±£¬Ö¸Áî¿ÕËÙ ¼õĞ¡2.5m/s
-	//Ğ¡ÓÚ-2.5m/sÊ±£¬Ö¸Áî¿ÕËÙ Ôö´ó2.5m/s
-	//¾ø¶ÔÖµĞ¡ÓÚ2.5m/sÊ±£¬Ö¸Áî¿ÕËÙ ²¹³¥¶ÔÓ¦Öµ
+	//ÖµĞ¡2.5m/sÊ±Ö¸ Ó¦Öµ
 	if(m_flag_flightime_ctrl == 1)
 	{
-		//·½·¨Ò»£ºÖÜÆÚ10sÅĞ¶ÏÒ»´Î£¬²¹³¥¿ÕËÙ
-		//ËµÃ÷£º¼ÆËãµØËÙÓëÄ¿±êÄ¿±êËÙ¶È²î£¬²¹³¥¿ÕËÙ£¬Ê¹µÃµØËÙÖğ½¥Ç÷½üÓÚÄ¿±êËÙ¶È
+		//Ò»10sĞ¶Ò»Î£
+		//ËµÄ¿Ä¿Ù¶È²î£¬Ù£Ê¹ÃµÄ¿Ù¶
 		if(flight_time > m_dltVg_time + 10.0)
 		{
 			m_dltVg_time = flight_time;
 
-			//µØËÙ²¹³¥¿ÕËÙ£¬´ïµ½µ½´ïÊ±¼äµÄÄ¿µÄ
+			//Ù²Ù£ïµ½Ê±Ä¿
 			dlt_air_velocity_comp = target_velocity - m_missile_velocity;
 		}
-		//µ½´ïÊ±¼ä¿ØÖÆ£¬ÆÚÍûµØËÙ = ´ı·É¾àÀë/´ı·ÉÊ±¼ä£¬ÆäÖĞ£¬´ı·ÉÊ±¼ä = (µ±µ½´ïÊ±¼ä - µ±Ç°Ê±¼ä)£»
+		//Ê±Æ£ = É¾/Ê±ä£¬Ğ£Ê± = (Ê± - Ç°Ê±)
 		if(target_velocity + dlt_air_velocity_comp < 40.0)
 		{
-			dlt_velocity = 40.0 - m_air_velocity;//»ùÓÚËÙ¼ÆËãÆ«²î
+			dlt_velocity = 40.0 - m_air_velocity;//Ù¼Æ«
 		}
 		else if(target_velocity + dlt_air_velocity_comp > 60.0)
 		{
-			dlt_velocity = 60.0- m_air_velocity;//»ùÓÚËÙ¼ÆËãÆ«²î
+			dlt_velocity = 60.0- m_air_velocity;//Ù¼Æ«
 		}
 		else
 		{
-			dlt_velocity = target_velocity - m_air_velocity + dlt_air_velocity_comp;//»ùÓÚËÙ¼ÆËãÆ«²î
+			dlt_velocity = target_velocity - m_air_velocity + dlt_air_velocity_comp;//Ù¼Æ«
 		}
 		
-		//·½·¨¶ş£ºµØËÙ¿ØÖÆ
+		//Ù¿
 		//dlt_velocity = target_velocity - m_missile_velocity;
-		//´ı²¹³¥¿ÕËÙÏŞ·ù
+		//Ş·
 	}
 	else
 	{
 		dlt_velocity = target_velocity - m_air_velocity;
 	}
 
-	//ËµÃ÷1£ºÇé¿öÒ»¡¢¶şÎª´ó·¶Î§¿ØÖÆ£»Çé¿öÈıÎªÖĞ·¶Î§¿ØÖÆ£»Çé¿öËÄÎªĞ¡·¶Î§¿ØÖÆ£»
-	//ËµÃ÷2£ºÇé¿öÒ»¡¢¶ş´ó·¶Î§¿ØÖÆÁ¿ÎÈÌ¬Öµ£¬ÓÉÇé¿öÈıÖĞ·¶Î§¿ØÖÆ¼Ì³Ğ£¬ËÙ¶ÈÏÂ½µºÜ´ó£¬²»¿ÉºöÂÔ£»
-	//ËµÃ÷3£ºÇé¿öÈıÖĞ·¶Î§¿ØÖÆÁ¿ÎÈÌ¬Öµ£¬ÓÉÇé¿öËÄĞ¡·¶Î§¿ØÖÆ¼Ì³Ğ£¬ËÙ¶ÈÏÂ½µºÜĞ¡£¬ºöÂÔ£»
-	//ËµÃ÷4£º£¨Æ½·É»òÅÀÉı£©Õó·çÄÜÁ¿ÏÂ½µÊ±£¬ÈÏÎª³öÏÖÒì³££¬¾ßÌå´¦Àí¹ı³ÌÈçÏÂ£º????...
-	// 1)ÏÈ¿ª»·²¹³¥ÅÀÉıÓÍÃÅ£»
-	// 2)2.5sÖÜÆÚÅĞ¶ÏÄÜÁ¿Ôö¼ÓÇé¿ö£»
-	// 3£©ÍË³öÒì³£´¦Àí£¬¼´Õó·ç½áÊø
-	// 3.1)ÈôÄÜÁ¿²»Ôö¼Ó£¨ÊÓÇé£¬¸ÄÎª¸ß¶È²»Ôö¼Ó£©£¬°ë¿ª»·Ôö¼ÓÓÍÃÅ£»
-	// 3.2)ÈôÄÜÁ¿Ôö¼Ó£¨ÊÓÇé£¬¸ÄÎª¸ß¶ÈÔö¼Ó£©£¬²»Ôö¼Ó°ë¿ª»·ÓÍÃÅ£¬ÍË³öÒì³£´¦Àí£»
-	
-	//µ±Òì³£´¦Àí¹ı³Ì »ò ´ó·¶Î§ËÙ¶È¿ØÖÆÖĞ£¬²»½øĞĞ°ë¿ª»·²¹³¥£»
-	//·ñÔò£¬½øĞĞ°ë¿ª»·ËÙ¶È²¹³¥£»
-
-	//µ±°ë¿ª»·ËÙ¶È¿ØÖÆ¹ı³ÌÖĞ£¬²»½øĞĞPIËÙ¶È¿ØÖÆ
-	//·ñÔò£¬½øĞĞPIËÙ¶È¿ØÖÆ£»
-	
-	//Çé¿öÒ»£º¸ß¶È»ú¶¯½áÊø£¬¿ª»·m_Kc2ºÍm_Kc3×ÛºÏºó£¬·ùÖµ¸øm_Kc3£¬±ÜÃâµôËÙ
-	//if(m_Kc1_record < m_Kc1 + 10.0)
-	//{
-	//	m_Kc3 = m_Kc3 + m_Kc1;
-	//}
-	//Çé¿ö¶ş£º²àÏò»ú¶¯½áÊø£¬¿ª»·m_Kc1ºÍm_Kc3×ÛºÏºó£¬·ùÖµ¸øm_Kc3£¬±ÜÃâµôËÙ
-	//if(m_Kc2_record < m_Kc2 + 10.0)
-	//{
-	//	m_Kc3 = m_Kc3 + m_Kc2;
-	//}
-	//Çé¿öÒ»ºÍÇé¿ö¶ş£¬ÑÓ³Ù5sÔÙ½øĞĞ£¬Çé¿öÈı¿ØÖÆ£»²»½øĞĞÇé¿öËÄ¿ØÖÆ
 	if(fabs(m_Kc1 - m_Kc1_record) > 10.0 || fabs(m_Kc2 - m_Kc2_record) > 10.0)
 	{
-		m_Kc3 = 0.0;//´ó·¶Î§»ú¶¯ºó£¬ÖØĞÂĞÂ¹À¼ÆÓÍÃÅÁ¿
+		m_Kc3 = 0.0;//Î§Â¹
 		m_count_vel_pidctrl = 0;
 
-		//µÈÒ»¶ÎÊ±¼äºó£¬ÔÙ½øĞĞ¡°Çé¿öÈı£¬ËÙ¶È¿ØÖÆ¡±
+		//Ò»Ê±Ù½Ğ¡Ù¶È¿Æ¡
 		m_dltKc_time = flight_time + 2.5;
 	}
-	//¸üĞÂÇ°Ò»Ö¡Ö¸ÁîÓÍÃÅ
+	//Ç°Ò»Ö¡Ö¸
 	m_Kc1_record = m_Kc1;
 	m_Kc2_record = m_Kc2;
 	
-	//Çé¿öÈı£ºËÙ¶ÈÖĞ·¶Î§¿ØÖÆ£¬¼´m_Kc1ºÍm_Kc2±£³Ö²»±ä£¬°ë¿ª»·¿ØÖÆ¼ÆËãm_Kc3
-	//Ã¿2.5s£¬¹Û²ì¿ÕËÙÓëÖ¸ÁîËÙ¶ÈÖ®¼ä¹ØÏµ
-	//Èç¹û¿ÕËÙ´óÓÚÖ¸Áî¿ÕËÙ2.5m/s£¬¼õĞ¡5%ÓÍÃÅ£»
-	//Èç¹û¿ÕËÙĞ¡ÓÚÖ¸Áî¿ÕËÙ2.5m/s£¬Ôö´ó5%ÓÍÃÅ£»
-	//Èç¹û¿ÕËÙÓëÖ¸Áî¿ÕËÙĞ¡ÓÚ2.5m/s£¬±£³Öµ±Ç°ÓÍÃÅ²»±ä£»
 	if(flight_time > m_dltKc_time + 2.5)
 	{
 		m_dltKc_time = flight_time;
@@ -389,38 +302,33 @@ void CMathControlEngine::Calc_Data_Kc()
 		{
 			m_Kc3 = m_Kc3 + 5.0;
 
-			//²»½øĞĞPI¿ØÖÆ
+			//PI
 			m_count_vel_pidctrl = 0;
 		}
 		else if(dlt_velocity < -5.0)
 		{
 			m_Kc3 = m_Kc3 - 5.0;
 
-			//²»½øĞĞPI¿ØÖÆ
+			//PI
 			m_count_vel_pidctrl = 0;
 		}
 		else
 		{
-			//Ê×´ÎÂú×ã£¬°´ÕÕ1%ÓÍÃÅ£¬ËÙ¶ÈÔöÁ¿1m/s£¬²¹³¥Ê£ÓàÁ¿£¬Ö®ºóÔÚ½øÈëPI¿ØÖÆ
-			//ºóĞøÓÅ»¯Îª£¬ÌáÉıËÙ¶È¿ØÖÆ¿ìËÙĞÔ
+			//×´ã£¬1%Å£Ù¶1m/sÊ£Ö®Ú½PI
+			//Å»ÎªÙ¶È¿Æ¿
 			if(m_count_vel_pidctrl == 0)
 			{
 				m_Kc3 += dlt_velocity*1.0;
 			}
-			//m_Kc3±£³ÖÖ®Ç°ÊıÖµ±£³Ö²»±ä
+			//m_Kc3Ö®Ç°ÖµÖ²
 			m_count_vel_pidctrl++;
 		}
 	}
-
-		
-	//Çé¿öËÄ£ºËÙ¶ÈÏ¸»¯¿ØÖÆ£¬¼´PI¿ØÖÆ
-	//Á¬Ğø5sÊ±¼ä£¬ËÙ¶ÈÆ«²îĞ¡ÓÚ2.5m/s£¬¿ªÊ¼½øĞĞPIËÙ¶È¿ØÖÆ£»
-	//µ±ËÙ¶ÈÆ«²î´óÓÚ2.5m/sÊ±£¬½áÊøPIËÙ¶È¿ØÖÆ£¬¿ØÖÆÁ¿¡¢»ı·ÖÁ¿ÇåÁã£»
 	
-	//ËµÃ÷£ºÏÂ»¬¹ı³ÌÊÇ·ñ¿ÉÒÔ²»½øĞĞPI¿ØÖÆ
+	//ËµÂ»Ç·Ô²PI
 	if(m_count_vel_pidctrl > 2)
 	{
-		//±Õ»·PI¿ØÖÆ
+		//Õ»PI
 		m_velocity_integrator +=dlt_velocity * STEP_5ms;
 		m_velocity_integrator = CFlightGlobalFun::Range(m_velocity_integrator, 10.0/ki);
 		m_Kc4 = kp * dlt_velocity + ki * m_velocity_integrator;
@@ -429,124 +337,39 @@ void CMathControlEngine::Calc_Data_Kc()
 	}
 	else
 	{
-		//PI¿ØÖÆÎªÁã£¬»ı·ÖÎªÁã
+		//PIÎªã£¬Îª
 		m_velocity_integrator = 0.0;
 		m_Kc4 = 0.0;
 	}	
 	
-	//ºÏ×ªËÙ
+	//×ª
 	m_control_Kc = m_Kc0 + m_Kc1 + m_Kc2 + m_Kc3 + m_Kc4;
 
-	//×ªËÙ¿ØÖÆ
+	//×ªÙ¿
 	if(m_control_Kc < KC_COMMAND_MIN_LIMIT)
 		m_control_Kc = KC_COMMAND_MIN_LIMIT; 
 	if(m_control_Kc > KC_COMMAND_MAX_LIMIT)
 		m_control_Kc = KC_COMMAND_MAX_LIMIT; 
 }
-#else
-void CMathControlEngine::Calc_Data_Rpm()
-{
-	double target_velocity = VEL_COMMAND_CRUISE;//³õÖµ
-	
-	//×ªËÙÏŞÖÆ¼°ÍÆÁ¦µ±Á¿
-	double k0 = 700;
-	double kp = 1.0;
-	double ki = 0.13;
 
-	//Ö¸ÁîËÙ¶ÈÏŞ·ù
-	if(m_target_velocity > VEL_COMMAND_MAX_LIMIT)
-	{
-		target_velocity = VEL_COMMAND_MAX_LIMIT;
-	}
-	else if(m_target_velocity > VEL_COMMAND_MIN_LIMIT)
-	{
-		target_velocity = VEL_COMMAND_MIN_LIMIT;
-	}
-	else
-	{
-		target_velocity = m_target_velocity;
-	}
-	
-	//Çó»ù×¼×°¶©×ªËÙ
-	m_n0 = RPM_COMMAND_CRUISE + (m_target_velocity - VEL_COMMAND_CRUISE)*14.2;
-
-	//×ªÍä¹ı³Ì²¹³¥×ªËÙ
-	if (m_flag_waypoint_turn || m_flag_launch_turn)
-	{
-		m_n1 = 1500;
-	} 
-	else
-	{
-		m_n1 = 0.0;
-	}
-
-	//Çó¸ß¶È»ú¶¯²¹³¥×ªËÙ
-	if (m_flag_alltitude_change)
-	{
-		m_n2 = 0.0;
-		//ÅÀÉı
-		if (m_flag_alltitude_climb)
-		{
-			m_n2 = 1500.0;
-		}
-		//ÏÂ»¬
-		if (m_flag_alltitude_decline)
-		{
-			m_n2 = 0.0;
-		}
-	} 
-	//ÎŞ¸ß¶È»ú¶¯
-	else
-	{
-		m_n2 = 0.0;
-	}
-
-	//Ê±¼ä¿ØÖÆ£¬¼´µØËÙ¸ú×Ù£¬PI¿ØÖÆ
-	double dlt_velocity = 0.0;
-	if (m_flag_flightime_ctrl)
-	{
-		dlt_velocity = target_velocity - m_missile_velocity;
-		m_velocity_integrator +=dlt_velocity * STEP_5ms;
-		m_velocity_integrator = CFlightGlobalFun::Range(m_velocity_integrator, (-100.0/(k0*ki)));
-		m_n3 = k0*(kp*dlt_velocity + ki * m_velocity_integrator);
-		
-		m_n3 = CFlightGlobalFun::Range(m_n3, 1500.0);
-	}
-
-	//ºÏ×ªËÙ
-	m_control_rpm = m_n0 + m_n1 + m_n2 + m_n3;
-
-	//×ªËÙ¿ØÖÆ
-	if(m_control_rpm < RPM_COMMAND_MIN_LIMIT)
-		m_control_rpm = RPM_COMMAND_MIN_LIMIT; 
-	if(m_control_rpm > RPM_COMMAND_MAX_LIMIT)
-		m_control_rpm = RPM_COMMAND_MAX_LIMIT; 
-
-	//Ö¸Áî×ªËÙ¹À¼Æ×´Ì¬×ªËÙ
-	//m_state_rpm = m_control_rpm;
-}
-#endif
 
 void CMathControlEngine::Send_Data()
 {
-#ifdef __VEL__CONTROL__MODE__KC__
 	p_st_engine_control_output->control_Kc = m_control_Kc;
-#else
-	p_st_engine_control_output->control_rpm = m_control_rpm;
-#endif
-	//p_st_engine_control_output->mass_calc = m_mass_calc;
 }
 
-/*¼à¿Ø
+//
+/*
 void CMathControlEngine::Monitor_Data()
 {
 	extern CSimMonitor sim_monitor;
 	
 	if (sim_monitor.flag_monitor2_valid)
 	{
-		sim_monitor.Get_Variable(m_target_velocity,"Vcx",ENUM_FILE_CONTROL1);	//ËÙ¶ÈÖ¸Áî
-		sim_monitor.Get_Variable(m_air_velocity,"Vr_air",ENUM_FILE_CONTROL1);	//¿ÕËÙ
-		sim_monitor.Get_Variable(m_missile_velocity,"dhcx",ENUM_FILE_CONTROL1);//µØËÙ
-		sim_monitor.Get_Variable(m_control_Kc,"Kc",ENUM_FILE_CONTROL1);		//ÓÍÃÅ
+		sim_monitor.Get_Variable(m_target_velocity,"Vcx",ENUM_FILE_CONTROL1);	//Ù¶Ö¸
+		sim_monitor.Get_Variable(m_air_velocity,"Vr_air",ENUM_FILE_CONTROL1);	//
+		sim_monitor.Get_Variable(m_missile_velocity,"dhcx",ENUM_FILE_CONTROL1);//
+		sim_monitor.Get_Variable(m_control_Kc,"Kc",ENUM_FILE_CONTROL1);		//
 	}
-}*/
+}
+*/

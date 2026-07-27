@@ -892,7 +892,7 @@ void UpdatePredictMsnByGround(STRU_422_MSG_INFO * frame)
 				short alt,dir,radis;
 				unsigned short speed;
 				unsigned char type;
-				memcpy(&lon,	ptBuffer + 17 * i + 0, 4);	// ????basic ling194
+				memcpy(&lon,	ptBuffer + 17 * i + 0, 4);	
 				memcpy(&lat,	ptBuffer + 17 * i + 4, 4);
 				memcpy(&alt,	ptBuffer + 17 * i + 8, 2);
 				memcpy(&dir,	ptBuffer + 17 * i + 10, 2);
@@ -929,13 +929,13 @@ void UpdatePredictMsnByGround(STRU_422_MSG_INFO * frame)
 			g_initial_data.latitude_launch  = g_route_data.p_route_data[2];
 			g_initial_data.height_launch    = g_route_data.p_route_data[3];
 			g_initial_data.initial_parameter1 = 15;//预留初始参数1，例如发射点温度等，用于估算 声速、大气等模型
-			g_initial_data.initial_parameter2 = 170;//预留初始参数2，飞行仿真模式
+			g_initial_data.initial_parameter2 = 0;//预留初始参数2，飞行仿真模式 
 			g_initial_data.launch_time		= 0;                //发射时间
 			g_initial_data.lauch_azimuth	= dir_of_wp0 * 0.01;//发射方位角
 			g_initial_data.lauch_pitch		= 12;               //发射俯仰角
-			g_initial_data.lauch_booster_pitch = 20;//助推器俯仰角
-			g_initial_data.climb_ktheta_enc = 8.0;  //初始段爬升角
-			g_initial_data.cruise_ktheta_enc = 2.0; //起飞完成后平飞攻角
+			g_initial_data.lauch_booster_pitch = 32;//助推器俯仰角
+			g_initial_data.climb_ktheta_enc = 9.0;  //初始段爬升角
+			g_initial_data.cruise_ktheta_enc = 3.5; //起飞完成后平飞攻角
 
 			SETDATA(pDataPoolFly, "DataLon", (g_route_data.p_route_data[1] * 1e7), OS_S32); 
 			SETDATA(pDataPoolFly, "DataLat", (g_route_data.p_route_data[2] * 1e7), OS_S32); 

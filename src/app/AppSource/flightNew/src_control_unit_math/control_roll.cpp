@@ -37,6 +37,7 @@ CMathControlRoll::CMathControlRoll()
 	m_urg_record = 0.0;
 	m_uz = 0.0;
 	m_uz1_record = 0.0;
+	m_uz2_record = 0.0;
 	m_sz = 0.0;
 	m_mass = 0.0;
 	m_v = 0.0;
@@ -194,6 +195,7 @@ void CMathControlRoll::Run()
 	Get_Data();
 	Calc_Data();
 	Send_Data();
+	//Monitor_Data();
 }
 void CMathControlRoll::Get_Data()
 {
@@ -245,7 +247,7 @@ void CMathControlRoll::Calc_Data()
 	double delta_sz = 0.0;
 	double delta_vz = 0.0;
 	// 2.1 ����ȶ�ǰ�������в�ƫ����
-	//20260521--wym ����������ǰ����Ϊ����ȶ�ǰ
+	//20260521 ����������ǰ����Ϊ����ȶ�ǰ
 	//if (flight_time <= m_time_separate_booster) 
 	if (flight_time <= m_time_missile_takeoff)
 	{
@@ -275,7 +277,6 @@ void CMathControlRoll::Calc_Data()
 				//delta_sz = m_sz - m_turn_radius;
 
 				//��ƫ����޷�
-				//delta_sz = CFlightGlobalFun::Range(delta_sz, (10.0 * m_k7g / m_k3g));//???...
 				delta_sz = CFlightGlobalFun::Range(m_sz, (10.0 * m_k7g / m_k3g)); //Լ30m
 				
 				//ת����̣���ƫ���󣬲�ƫ��������
@@ -296,7 +297,7 @@ void CMathControlRoll::Calc_Data()
 		}
 		
 		//�����ٶ��޷�
-		delta_vz = CFlightGlobalFun::Range(delta_vz, 10.0); //����ٶ�ƫ��Լ10m/s
+		delta_vz = CFlightGlobalFun::Range(delta_vz, 10.0); //��Ӧ10deg��ת�ǣ�10.0/m_k7g->10.0
 	}
 	
 
@@ -326,37 +327,15 @@ void CMathControlRoll::Calc_Data()
 	//m_uz1 = - m_uz1;
 	
 	// 3.2 �޷�->m_uz1
-	m_uz1 = CFlightGlobalFun::Range(m_uz1, 10.0);
+	m_uz1 = CFlightGlobalFun::Range(m_uz1, 10.0);/// 30.0->10.0
 	if (flight_time > m_time_turn_in_start
 		&& flight_time <= m_time_turn_out_end)
 	{
-		m_uz1 = CFlightGlobalFun::Range(m_uz1, 10.0);
+		m_uz1 = CFlightGlobalFun::Range(m_uz1, 10.0);/// 15.0->10.0
 	}
 	
 	// 3.3 �����������->uz_temp
 	double uz_temp = 0.0;
-	//����ת��ǰ�������в�ƫ���ƣ�ɾ��
-	//if(flight_time < m_time_launch_turn_ok)
-	//{
-	//	uz_temp = 0.0;
-	//}	
-	//else if(flight_time < m_time_launch_turn_ok + 1.0)
-	//{
-	//	//����ת�����
-	//	uz_temp = m_uz1 * (flight_time - m_time_turn_out_end);
-		//if (flight_time <= m_time_turn_out_end)
-		//{
-		//	uz_temp = 0.0;
-		//}
-		//else if(flight_time < (m_time_turn_out_end + 1.0))
-		//{
-		//	uz_temp = m_uz1 * (flight_time - m_time_turn_out_end);
-		//}
-		//else
-		//{
-		//	uz_temp = m_uz1;
-		//}
-	//}
 	//������ǰ�������в�ƫ����
 	if(flight_time < m_time_missile_takeoff)
 	{
@@ -367,53 +346,56 @@ void CMathControlRoll::Calc_Data()
 	{
 		uz_temp = m_uz1 * (flight_time - m_time_missile_takeoff)/3.0;
 	}
-	// 1)�����ɺ�����ת��ǰ������ֱ�����в�ƫ����
-	//�ԣ����ϵ�else��
-	// 2)��������ת��1s�ڣ�ֱ����ƫ���� ���ɵ�����ת��
-	// ֱ������ʱ��ƫ������m_uz1_record�����ɵ��������в�ƫ����0.0
-	// 3)����ת����̣������в�ƫ���ƣ���0.0
-	// 4)����ת����ɺ�1s�ڣ����ɵ�ֱ����ƫ����
 	else if(m_flag_launch_turn)
 	{
 		//ֱ����ƫ���ƣ����ɵ���ƫ�޿���
 		if(flight_time < m_time_turn_in_start + 1.0)
 		{
-			uz_temp = m_uz1_record * (flight_time + 1.0 - m_time_turn_in_start)/1.0;
+			uz_temp = m_uz1_record * (1.0 + m_time_turn_in_start - flight_time)/1.0;
 		}
 		else
 		{
 			uz_temp = 0.0;
-			m_uz1_record = 0.0;
 		}
+		//��¼����ת�����ʱ�̣���ƫ���Ƽ�¼
+		m_uz2_record = uz_temp;
 	}
+	//����ת���������
 	else if( (flight_time > m_time_launch_turn_ok)&&(flight_time < m_time_launch_turn_ok + 3.0) ) 
 	{
 		uz_temp = m_uz1 * (flight_time - m_time_launch_turn_ok)/3.0;
 	}
 	else
 	{
-		//ֱ��
-		if (flight_time <= m_time_turn_in_start)
+		//��ʼֱ���������ɹ��ɺ�ֱ����ƫ����
+		if (flight_time <= m_time_turn_in_start) 
 		{
 			uz_temp = m_uz1;
 			m_uz1_record = m_uz1;
 		}
-		//ֱ��������ת��
-		else if (flight_time < (m_time_turn_in_start + 1.0))
+
+		else if (flight_time <= m_time_turn_in_end)
 		{
-			uz_temp = m_uz1_record * (1.0 + m_time_turn_in_start - flight_time)
-				+ m_uz1 * (flight_time - m_time_turn_in_start);
+			uz_temp = 0.0;
+		}
+		//20260716 end��ʼ���뺽����ƫ�ܿ���
+		else if (flight_time < (m_time_turn_in_end + 1.0))	
+		{
+			//��������ƫ����
+			uz_temp = m_uz1 * (flight_time - m_time_turn_in_end);
 		}
 		//����ת��
 		else if (flight_time <= m_time_turn_out_end)
 		{
 			uz_temp = m_uz1;
-			m_uz1_record = m_uz1;
+			
+			//���º���ת�䣬��ƫ���Ƽ�¼
+			m_uz2_record = m_uz1;
 		}
 		//����ת�� �� ����ת�� �� ֱ��
 		else if (flight_time < (m_time_turn_out_end + 1.0))
 		{
-			uz_temp = m_uz1_record * (1.0 + m_time_turn_out_end - flight_time)
+			uz_temp = m_uz2_record * (1.0 + m_time_turn_out_end - flight_time)
 				+ m_uz1 * (flight_time - m_time_turn_out_end);
 		}
 		//ֱ��
@@ -424,30 +406,7 @@ void CMathControlRoll::Calc_Data()
 		}
 	}
 	
-	// 3.4�״θ߶ȿ��ƹ���uz_temp->m_uz
-	//if (flight_time < m_time_altitude_control)
-	//if(flight_time < m_time_missile_takeoff)
-	//{
-	//	m_uz = 0.0;
-	//}
-	//else if (flight_time < (m_time_altitude_control + 3.0))
-	//else if (flight_time < (m_time_missile_takeoff + 3.0))
-	//{
-	//	//m_uz = uz_temp * (flight_time - (m_time_engine_start + 7.0)) / 3.0;
-	//	//m_uz = uz_temp * (flight_time - m_time_altitude_control) / 3.0;
-	//	m_uz = uz_temp * (flight_time - m_time_missile_takeoff) / 3.0;
-	//}
-	//else
-	//{
-	//	m_uz = uz_temp;	
-	//}
-	//��ʱ������
-	///˵����1deg��ǣ���Ӧ1deg��ת��ָ��
-	//��ֱ��ʱ��0deg��ת�Ǹ�����10deg��ת�Ƕ�Ӧ0.175g������أ�
-	//������ת��ʱ����ƹ�ת�ǽ�Сʱ�����ƣ�
 	m_uz = uz_temp;
-
-
 	
 	// 4.�����ڻ�·ָ���ת�Ǽ����ٶ�ָ��
 	Calc_Control_Commond();
@@ -457,20 +416,22 @@ void CMathControlRoll::Calc_Data()
 	m_u2g = m_k2g * (m_gama - m_gama_command);
 	m_u5g = m_k5g * (m_wx - m_wx_command);
 	
-	//ԭ����
-	//if(flight_time >= m_time_separate_booster + 1.0) 
-	//{
-	//	m_u4g += m_k4g * (m_gama - m_gama_command) * STEP_5ms;
-	//	m_u4g = CFlightGlobalFun::Range(m_u4g, 12.0);
-	//}
-	//ԭADRC
-	//if(flight_time >= m_time_combat_status)
-	//{
-	//	m_z2 += m_w0 * m_w0 * (m_gama - m_z1) * STEP_5ms;
-	//	m_z1 += (m_z2 + m_k * m_urg_record + 2.0 * m_w0 * (m_gama - m_z1)) * STEP_5ms;
-	//	m_ug_adrc = - m_z2 / m_k;
-	//	m_urg_record = m_u2g + m_u5g + m_ug_adrc;
-	//}
+	//����
+	m_k4g = 0.01;
+	if(flight_time < m_time_missile_takeoff) 
+	{
+		m_u4g = 0.0;
+	}
+	else if(flight_time < m_time_combat_status) 
+	{
+		m_u4g += m_k4g * (m_gama - m_gama_command) * STEP_5ms;
+		m_u4g = CFlightGlobalFun::Range(m_u4g, 12.0);
+	}
+	else
+	{
+		m_u4g = 0.0;
+	}
+
 
 	// 5.2 ADRC����
 	//����ǰ
@@ -481,22 +442,11 @@ void CMathControlRoll::Calc_Data()
 		m_u5g = 0.0;
 		m_uz = 0.0;
 		m_urg_record = 0.0;
-
-		/*para_wx_eso_takeoff.z1 = m_wx/RTOA;
-		para_wx_eso_takeoff.z1_pre = m_wx/RTOA;
-		para_wx_eso_takeoff.z2 = 0.0;
-		para_wx_eso_takeoff.z2_pre= 0.0;
-		para_wx_eso_takeoff.wx = m_wx/RTOA;
-		para_wx_eso_takeoff.wx_pre = m_wx/RTOA;*/
 	}
 	//��ɹ���
 	//else if(flight_time < m_time_separate_booster + 1.0) 
-	else if(flight_time < m_time_missile_takeoff) 	 //20260521--wym
+	else if(flight_time < m_time_missile_takeoff) 	 //20260521
 	{
-		/*para_wx_eso_takeoff.wx = m_wx/RTOA;
-		para_wx_eso_takeoff.ux = m_urg_record/RTOA;
-		wx_eso_calc_takeoff(44.0, 0.5, 5.0);
-		m_ug_adrc = RTOA*0.5*para_wx_eso_takeoff.z2/ 44.0;*/
 		m_ug_adrc = 0.0;
 
 		para_wx_eso_cruise.z1 = m_wx/RTOA;
@@ -521,8 +471,6 @@ void CMathControlRoll::Calc_Data()
 	
 	//������������أ����Կ��Ŷ�ȡ�෴��
 	m_urg_record = -(m_ug_adrc + m_u2g + m_u5g);
-	//m_urg_record = -(m_ug_adrc + m_u2g + m_u5g + m_uz);
-	//m_urg_record = m_ug_adrc + m_u2g + m_u5g + m_uz;
 }
 
 void CMathControlRoll::Calc_Control_Gain()
@@ -536,23 +484,9 @@ void CMathControlRoll::Calc_Control_Gain()
 	//��ɶο��Ʋ���: �̶��ջ������ĸ�����PD���ƣ��߶ȡ��ٶȶ�ά��ֵ
 	double k2g_stage1 = 0.7730;
 	double k5g_stage1 = 0.1313;
-	static double hight_ug_stage1_array[4] = {0.0, 1000.0, 2000.0, 3000.0};//�߶�
-	static double vel_ug_stage1_array[7] = {20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0};//�ٶ�
-	/*// �ջ������̶�Ϊ1.5Hz�����Ʋ�����ֵ��
-	// ������������� Kp[�߶�][�ٶ�]
-	double K2g_stage1_matrix[4][7] = {
-	    {4.1668, 1.8519, 1.0417, 0.6667, 0.4630, 0.3401, 0.2604},
-	    {4.5915, 2.0407, 1.1479, 0.7346, 0.5102, 0.3748, 0.2870},
-	    {5.0709, 2.2537, 1.2677, 0.8113, 0.5634, 0.4140, 0.3169},
-	    {5.6135, 2.4949, 1.4034, 0.8982, 0.6237, 0.4582, 0.3508}
-	};
-	// ������΢������ Kd[�߶�][�ٶ�]
-	double K5g_stage1_matrix[4][7] = {
-	    {0.7600, 0.3277, 0.1787, 0.1107, 0.0744, 0.0528, 0.0390},
-	    {0.8420, 0.3642, 0.1992, 0.1239, 0.0835, 0.0595, 0.0441},
-	    {0.9347, 0.4053, 0.2223, 0.1387, 0.0938, 0.0671, 0.0499},
-	    {1.0395, 0.4519, 0.2486, 0.1555, 0.1054, 0.0756, 0.0565}
-	};	*/
+	double hight_ug_stage1_array[4] = {0.0, 1000.0, 2000.0, 3000.0};//�߶�
+	double vel_ug_stage1_array[7] = {20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0};//�ٶ�
+
 
 	// �ջ������̶�Ϊ1.0Hz�����Ʋ�����ֵ��
 	// ������������� Kp[�߶�][�ٶ�]
@@ -574,15 +508,6 @@ void CMathControlRoll::Calc_Control_Gain()
 	//if(flight_time < m_time_separate_booster + 1.0)
 	if(flight_time < m_time_missile_takeoff)
 	{
-		//temp_v = CFlightGlobalFun::Range2(m_v, vel_stage1_array[2], vel_stage1_array[0]);
-		//kgd_stage1 = CFlightGlobalFun::LAQL1(3,  vel_stage1_array,  kgd_stage1_array, temp_v);
-		//m_k2g = kgp_stage1;
-		//m_k5g = kgd_stage1;
-		//m_k2g = 0.1818;
-		//m_k5g = 0.0682;
-
-		//m_k2g = 1.1364;
-		//m_k5g = 0.2045;
 
 		temp_hight  = CFlightGlobalFun::Range2(m_hz, hight_ug_stage1_array[3], hight_ug_stage1_array[0]);
 		temp_velocity = CFlightGlobalFun::Range2(m_v, vel_ug_stage1_array[6], vel_ug_stage1_array[0]);
@@ -598,54 +523,14 @@ void CMathControlRoll::Calc_Control_Gain()
 	//Ѳ���β���
 	else if(flight_time < m_time_combat_status)
 	{
-		//temp_v = CFlightGlobalFun::Range2(m_v, vel_stage2_array[2], vel_stage2_array[0]);
-		//temp_mass = CFlightGlobalFun::Range2(m_mass, mass_stage2_array[2], mass_stage2_array[0]);
-		//kgd_stage2 = CFlightGlobalFun::LAQL2(3,  3,  mass_stage2_array,  vel_stage2_array, kgd_stage2_matrix, temp_mass, temp_v);
-		//m_k2g = kgp_stage2;
-		//m_k5g = kgd_stage2;
-		//m_k2g = 0.1653;
-		//m_k5g = 0.0436;
+
 		m_k2g = 0.6612;	//��Ӧ1.5Hz����9rad/s
 		m_k5g = 0.1055;
 		
-		//ADRC���ƣ���
-
-		//��ƫ���ƴ����ϵͣ���������
-		//ȡ��ת�ǻ�·����Ϊ1.5rad/s������ϵ��0.8��
-		//����ʱ��Լ2.0s��30deg����޷���ƫ��2.43m����С����
-		//m_k3g = 13.235;
-		//m_k7g = 14.118;
-		//m_k6g = m_k3g*0.15;//Լ2.0
-		//ȡ��ת�ǻ�·����Ϊ1.0rad/s������ϵ��0.8
-		//��Ծ����ʱ��Լ3.75s�����ʣ���30deg����޷���ƫ��5.24m��С����
-		//m_k3g = 5.73;
-		//m_k7g = 9.17;
-		//m_k6g = m_k3g*0.1;//Լ0.753
-		
-		//ȡ��ת�ǻ�·����Ϊ0.75rad/s������ϵ��0.8
-		//��Ծ����ʱ��Լ5.0s�����ʣ���30deg����޷���ƫ��9.32m����С����
-		//����֤???...
-		//m_k3g = 3.22;
-		//m_k7g = 6.88;
-		//m_k6g = m_k3g*0.075;//Լ0.242
-		//ȡ��ת�ǻ�·����Ϊ0.5rad/s������ϵ��0.8��
-		//��Ծ����ʱ��Լ7.5s(�ϴ�)��30deg����޷���ƫ��20.4m�����ʣ���
-		//����֤��Ч���Ϻ�
 		m_k3g = 1.47;
 		m_k7g = 4.70;
 		m_k6g = 0.07;//m_k3g*0.05Լ0.0735
 		
-		//ȡ��ת�ǻ�·����Ϊ0.3rad/s������ϵ��0.8��
-		//��Ծ����ʱ��Լ12.5s�����󣩣�30deg����޷���ƫ��56.6m��
-		//m_k3g = 0.53;
-		//m_k7g = 2.82;
-		//m_k6g = m_k3g*0.03;//Լ0.016��ȡ0.02
-		
-		//��ƫ����
-		//m_k3g = 0.10;//0.06;
-		//m_k7g = 0.80;//0.65;
-		//m_k6g = 0.005;//0.00;
-		//��ת�� ���油��
 		if(fabs(m_gama) > 30.0) // error less than 2.5%
 		{
 			double k_temp = fabs(m_gama / RTOA / tan(m_gama / RTOA));
@@ -656,17 +541,10 @@ void CMathControlRoll::Calc_Control_Gain()
 	//ĩ�Ƶ���
 	else
 	{
-		//kgd_stage2 = CFlightGlobalFun::LAQL2(3,  3,  mass_stage2_array,  vel_stage2_array, kgd_stage2_matrix, temp_mass, temp_v);
-		//m_k2g = kgp_stage2;
-		//m_k5g = kgd_stage2;
-		//m_k2g = 0.1653;
-		//m_k5g = 0.0436;
+
 		m_k2g = 0.6612;	//��Ӧ1.5Hz����9rad/s
 		m_k5g = 0.1055;
 
-		//ԭADRC����
-		//m_w0 = 8.0;
-		//m_k = 30.0;
 	}
 }
 void CMathControlRoll::Calc_Control_Commond()
@@ -679,7 +557,7 @@ void CMathControlRoll::Calc_Control_Commond()
 	}
 	//����������ǰ�������������ƫ����
 	//else if(flight_time <= m_time_separate_booster)
-	//20260521--wym
+	//20260521
 	//����ȶ�ǰ�������������ƫ����
 	else if(flight_time < m_time_missile_takeoff)
 	{
@@ -701,6 +579,8 @@ void CMathControlRoll::Calc_Control_Commond()
 			m_gama_record2 = m_gama_command;
 		}
 		//�����ת�ǹ��ɣ������в�ƫ����
+		//˵��1������ת��ʱ���ӳ�ʼֱ����ƫ���ƹ�ת�� m_gama_record2 ���ɵ� ����ת��
+		//˵��2������ת��ʱ���ӷǳ�ʼֱ����ƫ���ƹ�ת�� m_gama_record2 ���ɵ� ����ת��
 		else if (flight_time <= m_time_turn_in_end)
 		{
 			m_gama_command = m_gama_record2 + ROLL_RATE_COMMAND * (flight_time - m_time_turn_in_start) * CFlightGlobalFun::FSign(m_turn_angle);	  
@@ -734,22 +614,18 @@ void CMathControlRoll::Calc_Control_Commond()
 			m_gama_command = - m_uz / m_k2g;
 			m_gama_command = CFlightGlobalFun::Range(m_gama_command, ROLL_COMMAND_STATIC_LIMIT);
 			m_gama_command_compensate = 0.0;
+			m_gama_record2 = m_gama;
 		}
 
 		m_gama_record3 = m_gama_command;
 		//����ĩ�Ƶ�ǰ����ת���������㣬����STT�Ƶ�
-		m_time_combat_delay = fabs(m_gama) / ROLL_RATE_COMMAND;
+		//m_time_combat_delay = fabs(m_gama) / ROLL_RATE_COMMAND;
+		m_time_combat_delay = fabs(m_gama_record3) / ROLL_RATE_COMMAND;
 		if(m_time_combat_delay < 0.5) m_time_combat_delay = 0.5;
 		if(m_time_combat_delay > 2.0) m_time_combat_delay = 2.0;
 		m_time_BTT_guidance_in = flight_time;
 	}
-	//���������Ż�ΪBTT �� STT�Ƶ��Զ��л�
-	//����������STT�����ع��ƣ��໬��10deg��Ӧ�Ĳ������ԼΪ0.15g����ӦԼ8.6deg��ȡֵ8deg��ת����Ϊ���ޣ��������½����̶�ѹ���ӣ����ù�������Ԥ������
-	//BTT�����ƹ��ƣ�60deg������Ϊ1.732g�����й�ת���޷���������̬��Ӧ���������Ϊ2g������������޷���
-	//���ع��ǿɿط�Χ�� -4.5~2.3deg����2.0g����(��1.0g�˶�����)��Ӧ9.1deg����(С����������10deg����)����0.5g����(��1.5g�˶�����)��Լ-11.3deg���ǣ�
-	//˵����������˵������������Ϊ50m/sѲ���������ܶ�1g/cm^3��
-	//�������̶�Ŀ�꣬��Ϊ����ĩ�Ƶ�ʱ������ֱ����ƫ���ƣ���ת���������Ʋ�����ţ�������Ϊ��ĩ�Ƶ����̷���Ų��䣬����ѡȡĩ�Ƶ�ģʽ��
-	//����ĩ�Ƶ�ʱ�̹�ת�� ���� 8degʱ������BTTĩ�Ƶ����������STTĩ�Ƶ�����������һ��ĩ�Ƶ�ģʽ�£������л���
+
 	else if(flight_time < m_time_combat_status + m_time_combat_delay)
 	{	
 		m_gama_command = m_gama_record3*(m_time_combat_delay + m_time_combat_status - flight_time)/m_time_combat_delay
@@ -757,28 +633,6 @@ void CMathControlRoll::Calc_Control_Commond()
 	}
 	else
 	{
-		//������???...
-// 		double knz = 3.0;	
-//
-//		double nz_command = knz * m_v * m_dqh / RTOA / m_g;
-// 		nz_command = CFlightGlobalFun::Range(nz_command, 0.8);
-// 
-//		//BTT
-// 		if (fabs(nz_command) >= 0.15)
-// 		{
-// 			m_gama_command = -atan((fabs(nz_command) - 0.15) * CFlightGlobalFun::FSign(nz_command)) * RTOA;			
-// 			m_gama_command = CFlightGlobalFun::Range(m_gama_command, 25.0);
-// 			if (flight_time <= (m_time_BTT_guidance_in + 1.0))
-// 			{
-// 				m_gama_command = (flight_time - m_time_BTT_guidance_in) * m_gama_command;
-// 			}
-// 		}
-// 		else
-//		{
-//			//STT
-//			m_gama_command = 0.0;
-//			m_time_BTT_guidance_in = flight_time;
-//		}
 		m_gama_command = m_gama_command_guidance;
 	}
 
@@ -853,17 +707,6 @@ void CMathControlRoll::Monitor_Data()
 		sim_monitor.Get_Variable(m_wx,"wx",ENUM_FILE_CONTROL1);//��ת���ٶ� 5
 		sim_monitor.Get_Variable(m_sz,"sz",ENUM_FILE_CONTROL1);//��ƫ 8
 		sim_monitor.Get_Variable(m_vnz,"vz",ENUM_FILE_CONTROL1);//�����ٶ� 9
-		//double delta_sz = 0.0;
-		//if((flight_time > m_time_turn_in_start) && (flight_time < m_time_turn_out_end))
-		//{
-		//	delta_sz = - (m_sz - m_turn_radius) * CFlightGlobalFun::FSign(m_turn_angle);
-		//}
-		//else
-		//{
-		//	delta_sz = m_sz;
-		//}
-		//sim_monitor.Get_Variable(delta_sz,"sz",ENUM_FILE_CONTROL1);//��ƫ 8
-		//sim_monitor.Get_Variable(m_nbz,"ny",ENUM_FILE_CONTROL1);//����ϵ���������
 		
 	}
 	if (sim_monitor.flag_monitor3_valid)
