@@ -10,6 +10,7 @@
 #include "../core/BusInteract.h"
 #include "../interface/interface_power.h"
 #include "../interface/interface_gpio.h"
+#include "log_ctrl.h"
 
 //#include "../flight/os_flight_data.h"
 OS_U8 PowerOffCount = 0;
@@ -46,8 +47,8 @@ PWR_SEQ_GROUP seqGroups[] = {
 	{0}
 };
 /*********************************************
- * ��������: TrigerSeq
- * ��������: ���ݸ�����ʱ���ţ��趨��ǰʱ����״̬���ж�״̬������
+ * 函数功能: TrigerSeq
+ * 函数功能: 根据给定的时序编号，设定当前时序，由状态机判断状态并发送
  * *******************************************/
 #define MAX_SIMULTANEOUS_SEQ_COUNT	(5)
 static PWR_SEQ curSeqList[MAX_SIMULTANEOUS_SEQ_COUNT] = {0};
@@ -124,8 +125,8 @@ static int PWRTimSeq(int channelNo, int isEnalbe)
 
 
 /*********************************************
- * ��������: TrigerGroupSeq
- * ��������: ���ݸ�������ʱ���ţ��趨��ǰʱ���飬��״̬���ж�״̬������
+ * 函数功能: TrigerGroupSeq
+ * 函数功能: 根据给定的组时序编号，设定当前时序组，由状态机判断状态并发送
  * *******************************************/
 OS_U8 TrigerGroupSeq(int groupIndex)
 {
@@ -145,8 +146,8 @@ OS_U8 TrigerGroupSeq(int groupIndex)
 }
 
 /*********************************************
- * ��������: SeqHandle
- * ��������: ������ʱ���źż��ر��źŷ��ͣ���ʱ��������趨��ǰʱ��Ϊ��
+ * 函数功能: SeqHandle
+ * 函数功能: 负责发送时序信号及关闭信号发送，当时序结束后，设定当前时序为空
  * *******************************************/
 OS_U8 SeqGroupHandle();
 OS_U8 SeqHandle()
@@ -193,8 +194,8 @@ OS_U8 SeqHandle()
 	return 0;
 }
 /*********************************************
- * ��������:SeqGroupHandle()
- * ��������:��������룬����������ʱ����Ϣ
+ * 函数名称:SeqGroupHandle()
+ * 函数功能:根据组号码，发送连续的时序信息
  * *******************************************/
 OS_U8 SeqGroupHandle()
 {
@@ -248,7 +249,7 @@ OS_U8 SeqGroupHandle()
 
 /*********************************************
  *
- * ��������:Ϊ�������ָ�����ɷ�������豸��������
+ * 函数功能:为单机配电指令生成发往配电设备的数据区
  * *******************************************/
 OS_U8 GeneratePwrBuf(int channel, OS_U8* buf)
 {
@@ -273,10 +274,10 @@ OS_U8 GeneratePwrBuf(int channel, OS_U8* buf)
 }
 
 /*************************************************
- * �������� :PwrCmdHandler()
- * ��������:���ܿ������ڽ��յ��������ָ��ʱ����Ϊ�����control������ָ��
- * 		    ��Ϊ��ʱ����������������ָ����ֱ�ӷ���ʱ���������
- * 		    �����ܿ�����ת����ʱ��������Ĺ���Ϊ������繦��
+ * 函数名称 :PwrCmdHandler()
+ * 函数功能:智能控制器在接收到无线配电指令时，认为是针对control版的配电指令
+ * 		    因为给时序配电器的无线配电指令已直接发往时序配电器。
+ * 		    由智能控制器转发至时序配电器的功能为单机配电功能
  * ************************************************/
 OS_U8 powerNeedRsp[3] = {0};
 extern OS_U16 AutoZeroCount;
@@ -286,7 +287,7 @@ OS_U32 PwrCmdHandler(STRU_422_MSG_INFO * frame)
 	OS_U8 msgId = frame->u8MsgID;
 	switch(msgId)
 	{
-		case CMD_POWER_REQ://�������
+		case CMD_POWER_REQ://单机配电
 		{
 			OS_U8 pwrByte = frame->au8Data[0];
 			if(pwrByte > 0x0F)
@@ -299,7 +300,7 @@ OS_U32 PwrCmdHandler(STRU_422_MSG_INFO * frame)
 			}
 		}
 		break;
-		case CMD_SEQ_POWER_REQ://ʱ�����
+		case CMD_SEQ_POWER_REQ://时序测试
 		{
 			OS_U8 testChannel = frame->au8Data[0];
 			OS_U16 width;
@@ -320,24 +321,25 @@ CAN_RECV_VA canRecvVa;
 void SavePwrSeq()
 {
     SETDATA(pDataPoolPwr, "Batt28V", canRecvVa.battV,	OS_U16);
-    SETDATA(pDataPoolPwr, "groundV", canRecvVa.groundV,	OS_U16);
-    //SETDATA(pDataPoolPwr, "engineV", canRecvVa.engineV,	OS_U16);
+    SETDATA(pDataPoolPwr, "GST-V", canRecvVa.groundV,	OS_U16);
 	SETDATA(pDataPoolPwr, "engineV", canRecvVa.engineV,	OS_U32);
     SETDATA(pDataPoolPwr, "VCombin", canRecvVa.mainV,	OS_U16);
+    SETDATA(pDataPoolPwr, "STEER-V", canRecvVa.steerV,	OS_U16);
+
     SETDATA(pDataPoolPwr, "Batt28A", canRecvVa.battA,	OS_U16);
-    SETDATA(pDataPoolPwr, "groundA", canRecvVa.groundA,	OS_U16);
-    //SETDATA(pDataPoolPwr, "engineA", canRecvVa.engineA,	OS_U16);
+    SETDATA(pDataPoolPwr, "GST-I", canRecvVa.groundA,	OS_U16);
 	SETDATA(pDataPoolPwr, "engineA", canRecvVa.engineA,	OS_U32);
     SETDATA(pDataPoolPwr, "ACombin", canRecvVa.mainA,	OS_U16);
+    SETDATA(pDataPoolPwr, "STEER-I", canRecvVa.steerA,	OS_U16);
     SETDATA(pDataPoolPwr, "pwrTemp", canRecvVa.mcuTemp,	OS_U16);
 }
 
 OS_U8 CanRtPwrSeqHandler(OS_U32 id, OS_BOOL ext_id, const OS_U8* pdata, OS_U8 datalen)
 {
-    if(id == 0x183)//V	// Э�����
+    if(id == 0x183)//V	// 协议解析
     {
-		//e.g. unsigned long long data = 0x0001D63AAF164000ULL;(ʵ��CANץ����������С������������ڴ棬����һ���ֽ���)
-		//�õ�
+		//e.g. unsigned long long data = 0x0001D63AAF164000ULL;(实际CAN抓来的数据是小端序，这里存入内存，反了一下字节序)
+		//得到
 		// pdata[0] = 0x00  // Byte1
 		// pdata[1] = 0x40  // Byte2
 		// pdata[2] = 0x16  // Byte3
@@ -346,23 +348,27 @@ OS_U8 CanRtPwrSeqHandler(OS_U32 id, OS_BOOL ext_id, const OS_U8* pdata, OS_U8 da
 		// pdata[5] = 0xD6  // Byte6
 		// pdata[6] = 0x01  // Byte7
 		// pdata[7] = 0x00  // Byte8
-		canRecvVa.battV = (pdata[0] << 4) | (pdata[1] >> 4);      //0.01	// �����������У������õ�0x004
-		canRecvVa.groundV = ((pdata[1] & 0x0F) << 8) | pdata[2];  //0.01	// �����������У������õ�0x016
-		canRecvVa.engineV = (pdata[3] << 4) | (pdata[4] >> 4);    //0.01	// �����������У������õ�0xAF3
-		canRecvVa.mainV = ((pdata[4] & 0x0F) << 8) | pdata[5];    //0.01	// �����������У������õ�0xAD6
+		canRecvVa.battV = (pdata[0] << 4) | (pdata[1] >> 4);      //0.01	// 在上面例子中，解析得到0x004
+		canRecvVa.groundV = ((pdata[1] & 0x0F) << 8) | pdata[2];  //0.01	// 在上面例子中，解析得到0x016
+		canRecvVa.engineV = (pdata[3] << 4) | (pdata[4] >> 4);    //0.01	// 在上面例子中，解析得到0xAF3
+		canRecvVa.mainV = ((pdata[4] & 0x0F) << 8) | pdata[5];    //0.01	// 在上面例子中，解析得到0xAD6
+		canRecvVa.steerV = 	pdata[7];
+		LOG_HEX8(pdata, "0x183 = ");
     }
-    else if(id == 0x184)//A	// Э�����
+    else if(id == 0x184)//A	// 协议解析
     {
         canRecvVa.battA = pdata[0];  	//0.1
         canRecvVa.groundA = pdata[1];	//0.1
         canRecvVa.engineA = pdata[2];	//0.1
         canRecvVa.mainA = pdata[3];		//0.1
+		canRecvVa.steerA = pdata[5];
 		canRecvVa.mcuTemp = (pdata[7] << 8) | pdata[6]; //0.1
+		LOG_HEX8(pdata, "0x184 = ");
     }
 	else{
 		return -1;
 	}
-    g_DeviceState.powerCountDown = 200;	// �������200*5ms��û�����ô�ֵ��˵��CAN2��Ҳ��������һֱû���ϱ�����
+    g_DeviceState.powerCountDown = 200;	// 如果超过200*5ms还没有重置此值，说明CAN2，也就是配电板一直没有上报数据
     return 0;
 }
 

@@ -15,14 +15,14 @@
 #define FLASHFILE_COUNT	(7)	//6个诸元文件，1个程序文件
 
 typedef struct tagFlashFile{
-	unsigned int MagicCode;
-	unsigned int fileID;
-	void * baseAddr;
-	unsigned int fileLen;
-	unsigned int CRC1;
-	unsigned int ptrOffset;
-	char fileName[128];
-    unsigned char updateMark;
+	unsigned int MagicCode;			//FLASH_MAGIC_CODE
+	unsigned int fileID;			//0xB0
+	void * baseAddr;				//0x30000
+	unsigned int fileLen;	//4字节文件长度
+	unsigned int CRC1;		//4字节CRC校验
+	unsigned int ptrOffset;			//0x100(256)
+	char fileName[128];		//前64字节：文件名；后64字节：创建时间
+    unsigned char updateMark;//1
 }FLASHFILE;
 
 extern FLASHFILE flashFiles[];

@@ -10,14 +10,16 @@
 #include "../../sd_flash.h"
 #include "../core/DataPool.h"
 
+#define SD_BLOCK    (8 * 1024)    // 单次写入 SD 卡的块大小
+#define BUFF_BLOCK  (16 * 1024)   // 内存缓冲区大小
+
 int sd_card_fault = 0;  // 0：SD卡初始化成功； 1：初始化失败
-unsigned int SD_BLOCK = 8192;
-unsigned int BUFF_BLOCK = 0x8000;
+
 typedef struct
 {
 	int fileOpenRes;
 	OS_S32 fileCurPos;
-    OS_U8 fileBuffer[0x8000];
+    OS_U8 fileBuffer[BUFF_BLOCK];
 }SD_FILE;
 
 unsigned char SD_MountOK = FALSE;    // TRUE：SD卡已挂载（延迟挂载）；FALSE：SD卡未挂载

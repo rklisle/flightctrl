@@ -23,11 +23,11 @@ OS_U8 InitFuse()
 {
 	buffLoop[RT_FUSE].syncHead_A = 0xEB;
 	buffLoop[RT_FUSE].syncHead_B = 0x90;
-	buffLoop[RT_FUSE].lenExtern = 0;	// ����֡�б�ʾ�����ֽڣ�֮�⻹��lenExtern���ֽڣ��ܹ�����һ֡����	//��ͨ422��Ϣ��ͷ��6�ֽڣ�У���2�ֽڲ����볤���ֶ�
+	buffLoop[RT_FUSE].lenExtern = 0;	// 数据帧中表示长度字节，之外还有lenExtern个字节，总共构成一帧数据	//普通422消息，头部6字节，校验和2字节不算入长度字段
 	buffLoop[RT_FUSE].head = 0;
 	buffLoop[RT_FUSE].tail = 0;
-	buffLoop[RT_FUSE].lenPos = 0;	//0;	//����Head_A��Head_B֮����ƫ�ƶ����ֽڲŵ������ֽ�	//ͬ��ͷ���n���ֽ�Ϊ����
-	buffLoop[RT_FUSE].fixedLen = 27;	//0��ȡHeadA��HeadB����������ֽ���Ϊ���ȣ�-1���ݲ������������ֵ���̶�����
+	buffLoop[RT_FUSE].lenPos = 0;	//0;	//除了Head_A和Head_B之外再偏移多少字节才到长度字节	//同步头后第n个字节为长度
+	buffLoop[RT_FUSE].fixedLen = 27;	//0：取HeadA、HeadB后面的两个字节作为长度；-1：暂不清楚；具体数值：固定长度
 	buffLoop[RT_FUSE].inited = TRUE;
 	return 0;
 }
@@ -120,7 +120,7 @@ OS_U32 FuseRtHandler(STRU_422_MSG_INFO *data)
     SETDATA(pDataPoolSelf, "fuseay", ay,	    OS_FLOAT);
     SETDATA(pDataPoolSelf, "fuseaz", az,	    OS_FLOAT);
     SETDATA(pDataPoolSelf, "fuseg", g,	    OS_FLOAT);
-    SETDATA(pDataPoolSelf, "fuseTemp", fuseStatus.temp,	    OS_S16);
+    SETDATA(pDataPoolSelf, "fuseTemp", fuseStatus.temp,	    OS_U16);
 */    
 	g_DeviceState.fuseCountDown = 200;
 	return 0;
@@ -137,27 +137,27 @@ static OS_U8 GenFuseBuf(OS_U8 *buf, FuzeCmdType cmd)
     switch (cmd)
     {
     case ARM_I:
-        command[4] = 0x55;  // EB 90 FC 00 55 00 00 00
+        command[4] = 0x55;  // EB 90 FC 00 55 00 00 00      69 35
         break;
     case ARM_II:
-        command[5] = 0x55;  // EB 90 FC 00 00 55 00 00
+        command[5] = 0x55;  // EB 90 FC 00 00 55 00 00      15 75
         break;
     case ARM_III:
-        command[6] = 0x55;  // EB 90 FC 00 00 00 55 00
+        command[6] = 0x55;  // EB 90 FC 00 00 00 55 00      51 01
         break;
     case DETO:
-        command[7] = 0x55;  // EB 90 FC 00 00 00 00 55
+        command[7] = 0x55;  // EB 90 FC 00 00 00 00 55      AA 1B
         break;
     default:
-        return 0;  // ��Ч����
+        return 0;  // 无效命令
     }
 
-    // ���� CRC16��ǰ8�ֽڣ�
+    // 计算 CRC16（前8字节）
     OS_U16 checksum = crc16_xmodem(command, 8);
     command[8] = ((checksum >> 8) & 0xFF);
     command[9] = (checksum & 0xFF);
 
-    // �ظ�10�Σ���100�ֽ�
+    // 重复10次，共100字节
     for (int i = 0; i < 10; i++)
     {
         memcpy(buf + i * 10, command, 10);

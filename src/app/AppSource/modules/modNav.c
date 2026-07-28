@@ -1,7 +1,7 @@
 /*
  * modIMU.c
  *
- *  Created on: 2021��10��16��
+ *  Created on: 2021锟斤拷10锟斤拷16锟斤拷
  *      Author: QL
  */
 #include "../StateMachine.h"
@@ -19,17 +19,18 @@
 #include "../interface/interface_power.h"
 #include "../payload/fuse.h"
 
-STRU_NAV_INPUT navInput = {0, 0, 0, 0, 1, 210, 0};
 #define PI (3.1415926)
-static double northDir = 0;//��λ��
-static double Global = 0;  //���ؼ��ٶ�
-static double Sigma0 = 0;  //������ת���ٶ�
+
+STRU_NAV_INPUT navInput = {0, 0, 0, 0, 1, 210, 0};//鐩�鍓嶄笉浣跨敤
+static double northDir = 0;//鏂逛綅瑙�
+static double Global = 0;  //褰撳湴鍔犻€熷害
+static double Sigma0 = 0;  //褰撳湴鑷�杞�瑙掗€熷害
 double dpitch;
 double dyaw;
 double dpitchUnHor;
 double dyawUnHor;
 
-//�򵼺�����ָ����Ϣ
+//锟津导猴拷锟斤拷锟斤拷指锟斤拷锟斤拷息
 OS_U8 MsgToNAV(OS_U8 msgID, OS_U8 *data, OS_U8 len)
 {
 	MsgToDevice(RT_NAV, msgID, len, data);
@@ -38,10 +39,9 @@ OS_U8 MsgToNAV(OS_U8 msgID, OS_U8 *data, OS_U8 len)
 }
 
 /***********************************************************
- * ��������: DoHorizonCalc()
- * ��������: ˮƽ�����㷨������
- * �����Ϣ�������ǡ�����ǡ���ת�ǡ���γ�ߡ��ͼ��ٶȡ��ͽ��ٶ�
- * ����:	���Ʋ���
+ * 鍑芥暟鍚嶇О: DoHorizonCalc()
+ * 鍑芥暟鍔熻兘: 姘村钩璁＄畻绠楁硶鍑芥暟銆�
+ * 浣滆€�:	鎺у埗閮ㄩ棬
  ***********************************************************/
 static OS_S32 HorizontalCalc(OS_DOUBLE ax,
 					   		 OS_DOUBLE ay,
@@ -83,13 +83,12 @@ static OS_S32 HorizontalCalc(OS_DOUBLE ax,
 
 	switch(u8CalcCnt)
 	{
-	case 0:	//��ʼ����
+	case 0:	//寮€濮嬭�＄畻
 		s_AxsumIMU= s_AysumIMU= s_AzsumIMU=
 		s_WxsumIMU= s_WysumIMU= s_WzsumIMU=
 		s_Lonsum= s_Latsum= s_Heightsum=0;
 		break;
-	default: 
-		//������ٶȡ����ٶȡ���γ�߾�ֵ
+	default: //绉�鍒�//璁＄畻
 		s_AxsumIMU += ax;
 		s_AysumIMU += ay;
 		s_AzsumIMU += az;
@@ -100,14 +99,14 @@ static OS_S32 HorizontalCalc(OS_DOUBLE ax,
 		s_Latsum += lat;
 		s_Heightsum += height;
 
-		s_AxsumRocket = s_AxsumIMU; //��������ϵ����������ϵ��ת���������ͺ��Լ���װ�����Ӧ
+		s_AxsumRocket = s_AxsumIMU; //鎯�缁勫潗鏍囩郴鍒扮��浣撳潗鏍囩郴鐨勮浆鎹�锛屼緷鎹�鍨嬪彿浠ュ強瀹夎�呮儏鍐靛�瑰簲
 		s_AysumRocket = s_AysumIMU;
 		s_AzsumRocket = s_AzsumIMU;
 		s_WxsumRocket = s_WxsumIMU;
 		s_WysumRocket = s_WysumIMU;
 		s_WzsumRocket = s_WzsumIMU;
 
-		axAverage = s_AxsumRocket / u8CalcCnt;   //ȡˮƽ����180s�ڵ�ƽ��ֵ
+		axAverage = s_AxsumRocket / u8CalcCnt;   //鍙栨按骞宠�＄畻180s鍐呯殑骞冲潎鍊�
 		ayAverage = s_AysumRocket / u8CalcCnt;
 		azAverage = s_AzsumRocket / u8CalcCnt;
 		wxAverage = s_WxsumRocket / u8CalcCnt;
@@ -118,77 +117,81 @@ static OS_S32 HorizontalCalc(OS_DOUBLE ax,
 		if(pLat) *pLat = s_Latsum / u8CalcCnt;
 		if(pHeight) *pHeight = s_Heightsum / u8CalcCnt;
 
-		//�ͼ��ٶȡ����ٶ�
+		//锟酵硷拷锟劫度★拷锟斤拷锟劫讹拷
 		globalIn = sqrt(axAverage * axAverage + ayAverage * ayAverage + azAverage * azAverage);
 		if(pGlocal) *pGlocal = globalIn;
 		//*pGlocal = axAverage;
 		if(pSigma0) *pSigma0 = sqrt(wxAverage * wxAverage + wyAverage * wyAverage + wzAverage * wzAverage)*3600;
 
-		///1���޳�����
-		d_pitch = - asin(ayAverage / globalIn); //������ = ������ٶ�/�ϼ��ٶ�
+		//1璞￠檺鏈濆皠鍚�
+		d_pitch = - asin(ayAverage / globalIn); //渚濇嵁鍙戝皠鍧愭爣绯讳笌绠�浣撳潗鏍囩郴鍏崇郴纭�瀹氱�﹀彿
 		pitch = d_pitch + PI / 2;
-		yaw = asin(azAverage / globalIn / sin(pitch)); //�����
+		yaw = asin(azAverage / globalIn / sin(pitch)); //鍚屼笂
 
-		///3���޳�����
-		//d_pitch = asin(ayAverage / globalIn); //���ݷ�������ϵ���������ϵ��ϵȷ������
+		//3璞￠檺鏈濆皠鍚�
+		//d_pitch = asin(ayAverage / globalIn); //渚濇嵁鍙戝皠鍧愭爣绯讳笌绠�浣撳潗鏍囩郴鍏崇郴纭�瀹氱�﹀彿
 		//pitch = d_pitch + PI / 2;
-		//yaw = - asin(azAverage / globalIn / sin(pitch)); //ͬ��
+		//yaw = - asin(azAverage / globalIn / sin(pitch)); //鍚屼笂
 
-		//��������ǡ�����ǡ���ת��
+		//锟斤拷锟斤拷锟斤拷锟斤拷恰锟斤拷锟斤拷锟角★拷锟斤拷转锟斤拷
 		if(pPItch) *pPItch = toDeg(d_pitch);
 		if(pYaw) *pYaw = toDeg(yaw);
-		if(pNorth) *pNorth = toDeg(atan2(wzAverage, wyAverage));//Y1 3���޳����򣬲���Ҫ�ټ�pi
+		if(pNorth) *pNorth = toDeg(atan2(wzAverage, wyAverage));//Y1 3璞￠檺鏈濆皠鍚戯紝涓嶉渶瑕佸啀鍔爌i
 		if(*pNorth < 0)
 			*pNorth += 360;
-		//Y6 if(pNorth) *pNorth = toDeg(atan2(wzAverage, wyAverage)+ PI); //g_HorizontalCalc_north �����ΧΪ-pi/2~pi/2,��Է�λ�Ƿ�ĸ�������0 2021521 ��
+		//Y6 if(pNorth) *pNorth = toDeg(atan2(wzAverage, wyAverage)+ PI); //g_HorizontalCalc_north 缁撴灉鑼冨洿涓�-pi/2~pi/2,閽堝�规柟浣嶈�掑垎姣嶅繀椤诲ぇ浜�0 2021521 浣�
 		break;
 	}
 	return 1;
 }
 
 /***********************************************************
- * ��������: DoHorizonCalc()
- * ��������: ˮƽ���������������������Ϊ:
- * 			(1)hCalcCnt	ˮƽ���㵱ǰ�ļ���
- * 			(2)hCalcTotalCnt ˮƽ����Ľ��������
- * 			����������Ϊ0ʱ������Ҫ����ˮƽ���㡣
- * 			���յ�����ˮƽ��������󣬻ὫhCalcTotalCnt��Ϊ180��hCalcCnt��Ϊ0������ʼ�����ۼӼ���������ˮƽ���㡣
- * ����:	�ɺ�Z
+ * 鍑芥暟鍚嶇О: DoHorizonCalc()
+ * 鍑芥暟鍔熻兘: 姘村钩璁＄畻鍚�鍔ㄥ嚱鏁帮紝杈撳叆鍙傛暟涓�:
+ * 			(1)hCalcCnt	姘村钩璁＄畻褰撳墠鐨勮�℃暟
+ * 			(2)hCalcTotalCnt 姘村钩璁＄畻鐨勬埅鑷崇�掕�℃暟
+ * 			褰撴埅鑷宠�℃暟涓�0鏃讹紝涓嶉渶瑕佽繘琛屾按骞宠�＄畻銆�
+ * 			褰撴敹鍒板湴闈㈡按骞宠�＄畻璇锋眰鍚庯紝浼氬皢hCalcTotalCnt缃�涓�180锛宧CalcCnt缃�涓�0锛屽苟寮€濮嬭繘琛岀疮鍔犺�℃暟骞惰繘琛屾按骞宠�＄畻銆�
+ * 浣滆€�:	鎴愬畯鐠�
  ***********************************************************/
-static OS_U32 hCalcCnt = 0;//ˮƽ��̬�������
-static OS_U32 hCalcTotalCnt = 0;//ת������46s = 46 * 200 * 5ms
+static OS_U32 hCalcCnt = 0;//水平锟斤拷态锟斤拷锟斤拷锟斤拷锟�
+static OS_U32 hCalcTotalCnt = 0;//转锟斤拷锟斤拷锟斤拷46s = 46 * 200 * 5ms
 static OS_U8 DoHorizonCalc()
 {
-	//�ϼ��ٶȡ����ٶȸ���
+	//锟较硷拷锟劫度★拷锟斤拷锟劫度革拷锟斤拷
 	if(hCalcTotalCnt)
 	{
-		//�������ʱ������㣬���ٸ�������
+		//锟斤拷锟斤拷锟斤拷锟绞憋拷锟斤拷锟斤拷锟姐，锟斤拷锟劫革拷锟斤拷锟斤拷锟斤拷
 		if(hCalcCnt == hCalcTotalCnt)
 		{
 			hCalcCnt = 0;
 			hCalcTotalCnt = 0;
 			return 0;
 		}
-		//ÿ1s = 5ms*200������һ������
+		//每1s = 5ms*200锟斤拷锟斤拷锟斤拷一锟斤拷锟斤拷锟斤拷
 		else if(hCalcCnt % 200 == 0)
-		{//�ڳ�������Ĺ����У�Ҳÿ��1���´�һ�μ�������
-			SETDATA(pDataPoolNav, "Global", Global, OS_DOUBLE);//���ؼ��ٶ�
-			SETDATA(pDataPoolNav, "Sigma0", Sigma0, OS_DOUBLE);//�ϳɽ��ٶ�
+		{//鍦ㄦ寔缁�璁＄畻鐨勮繃绋嬩腑锛屼篃姣忛殧1绉掍笅浼犱竴娆¤�＄畻缁撴灉銆�
+			SETDATA(pDataPoolNav, "Global", Global, OS_DOUBLE);//褰撳湴鍔犻€熷害
+			SETDATA(pDataPoolNav, "Sigma0", Sigma0, OS_DOUBLE);//鍚堟垚瑙掗€熷害
 		}
 	}
 
-	//ˮƽ����㣺�����ǡ�����ǡ���ת�ǡ���γ�ߡ��ͼ��ٶȡ��ͽ��ٶȼ���
+	//水平锟斤拷锟斤拷悖猴拷锟斤拷锟斤拷恰锟斤拷锟斤拷锟角★拷锟斤拷转锟角★拷锟斤拷纬锟竭★拷锟酵硷拷锟劫度★拷锟酵斤拷锟劫度硷拷锟斤拷
 	float fax,fay,faz,fwx,fwy,fwz;
-	GetDataFast(pDataPoolNav, "navWx", &fwx);//ԭʼ���ٶ�X
-	GetDataFast(pDataPoolNav, "navWy", &fwy);//ԭʼ���ٶ�Y
-	GetDataFast(pDataPoolNav, "navWz", &fwz);//ԭʼ���ٶ�Z
-	GetDataFast(pDataPoolNav, "navAx", &fax);//ԭʼ���ٶ�X
-	GetDataFast(pDataPoolNav, "navAy", &fay);//ԭʼ���ٶ�Y
-	GetDataFast(pDataPoolNav, "navAz", &faz);//ԭʼ���ٶ�Z
-	//���hCalcTotalCntΪ0,˵��ˮƽ����δ����
-	//���hCalcCnt�Ѿ�����180*200ʱ��˵��ˮƽ�����Ѿ�����
-	//ֻ�е����淢��ˮƽ����ָ���hCalcTotalCnt��ֵ����hCalcCnt��0,��ʼÿ5ms��һ��ˮƽ����
+	GetDataFast(pDataPoolNav, "navWx", &fwx);//鍘熷�嬭�掗€熷害X
+	GetDataFast(pDataPoolNav, "navWy", &fwy);//鍘熷�嬭�掗€熷害Y
+	GetDataFast(pDataPoolNav, "navWz", &fwz);//鍘熷�嬭�掗€熷害Z
+	GetDataFast(pDataPoolNav, "navAx", &fax);//鍘熷�嬪姞閫熷害X
+	GetDataFast(pDataPoolNav, "navAy", &fay);//鍘熷�嬪姞閫熷害Y
+	GetDataFast(pDataPoolNav, "navAz", &faz);//鍘熷�嬪姞閫熷害Z
+	//锟斤拷锟絟CalcTotalCnt为0,说锟斤拷水平锟斤拷锟斤拷未锟斤拷锟斤拷
+	//锟斤拷锟絟CalcCnt锟窖撅拷锟斤拷锟斤拷180*200时锟斤拷说锟斤拷水平锟斤拷锟斤拷锟窖撅拷锟斤拷锟斤拷
+	//只锟叫碉拷锟斤拷锟芥发锟斤拷水平锟斤拷锟斤拷指锟斤拷锟絟CalcTotalCnt锟斤拷值锟斤拷锟斤拷hCalcCnt锟斤拷0,锟斤拷始每5ms锟斤拷一锟斤拷水平锟斤拷锟斤拷
 	double ax = fax,ay=fay,az=faz,wx=fwx,wy=fwy,wz=fwz;
+
+	//濡傛灉hCalcTotalCnt涓�0,璇存槑姘村钩璁＄畻鏈�鍚�鍔�
+	//濡傛灉hCalcCnt宸茬粡澶т簬180*200鏃讹紝璇存槑姘村钩璁＄畻宸茬粡缁撴潫
+	//鍙�鏈夊綋鍦伴潰鍙戦€佹按骞宠�＄畻鎸囦护鍚庯紝hCalcTotalCnt璧嬪€硷紝涓攈CalcCnt缃�0,寮€濮嬫瘡5ms鍋氫竴娆℃按骞宠�＄畻
 	if(hCalcTotalCnt && hCalcCnt<hCalcTotalCnt)
 	{
 		HorizontalCalc(ax,
@@ -200,9 +203,9 @@ static OS_U8 DoHorizonCalc()
 						0,
 						0,
 						0,
-						&dpitchUnHor,//������
+						&dpitchUnHor,//锟斤拷锟斤拷锟斤拷
 						&dyawUnHor,
-						&northDir,//�淽λ��
+						&northDir,//锟芥方位锟斤拷
 						NULL,
 						NULL,
 						NULL,
@@ -214,7 +217,7 @@ static OS_U8 DoHorizonCalc()
 	return 1;
 }
 
-//�򵼺�����ָ��
+//锟津导猴拷锟斤拷锟斤拷指锟斤拷
 OS_U32 NavCmdHandler(STRU_422_MSG_INFO * frame)
 {
 	OS_U8 msgID = frame->u8MsgID;
@@ -222,13 +225,13 @@ OS_U32 NavCmdHandler(STRU_422_MSG_INFO * frame)
 	{
 		case CMD_NAV_INIT:
 		{
-			//�ڶ�׼��ʱ����ע��ʼ����
+			//鍦ㄥ�瑰噯鐨勬椂鍊欙紝涓婃敞鍒濆�嬫暟鎹�
 			OS_S8 InitData[100];
-			//ˮƽ��װ
+			//姘村钩瀹夎��
 			//InitData[0] = 1;
 			//InitData[1] = -3;
 			//InitData[2] = 2;
-			//��ֱ��װ
+			//鍨傜洿瀹夎��
 			InitData[0] = 1;
 			InitData[1] = 3;
 			InitData[2] = -2;
@@ -244,14 +247,14 @@ OS_U32 NavCmdHandler(STRU_422_MSG_INFO * frame)
 			//MsgToDevice(RT_NAV , BUS_NAV_INIT_DATA, 38, (OS_U8*)InitData);
 		}
 		break;
-		case CMD_HOR_CALC_REQ://��׼���� ��ˮƽ��׼�ʹ�ֱ��׼����ģʽ
+		case CMD_HOR_CALC_REQ://瀵瑰噯璇锋眰 鍒嗘按骞冲�瑰噯鍜屽瀭鐩村�瑰噯涓ょ�嶆ā寮�
 		{
 
-			if(frame->au8Data[0] == 0)//ˮƽ��׼
+			if(frame->au8Data[0] == 0)//姘村钩瀵瑰噯
 			{
 				SETDATA(pDataPoolNav,	"imuFocus",	 2,		OS_U8);
 			}
-			else if(frame->au8Data[0] == 1)//��ֱ��׼
+			else if(frame->au8Data[0] == 1)//鍨傜洿瀵瑰噯
 			{
 				SETDATA(pDataPoolNav,	"imuFocus",	 1,		OS_U8);
 			}
@@ -259,13 +262,13 @@ OS_U32 NavCmdHandler(STRU_422_MSG_INFO * frame)
 			MsgToDevice(RT_NAV, BUS_NAV_FOCUS, 0, (OS_U8*)&toNav);
 		}
 		break;
-		case CMD_TO_NAV_REQ: //������ϵ�������
+		case CMD_TO_NAV_REQ: //鍚�鍔ㄧ粍鍚堝�艰埅璇锋眰
 		{
 			OS_U8 toNav[1];
 			MsgToDevice(RT_NAV, BUS_NAV_START_NAV, 0, (OS_U8*)&toNav);
-			g_DeviceState.workStage |= DOM_NAVON;//ת����ģʽ
+			g_DeviceState.workStage |= DOM_NAVON;//杞�瀵艰埅妯″紡
 
-			//����������ˮƽ����
+			//鍚�鍔ㄦ湰鏈虹殑姘村钩璁＄畻
 			hCalcCnt = 0;
 			OS_U8 calcSecond = 46;
 			hCalcTotalCnt = calcSecond * 200;
@@ -283,22 +286,21 @@ OS_U32 NavCmdHandler(STRU_422_MSG_INFO * frame)
 	return 0;
 }
 
-//���յ��������ݺ󣬻������ݵ����ݳأ����ڷɿ�ʹ�ú�ң�⣬�Լ�����վ��ϢӦ��
+//锟斤拷锟秸碉拷锟斤拷锟斤拷锟斤拷锟捷后，伙拷锟斤拷锟斤拷锟捷碉拷锟斤拷锟捷池ｏ拷锟斤拷锟节飞匡拷使锟矫猴拷遥锟解，锟皆硷拷锟斤拷锟斤拷站锟斤拷息应锟斤拷
 OS_U32 NavRtHandler(STRU_422_MSG_INFO * frame)	// RT_NAV
 {
 	OS_U8 msgID = frame->u8MsgID;
 	switch(msgID)
 	{
-	//��ʱ������ϵ�������֡ (����5ms)
-	case BUS_IMU_INFO_REPORT:
+	case BUS_IMU_INFO_REPORT://缁勫悎瀵艰埅鐗堝畾鏃跺彂閫佸抚(5ms)
 		{
-			//�������ݵ����ݳأ����ڷɿ�ʹ�ú�ң��
+			//锟斤拷锟斤拷锟斤拷锟捷碉拷锟斤拷锟捷池ｏ拷锟斤拷锟节飞匡拷使锟矫猴拷遥锟斤拷
 			STRU_NAV_INFO navInfo;
 			memcpy(&navInfo, frame->au8Data, sizeof(navInfo));
-			SaveNavInDataPool(&navInfo);	//�洢��������
+			SaveNavInDataPool(&navInfo);	//锟芥储锟斤拷锟斤拷锟斤拷锟斤拷
 			g_DeviceState.navCountDown = 200;
 
-			//������׼
+			//锟斤拷锟斤拷锟斤拷准
 			if(navInfo.navStatus == 0x44)
 			{
 				STRU_422_MSG_INFO frame;
@@ -306,17 +308,17 @@ OS_U32 NavRtHandler(STRU_422_MSG_INFO * frame)	// RT_NAV
 				NavCmdHandler(&frame);
 			}
 
-			//ˮƽ���㿴ָ���Ƿ�Ѽ���ʱ�������ˣ���������˾����������û���þ�����
+			//姘村钩璁＄畻鐪嬫寚浠ゆ槸鍚︽妸璁＄畻鏃堕棿閲嶇疆浜嗭紝濡傛灉閲嶇疆浜嗗氨閲嶅仛锛屽�傛灉娌￠噸缃�灏辫烦杩�
 			DoHorizonCalc();
 		}
 		break;
-	//����Ӧ������֡
+	//锟斤拷锟斤拷应锟斤拷锟斤拷锟斤拷帧
 	case CMD_GET_EPH_RSP:
 		CmdResponseHandler(msgID, frame->u16Len, frame->au8Data);
 		break;
 	}
 	
-	//����վ��ϢӦ��
+	//锟斤拷锟斤拷站锟斤拷息应锟斤拷
 	if(msgID >= 0x60 && msgID <= 0x6F)
 	{
 		CmdResponseHandler(msgID, frame->u16Len, frame->au8Data);
@@ -324,57 +326,57 @@ OS_U32 NavRtHandler(STRU_422_MSG_INFO * frame)	// RT_NAV
 	return 0;
 }
 
-// NAV�����������ݣ�����������Ҫ����Щ���ݸ�ֵ��IMU�����ݳ�
+// NAV浼犺繃鏉ョ殑鏁版嵁锛岀幇鍦ㄦ垜浠�闇€瑕佹妸杩欎簺鏁版嵁璧嬪€肩粰IMU鐨勬暟鎹�姹�
 OS_U8 SaveNavInDataPool(STRU_NAV_INFO *navInfo)
 {
-	SETDATA(pDataPoolNav, "gpsMod", navInfo->GPSstate,	OS_U8);//GPS״̬
-	SETDATA(pDataPoolNav, "gpsLoCnt", navInfo->StanumberMaster>navInfo->StanumberSlave?navInfo->StanumberMaster:navInfo->StanumberSlave,	OS_U8);//GPS��λ����
+	SETDATA(pDataPoolNav, "gpsMod", navInfo->GPSstate,	OS_U8);//GPS鐘舵€�
+	SETDATA(pDataPoolNav, "gpsLoCnt", navInfo->StanumberMaster>navInfo->StanumberSlave?navInfo->StanumberMaster:navInfo->StanumberSlave,	OS_U8);//GPS锟斤拷位锟斤拷锟斤拷
 	SETDATA(pDataPoolNav, "gpsLoMas", navInfo->gpsDirEnable[0] == 'V'?1:0, OS_U8);
 	SETDATA(pDataPoolNav, "gpsLoSla", navInfo->gpsDirEnable[1], OS_U8);
-	SETDATA(pDataPoolNav, "gpsLon", navInfo->GPSlon,	OS_S32);//GPS锟斤拷锟斤拷
-	SETDATA(pDataPoolNav, "gpsLat", navInfo->GPSlat,	OS_S32);//GPS纬锟斤拷
-	SETDATA(pDataPoolNav, "gpsHigh", navInfo->GPShigh * 1e-3,	OS_S16);//GPS锟竭讹拷
-	SETDATA(pDataPoolNav, "gpsVn", navInfo->GPSVn,	OS_S16);//GPS锟斤拷锟斤拷
-	SETDATA(pDataPoolNav, "gpsVs", navInfo->GPSVs,	OS_S16);//GPS锟斤拷锟斤拷
-	SETDATA(pDataPoolNav, "gpsVe", navInfo->GPSVe,	OS_S16);//GPS锟斤拷锟斤拷
+	SETDATA(pDataPoolNav, "gpsLon", navInfo->GPSlon,	OS_S32);//GPS缁忓害
+	SETDATA(pDataPoolNav, "gpsLat", navInfo->GPSlat,	OS_S32);//GPS绾�搴�
+	SETDATA(pDataPoolNav, "gpsHigh", navInfo->GPShigh * 1e-3,	OS_S16);//GPS楂樺害
+	SETDATA(pDataPoolNav, "gpsVn", navInfo->GPSVn,	OS_S16);//GPS鍖楅€�
+	SETDATA(pDataPoolNav, "gpsVs", navInfo->GPSVs,	OS_S16);//GPS澶╅€�
+	SETDATA(pDataPoolNav, "gpsVe", navInfo->GPSVe,	OS_S16);//GPS涓滈€�
 	SETDATA(pDataPoolNav, "gpsPdop", navInfo->PDOP,		OS_U16);//PDOP
 	SETDATA(pDataPoolNav, "gpsGdop", navInfo->GDOP,		OS_U16);//GDOP
 	SETDATA(pDataPoolNav, "gpsDelay", navInfo->Deltime,	OS_U8);//PPS
-	SETDATA(pDataPoolNav, "gpsUload", navInfo->uploadEphStatus,	OS_U8);//����װ�����
+	SETDATA(pDataPoolNav, "gpsUload", navInfo->uploadEphStatus,	OS_U8);//鏄熷巻瑁呰�㈢粨鏋�
 
-	SETDATA(pDataPoolNav, "gpsYear", navInfo->year,	OS_U8);//GPS��
-	SETDATA(pDataPoolNav, "gpsMonth", navInfo->month,	OS_U8);//GPS��
-	SETDATA(pDataPoolNav, "gpsDay", navInfo->day,	OS_U8);//GPS��
-	SETDATA(pDataPoolNav, "gpsHour", navInfo->hour,	OS_U8);//GPSʱ
-	SETDATA(pDataPoolNav, "gpsMinit", navInfo->minite,	OS_U8);//GPS��
-	SETDATA(pDataPoolNav, "gpsSec", navInfo->second,	OS_U8);//GPS��
-	SETDATA(pDataPoolNav, "gpsMs", navInfo->ms,	OS_U16);//GPS����
-	SETDATA(pDataPoolNav, "gpsTrack", navInfo->gpsTrack,	OS_U16);//GPS������
-	SETDATA(pDataPoolNav, "gpsDir", navInfo->gpsDir,	OS_U16);//GPS�����
-	SETDATA(pDataPoolNav, "gpsDirOK", navInfo->gpsDirEffect,	OS_U8);//GPS������Ч��־
+	SETDATA(pDataPoolNav, "gpsYear", navInfo->year,	OS_U8);//GPS骞�
+	SETDATA(pDataPoolNav, "gpsMonth", navInfo->month,	OS_U8);//GPS鏈�
+	SETDATA(pDataPoolNav, "gpsDay", navInfo->day,	OS_U8);//GPS鏃�
+	SETDATA(pDataPoolNav, "gpsHour", navInfo->hour,	OS_U8);//GPS鏃�
+	SETDATA(pDataPoolNav, "gpsMinit", navInfo->minite,	OS_U8);//GPS鍒�
+	SETDATA(pDataPoolNav, "gpsSec", navInfo->second,	OS_U8);//GPS绉�
+	SETDATA(pDataPoolNav, "gpsMs", navInfo->ms,	OS_U16);//GPS姣�绉�
+	SETDATA(pDataPoolNav, "gpsTrack", navInfo->gpsTrack,	OS_U16);//GPS鑸�杩硅��
+	SETDATA(pDataPoolNav, "gpsDir", navInfo->gpsDir,	OS_U16);//GPS鑸�鍚戣��
+	SETDATA(pDataPoolNav, "gpsDirOK", navInfo->gpsDirEffect,	OS_U8);//GPS鑸�鍚戞湁鏁堟爣蹇�
 
 	if((g_DeviceState.workStage & DOM_HILSMODE) && hilInput.useNav == 0)
 	{
 	}
 	else
 	{
-		SETDATA(pDataPoolImu, "gpsLon", navInfo->GPSlon,			OS_S32);//GPS����
-		SETDATA(pDataPoolImu, "gpsLat", navInfo->GPSlat,			OS_S32);//GPSγ��
-		SETDATA(pDataPoolImu, "gpsAlt", navInfo->GPShigh * 1e-3,	OS_S16);//GPS�߶�
-		SETDATA(pDataPoolImu, "gpsVn", navInfo->GPSVn,	OS_S16);//GPS����
-		SETDATA(pDataPoolImu, "gpsVs", navInfo->GPSVs,	OS_S16);//GPS����
-		SETDATA(pDataPoolImu, "gpsVe", navInfo->GPSVe,	OS_S16);//GPS����
-		SETDATA(pDataPoolImu, "dirEffec",	navInfo->gpsDirEffect,	OS_U8);//GPS������Ч��־
+SETDATA(pDataPoolImu, "gpsLon", navInfo->GPSlon,			OS_S32);//GPS缁忓害
+SETDATA(pDataPoolImu, "gpsLat", navInfo->GPSlat,			OS_S32);//GPS绾�搴�
+SETDATA(pDataPoolImu, "gpsAlt", navInfo->GPShigh * 1e-3,	OS_S16);//GPS楂樺害
+SETDATA(pDataPoolImu, "gpsVn", navInfo->GPSVn,	OS_S16);//GPS鍖楅€�
+SETDATA(pDataPoolImu, "gpsVs", navInfo->GPSVs,	OS_S16);//GPS澶╅€�
+SETDATA(pDataPoolImu, "gpsVe", navInfo->GPSVe,	OS_S16);//GPS涓滈€�
+SETDATA(pDataPoolImu, "dirEffec",	navInfo->gpsDirEffect,	OS_U8);//GPS鑸�鍚戞湁鏁堟爣蹇�
 
-		SETDATA(pDataPoolImu, "gpsYear",  navInfo->year,   OS_U8);	//GPS��
-		SETDATA(pDataPoolImu, "gpsMonth", navInfo->month,  OS_U8);	//GPS��
-		SETDATA(pDataPoolImu, "gpsDay",   navInfo->day,    OS_U8);	//GPS��
-		SETDATA(pDataPoolImu, "gpsHour",  navInfo->hour,   OS_U8);	//GPSʱ
-		SETDATA(pDataPoolImu, "gpsMinit", navInfo->minite, OS_U8);	//GPS��
-		SETDATA(pDataPoolImu, "gpsSec",   navInfo->second, OS_U8);	//GPS��
-		SETDATA(pDataPoolImu, "gpsMSec",  navInfo->ms,     OS_U8);	//GPS����
-		SETDATA(pDataPoolImu, "gpsDir", navInfo->gpsDir,  OS_U16);
-		SETDATA(pDataPoolImu, "gpsScCnt", navInfo->StanumberMaster>navInfo->StanumberSlave?navInfo->StanumberMaster:navInfo->StanumberSlave,	OS_U8);//GPS��λ����
+SETDATA(pDataPoolImu, "gpsYear",  navInfo->year,   OS_U8);	//GPS骞�
+SETDATA(pDataPoolImu, "gpsMonth", navInfo->month,  OS_U8);	//GPS鏈�
+SETDATA(pDataPoolImu, "gpsDay",   navInfo->day,    OS_U8);	//GPS鏃�
+SETDATA(pDataPoolImu, "gpsHour",  navInfo->hour,   OS_U8);	//GPS鏃�
+SETDATA(pDataPoolImu, "gpsMinit", navInfo->minite, OS_U8);	//GPS鍒�
+SETDATA(pDataPoolImu, "gpsSec",   navInfo->second, OS_U8);	//GPS绉�
+SETDATA(pDataPoolImu, "gpsMSec",  navInfo->ms,     OS_U8);	//GPS姣�绉�
+SETDATA(pDataPoolImu, "gpsDir", navInfo->gpsDir,  OS_U16);
+SETDATA(pDataPoolImu, "gpsScCnt", navInfo->StanumberMaster>navInfo->StanumberSlave?navInfo->StanumberMaster:navInfo->StanumberSlave,	OS_U8);//GPS瀹氫綅鏄熸暟
 
 		SETDATA(pDataPoolImu, "imuWx", navInfo->imuWx16507,	OS_FLOAT);
 		SETDATA(pDataPoolImu, "imuWy", navInfo->imuWy16507,	OS_FLOAT);
@@ -396,7 +398,7 @@ OS_U8 SaveNavInDataPool(STRU_NAV_INFO *navInfo)
 		SETDATA(pDataPoolImu, "navState", navInfo->navStatus,	OS_U8);
 		SETDATA(pDataPoolImu, "navDir", navInfo->s16dir,	OS_U16);
 
-		//�����жϵ���״̬׼�����Һ�����Ч��־��Ч
+//鏂板�炲垽鏂�瀵艰埅鐘舵€佸噯澶囦腑涓旇埅鍚戞湁鏁堟爣蹇楁湁鏁�
 		if((navInfo->navStatus == 0) && (navInfo->gpsDirEffect == 1))
 		{
 			float navdirmid;
@@ -410,41 +412,41 @@ OS_U8 SaveNavInDataPool(STRU_NAV_INFO *navInfo)
 		}
 	}
 
-	SETDATA(pDataPoolNav, "navLon", navInfo->s32navLon,	OS_S32);//��������
-	SETDATA(pDataPoolNav, "navLat", navInfo->s32navLat,	OS_S32);//����γ��
-	SETDATA(pDataPoolNav, "navHigh", navInfo->s32navHigh * 1e-3,OS_FLOAT);//�����߶�
-	SETDATA(pDataPoolNav, "navVn", navInfo->s32navVn * 1e-1,	OS_S16);//��������
-	SETDATA(pDataPoolNav, "navVs", navInfo->s32navVs * 1e-1,	OS_S16);//��������
-	SETDATA(pDataPoolNav, "navVe", navInfo->s32navVe * 1e-1,	OS_S16);//��������
+	SETDATA(pDataPoolNav, "navLon", navInfo->s32navLon,	OS_S32);//瀵艰埅缁忓害
+	SETDATA(pDataPoolNav, "navLat", navInfo->s32navLat,	OS_S32);//瀵艰埅绾�搴�
+	SETDATA(pDataPoolNav, "navHigh", navInfo->s32navHigh * 1e-3,OS_FLOAT);//瀵艰埅楂樺害
+	SETDATA(pDataPoolNav, "navVn", navInfo->s32navVn * 1e-1,	OS_S16);//瀵艰埅鍖楅€�
+	SETDATA(pDataPoolNav, "navVs", navInfo->s32navVs * 1e-1,	OS_S16);//瀵艰埅澶╅€�
+	SETDATA(pDataPoolNav, "navVe", navInfo->s32navVe * 1e-1,	OS_S16);//瀵艰埅涓滈€�
 
-	SETDATA(pDataPoolNav, "navPitch", navInfo->s16pitch,	OS_S16);//��������
-	SETDATA(pDataPoolNav, "navRoll", navInfo->s16roll,	OS_S16);//������ת
-	SETDATA(pDataPoolNav, "navDir", navInfo->s16dir,	OS_U16);//������λ��
+	SETDATA(pDataPoolNav, "navPitch", navInfo->s16pitch,	OS_S16);//瀵艰埅淇�浠�
+	SETDATA(pDataPoolNav, "navRoll", navInfo->s16roll,	OS_S16);//瀵艰埅婊氳浆
+	SETDATA(pDataPoolNav, "navDir", navInfo->s16dir,	OS_U16);//瀵艰埅鏂逛綅瑙�
 
-	SETDATA(pDataPoolNav, "navWx", navInfo->imuWx16507,	OS_FLOAT);//ԭʼ���ٶ�X
-	SETDATA(pDataPoolNav, "navWy", navInfo->imuWy16507,	OS_FLOAT);//ԭʼ���ٶ�Y
-	SETDATA(pDataPoolNav, "navWz", navInfo->imuWz16507,	OS_FLOAT);//ԭʼ���ٶ�Z
-	SETDATA(pDataPoolNav, "navAx", navInfo->imuAx16507,	OS_FLOAT);//ԭʼ���ٶ�X
-	SETDATA(pDataPoolNav, "navAy", navInfo->imuAy16507,	OS_FLOAT);//ԭʼ���ٶ�Y
-	SETDATA(pDataPoolNav, "navAz", navInfo->imuAz16507,	OS_FLOAT);//ԭʼ���ٶ�Z
+	SETDATA(pDataPoolNav, "navWx", navInfo->imuWx16507,	OS_FLOAT);//鍘熷�嬭�掗€熷害X
+	SETDATA(pDataPoolNav, "navWy", navInfo->imuWy16507,	OS_FLOAT);//鍘熷�嬭�掗€熷害Y
+	SETDATA(pDataPoolNav, "navWz", navInfo->imuWz16507,	OS_FLOAT);//鍘熷�嬭�掗€熷害Z
+	SETDATA(pDataPoolNav, "navAx", navInfo->imuAx16507,	OS_FLOAT);//鍘熷�嬪姞閫熷害X
+	SETDATA(pDataPoolNav, "navAy", navInfo->imuAy16507,	OS_FLOAT);//鍘熷�嬪姞閫熷害Y
+	SETDATA(pDataPoolNav, "navAz", navInfo->imuAz16507,	OS_FLOAT);//鍘熷�嬪姞閫熷害Z
 
 
-	// SETDATA(pDataPoolNav, "navWx2", navInfo->imuWx20689,	OS_FLOAT);//ԭʼ���ٶ�X
-	// SETDATA(pDataPoolNav, "navWy2", navInfo->imuWy20689,	OS_FLOAT);//ԭʼ���ٶ�Y
-	// SETDATA(pDataPoolNav, "navWz2", navInfo->imuWz20689,	OS_FLOAT);//ԭʼ���ٶ�Z
-	// SETDATA(pDataPoolNav, "navAx2", navInfo->imuAx20689,	OS_FLOAT);//ԭʼ���ٶ�X
-	// SETDATA(pDataPoolNav, "navAy2", navInfo->imuAy20689,	OS_FLOAT);//ԭʼ���ٶ�Y
-	// SETDATA(pDataPoolNav, "navAz2", navInfo->imuAz20689,	OS_FLOAT);//ԭʼ���ٶ�Z
+	// SETDATA(pDataPoolNav, "navWx2", navInfo->imuWx20689,	OS_FLOAT);//原始锟斤拷锟劫讹拷X
+	// SETDATA(pDataPoolNav, "navWy2", navInfo->imuWy20689,	OS_FLOAT);//原始锟斤拷锟劫讹拷Y
+	// SETDATA(pDataPoolNav, "navWz2", navInfo->imuWz20689,	OS_FLOAT);//原始锟斤拷锟劫讹拷Z
+	// SETDATA(pDataPoolNav, "navAx2", navInfo->imuAx20689,	OS_FLOAT);//原始锟斤拷锟劫讹拷X
+	// SETDATA(pDataPoolNav, "navAy2", navInfo->imuAy20689,	OS_FLOAT);//原始锟斤拷锟劫讹拷Y
+	// SETDATA(pDataPoolNav, "navAz2", navInfo->imuAz20689,	OS_FLOAT);//原始锟斤拷锟劫讹拷Z
     
-	// SETDATA(pDataPoolNav, "navWx3", navInfo->imuWx42688,	OS_FLOAT);//ԭʼ���ٶ�X
-	// SETDATA(pDataPoolNav, "navWy3", navInfo->imuWy42688,	OS_FLOAT);//ԭʼ���ٶ�Y
-	// SETDATA(pDataPoolNav, "navWz3", navInfo->imuWz42688,	OS_FLOAT);//ԭʼ���ٶ�Z
-	// SETDATA(pDataPoolNav, "navAx3", navInfo->imuAx42688,	OS_FLOAT);//ԭʼ���ٶ�X
-	SETDATA(pDataPoolNav, "navAy3", navInfo->imuAy42688,	OS_FLOAT);//ԭʼ���ٶ�Y
-	SETDATA(pDataPoolNav, "navAz3", navInfo->imuAz42688,	OS_FLOAT);//ԭʼ���ٶ�Z
+	// SETDATA(pDataPoolNav, "navWx3", navInfo->imuWx42688,	OS_FLOAT);//原始锟斤拷锟劫讹拷X
+	// SETDATA(pDataPoolNav, "navWy3", navInfo->imuWy42688,	OS_FLOAT);//原始锟斤拷锟劫讹拷Y
+	// SETDATA(pDataPoolNav, "navWz3", navInfo->imuWz42688,	OS_FLOAT);//原始锟斤拷锟劫讹拷Z
+	// SETDATA(pDataPoolNav, "navAx3", navInfo->imuAx42688,	OS_FLOAT);//原始锟斤拷锟劫讹拷X
+	SETDATA(pDataPoolNav, "navAy3", navInfo->imuAy42688,	OS_FLOAT);//原始锟斤拷锟劫讹拷Y
+	SETDATA(pDataPoolNav, "navAz3", navInfo->imuAz42688,	OS_FLOAT);//原始锟斤拷锟劫讹拷Z
 
 	SETDATA(pDataPoolNav, "navState", navInfo->navStatus ,	OS_U8);
-	//cpu0�����ʱ�������壩
+	//cpu0杩愮畻鑰楁椂锛堝�艰埅鏉匡級
 	SETDATA(pDataPoolNav, "navUs", navInfo->navUs,	OS_U16);
 	SETDATA(pDataPoolNav, "navUsKa", navInfo->navUsKa,	OS_U16);
     SETDATA(pDataPoolSelf, "cpuTemp2", navInfo->cpuTemp,	OS_S16);
@@ -480,7 +482,7 @@ OS_U8 SaveNavInDataPool(STRU_NAV_INFO *navInfo)
 	return 0;
 }
 
-//���ݵ�����Ϣ������ֱ������ϵ����
+//锟斤拷锟捷碉拷锟斤拷锟斤拷息锟斤拷锟斤拷锟斤拷直锟斤拷锟斤拷锟斤拷系锟斤拷锟斤拷
 OS_U8 CalcXYZ()
 {
 	double x = 0, y = 0, z = 0;
@@ -494,7 +496,7 @@ OS_U8 CalcXYZ()
 	OS_U8 navState = 0;
     if(g_DeviceState.imuCountDown == 0 && ((g_DeviceState.workStage & DOM_HILSMODE) != DOM_HILSMODE))
     {
-		// ��IMU��������nav���ݳ���ȡ����
+		// 涓嶪MU鏂�杩烇紝浠巒av鏁版嵁姹犱腑鍙栨暟鎹�
         GetDataFast(pDataPoolNav, "navLon",  &inavlon);
         GetDataFast(pDataPoolNav, "navLat",  &inavlat);
         GetDataFast(pDataPoolNav, "navHigh", &fnavhigh);
@@ -507,7 +509,7 @@ OS_U8 CalcXYZ()
     }
     else
     {
-		// ��IMU������������IMU���ݳ���ȡ����
+		// 涓嶪MU杩炴帴姝ｅ父锛屼粠IMU鏁版嵁姹犱腑鍙栨暟鎹�
         GetDataFast(pDataPoolImu, "navLon",  &inavlon);
         GetDataFast(pDataPoolImu, "navLat",  &inavlat);
         GetDataFast(pDataPoolImu, "navHigh", &fnavhigh);
@@ -535,7 +537,7 @@ OS_U8 CalcXYZ()
 	GetDataFast(pDataPoolFly, "DataHigh", &luanchHigh);//
 	GetDataFast(pDataPoolFly, "DataDir", &luanchDir);//
 
-	if(navState == 0x60 || navState == 0x64)//60��ϵ�����64���Ե���
+	if(navState == 0x60 || navState == 0x64)//60缁勫悎瀵艰埅锛�64鎯�鎬у�艰埅
 	{
 		DoCalcXYZ(	luanchLon * 1e-7, 
 					luanchLat*1e-7, 

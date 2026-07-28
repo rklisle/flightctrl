@@ -240,6 +240,7 @@ OS_U32 FlashCmdHandler(STRU_422_MSG_INFO * frame)
 		burnState = frame->au8Data[0];
 		if(burnState == BURNING)
 		{
+			// 进入烧写状态
 			OS_U8 fileIndex = frame->au8Data[1];
 			if(fileIndex == FILE_INDEX_CPU0)
             {
@@ -258,8 +259,8 @@ OS_U32 FlashCmdHandler(STRU_422_MSG_INFO * frame)
             if(pflashFile->fileLen > MAXPACKETLEN)
             {
                 isBigFile = TRUE;
-                QspiErase((OS_U32)pflashFile->baseAddr, pflashFile->fileLen);
-                QspiWrite256((OS_U32)pflashFile, (OS_U32)pflashFile->baseAddr);
+                QspiErase((OS_U32)pflashFile->baseAddr, ((int)pflashFile->ptrOffset + pflashFile->fileLen));	//擦
+                QspiWrite256((OS_U32)pflashFile, (OS_U32)pflashFile->baseAddr);//写文件描述符
 				tempFilePos = 0;
 				tempFilePacket = 0;
             }
@@ -270,6 +271,7 @@ OS_U32 FlashCmdHandler(STRU_422_MSG_INFO * frame)
 		}
 		else if(burnState == UNBURN)
 		{
+			// 退出烧写状态
 			pflashFile = NULL;
 			FlashProgramming = FALSE;
             isBigFile = FALSE;
@@ -291,10 +293,10 @@ OS_U32 FlashCmdHandler(STRU_422_MSG_INFO * frame)
 	case CMD_FLASH_ENCAP_REQ:		//flash烧写内容
 	{
 
-		OS_U16* totalPacketCount = (OS_U16*)frame->au8Data;
-		OS_U16* curPacketIndex = (OS_U16*)(frame->au8Data + 2);
-		OS_U16*	effectByteCount = (OS_U16*)(frame->au8Data + 4);
-		OS_U8* payloadPtr = (OS_U8*)(frame->au8Data + 6);
+		OS_U16* totalPacketCount = (OS_U16*)frame->au8Data;		//总帧数
+		OS_U16* curPacketIndex = (OS_U16*)(frame->au8Data + 2);	//帧序号
+		OS_U16*	effectByteCount = (OS_U16*)(frame->au8Data + 4);//长度
+		OS_U8* payloadPtr = (OS_U8*)(frame->au8Data + 6);		//内容
 		//OS_U8 temp[256];
 		//memcpy(temp,payloadPtr, 250);
 		OS_U8 writeRes;
@@ -329,11 +331,11 @@ OS_U32 FlashCmdHandler(STRU_422_MSG_INFO * frame)
 			lastPacketCount = * totalPacketCount;
 			lastPacketIndex = *curPacketIndex;
             if(isBigFile == FALSE)
-            {
+            {//smallfile
                 memcpy((OS_U8 *)(fileContent + (int)pflashFile->ptrOffset + (int)(*curPacketIndex * MAXPACKETLEN)),
                         (OS_U8*)payloadPtr,
                         (size_t)*effectByteCount);
-                if(*curPacketIndex == *totalPacketCount - 1)
+                if(*curPacketIndex == *totalPacketCount - 1)	//是否是最后一包数据
                 {
                     //先回复地面收到数据，再进行flash烧写工作
                     resBuf[0] = 0x11;
@@ -398,7 +400,7 @@ OS_U32 FlashCmdHandler(STRU_422_MSG_INFO * frame)
 		CmdResponseHandler(CMD_FLASH_ENCAP_RSP, 6, resBuf);
 	}
 		break;
-	case CMD_FLASH_QUERY_REQ:
+	case CMD_FLASH_QUERY_REQ:		//查询Flash中有效文件（会校验完整性）
 		{
 			FLASHFILE tmpFileInfo={0};
 			FLASHFILE *p = flashFiles;
@@ -453,7 +455,7 @@ OS_U32 FlashCmdHandler(STRU_422_MSG_INFO * frame)
 			}
 		}
 		break;
-	case CMD_FLASH_CLEAR_REQ:
+	case CMD_FLASH_CLEAR_REQ:		//清除所有Flash文件
 		{
 			ClearFlashDatFile();
 			OS_U8 data[10];
@@ -469,10 +471,10 @@ OS_U32 FlashCmdHandler(STRU_422_MSG_INFO * frame)
 					(OS_U32)(pflashFile->baseAddr),
 					(OS_U32)fileContent,
 					sizeof(FLASHFILE));
-            OS_U32 fileLen = ((FLASHFILE*)fileContent)->fileLen;
+            OS_U32 fileLen = ((FLASHFILE*)fileContent)->fileLen;//文件长度
             OS_U32 calcCheckSum = 0;
             if(fileLen <= 256)
-            {
+            {//smallfile
                 readRes = QspiFlashRead(
                         (OS_U32)(pflashFile->baseAddr + pflashFile->ptrOffset),
                         (OS_U32)(fileContent + pflashFile->ptrOffset),
@@ -500,8 +502,8 @@ OS_U32 FlashCmdHandler(STRU_422_MSG_INFO * frame)
                 }
             }
             else
-            {
-                int len = 0;
+            {//bigfile
+                int len = 0;//当前读到的文件位置，每次读完会+256
                 //int readIndex = 0;
                 calcCheckSum = 0xFFFFFFFF;
                 while(len < fileLen)
@@ -511,7 +513,7 @@ OS_U32 FlashCmdHandler(STRU_422_MSG_INFO * frame)
                     (OS_U32)(fileContent),
                         256);
                     
-                    OS_U32 tempLen = fileLen - len > 256?256:fileLen - len;
+                    OS_U32 tempLen = fileLen - len > 256?256:fileLen - len;//每次读出的文件长度，应该前面都是256，最后一帧是<256
                     
                     calcCheckSum = CalCRC32(fileContent, tempLen, calcCheckSum, 1);
                     calcCheckSum = calcCheckSum ^ 0xFFFFFFFF;

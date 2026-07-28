@@ -94,7 +94,7 @@ OS_U8 SaveHilInDataPool(STRU_HIL_INPUT *hilInfo)
 		
 		// if(g_DeviceState.srvCountDown == 0)
 		// {
-		// 	// 280 ?????????????????100?????hilInfo->DD1?????????100???????
+		// 	// 280 半实物过来的数据就是100倍的，hilInfo->DD1这个应该就是100倍的角度值
 		// 	SETDATA(pDataPoolSrv, "Sr1Read", hilInput.DD1, OS_S16);	
 		// 	SETDATA(pDataPoolSrv, "Sr2Read", hilInput.DD2, OS_S16);	
 		// }
@@ -106,8 +106,8 @@ OS_U32 HilRtHandler(STRU_422_MSG_INFO * frame)// RT_HIL
 	OS_U8 msgID = frame->u8MsgID;
 	switch(msgID)
 	{
-	case 0xAA://???????
-	{	
+	case 0xAA:
+	{//主控指令
 		OS_U8 cmd = frame->au8Data[0];
 		if(cmd == CMD_HOR_CALC_REQ || cmd == CMD_TO_NAV_REQ)
 		{
@@ -117,7 +117,8 @@ OS_U32 HilRtHandler(STRU_422_MSG_INFO * frame)// RT_HIL
 		}
 	}
 		break;
-	case 0xAB://???????
+	case 0xAB:
+		//攻击目标
 	{
 		OS_DOUBLE lon,lat,high;
 		OS_DOUBLE pitch,yaw;
@@ -147,11 +148,11 @@ OS_U32 HilRtHandler(STRU_422_MSG_INFO * frame)// RT_HIL
         
 	}
 		break;
-	case 0x22://????????
-	case 0x23://????????
+	case 0x22://紧急伞降
+	case 0x23://紧急返航
 		ControllerCmdHandler(frame);
 		break;
-	case CMD_MSN_NEWPT://??????????????	// 280 ???????? ????
+	case CMD_MSN_NEWPT://仿真上注任务指令	// 280 该命令不用 注释掉
 		{
 			// double lon,lat,high,track,speed,arriveTime;
 			// memcpy(&lon, frame->au8Data + 1, 8);
@@ -170,7 +171,7 @@ OS_U32 HilRtHandler(STRU_422_MSG_INFO * frame)// RT_HIL
 			// UpdateMission(msn);
 		}
 		break;
-	case 0x20:	// : ????????????
+	case 0x20:	// : 仿真已经起飞了
 		{
 			Stru_Sim_Data_OUTPUT hilInfoSrc = {0};
 			memcpy(&hilInfoSrc, frame->au8Data, sizeof(hilInfoSrc));
@@ -201,7 +202,7 @@ OS_U32 HilRtHandler(STRU_422_MSG_INFO * frame)// RT_HIL
 			SETDATA(pDataPoolMsn,	"autoStep",	13,	OS_U8);
 		}
 		break;
-	case CMD_LAUNCH_REQ:	//0xFA ???????
+	case CMD_LAUNCH_REQ:	//0xFA 发射指令
 		{
 
 		}

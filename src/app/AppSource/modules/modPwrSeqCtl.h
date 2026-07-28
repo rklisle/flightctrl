@@ -1,7 +1,7 @@
 /*
  * PwrSeqCtl.h
  *
- *  Created on: 2021年10月16日
+ *  Created on: 2021锟斤拷10锟斤拷16锟斤拷
  *      Author: QL
  */
 
@@ -63,15 +63,17 @@ enum seqID
 #pragma pack(1)
 typedef struct CAN_RECV_VA
 {
-	OS_U16 battV; 	//MML 协议中是8位
-    OS_U16 groundV;	//MML 协议中是8位
-    OS_U16 engineV;	//MML 协议中是8位
-    OS_U16 mainV;	//MML 协议中是8位
-    OS_U16 battA;	//MML 协议中是8位
-    OS_U16 groundA;	//MML 协议中是8位
-    OS_U16 engineA;	//MML 协议中是8位
-    OS_U16 mainA;	//MML 协议中是8位
-    OS_U32 mcuTemp;	//MML 协议中是16位
+	OS_U16 battV; 	
+    OS_U16 groundV;	
+    OS_U16 engineV;	
+    OS_U16 mainV;	
+	OS_U8  steerV;
+    OS_U16 battA;	
+    OS_U16 groundA;	
+    OS_U16 engineA;	
+    OS_U16 mainA;	
+	OS_U8  steerA;
+    OS_U32 mcuTemp;	
 }CAN_RECV_VA;
 #pragma pack(0)
 

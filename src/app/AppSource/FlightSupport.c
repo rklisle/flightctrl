@@ -31,7 +31,7 @@
 
 
 //#include "flight_data.h"
-Point safePoints[20];	// ????????????????????????????????
+Point safePoints[20];	// 加载任务后，得到的安全区域围栏
 int airHighArray[1000] = {0};
 int safePointCount;
 
@@ -148,71 +148,71 @@ static void FlightSeqOutputHandle()
 ***********************************************************/
 void FlightTMOutputHandle()	
 {
-	SETDATA(pDataPoolMsn,	"curPtNo",	g_CtrltoDL_tel.curPtNo,	OS_U8);         		//当前航点号
-	SETDATA(pDataPoolMsn,	"tarLon",	g_CtrltoDL_tel.curTargetLon * 1e7, OS_S32 );	//当前目标航点经度
-	SETDATA(pDataPoolMsn,	"tarLat",	g_CtrltoDL_tel.curTargetLat * 1e7, OS_S32 );	//当前目标航点纬度
-	SETDATA(pDataPoolMsn,	"tarAlt",	g_CtrltoDL_tel.curTargetAlt, OS_S16 );			//当前目标航点高度
-	SETDATA(pDataPoolFly,	"rollCmd",	g_CtrltoDL_tel.rudderRollCmd* 100,	OS_S16);	//通道舵副翼
-	SETDATA(pDataPoolFly,	"pitchCmd",	g_CtrltoDL_tel.rudderPitchCmd * 100,OS_S16);	//通道舵升降	
-	SETDATA(pDataPoolFly,	"yawCmd",	g_CtrltoDL_tel.rudderYawCmd* 100,	OS_S16);	//通道舵航向
+	SETDATA(pDataPoolMsn,	"curPtNo",	g_CtrltoDL_tel.curPtNo,	OS_U8);         		//当前�?点号
+	SETDATA(pDataPoolMsn,	"tarLon",	g_CtrltoDL_tel.curTargetLon * 1e7, OS_S32 );	//当前�?标航点经�?
+	SETDATA(pDataPoolMsn,	"tarLat",	g_CtrltoDL_tel.curTargetLat * 1e7, OS_S32 );	//当前�?标航点纬�?
+	SETDATA(pDataPoolMsn,	"tarAlt",	g_CtrltoDL_tel.curTargetAlt, OS_S16 );			//当前�?标航点高�?
+	SETDATA(pDataPoolFly,	"rollCmd",	g_CtrltoDL_tel.rudderRollCmd* 100,	OS_S16);	//通道舵副�?
+	SETDATA(pDataPoolFly,	"pitchCmd",	g_CtrltoDL_tel.rudderPitchCmd * 100,OS_S16);	//通道舵升�?	
+	SETDATA(pDataPoolFly,	"yawCmd",	g_CtrltoDL_tel.rudderYawCmd* 100,	OS_S16);	//通道舵航�?
 
-	SETDATA(pDataPoolFly,	"gamaCmd",	g_CtrltoDL_tel.gamaCmd * 1e2, OS_S16 );			//滚转角指令
-	SETDATA(pDataPoolFly,	"nycCmd",	g_CtrltoDL_tel.nycCmd * 1e2, OS_S16 ); 			//升力面过载指令
-	SETDATA(pDataPoolFly,	"varthCmd",	g_CtrltoDL_tel.varthetaCmd * 1e2, OS_S16 );     //俯仰角指令
+	SETDATA(pDataPoolFly,	"gamaCmd",	g_CtrltoDL_tel.gamaCmd * 1e2, OS_S16 );			//滚转角指�?
+	SETDATA(pDataPoolFly,	"nycCmd",	g_CtrltoDL_tel.nycCmd * 1e2, OS_S16 ); 			//升力面过载指�?
+	SETDATA(pDataPoolFly,	"varthCmd",	g_CtrltoDL_tel.varthetaCmd * 1e2, OS_S16 );     //�?仰�?�指�?
 	SETDATA(pDataPoolFly,	"highCmd",	g_CtrltoDL_tel.heightCmd/0.1,OS_S16 );			//高度指令
-	SETDATA(pDataPoolFly,	"vyCmd",	g_CtrltoDL_tel.vyCmd/0.003 , OS_S16 );			//垂速指令
-	SETDATA(pDataPoolFly,	"ac_dL",	g_CtrltoDL_tel.ac_dL * 100, OS_U32);			//待飞距
-	SETDATA(pDataPoolFly,	"ac_dZ",	g_CtrltoDL_tel.ac_dZ * 100, OS_U16);			//侧边距
-	SETDATA(pDataPoolFly,   "fcstate",  g_CtrltoDL_tel.flight_control_state,OS_U32);    //飞行状态
+	SETDATA(pDataPoolFly,	"vyCmd",	g_CtrltoDL_tel.vyCmd/0.003 , OS_S16 );			//垂速指�?
+	SETDATA(pDataPoolFly,	"ac_dL",	g_CtrltoDL_tel.ac_dL * 100, OS_U32);			//待�?�距
+	SETDATA(pDataPoolFly,	"ac_dZ",	g_CtrltoDL_tel.ac_dZ * 100, OS_U16);			//侧边�?
+	SETDATA(pDataPoolFly,   "fcstate",  g_CtrltoDL_tel.flight_control_state,OS_U32);    //飞�?�状�?
 	
-	SETDATA(pDataPoolFly,   "thrusCmd", g_CtrltoDL_tel.thrustCmd*10,OS_U16);            //推力指令，例如油门开度Kc 无符号
-	SETDATA(pDataPoolFly,   "rpmState", g_CtrltoDL_tel.rpmState/2,OS_U16);             	//发动机状态转速
+	SETDATA(pDataPoolFly,   "thrusCmd", g_CtrltoDL_tel.thrustCmd*10,OS_U16);            //推力指令，例如油门开�?Kc 无�?�号
+	SETDATA(pDataPoolFly,   "rpmState", g_CtrltoDL_tel.rpmState/2,OS_U16);             	//发动机状态转�?
 	SETDATA(pDataPoolFly,	"ac_Vz",	g_CtrltoDL_tel.ac_Vz/0.003,	OS_S16);			//侧向速度
 	SETDATA(pDataPoolFly,	"ac_Vy",	g_CtrltoDL_tel.ac_Vy/0.003,OS_S16);				//天向速度	
 	SETDATA(pDataPoolFly,	"ac_Vx",	g_CtrltoDL_tel.ac_Vx/0.003,	OS_S16);			//射向速度
-	SETDATA(pDataPoolFly,	"ac_dR",	g_CtrltoDL_tel.ac_dR * 10, OS_S16 );			//圆轨迹侧边距，未去掉转弯半径
-	SETDATA(pDataPoolFly,	"azimuth",	g_CtrltoDL_tel.cur_azimuth/0.006, OS_S16 );		//航段方位角
-	SETDATA(pDataPoolFly,	"thetav",	g_CtrltoDL_tel.cur_thetav/0.003, OS_S16 );		//轨迹倾角
-	SETDATA(pDataPoolFly,	"psicv",	g_CtrltoDL_tel.cur_psicv/0.006, OS_S16 );		//轨迹偏角
+	SETDATA(pDataPoolFly,	"ac_dR",	g_CtrltoDL_tel.ac_dR * 10, OS_S16 );			//圆轨迹侧边距，未去掉�?�?半径
+	SETDATA(pDataPoolFly,	"azimuth",	g_CtrltoDL_tel.cur_azimuth/0.006, OS_S16 );		//�?段方位�??
+	SETDATA(pDataPoolFly,	"thetav",	g_CtrltoDL_tel.cur_thetav/0.003, OS_S16 );		//轨迹倾�??
+	SETDATA(pDataPoolFly,	"psicv",	g_CtrltoDL_tel.cur_psicv/0.006, OS_S16 );		//轨迹偏�??
 	SETDATA(pDataPoolFly,	"Vcmd",	    g_CtrltoDL_tel.Vcmd * 10, OS_S16 );				//速度指令 
-	SETDATA(pDataPoolFly,	"nyCmd",	g_CtrltoDL_tel.nyCmd_Guidance * 100 , OS_S16 );	//末制导纵向过载指令
-	SETDATA(pDataPoolFly,	"nzCmd",	g_CtrltoDL_tel.nzCmd_Guidance * 100, OS_S16 );	//末制导侧向过载指令
-	SETDATA(pDataPoolFly,	"wyCmd",	g_CtrltoDL_tel.wyCmd * 100, OS_S16 );			//航向角速度指令
+	SETDATA(pDataPoolFly,	"nyCmd",	g_CtrltoDL_tel.nyCmd_Guidance * 100 , OS_S16 );	//�?制�?�纵向过载指�?
+	SETDATA(pDataPoolFly,	"nzCmd",	g_CtrltoDL_tel.nzCmd_Guidance * 100, OS_S16 );	//�?制�?�侧向过载指�?
+	SETDATA(pDataPoolFly,	"wyCmd",	g_CtrltoDL_tel.wyCmd * 100, OS_S16 );			//�?向�?�速度指令
 
-	SETDATA(pDataPoolFly,	"pitch_nT",	g_CtrltoDL_tel.pitch_rate_nT_filterOut * 1000, OS_S16 );//俯仰视线角速度滤波
+	SETDATA(pDataPoolFly,	"pitch_nT",	g_CtrltoDL_tel.pitch_rate_nT_filterOut * 1000, OS_S16 );//�?仰�?�线角速度滤波
 	SETDATA(pDataPoolFly,	"yaw_nT",	g_CtrltoDL_tel.yaw_rate_nT_filterOut * 1000, OS_S16 );  //偏航视线角速度滤波
-	SETDATA(pDataPoolFly,	"deltaR",	g_CtrltoDL_tel.deltaR*100,	OS_U32);			//弹目距离，打击点
-	SETDATA(pDataPoolFly,	"dRn",		g_CtrltoDL_tel.dRn,	OS_S16);					//弹目北向距离
-	SETDATA(pDataPoolFly,	"dRu",		g_CtrltoDL_tel.dRu,	OS_S16);					//弹目天向距离
-	SETDATA(pDataPoolFly,	"dRe",		g_CtrltoDL_tel.dRe,	OS_S16);					//弹目东向距离
-	SETDATA(pDataPoolFly,	"PitchPre",	g_CtrltoDL_tel.Pitch_Preset_Angle * 100,OS_S16);//理论俯仰框架角
-	SETDATA(pDataPoolFly,	"YawPre",	g_CtrltoDL_tel.Yaw_Preset_Angle * 100,OS_S16);	//理论偏航框架角
-	SETDATA(pDataPoolFly,	"DusState",	g_CtrltoDL_tel.Dubins_stage, OS_S32);			//杜宾斯段
-	SETDATA(pDataPoolFly,	"DusType1",	g_CtrltoDL_tel.dubins_type1, OS_S32);			//杜宾斯类型
-	SETDATA(pDataPoolFly,	"DusType2",	g_CtrltoDL_tel.dubins_type2, OS_S32);			//杜宾斯类型
-	SETDATA(pDataPoolFly,	"DusType3",	g_CtrltoDL_tel.dubins_type3, OS_S32);			//杜宾斯类型
-	SETDATA(pDataPoolFly,	"DbsLen",	g_CtrltoDL_tel.Dubins_length , OS_FLOAT);		//杜宾斯段航程
+	SETDATA(pDataPoolFly,	"deltaR",	g_CtrltoDL_tel.deltaR*100,	OS_U32);			//弹目距�?�，打击�?
+	SETDATA(pDataPoolFly,	"dRn",		g_CtrltoDL_tel.dRn,	OS_S16);					//弹目北向距�??
+	SETDATA(pDataPoolFly,	"dRu",		g_CtrltoDL_tel.dRu,	OS_S16);					//弹目天向距�??
+	SETDATA(pDataPoolFly,	"dRe",		g_CtrltoDL_tel.dRe,	OS_S16);					//弹目东向距�??
+	SETDATA(pDataPoolFly,	"PitchPre",	g_CtrltoDL_tel.Pitch_Preset_Angle * 100,OS_S16);//理�?�俯仰�?�架�?
+	SETDATA(pDataPoolFly,	"YawPre",	g_CtrltoDL_tel.Yaw_Preset_Angle * 100,OS_S16);	//理�?�偏�?框架�?
+	SETDATA(pDataPoolFly,	"DusState",	g_CtrltoDL_tel.Dubins_stage, OS_S32);			//杜�?�斯�?
+	SETDATA(pDataPoolFly,	"DusType1",	g_CtrltoDL_tel.dubins_type1, OS_S32);			//杜�?�斯类型
+	SETDATA(pDataPoolFly,	"DusType2",	g_CtrltoDL_tel.dubins_type2, OS_S32);			//杜�?�斯类型
+	SETDATA(pDataPoolFly,	"DusType3",	g_CtrltoDL_tel.dubins_type3, OS_S32);			//杜�?�斯类型
+	SETDATA(pDataPoolFly,	"DbsLen",	g_CtrltoDL_tel.Dubins_length , OS_FLOAT);		//杜�?�斯段航�?
 	SETDATA(pDataPoolFly,	"gamacCom",	g_CtrltoDL_tel.gamac_compensate/0.003,OS_S16);	//滚转角指令补偿量
-	SETDATA(pDataPoolFly,	"uz_gamac",	g_CtrltoDL_tel.uz_gamac/0.003,OS_S16);			//侧偏控制量
-	SETDATA(pDataPoolFly,	"mx_ESO",	g_CtrltoDL_tel.mx_ESO*100,OS_S16);				//干扰估计状态量z2
+	SETDATA(pDataPoolFly,	"uz_gamac",	g_CtrltoDL_tel.uz_gamac/0.003,OS_S16);			//侧偏控制�?
+	SETDATA(pDataPoolFly,	"mx_ESO",	g_CtrltoDL_tel.mx_ESO*100,OS_S16);				//干扰估�?�状态量z2
 	SETDATA(pDataPoolFly,	"ADRC",	    g_CtrltoDL_tel.fduox_ADRC * 100, OS_S16);		//ADRC舵偏
 	SETDATA(pDataPoolFly,	"Qv",	    g_CtrltoDL_tel.Qv * 100, OS_U32);				//动压
-	SETDATA(pDataPoolFly,   "alphaIns", g_CtrltoDL_tel.alpha_ins*100,	OS_S16);		//地速攻角
-	SETDATA(pDataPoolFly,   "betaIns",  g_CtrltoDL_tel.beta_ins*100,	OS_S16);        //地速侧滑角	
+	SETDATA(pDataPoolFly,   "alphaIns", g_CtrltoDL_tel.alpha_ins*100,	OS_S16);		//地速攻�?
+	SETDATA(pDataPoolFly,   "betaIns",  g_CtrltoDL_tel.beta_ins*100,	OS_S16);        //地速侧滑�??	
 	SETDATA(pDataPoolFly,	"nyflt",	g_CtrltoDL_tel.nyflt/0.001, OS_S16 );			//体轴法向过载
 	SETDATA(pDataPoolFly,	"nzflt",	g_CtrltoDL_tel.nzflt/0.001, OS_S16 );			//体轴侧向过载
 	SETDATA(pDataPoolFly,   "cnt_alti", g_CtrltoDL_tel.count_altitude_change,OS_U32);   //高度机动次数
-	SETDATA(pDataPoolFly,	"mass_cal",	g_CtrltoDL_tel.mass_calc/0.01, OS_S16 );		//质量估计
-	SETDATA(pDataPoolFly,	"ugfZetac", g_CtrltoDL_tel.ugf_zetac/0.001, OS_S16 );		//高度控制量
-	SETDATA(pDataPoolFly,	"uqkf",		g_CtrltoDL_tel.uqkf/0.001, OS_S16 );			//前馈控制量
+	SETDATA(pDataPoolFly,	"mass_cal",	g_CtrltoDL_tel.mass_calc/0.01, OS_S16 );		//质量估�??
+	SETDATA(pDataPoolFly,	"ugfZetac", g_CtrltoDL_tel.ugf_zetac/0.001, OS_S16 );		//高度控制�?
+	SETDATA(pDataPoolFly,	"uqkf",		g_CtrltoDL_tel.uqkf/0.001, OS_S16 );			//前�?�控制量
 
 	SETDATA(pDataPoolFly,	"curLon",	g_CtrltoDL_tel.curLon * 1e7, OS_S32 );    //当前经度
-	SETDATA(pDataPoolFly,	"curLat",	g_CtrltoDL_tel.curLat * 1e7, OS_S32 );	  //当前纬度
+	SETDATA(pDataPoolFly,	"curLat",	g_CtrltoDL_tel.curLat * 1e7, OS_S32 );	  //当前�?�?
 	SETDATA(pDataPoolFly,	"curAlt",	g_CtrltoDL_tel.curAlt/0.1,OS_S16 );		  //当前高度
 
 	// SETDATA(pDataPoolFly,	"tokenlon",	g_CtrltoDL_tel.token_long, OS_U8 );			//纵向令牌
 	// SETDATA(pDataPoolFly,	"tokenlat",	g_CtrltoDL_tel.token_late, OS_U8 );			//侧向令牌
-    // SETDATA(pDataPoolNav, "MaxRpm", g_CtrltoDL_tel.MaxRpm*100,	OS_S16);			//最大转速
+    // SETDATA(pDataPoolNav, "MaxRpm", g_CtrltoDL_tel.MaxRpm*100,	OS_S16);			//最大转�?
 	// SETDATA(pDataPoolNav, "DFT_freq", g_CtrltoDL_tel.DFT_freq_max*100,	OS_S16);	//辨识运动频率
 	if(g_controller_to_switch.flag_missle_takeoff == 1)
 	{
@@ -221,7 +221,7 @@ void FlightTMOutputHandle()
 
 }
 
-void FlightSrvOutputHandle()	//02 ?????????????>???????
+void FlightSrvOutputHandle()	//02 控制输出角度—�?>操作舵机
 {
 	/* currTime is seconds since DoIgnition (HIL sim start also calls it) */
 	// if(g_DeviceState.currTime > 200.0 && fabs(g_controller_to_actuator.control_voltage_I) > 10.0)
@@ -237,8 +237,8 @@ void FlightSrvOutputHandle()	//02 ?????????????>???????
 							);
 	//ServoCtlOnce_6Rudder(g_CtrltoDL_tel.rudder_I_cmd,g_CtrltoDL_tel.rudder_II_cmd,g_CtrltoDL_tel.rudder_III_cmd,g_CtrltoDL_tel.rudder_IV_cmd,g_CtrltoDL_tel.rudder_V_cmd,g_CtrltoDL_tel.rudder_VI_cmd);
 }
-OS_U8 OutSafeArea = 0;	// 0???????	1?????????????????????????????
-void FlightEngineOutputHandle()//02 ????????????????????????????????????????????????>?????????????????
+OS_U8 OutSafeArea = 0;	// 0安全区里	1出安全区，且等了一会儿�?定出了安全区
+void FlightEngineOutputHandle()//02 在各种情况下（是否起飞？�?否出安全区？）控制输出油门开度—�?>操作油门开度全局变量
 {
 	OS_U32 curEngineRpm;
 
@@ -251,19 +251,12 @@ void FlightEngineOutputHandle()//02 ????????????????????????????????????????????
 	//if(flightSeq.luanched == 1 && ((g_DeviceState.workStage & DOM_AUTOMATIC) == DOM_AUTOMATIC))
 	if(flightSeq.luanched == 1)
 	{
-		//????????????????????
 		if(OutSafeArea)
 		{
-			//slow down the speed
-			// CurEngineRpm = 18000;
-			//?????????
-			//StopEngine();
-			//CurEngineRpm = 0;
 		}
-		//?????????????????????
 		else
 		{
-			//?????????????????????????
+			//安全区内，�?�常飞�?�，�?控制�?
 			CurEngineRpm = (OS_U32)(g_controller_to_engine.control_Kc * 10.0f);
 		}
 	}
@@ -359,7 +352,7 @@ void FlightInputGenerate()
 
 		g_baro_data.static_pressure = static_pressure;
 		g_baro_data.total_pressure = total_pressure;
-		//导引头后续赋值
+		//导引头后�?赋�?
 		g_seeker_data.flag_combat_status=0;
 		g_seeker_data.flag_combat_status=0;
 
@@ -385,54 +378,54 @@ void DoFlightRun()
 OS_U8 InitSafeArea(OS_U8* buf)
 {
 	OS_S32 lon,lat;
-	safePointCount = buf[0];// ????????
+	safePointCount = buf[0];// 围栏点数
 	for(int i=0;i<safePointCount;i++)
 	{
 		lon = *((OS_S32*)(buf+ 2 + i*8));
 		lat = *((OS_S32*)(buf+ 6 + i*8));
-        safePoints[i].x = lon * 1e-7;   // ???? 
-        safePoints[i].y = lat * 1e-7; 	// ???? 
+        safePoints[i].x = lon * 1e-7;   // 经度 
+        safePoints[i].y = lat * 1e-7; 	// 纬度
 	}
     
 	return 0;
     
 }
 
-// ????????????????
+// 计算两个向量的点积
 double dotProduct(Point a, Point b) {
     return a.x * b.x + a.y * b.y;
 }
 
-// ???????????
+// 计算向量的模
 double vectorMagnitude(Point a)
 {
     return sqrt(a.x * a.x + a.y * a.y);
 }
 
-// ?????????????????
+// 计算三个点之间的夹角
 double calculateAngle(Point p1, Point p2, Point p3)
 {
-    // ????????P1P3??P2P3
+    // 计算向量P1P3和P2P3
     Point vectorP1P3 = {p3.x - p1.x, p3.y - p1.y};
     Point vectorP2P3 = {p3.x - p2.x, p3.y - p2.y};
 
-    // ????????????
+    // 计算向量的点积
     double dot = dotProduct(vectorP1P3, vectorP2P3);
 
-    // ???????????
+    // 计算向量的模
     double magnitudeP1P3 = vectorMagnitude(vectorP1P3);
     double magnitudeP2P3 = vectorMagnitude(vectorP2P3);
 
-    // ?????????????
+    // 计算夹角的余弦值
     double cosTheta = dot / (magnitudeP1P3 * magnitudeP2P3);
 
-    // ????????????????????????
+    // 计算并返回夹角（以弧度为单位）
     return acos(cosTheta);
 }
 
-/**??????????????????????????????????
- * ???????  1	???????
- * 			0	???????*/
+/**函数功能：判断某个经纬度点是否在安全区内
+ * 返回值：	1	安全区内
+ * 			0	安全区外*/
 OS_BOOL JudgeInSafe2(double lon, double lat)
 {
 	Point curPt;
@@ -452,7 +445,7 @@ OS_BOOL JudgeInSafe2(double lon, double lat)
 		allAngle += angle[i];
 	}
 	OS_BOOL is_inside;
-	if(allAngle> 2*3.1 && allAngle < 2*3.2)///2pai
+	if(allAngle> 2*3.1 && allAngle < 2*3.2)//2pai
 	{
 		is_inside = TRUE;
 	}
@@ -464,20 +457,18 @@ OS_BOOL JudgeInSafe2(double lon, double lat)
 }
 
 extern OS_U8 RecoverMark;
-//???10s???1s???????????????????????????3s?????????
-OS_U8 JudgeHomeward()
+OS_U8 JudgeHomeward()	//02 起飞2s后，每1s判断一次，是否出了安全区？是否需要伞降？是否地面发出紧急返航？
 {
 	static OS_U8 OutSafeCount = 0;
 
-	//???????????????????????????????????1s????
+	//每秒判断一次
 	if(g_DeviceState.CurrTick % 200 != 0)
 		return 1;
 
-	//?????????????????4s?????????
-	if(g_DeviceState.CurrTick < 200 * 10)
+	//判断安全区驶出
+	if(g_DeviceState.CurrTick < 200 * 2)//2s后起判安全区
 		return 1;
 
-	//???????????
 	int ilon,ilat;
 	double lon,lat;
 	GetDataFast(pDataPoolImu, "navLon", &ilon);
@@ -487,46 +478,41 @@ OS_U8 JudgeHomeward()
 
 	if(OutSafeArea)
 	{
-		// ???????????????????
-		if(OutSafeCount == 3)
+		// 出安全区了
+		if(OutSafeCount == 5)
 		{
 			StopEngine();
 			CurEngineRpm = 0;
 		}
-		//?????????????
+
 		if(OutSafeCount == 0)
 		{
-			DoOpenUm();//?????????
+			DoOpenUm();//安全区外开伞
 		}
 		else
 		{
 			OutSafeCount--;
 		}
 	}
-	//?????????
+
 	static int judgeError = 0;
 	if(JudgeInSafe2(lon,lat) == FALSE)
 	{
-		//????M??????????????????????????
-		if(RecoverMark == 1)
+		// 出安全区了
+		if(RecoverMark == 1)	// 地面发出紧急返航，该值置为1
 		{
 			;
 		}
-		//?????????
 		else
 		{
-			//????3s???????????????????????
 			if(judgeError >= 3)
-			{	
+			{
+				// 出安全区，且时间超过3s
 				SETDATA(pDataPoolSelf,  "flyError", 0xCC,	OS_U8);
 				
-				//???????????????????2s??????????????????5s???????	
 				if(OutSafeArea == false)
-					OutSafeCount = 5;//35;
+					OutSafeCount = 35;
 				OutSafeArea = true;
-				
-				//???????????30%???? 
-				CurEngineRpm = 300;	/// TODO: ECU ???????????????????????????????????????? ????????????20.0%	//18000;
 			}
 			else
 			{
@@ -536,7 +522,7 @@ OS_U8 JudgeHomeward()
 	}
 	else
 	{
-		//????????
+		// 在安全区内
 		judgeError = 0;
 		OutSafeArea = false;
 	}

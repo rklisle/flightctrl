@@ -5,11 +5,11 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-/** ????????? */
+/** 舵机编号定义 */
 #ifdef SERVO_CAN
 typedef enum {
-    SERVO_PWM7 = 0, // ????
-    ECU_PWM8,       // ???PWM
+    SERVO_PWM7 = 0, // 开伞舵机
+    ECU_PWM8,       //发动机启动信号
     PWM_CH_MAX,
 } Servo_ID_t;
 #endif
@@ -28,13 +28,13 @@ typedef enum {
 } Servo_ID_t;
 #endif
 
-/** PWM??????? */
+/** PWM配置结构体 */
 typedef struct {
-    float frequency_hz;   // PWM???(Hz)    333
-    float resolution_us;     // TIMER??????us??  1
-    float init_duty_ratio;     // ?????0.0~1.0??  ???0.4995
-    float min_duty_ratio; // ??��????(0.0~1.0)    0.333
-    float max_duty_ratio; // ???????(0.0~1.0)    0.666
+    float frequency_hz;   // PWM频率(Hz)    333
+    float resolution_us;     // TIMER的精度（us）  1
+    float init_duty_ratio;     // 占空比（0.0~1.0）  初始0.4995
+    float min_duty_ratio; // 最小占空比(0.0~1.0)    0.333
+    float max_duty_ratio; // 最大占空比(0.0~1.0)    0.666
 } PWM_Config_t;
 
 // ??????API

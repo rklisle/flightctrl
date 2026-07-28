@@ -26,6 +26,15 @@ extern int32_t fcs_uart_send(int32_t fd, const uint8_t* pdata, uint32_t len);
             fcs_uart_send(RT_LOG, (const uint8_t*)info, strlen(info)); \
         } while(0)
 
+    #define LOG_HEX8(data, prefix) \
+        do { \
+            LOG_STR(prefix); \
+            for (int _j = 0; _j < 8; _j++) { \
+                LOG_VAL("%02X ", ((uint8_t*)(data))[_j]); \
+            } \
+            LOG_STR("\n"); \
+        } while(0)
+
     #define LOG_HEX16(data, prefix) \
         do { \
             LOG_STR(prefix); \
@@ -37,6 +46,7 @@ extern int32_t fcs_uart_send(int32_t fd, const uint8_t* pdata, uint32_t len);
 #else
     #define LOG_STR(msg) ((void)0)
     #define LOG_VAL(fmt, ...) ((void)0)
+    #define LOG_HEX8(data, prefix) ((void)0)
     #define LOG_HEX16(data, prefix) ((void)0)
 #endif
 

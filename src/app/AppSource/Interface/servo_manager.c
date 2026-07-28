@@ -16,10 +16,10 @@ Servo_ErrorCode_t check_servo_id(Servo_ID_t servo_id);
 static const Angle_Servo_Config_t s_angle_config = {
     .frequency_hz = 333.0f,
     .resolution_deg = 0.1f,      // 0.1度精度
-    .min_angle_deg = -50.0f,
-    .max_angle_deg = 50.0f,
-    .min_pulse_us = 1000.0f,      // -50度对应1000us
-    .max_pulse_us = 2000.0f,      // 50度对应2000us
+    .min_angle_deg = -85.0f,
+    .max_angle_deg = 85.0f,
+    .min_pulse_us = 1000.0f,      // -85度对应1000us
+    .max_pulse_us = 2000.0f,      // 85度对应2000us
 };
 
 // 根据协议，配置 Pulse_Servo_Config_t 结构体

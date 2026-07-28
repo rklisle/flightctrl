@@ -1,7 +1,7 @@
 /*
  * mission.h
  *
- *  Created on: 2024Äê12ÔÂ9ÈÕ
+ *  Created on: 2024å¹´12æœˆ9æ—¥
  *      Author: lenovo
  */
 
@@ -10,20 +10,21 @@
 
 #include "../support/os_framework.h"
 
-#define SLAVE_COUNT (12)
-#define AUTO_MSN_PT_MAX_COUNT	(100)
+#define SLAVE_COUNT (12)	//æœ€å¤§ä»æœºæ•°é‡
+#define AUTO_MSN_PT_MAX_COUNT	(100)	//æœ€å¤§èˆªç‚¹æ•°é‡
 #define d2r		(57.29577951308402)
 
 extern void MissionInit();
 extern void RunMissionTask(int tick);
 
-extern OS_U8 leadID;  //µ±Ç°Ö¸»Ó»úID
-extern OS_U8 selfID;	//±¾»úID
+extern OS_U8 leadID;  //å½“å‰æŒ‡æŒ¥æœºIDï¼ˆä¸»æœºIDï¼‰
+extern OS_U8 selfID;	//æœ¬æœºID
 
 #pragma pack(1)
-typedef struct REPORT_STATUS
+
+typedef struct REPORT_STATUS	//é£æœºçŠ¶æ€æŠ¥å‘Šï¼ˆä½ç½®/é€Ÿåº¦/å§¿æ€ç­‰ï¼‰
 {
-	OS_U8 selfID;
+	OS_U8 selfID;	//æœ¬æœºæ±‡æŠ¥
 	OS_U8 commStatus;
 	OS_U8 luanchedStatus;
 	OS_U8 navStatus;
@@ -34,20 +35,20 @@ typedef struct REPORT_STATUS
 	OS_S16 ax;
 	OS_S16 ay;
 	OS_S16 az;
-	OS_S32 lon;
-	OS_S32 lat;
-	OS_FLOAT alt;
+	OS_S32 lon;		//æœ¬æœºæ±‡æŠ¥
+	OS_S32 lat;		//æœ¬æœºæ±‡æŠ¥
+	OS_FLOAT alt;	//æœ¬æœºæ±‡æŠ¥
 	OS_S16 vn;
 	OS_S16 vs;
 	OS_S16 ve;
-	OS_S16 pitch;
-	OS_S16 dir;
-	OS_S16 roll;
+	OS_S16 pitch;	//æœ¬æœºæ±‡æŠ¥
+	OS_S16 dir;		//æœ¬æœºæ±‡æŠ¥
+	OS_S16 roll;	//æœ¬æœºæ±‡æŠ¥
 	OS_S16 TAS;
 
 }REPORT_STATUS;
 
-typedef enum MSN_CMD_TYPE
+typedef enum MSN_CMD_TYPE	//å‘½ä»¤ç±»å‹æšä¸¾ï¼ˆä¿æŒ/èˆªç‚¹é£è¡Œ/æ‚¬åœ/æ”»å‡»/å›æ”¶ï¼‰
 {
 	MSN_CMD_KEEP = 0,
 	MSN_CMD_WAYPOINT_FLIGHT,
@@ -64,38 +65,39 @@ typedef enum MSN_DELAY_TYPE
 }MSN_DELAY_TYPE;
 
 
-typedef struct MSN_CMD
+typedef struct MSN_CMD	//ä»»åŠ¡å‘½ä»¤ç»“æ„ä½“
 {
-	MSN_CMD_TYPE MsnCmdType;		//0:²»±ä   1:º½µã·ÉĞĞ	2:ÅÌĞı	3:¹¥»÷,   4:ÍË³ö¹¥»÷ 5:»ØÊÕ
-	MSN_DELAY_TYPE delayType;		//0Á¢¼´Ö´ĞĞ£¬1Ö´ĞĞÍêµ±Ç°ÈÎÎñºóÖ´ĞĞ
-	OS_DOUBLE targetLon;	//Ä¿±ê¾­¶È  deg
-	OS_DOUBLE targetLat;	//Ä¿±êÎ³¶È   deg
-	OS_DOUBLE targetHigh;	//Ä¿±ê¸ß¶È  m
+	MSN_CMD_TYPE MsnCmdType;		//0:ä¸å˜   1:èˆªç‚¹é£è¡Œ	2:ç›˜æ—‹	3:æ”»å‡»,   4:é€€å‡ºæ”»å‡» 5:å›æ”¶
+	MSN_DELAY_TYPE delayType;		//0ç«‹å³æ‰§è¡Œï¼Œ1æ‰§è¡Œå®Œå½“å‰ä»»åŠ¡åæ‰§è¡Œ
+	OS_DOUBLE targetLon;	//ç›®æ ‡ç»åº¦  deg
+	OS_DOUBLE targetLat;	//ç›®æ ‡çº¬åº¦   deg
+	OS_DOUBLE targetHigh;	//ç›®æ ‡é«˜åº¦  m
 
-	OS_DOUBLE speed;		//·ÉĞĞËÙ¶È    m/s
-	OS_U8 speedType;		//ËÙ¶ÈÀàĞÍ 0:¿ÕËÙ 1:µØËÙ
+	OS_DOUBLE speed;		//é£è¡Œé€Ÿåº¦    m/s
+	OS_U8 speedType;		//é€Ÿåº¦ç±»å‹ 0:ç©ºé€Ÿ 1:åœ°é€Ÿ
 
-	OS_DOUBLE radis;		//·ÉĞĞ°ë¾¶   m
+	OS_DOUBLE radis;		//é£è¡ŒåŠå¾„   m
 
-	OS_DOUBLE inTrack;		//ÈëÍä½Ç¶È  0-360 deg
-	OS_DOUBLE outTrack;		//³öÍä½Ç¶È   0-360 deg
+	OS_DOUBLE inTrack;		//å…¥å¼¯è§’åº¦  0-360 deg
+	OS_DOUBLE outTrack;		//å‡ºå¼¯è§’åº¦   0-360 deg
 
-	OS_U32 arriveTime;		//µ½´ïÊ±¼ä
+	OS_U32 arriveTime;		//åˆ°è¾¾æ—¶é—´
 }MSN_CMD;
 
-typedef struct {
-	int sn; 			//µãºÅ 0-¹Ì¶¨Îª·¢Éäµã ÆäËû-Îª¹æ»®º½Â·µã
+typedef struct	//èˆªç‚¹ç»“æ„ä½“
+{
+	int sn; 			//ç‚¹å· 0-å›ºå®šä¸ºå‘å°„ç‚¹ å…¶ä»–-ä¸ºè§„åˆ’èˆªè·¯ç‚¹
 	double lon;
 	double lat;
-	int h; //¸ß¶Èm 
-	int w; //º½µãÀàĞÍ
-	int t; //µ½´ïÊ±¼ä Ãë
-	float V_cmd; //·ÉĞĞÂíºÕÊıÖ¸Áî
-	float outTrack;//º½Ïò
-//	float radis;		//ÅÌĞı°ë¾¶   
-//	float hit_angle;//´ò»÷½Ç¶È
-	unsigned char if_airspeed_used; //ÊÇ·ñÆôÓÃ¿ÕËÙ¿ØÖÆ
-	unsigned char if_GuideFlight; //ÊÇ·ñÖ¸µã
+	int h; //é«˜åº¦m 
+	int w; //èˆªç‚¹ç±»å‹
+	int t; //åˆ°è¾¾æ—¶é—´ ç§’
+	float V_cmd; //é£è¡Œé©¬èµ«æ•°æŒ‡ä»¤
+	float outTrack;//èˆªå‘
+//	float radis;		//ç›˜æ—‹åŠå¾„   
+//	float hit_angle;//æ‰“å‡»è§’åº¦
+	unsigned char if_airspeed_used; //æ˜¯å¦å¯ç”¨ç©ºé€Ÿæ§åˆ¶
+	unsigned char if_GuideFlight; //æ˜¯å¦æŒ‡ç‚¹
 }RoutePointIn;
 
 typedef enum MSN_TASK_MODE
@@ -105,7 +107,7 @@ typedef enum MSN_TASK_MODE
 }MSN_TASK_MODE;
 
 
-typedef struct FLIGHT_RESTRICTION
+typedef struct FLIGHT_RESTRICTION	//é£è¡Œé™åˆ¶å‚æ•°
 {
 	double maxAirSpd;
 	double minAirSpd;
@@ -115,19 +117,19 @@ typedef struct FLIGHT_RESTRICTION
 }FLIGHT_RESTRICTION;
 
 
-typedef enum FORMATION_MODE
+typedef enum FORMATION_MODE	//ç¼–é˜Ÿæ¨¡å¼ï¼ˆç¯ç»•/é˜Ÿåˆ—/äººå­—å½¢ï¼‰
 {
-	//±à¶ÓÄ£Ê½£¬
-	//1.ËÄÖÜ»·ÈÆĞÎ
-	//2.Ç°ºó¶ÓÁĞĞÎ
-	//3.×óÓÒÈË×ÖĞÎ
-	MODE_SURROUND = 0,
-	MODE_QUEUE,
-	MODE_SIDE_TO_SIDE,
+	//ç¼–é˜Ÿæ¨¡å¼ï¼Œ
+	//1.å››å‘¨ç¯ç»•å½¢
+	//2.å‰åé˜Ÿåˆ—å½¢
+	//3.å·¦å³äººå­—å½¢
+	MODE_SURROUND = 0,	//å››å‘¨ç¯ç»•å½¢
+	MODE_QUEUE,			//å‰åé˜Ÿåˆ—å½¢
+	MODE_SIDE_TO_SIDE,	//å·¦å³äººå­—å½¢
 }FORMATION_MODE;
 #pragma pack(0)
 
-extern REPORT_STATUS slaverStatus[SLAVE_COUNT];
+extern REPORT_STATUS slaverStatus[SLAVE_COUNT];	//æ‰€æœ‰ä»æœºçŠ¶æ€æ•°ç»„
 //extern RoutePointIn slaveCmd[SLAVE_COUNT];
 
 
