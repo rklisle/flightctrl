@@ -584,7 +584,7 @@ OS_U8 DoReturnHomeward()
 		num_col = 11;
 	}
 
-	/* å–æœ€åŽä¸€ä¸?å›žæ”¶èˆ?ç‚¹ï¼ˆä¸Žæœ«ç‚¹å›žæ”¶è?…è??ä¸€è‡´ï¼‰*/
+	/* 取最后一个回收航点（与末点回收装订一致）*/
 	for(i = 0; i < g_route_data.num_rows; i++)
 	{
 		int idx = i * num_col;
@@ -613,7 +613,7 @@ OS_U8 DoReturnHomeward()
 	g_DLtoCtrl_sig.dltTime[0]           = 0;
 	g_DLtoCtrl_sig.turn_radius[0]       = 0;
 	g_DLtoCtrl_sig.velocity[0]          = speed;
-	g_DLtoCtrl_sig.accept_radius[0]     = 0; /* é£žæŽ§ä¾? route_mode==6 æ—¶é»˜è®? 100 m */
+	g_DLtoCtrl_sig.accept_radius[0]     = 0; /* 飞控侧 route_mode==6 时默认 100 m */
 	{
 		double curLon = selfStatus.lon * 1e-7;
 		double curLat = selfStatus.lat * 1e-7;

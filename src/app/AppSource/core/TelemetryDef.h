@@ -44,12 +44,9 @@ telemetryParam tm_flight[] =
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"AirSpd",	2},
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"GrdSpd",	2},
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"AirHigh",	2},
-	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"seqUmb",	1},
-	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"seqDrop",	1},
-	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"seqSac1",	1},
-	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"seqSac2",	1},
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"openUmb",	1},
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"res2",	4},//预留2
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"res1",	2},//HIL序号，此字段不要动
-	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"res2",	1},//预留2
 	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"EngineRp",	2},
 	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"rollCmd",	2},//通道舵副翼
 	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"pitchCmd",	2},//通道舵升降	
@@ -180,7 +177,7 @@ telemetryParam tm_200hz[] =
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fzImpSt",	1},	// Impact / Proximity Status
 	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"GST-V",	2},
 	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"GST-I",	2},
-	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"res4",	1},
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"flyError",	1},
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"cpuTemp",	2},	// flyctrl temp
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"cpuTemp2",	2},	// nav temp
 	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"mcuTemp",	2},	// 014 not used	// 280 from OnceBattery
@@ -191,7 +188,7 @@ telemetryParam tm_200hz[] =
 	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"STEER-V",	2},
 	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"STEER-I",	2},
 	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"PwrCmd",	1},
-	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"FireCmd",	1},
+	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"FireCmd",	1},	//280 HuoGongPin state
 	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"pwrTemp",	2},	// PwrSeqCtl-Temp from PwrSeqCtl
 	{&DataPoolALL[NAV_DATAPOOL_INDEX],	"navWx",	4},
 	{&DataPoolALL[NAV_DATAPOOL_INDEX],	"navWy",	4},
@@ -199,10 +196,10 @@ telemetryParam tm_200hz[] =
 	{&DataPoolALL[NAV_DATAPOOL_INDEX],	"navAx",	4},
 	{&DataPoolALL[NAV_DATAPOOL_INDEX],	"navAy",	4},
 	{&DataPoolALL[NAV_DATAPOOL_INDEX],	"navAz",	4},
-	{&DataPoolALL[NAV_DATAPOOL_INDEX],	"navWx2",	4},
-	{&DataPoolALL[NAV_DATAPOOL_INDEX],	"navWy2",	4},
-	{&DataPoolALL[NAV_DATAPOOL_INDEX],	"navWz2",	4},
-	{&DataPoolALL[NAV_DATAPOOL_INDEX],	"navAx2",	4},
+	{&DataPoolALL[NAV_DATAPOOL_INDEX],	"res5",	4},
+	{&DataPoolALL[NAV_DATAPOOL_INDEX],	"res6",	4},
+	{&DataPoolALL[NAV_DATAPOOL_INDEX],	"res7",	4},
+	{&DataPoolALL[NAV_DATAPOOL_INDEX],	"res8",	4},
 	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"engineV",	4},
 	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"engineA",	4},
 	{&DataPoolALL[NAV_DATAPOOL_INDEX],	"gpsMod",	1},
@@ -267,7 +264,7 @@ telemetryParam tm_200hz[] =
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"ecuError",	1},
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuelRate",	2},//
 // 0正常飞行，3距离伞降点<150，4正常开伞，0xCC出安全区标志
-	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"flyError",	1},
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"ecuStart",	1},
 // 存的是1000倍的实际电流值
 	{&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr1A",	2},
 	{&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr2A",	2},

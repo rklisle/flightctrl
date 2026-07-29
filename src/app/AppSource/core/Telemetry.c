@@ -21,6 +21,16 @@ static OS_BOOL TmCodeEq(const char *code, const char *name)
 	return (strncmp(code, name, PARAM_CODE_MAXLEN) == 0);
 }
 
+/* 弹目距离等写入 int16 遥测：超出范围饱和到 ±32767 */
+static OS_S16 TmClampS16(double v)
+{
+	if(v > 32767.0)
+		return (OS_S16)32767;
+	if(v < -32767.0)
+		return (OS_S16)(-32767);
+	return (OS_S16)v;
+}
+
 /*
  * Pack g_CtrltoDL_tel fields directly into 0x82 buffer.
  * SETDATA(pDataPoolFly, ...) often fails to land in the pool before TelemetryCombine;
@@ -70,34 +80,38 @@ static OS_BOOL TelemetryPackFlightDirectParam(const char *code, OS_U8 byteCount,
 		{ s16 = (OS_S16)(g_CtrltoDL_tel.varthetaCmd * 100.0); memcpy(p, &s16, 2); return TRUE; }
 		if(TmCodeEq(code, "nycCmd"))
 		{ s16 = (OS_S16)(g_CtrltoDL_tel.nycCmd * 100.0); memcpy(p, &s16, 2); return TRUE; }
+		/* 与 FlightTMOutputHandle：heightCmd/0.1、vyCmd/0.003；Excel 当量 0.1 / 0.003 */
 		if(TmCodeEq(code, "highCmd"))
-		{ s16 = (OS_S16)g_CtrltoDL_tel.heightCmd; memcpy(p, &s16, 2); return TRUE; }
+		{ s16 = (OS_S16)(g_CtrltoDL_tel.heightCmd / 0.1); memcpy(p, &s16, 2); return TRUE; }
 		if(TmCodeEq(code, "vyCmd"))
-		{ s16 = (OS_S16)g_CtrltoDL_tel.vyCmd; memcpy(p, &s16, 2); return TRUE; }
+		{ s16 = (OS_S16)(g_CtrltoDL_tel.vyCmd / 0.003); memcpy(p, &s16, 2); return TRUE; }
 
 		if(TmCodeEq(code, "ac_dZ"))
 		{ u16 = (OS_U16)(g_CtrltoDL_tel.ac_dZ * 100.0); memcpy(p, &u16, 2); return TRUE; }
 
 		if(TmCodeEq(code, "thrusCmd"))
 		{ u16 = (OS_U16)(g_CtrltoDL_tel.thrustCmd * 10.0); memcpy(p, &u16, 2); return TRUE; }
+		/* 与 FlightTMOutputHandle：rpmState/2；Excel 当量 2 */
 		if(TmCodeEq(code, "rpmState"))
-		{ u16 = (OS_U16)g_CtrltoDL_tel.rpmState; memcpy(p, &u16, 2); return TRUE; }
+		{ u16 = (OS_U16)(g_CtrltoDL_tel.rpmState / 2); memcpy(p, &u16, 2); return TRUE; }
 
+		/* 与 FlightTMOutputHandle：ac_Vx/Vy/Vz /0.003；Excel 当量 0.003 */
 		if(TmCodeEq(code, "ac_Vx"))
-		{ s16 = (OS_S16)(g_CtrltoDL_tel.ac_Vx * 100.0); memcpy(p, &s16, 2); return TRUE; }
+		{ s16 = (OS_S16)(g_CtrltoDL_tel.ac_Vx / 0.003); memcpy(p, &s16, 2); return TRUE; }
 		if(TmCodeEq(code, "ac_Vy"))
-		{ s16 = (OS_S16)(g_CtrltoDL_tel.ac_Vy * 100.0); memcpy(p, &s16, 2); return TRUE; }
+		{ s16 = (OS_S16)(g_CtrltoDL_tel.ac_Vy / 0.003); memcpy(p, &s16, 2); return TRUE; }
 		if(TmCodeEq(code, "ac_Vz"))
-		{ s16 = (OS_S16)(g_CtrltoDL_tel.ac_Vz * 100.0); memcpy(p, &s16, 2); return TRUE; }
+		{ s16 = (OS_S16)(g_CtrltoDL_tel.ac_Vz / 0.003); memcpy(p, &s16, 2); return TRUE; }
 		if(TmCodeEq(code, "ac_dR"))
 		{ s16 = (OS_S16)(g_CtrltoDL_tel.ac_dR * 10.0); memcpy(p, &s16, 2); return TRUE; }
 
+		/* azimuth/0.006、thetav/0.003、psicv/0.006；Excel 当量一致 */
 		if(TmCodeEq(code, "azimuth"))
-		{ s16 = (OS_S16)(g_CtrltoDL_tel.cur_azimuth * 100.0); memcpy(p, &s16, 2); return TRUE; }
+		{ s16 = (OS_S16)(g_CtrltoDL_tel.cur_azimuth / 0.006); memcpy(p, &s16, 2); return TRUE; }
 		if(TmCodeEq(code, "thetav"))
-		{ s16 = (OS_S16)(g_CtrltoDL_tel.cur_thetav * 100.0); memcpy(p, &s16, 2); return TRUE; }
+		{ s16 = (OS_S16)(g_CtrltoDL_tel.cur_thetav / 0.003); memcpy(p, &s16, 2); return TRUE; }
 		if(TmCodeEq(code, "psicv"))
-		{ s16 = (OS_S16)(g_CtrltoDL_tel.cur_psicv * 100.0); memcpy(p, &s16, 2); return TRUE; }
+		{ s16 = (OS_S16)(g_CtrltoDL_tel.cur_psicv / 0.006); memcpy(p, &s16, 2); return TRUE; }
 		if(TmCodeEq(code, "Vcmd"))
 		{ s16 = (OS_S16)(g_CtrltoDL_tel.Vcmd * 10.0); memcpy(p, &s16, 2); return TRUE; }
 
@@ -114,21 +128,22 @@ static OS_BOOL TelemetryPackFlightDirectParam(const char *code, OS_U8 byteCount,
 		{ s16 = (OS_S16)(g_CtrltoDL_tel.yaw_rate_nT_filterOut * 1000.0); memcpy(p, &s16, 2); return TRUE; }
 
 		if(TmCodeEq(code, "dRn"))
-		{ s16 = (OS_S16)g_CtrltoDL_tel.dRn; memcpy(p, &s16, 2); return TRUE; }
+		{ s16 = TmClampS16(g_CtrltoDL_tel.dRn); memcpy(p, &s16, 2); return TRUE; }
 		if(TmCodeEq(code, "dRu"))
-		{ s16 = (OS_S16)g_CtrltoDL_tel.dRu; memcpy(p, &s16, 2); return TRUE; }
+		{ s16 = TmClampS16(g_CtrltoDL_tel.dRu); memcpy(p, &s16, 2); return TRUE; }
 		if(TmCodeEq(code, "dRe"))
-		{ s16 = (OS_S16)g_CtrltoDL_tel.dRe; memcpy(p, &s16, 2); return TRUE; }
+		{ s16 = TmClampS16(g_CtrltoDL_tel.dRe); memcpy(p, &s16, 2); return TRUE; }
 
 		if(TmCodeEq(code, "PitchPre"))
 		{ s16 = (OS_S16)(g_CtrltoDL_tel.Pitch_Preset_Angle * 100.0); memcpy(p, &s16, 2); return TRUE; }
 		if(TmCodeEq(code, "YawPre"))
 		{ s16 = (OS_S16)(g_CtrltoDL_tel.Yaw_Preset_Angle * 100.0); memcpy(p, &s16, 2); return TRUE; }
 
+		/* gamacCom/uz_gamac /0.003；Excel 当量 0.003 */
 		if(TmCodeEq(code, "gamacCom"))
-		{ s16 = (OS_S16)(g_CtrltoDL_tel.gamac_compensate * 100.0); memcpy(p, &s16, 2); return TRUE; }
+		{ s16 = (OS_S16)(g_CtrltoDL_tel.gamac_compensate / 0.003); memcpy(p, &s16, 2); return TRUE; }
 		if(TmCodeEq(code, "uz_gamac"))
-		{ s16 = (OS_S16)(g_CtrltoDL_tel.uz_gamac * 100.0); memcpy(p, &s16, 2); return TRUE; }
+		{ s16 = (OS_S16)(g_CtrltoDL_tel.uz_gamac / 0.003); memcpy(p, &s16, 2); return TRUE; }
 		if(TmCodeEq(code, "mx_ESO"))
 		{ s16 = (OS_S16)(g_CtrltoDL_tel.mx_ESO * 100.0); memcpy(p, &s16, 2); return TRUE; }
 		if(TmCodeEq(code, "ADRC"))
@@ -138,20 +153,23 @@ static OS_BOOL TelemetryPackFlightDirectParam(const char *code, OS_U8 byteCount,
 		{ s16 = (OS_S16)(g_CtrltoDL_tel.alpha_ins * 100.0); memcpy(p, &s16, 2); return TRUE; }
 		if(TmCodeEq(code, "betaIns"))
 		{ s16 = (OS_S16)(g_CtrltoDL_tel.beta_ins * 100.0); memcpy(p, &s16, 2); return TRUE; }
+		/* nyflt/nzflt /0.001；Excel 当量 0.001 */
 		if(TmCodeEq(code, "nyflt"))
-		{ s16 = (OS_S16)(g_CtrltoDL_tel.nyflt * 100.0); memcpy(p, &s16, 2); return TRUE; }
+		{ s16 = (OS_S16)(g_CtrltoDL_tel.nyflt / 0.001); memcpy(p, &s16, 2); return TRUE; }
 		if(TmCodeEq(code, "nzflt"))
-		{ s16 = (OS_S16)(g_CtrltoDL_tel.nzflt * 100.0); memcpy(p, &s16, 2); return TRUE; }
+		{ s16 = (OS_S16)(g_CtrltoDL_tel.nzflt / 0.001); memcpy(p, &s16, 2); return TRUE; }
 
+		/* mass_cal/0.01；ugfZetac/uqkf /0.001；Excel 当量一致 */
 		if(TmCodeEq(code, "mass_cal"))
-		{ s16 = (OS_S16)(g_CtrltoDL_tel.mass_calc * 10.0); memcpy(p, &s16, 2); return TRUE; }
+		{ s16 = (OS_S16)(g_CtrltoDL_tel.mass_calc / 0.01); memcpy(p, &s16, 2); return TRUE; }
 		if(TmCodeEq(code, "ugfZetac"))
-		{ s16 = (OS_S16)(g_CtrltoDL_tel.ugf_zetac * 100.0); memcpy(p, &s16, 2); return TRUE; }
+		{ s16 = (OS_S16)(g_CtrltoDL_tel.ugf_zetac / 0.001); memcpy(p, &s16, 2); return TRUE; }
 		if(TmCodeEq(code, "uqkf"))
-		{ s16 = (OS_S16)(g_CtrltoDL_tel.uqkf * 100.0); memcpy(p, &s16, 2); return TRUE; }
+		{ s16 = (OS_S16)(g_CtrltoDL_tel.uqkf / 0.001); memcpy(p, &s16, 2); return TRUE; }
 
+		/* 与 FlightTMOutputHandle：curAlt/0.1；Excel 当量 0.1 */
 		if(TmCodeEq(code, "curAlt"))
-		{ s16 = (OS_S16)g_CtrltoDL_tel.curAlt; memcpy(p, &s16, 2); return TRUE; }
+		{ s16 = (OS_S16)(g_CtrltoDL_tel.curAlt / 0.1); memcpy(p, &s16, 2); return TRUE; }
 
 		return FALSE;
 	}

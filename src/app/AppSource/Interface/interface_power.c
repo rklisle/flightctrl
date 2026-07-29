@@ -24,17 +24,17 @@ OS_S8 PowerOn(POWER_DEVICE dev)
     OS_U32 CANCmd_power = 0;
 	switch(dev)
 	{
-    // 014协议
-    case DEVICE_SCOUT_E28V:        //导引头
+    // 014 protocol
+    case DEVICE_SCOUT_E28V:        // scout
         CANCmd_power = 0x10000000;
         break;
-    case DEVICE_FUSE28V:	      //引信可控电源
+    case DEVICE_FUSE28V:	      // fuse deto
         CANCmd_power = 0x40000000;
         break;
-    case DEVICE_FUSE_ISO5V:       //引信5V信号
+    case DEVICE_FUSE_ISO5V:       // fuse
         CANCmd_power = 0x00010000;
         break;
-    case DEVICE_SRV_PWR28V:	      //舵机
+    case DEVICE_SRV_PWR28V:	      // srv
         CANCmd_power = 0x04000000;
         break;
     default:
@@ -55,20 +55,20 @@ OS_S8 PowerOff(POWER_DEVICE dev)
 	OS_U32 CANCmd_power = 0;
 	switch(dev)
 	{
-    // 014协议
-    case DEVICE_MBAT:	          //主电池
+    // 014protocol
+    case DEVICE_MBAT:	          // MBAT
         CANCmd_power = (0x01000000 << 1);
         break;
-    case DEVICE_SCOUT_E28V:      //导引头
+    case DEVICE_SCOUT_E28V:      // scout
         CANCmd_power = (0x10000000 << 1);
         break;
-    case DEVICE_FUSE28V:	    //引信可控电源
+    case DEVICE_FUSE28V:	    // fuse deto
         CANCmd_power = (0x40000000 << 1);
         break;
-    case DEVICE_FUSE_ISO5V:     //引信5V信号
+    case DEVICE_FUSE_ISO5V:     // fuse
         CANCmd_power = (0x00010000 << 1);
         break;
-    case DEVICE_SRV_PWR28V:	    //舵机
+    case DEVICE_SRV_PWR28V:	    // srv
         CANCmd_power = (0x04000000 << 1);
         break;
     default:
@@ -95,16 +95,16 @@ OS_S8 SeqOn(OS_U8 channel)
     switch(channel)
     {
     case 0:
-        SETDATA(pDataPoolSelf, "seqDrop", 1,	OS_U8); // 时序抛伞
+        SETDATA(pDataPoolSelf, "seqDrop", 1,	OS_U8); // cut the umbrella
         break;
     case 1:
-        SETDATA(pDataPoolSelf, "seqUmb", 1,	OS_U8);     // 时序开伞
+        SETDATA(pDataPoolSelf, "seqUmb", 1,	OS_U8);     // open the umbrella
         break;
     case 2:
-        SETDATA(pDataPoolSelf, "seqSac1", 1,	OS_U8); // 时序前气囊
+        SETDATA(pDataPoolSelf, "seqSac1", 1,	OS_U8); // open airbag1
         break;
     case 3:
-        SETDATA(pDataPoolSelf, "seqSac2", 1,	OS_U8); // 时序后气囊
+        SETDATA(pDataPoolSelf, "seqSac2", 1,	OS_U8); // open airbag2
         break;
     }
 

@@ -54,6 +54,7 @@ PWR_SEQ_GROUP seqGroups[] = {
 static PWR_SEQ curSeqList[MAX_SIMULTANEOUS_SEQ_COUNT] = {0};
 static PWR_SEQ_GROUP curGroupSeq = {0};
 
+// not used in 014
 OS_U8 TrigerSeq(int seqIndex)
 {
 	for(int i=0;i<SEQ_COUNT;i++)
@@ -74,6 +75,7 @@ OS_U8 TrigerSeq(int seqIndex)
 	return 0;
 }
 
+// Gound send command : QiNang / GeSan (not used in 014)
 OS_U8 TrigerSeqWithWidth(int seqIndex, unsigned short width)
 {
 	for(int i=0;i<SEQ_COUNT;i++)
@@ -128,6 +130,7 @@ static int PWRTimSeq(int channelNo, int isEnalbe)
  * 函数功能: TrigerGroupSeq
  * 函数功能: 根据给定的组时序编号，设定当前时序组，由状态机判断状态并发送
  * *******************************************/
+// not used in 014
 OS_U8 TrigerGroupSeq(int groupIndex)
 {
 	if((g_DeviceState.workStage &DOM_TRIGGERON) != DOM_TRIGGERON)
@@ -150,7 +153,7 @@ OS_U8 TrigerGroupSeq(int groupIndex)
  * 函数功能: 负责发送时序信号及关闭信号发送，当时序结束后，设定当前时序为空
  * *******************************************/
 OS_U8 SeqGroupHandle();
-OS_U8 SeqHandle()
+OS_U8 SeqHandle()	// 5ms loop
 {
 	if(curGroupSeq.groupID != 0)
 	{
@@ -251,6 +254,7 @@ OS_U8 SeqGroupHandle()
  *
  * 函数功能:为单机配电指令生成发往配电设备的数据区
  * *******************************************/
+// not used in 014
 OS_U8 GeneratePwrBuf(int channel, OS_U8* buf)
 {
 	BOOL open = FALSE;
@@ -281,6 +285,7 @@ OS_U8 GeneratePwrBuf(int channel, OS_U8* buf)
  * ************************************************/
 OS_U8 powerNeedRsp[3] = {0};
 extern OS_U16 AutoZeroCount;
+// not used in 014
 OS_U32 PwrCmdHandler(STRU_422_MSG_INFO * frame)
 {
 

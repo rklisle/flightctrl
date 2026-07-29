@@ -228,7 +228,8 @@ static void HilWriteSimAirTelemetry(void)
 {
 	SETDATA(pDataPoolSelf, "AirSpd", (OS_S16)(hilInput.airSpd * 10.0), OS_S16);
 	SETDATA(pDataPoolSelf, "AirPress", (OS_S16)(hilInput.DD1 * 0.1), OS_S16);
-	//SETDATA(pDataPoolSelf, "AirHigh", (OS_S16)g_ins_data.height, OS_S16);
+	/* 与 CalcAirSpd：高度×10；遥测当量 0.1 */
+	SETDATA(pDataPoolSelf, "AirHigh", (OS_S16)(g_ins_data.height * 10.0), OS_S16);
 }
 
 static void HilWriteSimSeekerTelemetry(void)

@@ -360,23 +360,23 @@ OS_U8 SaveNavInDataPool(STRU_NAV_INFO *navInfo)
 	}
 	else
 	{
-SETDATA(pDataPoolImu, "gpsLon", navInfo->GPSlon,			OS_S32);//GPS缁忓害
-SETDATA(pDataPoolImu, "gpsLat", navInfo->GPSlat,			OS_S32);//GPS绾�搴�
-SETDATA(pDataPoolImu, "gpsAlt", navInfo->GPShigh * 1e-3,	OS_S16);//GPS楂樺害
-SETDATA(pDataPoolImu, "gpsVn", navInfo->GPSVn,	OS_S16);//GPS鍖楅€�
-SETDATA(pDataPoolImu, "gpsVs", navInfo->GPSVs,	OS_S16);//GPS澶╅€�
-SETDATA(pDataPoolImu, "gpsVe", navInfo->GPSVe,	OS_S16);//GPS涓滈€�
-SETDATA(pDataPoolImu, "dirEffec",	navInfo->gpsDirEffect,	OS_U8);//GPS鑸�鍚戞湁鏁堟爣蹇�
+		SETDATA(pDataPoolImu, "gpsLon", navInfo->GPSlon,			OS_S32);//GPS缁忓害
+		SETDATA(pDataPoolImu, "gpsLat", navInfo->GPSlat,			OS_S32);//GPS绾�搴�
+		SETDATA(pDataPoolImu, "gpsAlt", navInfo->GPShigh * 1e-3,	OS_S16);//GPS楂樺害
+		SETDATA(pDataPoolImu, "gpsVn", navInfo->GPSVn,	OS_S16);//GPS鍖楅€�
+		SETDATA(pDataPoolImu, "gpsVs", navInfo->GPSVs,	OS_S16);//GPS澶╅€�
+		SETDATA(pDataPoolImu, "gpsVe", navInfo->GPSVe,	OS_S16);//GPS涓滈€�
+		SETDATA(pDataPoolImu, "dirEffec",	navInfo->gpsDirEffect,	OS_U8);//GPS鑸�鍚戞湁鏁堟爣蹇�
 
-SETDATA(pDataPoolImu, "gpsYear",  navInfo->year,   OS_U8);	//GPS骞�
-SETDATA(pDataPoolImu, "gpsMonth", navInfo->month,  OS_U8);	//GPS鏈�
-SETDATA(pDataPoolImu, "gpsDay",   navInfo->day,    OS_U8);	//GPS鏃�
-SETDATA(pDataPoolImu, "gpsHour",  navInfo->hour,   OS_U8);	//GPS鏃�
-SETDATA(pDataPoolImu, "gpsMinit", navInfo->minite, OS_U8);	//GPS鍒�
-SETDATA(pDataPoolImu, "gpsSec",   navInfo->second, OS_U8);	//GPS绉�
-SETDATA(pDataPoolImu, "gpsMSec",  navInfo->ms,     OS_U8);	//GPS姣�绉�
-SETDATA(pDataPoolImu, "gpsDir", navInfo->gpsDir,  OS_U16);
-SETDATA(pDataPoolImu, "gpsScCnt", navInfo->StanumberMaster>navInfo->StanumberSlave?navInfo->StanumberMaster:navInfo->StanumberSlave,	OS_U8);//GPS瀹氫綅鏄熸暟
+		SETDATA(pDataPoolImu, "gpsYear",  navInfo->year,   OS_U8);	//GPS骞�
+		SETDATA(pDataPoolImu, "gpsMonth", navInfo->month,  OS_U8);	//GPS鏈�
+		SETDATA(pDataPoolImu, "gpsDay",   navInfo->day,    OS_U8);	//GPS鏃�
+		SETDATA(pDataPoolImu, "gpsHour",  navInfo->hour,   OS_U8);	//GPS鏃�
+		SETDATA(pDataPoolImu, "gpsMinit", navInfo->minite, OS_U8);	//GPS鍒�
+		SETDATA(pDataPoolImu, "gpsSec",   navInfo->second, OS_U8);	//GPS绉�
+		SETDATA(pDataPoolImu, "gpsMSec",  navInfo->ms,     OS_U8);	//GPS姣�绉�
+		SETDATA(pDataPoolImu, "gpsDir", navInfo->gpsDir,  OS_U16);
+		SETDATA(pDataPoolImu, "gpsScCnt", navInfo->StanumberMaster>navInfo->StanumberSlave?navInfo->StanumberMaster:navInfo->StanumberSlave,	OS_U8);//GPS瀹氫綅鏄熸暟
 
 		SETDATA(pDataPoolImu, "imuWx", navInfo->imuWx16507,	OS_FLOAT);
 		SETDATA(pDataPoolImu, "imuWy", navInfo->imuWy16507,	OS_FLOAT);
@@ -442,8 +442,8 @@ SETDATA(pDataPoolImu, "gpsScCnt", navInfo->StanumberMaster>navInfo->StanumberSla
 	// SETDATA(pDataPoolNav, "navWy3", navInfo->imuWy42688,	OS_FLOAT);//原始锟斤拷锟劫讹拷Y
 	// SETDATA(pDataPoolNav, "navWz3", navInfo->imuWz42688,	OS_FLOAT);//原始锟斤拷锟劫讹拷Z
 	// SETDATA(pDataPoolNav, "navAx3", navInfo->imuAx42688,	OS_FLOAT);//原始锟斤拷锟劫讹拷X
-	SETDATA(pDataPoolNav, "navAy3", navInfo->imuAy42688,	OS_FLOAT);//原始锟斤拷锟劫讹拷Y
-	SETDATA(pDataPoolNav, "navAz3", navInfo->imuAz42688,	OS_FLOAT);//原始锟斤拷锟劫讹拷Z
+	// SETDATA(pDataPoolNav, "navAy3", navInfo->imuAy42688,	OS_FLOAT);//原始锟斤拷锟劫讹拷Y
+	// SETDATA(pDataPoolNav, "navAz3", navInfo->imuAz42688,	OS_FLOAT);//原始锟斤拷锟劫讹拷Z
 
 	SETDATA(pDataPoolNav, "navState", navInfo->navStatus ,	OS_U8);
 	//cpu0杩愮畻鑰楁椂锛堝�艰埅鏉匡級

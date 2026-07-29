@@ -718,7 +718,7 @@ OS_U32 ControllerCmdHandler(STRU_422_MSG_INFO * frame)	// ��������
 }
 
 FLIGHT_SEQ flightSeq = {0};
-OS_U8 SeqCalc()	//5ms��ѯ
+OS_U8 SeqCalc()	//5ms loop
 {
 	OS_U32 flightTick = g_DeviceState.CurrTick;
 	OS_DOUBLE flightTime = flightTick * 0.005;
@@ -740,7 +740,7 @@ OS_U8 SeqCalc()	//5ms��ѯ
 
 
 /* Enter automatic flight: notify NAV, clear Interactive, reset flight clock */
-OS_U8 DoIgnition()// 1�����������������ɡ��������ã�/ 2�����أ������������/ 3���ٶ���ɣ���������/ 4��������ɣ������ã�
+OS_U8 DoIgnition()// 
 {
 	MsgToNAV(BUS_NAV_IGNATION,PTR_NULL,0);
 	
@@ -752,6 +752,7 @@ OS_U8 DoIgnition()// 1�����������������ɡ��
 	SETDATA(pDataPoolSelf, "startFly",	1,	OS_U8);	/* takeoff flag */
 	SETDATA(pDataPoolSelf, "luncTime",	g_DeviceState.BJTimeSecond,	OS_U32);	/* BJ launch time */
 	SETDATA(pDataPoolSelf, "flyError", 0,	OS_U8);	/* clear flight fault */ //��������   
+	SETDATA(pDataPoolSelf, "openUmb", 0, OS_U8); /* init */
 	return 0;
 }
 
