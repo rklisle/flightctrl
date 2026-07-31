@@ -117,39 +117,50 @@ void EngineHandler()   // HACK: TEST ECU restore & display
     if((g_DeviceState.CurrTick) % 20 == 0)  // 每100ms保存一次数据
     {
         modECU_GetEngineStatus(&engineStatus);
-    /** **************** 存数据池 ******************* */
-        SETDATA(pDataPoolSelf, "engSetRp",	engineStatus.fuel_pressure,	OS_U16);
-        // SETDATA(pDataPoolSelf, "ecuSetRp",	engineStatus.actual_throttle,	OS_U16);//97
-        SETDATA(pDataPoolSelf, "ecuSetRp",	engineStatus.expect_throttle,	OS_U16);//86
+        /** **************** save ******************* */
+        /* virables where engine PC software displayed */
+        SETDATA(pDataPoolSelf, "ecuMPwr",   engineStatus.UMainPwr,                  OS_U16);
+        SETDATA(pDataPoolSelf, "ecuIIgn1",  engineStatus.IIgnition1,                OS_U16);
+        SETDATA(pDataPoolSelf, "ecuIIgn2",  engineStatus.IIgnition2,                OS_U16);
+        SETDATA(pDataPoolSelf, "ecuFuPre",  engineStatus.Actual_fuel_pressure,      OS_U16);
+        SETDATA(pDataPoolSelf, "ecuFuDut",  engineStatus.Fuel_pump_duty_cycle,      OS_U16);
+        SETDATA(pDataPoolSelf, "ecuJet1",   engineStatus.Actual_jet1_duty_cycle,    OS_U16);
+        SETDATA(pDataPoolSelf, "ecuJet2",   engineStatus.Actual_jet2_duty_cycle,    OS_U16);
+        SETDATA(pDataPoolSelf, "ecuAirPr",  engineStatus.Air_pressure,              OS_U16);
+        SETDATA(pDataPoolSelf, "ecuATemp",  engineStatus.Ambient_temperatur,        OS_U16);
+        SETDATA(pDataPoolSelf, "ecuTemp1",  engineStatus.CH_Temperature1,           OS_U16);
+        SETDATA(pDataPoolSelf, "ecuTemp2",  engineStatus.CH_Temperature2,           OS_U16);
+        SETDATA(pDataPoolSelf, "ecuTemp3",  engineStatus.CH_Temperature3,           OS_U16);
+        SETDATA(pDataPoolSelf, "ecuTemp4",  engineStatus.CH_Temperature4,           OS_U16);
+        SETDATA(pDataPoolSelf, "ecuIgn1F",  engineStatus.Ignition1_on_off_flag,     OS_U16);
+        SETDATA(pDataPoolSelf, "ecuIgn2F",  engineStatus.Ignition2_on_off_flag,     OS_U16);
+        SETDATA(pDataPoolSelf, "ecuPumpF",  engineStatus.Pump_on_off_flag,          OS_U16);
+        SETDATA(pDataPoolSelf, "ecuModeF",  engineStatus.RPM_Regulator_on_off_flag, OS_U16);
+        SETDATA(pDataPoolSelf, "ecuChokF",  engineStatus.Choke_on_off_flag,         OS_U16);
+        SETDATA(pDataPoolSelf, "ecuRPM",    engineStatus.Actual_RPM,                OS_U16);
+        SETDATA(pDataPoolSelf, "ecuRPM2",   engineStatus.The_2nd_RPM_value,         OS_U16);
+        /* warmup & coolingDown judgement */
+        SETDATA(pDataPoolSelf, "ecuFbTho",	engineStatus.feedback_throttle, OS_U16);//86
+        SETDATA(pDataPoolSelf, "ecuThoF",	engineStatus.throttle_state, OS_U16);//35
+        /* ecu status */
+        SETDATA(pDataPoolSelf, "ecuState",	engineStatus.CurState,          OS_U8);
+        SETDATA(pDataPoolSelf, "ecuError",	engineStatus.ecuError,          OS_U8);
 
-        SETDATA(pDataPoolSelf, "ecuGetRp",  engineStatus.rpm,              OS_U16);
-        SETDATA(pDataPoolSelf, "ecu24V", engineStatus.jet1_duty,	OS_S16);
-        SETDATA(pDataPoolSelf, "ecu24A", engineStatus.jet2_duty,	OS_S16);
-
-        SETDATA(pDataPoolSelf, "scout1", engineStatus.ch1_temp,	OS_S16);
-        SETDATA(pDataPoolSelf, "scout2", engineStatus.ch2_temp,	OS_S16);
-        SETDATA(pDataPoolSelf, "scout3", engineStatus.ch3_temp,	OS_S16);
-        SETDATA(pDataPoolSelf, "scout4", engineStatus.ch4_temp,	OS_S16);
-
-        SETDATA(pDataPoolSelf, "ecuState",	engineStatus.CurState,	OS_U8);
-        SETDATA(pDataPoolSelf, "ecuError",	engineStatus.ecuError,	OS_U8);
-
-    /** **************** ������������ʾ ******************* */
+        /** **************** display ******************* */
         param30.runningStatus = engineStatus.CurState;         //当前发动机的状�?
         param30.error = engineStatus.ecuError;                 // 发动机错�?�?
-        param30.fuel_pressure = engineStatus.fuel_pressure;    //实际油压
-        param30.jet1_duty = engineStatus.jet1_duty;            // 实际喷油1脉�??
-        param30.curRpm = engineStatus.rpm;                     // 实际�?�?
-        param30.ambient_temp = engineStatus.ambient_temp;      // �?境温�?
-        param30.jet2_duty = engineStatus.jet2_duty;            // 实际喷油2脉�??
-        param30.battV = engineStatus.battV * 0.01;             // 系统输入电压
+        param30.fuel_pressure = engineStatus.Actual_fuel_pressure;    //实际油压
+        param30.jet1_duty = engineStatus.Actual_jet1_duty_cycle;            // 实际喷油1脉�??
+        param30.curRpm = engineStatus.Actual_RPM;                     // 实际�?�?
+        param30.ambient_temp = engineStatus.Ambient_temperatur;      // �?境温�?
+        param30.jet2_duty = engineStatus.Actual_jet2_duty_cycle;            // 实际喷油2脉�??
+        param30.battV = engineStatus.UMainPwr * 0.01;             // 系统输入电压
         param30.battA = engineStatus.battA * 0.1;              // 系统输入电流
-        // param30.actual_throttle = engineStatus.actual_throttle;//97
-        param30.actual_throttle = engineStatus.expect_throttle;// 期望的油门位�?
-        param30.ch1_temp = engineStatus.ch1_temp;
-        param30.ch2_temp = engineStatus.ch2_temp;
-        param30.ch3_temp = engineStatus.ch3_temp;
-        param30.ch4_temp = engineStatus.ch4_temp;
+        param30.actual_throttle = engineStatus.feedback_throttle;// 期望的油门位�?
+        param30.ch1_temp = engineStatus.CH_Temperature1;
+        param30.ch2_temp = engineStatus.CH_Temperature2;
+        param30.ch3_temp = engineStatus.CH_Temperature3;
+        param30.ch4_temp = engineStatus.CH_Temperature4;
         param30.outputW = 0;
 
         if(SyncToGround)

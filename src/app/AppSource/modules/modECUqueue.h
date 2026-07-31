@@ -3,74 +3,78 @@
 
 #include <stdint.h>
 
-/** ·¢¶¯»ú×´Ì¬»úµÄ×´Ì¬¶¨Òå */
+/** ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×´Ì¬ï¿½ï¿½ï¿½ï¿½×´Ì¬ï¿½ï¿½ï¿½ï¿½ */
 typedef enum {
-    ENGINE_STOPED = 0,      // Í£»ú
-    ENGINE_WARMUP = 1,      // Æô¶¯ÖÐ
-    ENGINE_RUNNING = 5,     // ÔËÐÐ
-    ENGINE_SHUTTING_DOWN = 2,// É¢ÈÈ
-    ENGINE_ERROR = 3, //Æô¶¯Ê§°Ü£¬¹ÊÕÏ
+    ENGINE_STOPED = 0,      // Í£ï¿½ï¿½
+    ENGINE_WARMUP = 1,      // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    ENGINE_RUNNING = 5,     // ï¿½ï¿½ï¿½ï¿½
+    ENGINE_SHUTTING_DOWN = 2,// É¢ï¿½ï¿½
+    ENGINE_ERROR = 3, //ï¿½ï¿½ï¿½ï¿½Ê§ï¿½Ü£ï¿½ï¿½ï¿½ï¿½ï¿½
 } SM_Engine_t;
 
-/** ·¢¶¯»ú´íÎóÂë¶¨Òå */
+/** ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ë¶¨ï¿½ï¿½ */
 typedef enum {
-    NO_ERROR = 0,           // ÎÞÒì³£
-    ERROR_FUEL_PRESSURE = 1,// Æô¶¯Á÷³ÌÖÐ£¬ÓÍÑ¹Òì³££¬ÓÍÑ¹<=2800¼´ÎªÒì³£
+    NO_ERROR = 0,
+    WARMUP_FAIL = 1,
 } SM_EngineError_t;
 
-/** ·¢¶¯»ú×´Ì¬²ÎÊý */
+/** ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×´Ì¬ï¿½ï¿½ï¿½ï¿½ */
 struct EngineStatus
 {
-    uint16_t ambient_temp;      // Ö¸Áî6 £¬»·¾³ÎÂ¶È£¬ÕûÊý£¬ÎÞ·ûºÅÊµ¼ÊÊýÖµ£¬[0~9999]
-    uint16_t air_pressure;      // Ö¸Áî8 £¬»·¾³ÆøÑ¹£¬ÎÞ·ûºÅ£¬µ¥Î»mbar£¬[0~9999]
-    uint16_t fuel_pressure; //*Ö¸Áî9 £¬Êµ¼ÊÓÍÑ¹£¬µ¥Î»mbar£¬[0~9999]
-
-    uint16_t jet1_duty;     // Ö¸Áî19£¬Êµ¼ÊÅçÓÍ1Âö¿í£¬µ¥Î»us£¬[0~9999]
-    uint16_t jet2_duty;     // Ö¸Áî39£¬Êµ¼ÊÅçÓÍ2Âö¿í£¬µ¥Î»us£¬[0~9999]
-
-    uint16_t throttle_state;    //*Ö¸Áî35£¬·çÃÅ×´Ì¬£¬0001Îª¹Ø±Õ£¬0000Î´¹Ø±Õ
-    uint16_t maxTemp;           // cmd59£º×î¸ßÎÂ¶È³¬´ËÃÅÏÞ£¬ÒÔ×î¸ßÆø¸×Îª×¼µ÷½Ú
-    uint16_t expect_rpm;        // Ö¸Áî64£¬ÆÚÍû·çÃÅÎ»ÖÃ°Ù·Ö±È*10±¶£¬¶¨ËÙÄ£Ê½ÏÂÆÚÍûµÄ×ªËÙÖµ£¬[0~9999]
-    uint16_t rpm;           //*Ö¸Áî69£¬Êµ¼Ê×ªËÙ£¬[0~9999]
-    uint16_t expect_throttle;   // Ö¸Áî86£¬ÆÚÍûµÄÓÍÃÅÎ»ÖÃ£¬[0~1000]
-
-    uint16_t ch1_temp;      // Ö¸Áî87£¬Í¨µÀ1Êµ¼ÊÎÂ¶ÈÖµ£¬µ¥Î»¡æ£¬[0~9999]
-    uint16_t ch2_temp;      // Ö¸Áî88£¬Í¨µÀ2Êµ¼ÊÎÂ¶ÈÖµ£¬µ¥Î»¡æ£¬[0~9999]
-    uint16_t ch3_temp;      // Ö¸Áî89£¬Í¨µÀ3Êµ¼ÊÎÂ¶ÈÖµ£¬µ¥Î»¡æ£¬[0~9999]
-    uint16_t ch4_temp;      // Ö¸Áî90£¬Í¨µÀ4Êµ¼ÊÎÂ¶ÈÖµ£¬µ¥Î»¡æ£¬[0~9999]
-
-    uint16_t battA;             // cmd91£ºÏµÍ³ÊäÈëµçÁ÷
-    uint16_t battV;             // cmd96£ºÏµÍ³ÊäÈëµçÑ¹
-    uint16_t actual_throttle;// Ö¸Áî97£¬Êµ¼Ê·çÃÅ¶æ»úÎ»ÖÃ£¬%£¬[0~100]
-    uint16_t actual_air_choke;  // Ö¸Áî98£¬Êµ¼Êµ²·ç°åÎ»ÖÃ£¬%£¬[0~100]
-    uint16_t version;           // cmd100:ÏµÍ³¹Ì¼þ°æ±¾
-    uint16_t totalMinite;       // cmd117£ºÏµÍ³×ÜÊ±¼ä£¨min£©
-    uint16_t runningMinite;     // cmd119£ºÓÍ±Ã×ÜÊ±¼ä£¨min£©
-    SM_Engine_t CurState;       //*µ±Ç°·¢¶¯»úµÄ×´Ì¬
-    SM_EngineError_t ecuError; // ·¢¶¯»ú´íÎóÂë
+    /* electrical parameters */
+    uint16_t UMainPwr;      // CMD96 [0~9999] X0.01
+    uint16_t IIgnition1;    // CMD92 [0~9999] X0.1
+    uint16_t IIgnition2;    // CMD93 [0~9999] X0.1
+    /* fuel supply */
+    uint16_t Actual_fuel_pressure; // CMD9 [0~9999]
+    uint16_t Fuel_pump_duty_cycle; // CMD17 [0~100]
+    uint16_t Actual_jet1_duty_cycle;// CMD19 [0~9999]
+    uint16_t Actual_jet2_duty_cycle;// CMD39 [0~9999]
+    /* temp & air pressure */
+    uint16_t Air_pressure; // CMD8 [0~9999]
+    uint16_t Ambient_temperatur; // CMD6 [0~9999]
+    uint16_t CH_Temperature1; // CMD87 [0~9999]
+    uint16_t CH_Temperature2; // CMD88 [0~9999]
+    uint16_t CH_Temperature3; // CMD89 [0~9999]
+    uint16_t CH_Temperature4; // CMD90 [0~9999]
+    /* control */
+    uint16_t Ignition1_on_off_flag; // CMD1 [0~1]
+    uint16_t Ignition2_on_off_flag; // CMD5 [0~1]
+    uint16_t Pump_on_off_flag; // CMD2 [0~1]
+    uint16_t RPM_Regulator_on_off_flag; // CMD3 [0~1]
+    uint16_t Choke_on_off_flag; // CMD4 [0~1]
+    /* rpm */
+    uint16_t Actual_RPM;   // CMD69 [0~9999]
+    uint16_t The_2nd_RPM_value;   // CMD144 [0~9999]
+    
+    uint16_t throttle_state;    // CMD35 [0~1]
+    uint16_t feedback_throttle;   // CMD86 [0~1000] X0.1
+    uint16_t battA;             // CMD91 [0~9999] X0.1
+    SM_Engine_t CurState;      //
+    SM_EngineError_t ecuError; //
 };
 
-/** ÓÍ±ÃÆô¶¯ */
+/** ï¿½Í±ï¿½ï¿½ï¿½ï¿½ï¿½ */
 void modECU_pumpOn(void);
 
-/** ÓÍ±ÃÍ£»ú */
+/** ï¿½Í±ï¿½Í£ï¿½ï¿½ */
 void modECU_pumpOff(void);
 
-/** ·¢¶¯»úÆô¶¯ */
+/** ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ */
 void modECU_startEngine(void);
 
-/** ·¢¶¯»úÍ£»ú */
+/** ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í£ï¿½ï¿½ */
 void modECU_stopEngine(void);
 
-/** ÉèÖÃÓÍÃÅ¿ª¶È
- * @param:ÓÍÃÅ°Ù·Ö±È£¬0.0~100.0£¬¶ÔÓ¦0%~100%
+/** ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å¿ï¿½ï¿½ï¿½
+ * @param:[0-100.0]
  */
 void modECU_setThrottle_percent(float percent);
 
-/** »ñÈ¡²ÎÊý£¬½âÎöÊý¾Ý´æÈë½á¹¹ÌåÈ«¾Ö±äÁ¿ */
+/** ï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý´ï¿½ï¿½ï¿½á¹¹ï¿½ï¿½È«ï¿½Ö±ï¿½ï¿½ï¿½ */
 void modECU_GetEngineStatus(struct EngineStatus *pstatus);
 
-/** À­ÆðÈÎÎñ */
+/** ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ */
 void modECU_EngineInit(void);
 
 #endif  // __MODECUQUEUE_H__

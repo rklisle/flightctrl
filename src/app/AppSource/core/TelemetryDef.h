@@ -116,55 +116,31 @@ telemetryParam tm_flight[] =
 	{&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr5Read",	2},
 	{&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr6Read",	2},
 };
-telemetryParam tm_200hz[] =
+telemetryParam tm_200hz[] =//219 B
 {
-	/** ?????????0xCC ???? ???????????????????
-	 *  ??????????????	0xEE
-	 *  ????????????????????0x00
-	 */
+//36B
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"RecvLunc",	1},
-	//	1????????????0???????
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"startFly",	1},
-	/** ?????
-	 * 1??????? > 30m/s?
-	 * 2???????????
-	 * 3?????????? ?? ??? > 10
-	 */
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"luanMode",	1},
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"luncTime",	4},
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"commNav",	1},
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"commEcu",	1},
-	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"commBatt",	1},
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"commPwr",	1},
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"commImu",	1},
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"commScot",	1},
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"commSrv",	1},
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"commFuse",	1},
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"tcCmd",	1},
-	// ???????????? ???????????1e-7
 	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"DataLon",	4},
-	// ?????????????? ???????????1e-7
 	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"DataLat",	4},
-	// ???????????? ???????1
 	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"DataHigh",	2},
-	// ???????????? ???????????????0.01
 	{&DataPoolALL[FLY_DATAPOOL_INDEX],	"DataDir",	2},
-// 1??SD???????????? 0xEE??0xFF??SD??????????
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"sdState",	1},
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"scout1",	2},
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"scout2",	2},
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"scout3",	2},
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"scout4",	2},
-	// {&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuseMode",	1},
-	// {&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuse24V",	1},
-	// {&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuseActv",	1},
-	// {&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuseBIT",	1},
-	// {&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuse5V",	2},
-	// {&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuseuf",	2},
-	// {&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuseTemp",	2},
-	// {&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuseax",	4},
-	// {&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuseay",	4},
-	// {&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuseaz",	4},
+// fuze - 17B
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fzFeedbk",	1},	// feed back & control signals
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fzTask",	1},	// tasks executed
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fzFirV",	2},	// fire 12V = 2byte value X 0.0004
@@ -175,33 +151,30 @@ telemetryParam tm_200hz[] =
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fzC1Stat",	2},	// Capacitor 1 Charging Status = 2byte value X 0.0023
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fzUnitNo",	2},	// Unit Number
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fzImpSt",	1},	// Impact / Proximity Status
-	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"GST-V",	2},
-	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"GST-I",	2},
+// 5B
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"flyError",	1},
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"cpuTemp",	2},	// flyctrl temp
 	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"cpuTemp2",	2},	// nav temp
-	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"mcuTemp",	2},	// 014 not used	// 280 from OnceBattery
+// PwrSeqCtl - 27B
 	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"Batt28V",	2},
 	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"Batt28A",	2},
+	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"GST-V",	2},
+	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"GST-I",	2},
+	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"engineV",	4},
+	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"engineA",	4},
 	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"VCombin",	2},
 	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"ACombin",	2},
 	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"STEER-V",	2},
 	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"STEER-I",	2},
+	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"pwrTemp",	2},
 	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"PwrCmd",	1},
-	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"FireCmd",	1},	//280 HuoGongPin state
-	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"pwrTemp",	2},	// PwrSeqCtl-Temp from PwrSeqCtl
+// NAV - 85B
 	{&DataPoolALL[NAV_DATAPOOL_INDEX],	"navWx",	4},
 	{&DataPoolALL[NAV_DATAPOOL_INDEX],	"navWy",	4},
 	{&DataPoolALL[NAV_DATAPOOL_INDEX],	"navWz",	4},
 	{&DataPoolALL[NAV_DATAPOOL_INDEX],	"navAx",	4},
 	{&DataPoolALL[NAV_DATAPOOL_INDEX],	"navAy",	4},
 	{&DataPoolALL[NAV_DATAPOOL_INDEX],	"navAz",	4},
-	{&DataPoolALL[NAV_DATAPOOL_INDEX],	"res5",	4},
-	{&DataPoolALL[NAV_DATAPOOL_INDEX],	"res6",	4},
-	{&DataPoolALL[NAV_DATAPOOL_INDEX],	"res7",	4},
-	{&DataPoolALL[NAV_DATAPOOL_INDEX],	"res8",	4},
-	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"engineV",	4},
-	{&DataPoolALL[PWR_DATAPOOL_INDEX],	"engineA",	4},
 	{&DataPoolALL[NAV_DATAPOOL_INDEX],	"gpsMod",	1},
 	{&DataPoolALL[NAV_DATAPOOL_INDEX],	"gpsLon",	4},
 	{&DataPoolALL[NAV_DATAPOOL_INDEX],	"gpsLat",	4},
@@ -227,51 +200,47 @@ telemetryParam tm_200hz[] =
 	{&DataPoolALL[NAV_DATAPOOL_INDEX],	"navLon",	4},
 	{&DataPoolALL[NAV_DATAPOOL_INDEX],	"navLat",	4},
 	{&DataPoolALL[NAV_DATAPOOL_INDEX],	"navHigh",	4},
-	//???????? * 100
 	{&DataPoolALL[NAV_DATAPOOL_INDEX],	"navVn",	2},
-	//???????? * 100
 	{&DataPoolALL[NAV_DATAPOOL_INDEX],	"navVs",	2},
-	//???????? * 100
 	{&DataPoolALL[NAV_DATAPOOL_INDEX],	"navVe",	2},
-	//??????
 	{&DataPoolALL[NAV_DATAPOOL_INDEX],	"navPitch",	2},
 	{&DataPoolALL[NAV_DATAPOOL_INDEX],	"navRoll",	2},
 	{&DataPoolALL[NAV_DATAPOOL_INDEX],	"navDir",	2},
- //0x00准备       0x20对准中     0x3F对准完成      0x2F对准失败（奇异角、或对准过程中出现较大幅度晃动）
-//0x60组合导航模式       0x64纯惯性导航模式  
 	{&DataPoolALL[NAV_DATAPOOL_INDEX],	"navState",	1},
-// HACK: TEST ECU dataPool Define
-//280：转速
-//014：发动机指令9：实际油压，单位mbar
-	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"engSetRp",	2},
-// 发动机设置转速(not used)
-//014：发动机指令86：期望的油门位置
-	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"ecuSetRp",	2},
-//014：指令69，实际转速，[0~9999]	
-	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"ecuGetRp",	2},
-//280：发动机温度 * 10	
-	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"ecuTemp",	2},
-//280：发动机电池电压 * 10
-//014：指令19，实际喷油1脉宽，单位us
-	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"ecu24V",	2},
-//280：发动机电池电流 * 10
-//014：指令39，实际喷油2脉宽，单位us
-	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"ecu24A",	2},
-//280：发动机状态：0停机，1启动中，2散热 3故障 4脱机 5运行
-//014：发动机状态：0停机，1启动中，2停机中 5运行
-	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"ecuState",	1},
-//014：发动机错误码定义：0无异常 1油压异常 
-	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"ecuError",	1},
-	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"fuelRate",	2},//
-// 0正常飞行，3距离伞降点<150，4正常开伞，0xCC出安全区标志
-	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"ecuStart",	1},
-// 存的是1000倍的实际电流值
-	{&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr1A",	2},
-	{&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr2A",	2},
-	{&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr3A",	2},
-	{&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr4A",	2},
-	{&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr5A",	2},
-	{&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr6A",	2},
+// ECU - 46B
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"ecuMPwr",  2},
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"ecuIIgn1", 2},
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"ecuIIgn2", 2},
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"ecuFuPre", 2},
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"ecuFuDut", 2},
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"ecuJet1",  2},
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"ecuJet2",  2},
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"ecuAirPr", 2},
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"ecuATemp", 2},
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"ecuTemp1", 2},
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"ecuTemp2", 2},
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"ecuTemp3", 2},
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"ecuTemp4", 2},
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"ecuIgn1F", 2},
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"ecuIgn2F", 2},
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"ecuPumpF", 2},
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"ecuModeF", 2},
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"ecuChokF", 2},
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"ecuRPM",   2},
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"ecuRPM2",  2},
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"ecuFbTho", 2},
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"ecuThoF",	2},
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"ecuState", 1},
+	{&DataPoolALL[SELF_DATAPOOL_INDEX],	"ecuError", 1},
+// SRV Feedback current - 12B
+	// {&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr1A",	2},
+	// {&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr2A",	2},
+	// {&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr3A",	2},
+	// {&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr4A",	2},
+	// {&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr5A",	2},
+	// {&DataPoolALL[SRV_DATAPOOL_INDEX],	"Sr6A",	2},
+// reserve
+	{&DataPoolALL[SRV_DATAPOOL_INDEX],	"res2607",	3},
 };
 telemetryParam tm_40hz_pack[][TM_PKT_PARAM_COUNT_40hz_10hz] =
 {

@@ -249,7 +249,7 @@ static void prv_engine_warmup_state_machine()
             s_next_state = CHECK_RPM;
             break;
         case CHECK_RPM:
-            if(s_engineStatus.rpm > 2000)// 检查转速是否2000以上
+            if(s_engineStatus.Actual_RPM > 2000)// 检查转速是否2000以上
             {
                 s_isfirstFail_rpm = true;
                 if(s_isfirstRunToHere)
@@ -311,6 +311,7 @@ static void prv_engine_warmup_state_machine()
             s_current_state = INIT_PWM;//为下次做准备
             s_StartEngineRetryCnt = 0;
             s_engineStatus.CurState = ENGINE_ERROR;
+            s_engineStatus.ecuError = WARMUP_FAIL;
             break;
     }
 }
@@ -413,68 +414,74 @@ static void prv_analyse_data(uint8_t *pbuf)
 {
     switch (pbuf[0])
     {
+    case 1:
+        s_engineStatus.Ignition1_on_off_flag        = (pbuf[1] << 8) + pbuf[2];
+        break;
+    case 2:
+        s_engineStatus.Pump_on_off_flag             = (pbuf[1] << 8) + pbuf[2];
+        break;
+    case 3:
+        s_engineStatus.RPM_Regulator_on_off_flag    = (pbuf[1] << 8) + pbuf[2];
+        break;
+    case 4:
+        s_engineStatus.Choke_on_off_flag            = (pbuf[1] << 8) + pbuf[2];
+        break;
+    case 5:
+        s_engineStatus.Ignition2_on_off_flag        = (pbuf[1] << 8) + pbuf[2];
+        break;
     case 6:
-        s_engineStatus.ambient_temp     = (pbuf[1] << 8) + pbuf[2];
+        s_engineStatus.Ambient_temperatur           = (pbuf[1] << 8) + pbuf[2];
         break;
     case 8:
-        s_engineStatus.air_pressure     = (pbuf[1] << 8) + pbuf[2];
+        s_engineStatus.Air_pressure                 = (pbuf[1] << 8) + pbuf[2];
         break;
     case 9:
-        s_engineStatus.fuel_pressure    = (pbuf[1] << 8) + pbuf[2];
+        s_engineStatus.Actual_fuel_pressure         = (pbuf[1] << 8) + pbuf[2];
+        break;
+    case 17:
+        s_engineStatus.Fuel_pump_duty_cycle         = (pbuf[1] << 8) + pbuf[2];
         break;
     case 19:
-        s_engineStatus.jet1_duty        = (pbuf[1] << 8) + pbuf[2];
+        s_engineStatus.Actual_jet1_duty_cycle       = (pbuf[1] << 8) + pbuf[2];
         break;
     case 35:
-        s_engineStatus.throttle_state   = (pbuf[1] << 8) + pbuf[2];
+        s_engineStatus.throttle_state               = (pbuf[1] << 8) + pbuf[2];
         break;
     case 39:
-        s_engineStatus.jet2_duty        = (pbuf[1] << 8) + pbuf[2];
-        break;
-    case 59:
-        s_engineStatus.maxTemp          = (pbuf[1] << 8) + pbuf[2];
-        break;
-    case 64:
-        s_engineStatus.expect_rpm       = (pbuf[1] << 8) + pbuf[2];
+        s_engineStatus.Actual_jet2_duty_cycle       = (pbuf[1] << 8) + pbuf[2];
         break;
     case 69:
-        s_engineStatus.rpm              = (pbuf[1] << 8) + pbuf[2];
+        s_engineStatus.Actual_RPM                   = (pbuf[1] << 8) + pbuf[2];
         break;
     case 86:
-        s_engineStatus.expect_throttle  = (pbuf[1] << 8) + pbuf[2];
+        s_engineStatus.feedback_throttle            = (pbuf[1] << 8) + pbuf[2];
         break;
     case 87:
-        s_engineStatus.ch1_temp         = (pbuf[1] << 8) + pbuf[2];
+        s_engineStatus.CH_Temperature1              = (pbuf[1] << 8) + pbuf[2];
         break;
     case 88:
-        s_engineStatus.ch2_temp         = (pbuf[1] << 8) + pbuf[2];
+        s_engineStatus.CH_Temperature2              = (pbuf[1] << 8) + pbuf[2];
         break;
     case 89:
-        s_engineStatus.ch3_temp         = (pbuf[1] << 8) + pbuf[2];
+        s_engineStatus.CH_Temperature3              = (pbuf[1] << 8) + pbuf[2];
         break;
     case 90:
-        s_engineStatus.ch4_temp         = (pbuf[1] << 8) + pbuf[2];
+        s_engineStatus.CH_Temperature4              = (pbuf[1] << 8) + pbuf[2];
         break;
     case 91:
-        s_engineStatus.battA            = (pbuf[1] << 8) + pbuf[2];
+        s_engineStatus.battA                        = (pbuf[1] << 8) + pbuf[2];
+        break;          
+    case 92:            
+        s_engineStatus.IIgnition1                   = (pbuf[1] << 8) + pbuf[2];
+        break;          
+    case 93:            
+        s_engineStatus.IIgnition2                   = (pbuf[1] << 8) + pbuf[2];
+        break;          
+    case 96:            
+        s_engineStatus.UMainPwr                     = (pbuf[1] << 8) + pbuf[2];
         break;
-    case 96:
-        s_engineStatus.battV            = (pbuf[1] << 8) + pbuf[2];
-        break;
-    case 97:
-        s_engineStatus.actual_throttle  = (pbuf[1] << 8) + pbuf[2];
-        break;
-    case 98:
-        s_engineStatus.actual_air_choke = (pbuf[1] << 8) + pbuf[2];
-        break;
-    case 100:
-        s_engineStatus.version          = (pbuf[1] << 8) + pbuf[2];
-        break;
-    case 117:
-        s_engineStatus.totalMinite      = (pbuf[1] << 8) + pbuf[2];
-        break;
-    case 119:
-        s_engineStatus.runningMinite    = (pbuf[1] << 8) + pbuf[2];
+    case 144:
+        s_engineStatus.The_2nd_RPM_value            = (pbuf[1] << 8) + pbuf[2];
         break;
     default:
         break;

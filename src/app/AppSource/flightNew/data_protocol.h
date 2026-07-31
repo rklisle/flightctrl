@@ -9,6 +9,11 @@
 #include <stdbool.h>
 // #include "port/flightPort.h"
 
+/* ??????????? #pragma pack?????? FlightSupport ???? pack(1)/pack(0) ??
+ * ???????????????g_CtrltoDL_tel.curLon ?????? curAlt?? */
+#pragma pack(push)
+#pragma pack()
+
 #define RE			(6378137.0)
 #define F_CONST		(1.0/298.257)
 #define E_CONST		0.00669437999
@@ -705,5 +710,7 @@ typedef struct _Stru_HIL_Data_OUTPUT
 	int MissileLauched;//起飞标识，1为起飞，0为未起飞
 	int NavigationMode;//导航参试模式，0为组合导航不参试/仿真全部模拟，1为惯导上状态叠加位置运动，2为角速度/加速度注入叠加噪声 惯导解算
 }Stru_HIL_Data_OUTPUT;
+
+#pragma pack(pop)
 
 #endif

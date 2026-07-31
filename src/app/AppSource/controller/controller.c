@@ -322,15 +322,14 @@ OS_U8 AutoLuanchProcess()
 		{
 			if(g_DeviceState.CurrTick % 20 == 0)
 			{
-				//���жϷ������Ƿ��ѽ�������״̬
 				GetDataFast(pDataPoolSelf, "ecuState", &curState);
-				GetDataFast(pDataPoolSelf, "ecuGetRp", &rpm);
-				switch(curState)//0ͣ����1�����У�2ɢ�� 3���� 4�ѻ� 5���У���϶���Э����ģ�
+				GetDataFast(pDataPoolSelf, "ecuRPM", &rpm);
+				switch(curState)
 				{
-					case ENGINE_STOPED://��������ָ��
+					case ENGINE_STOPED:
 							StartEngine();
 							break;
-					case ENGINE_WARMUP://�ȴ�����
+					case ENGINE_WARMUP:
 							if(g_DeviceState.CurrTick % 200 == 0)
 							{
 								LOG_STR("ENGINE_WARMUP...\n");
@@ -343,17 +342,21 @@ OS_U8 AutoLuanchProcess()
 							{
 								LOG_STR("ENGINE_ERROR\n");
 							}
+							/* run to here means :
+							1.warmup failed*/
 							break;
 					case ENGINE_RUNNING:
 							if(g_DeviceState.CurrTick % 200 == 0)
 							{
 								LOG_STR("ENGINE_RUNNING\n");
 							}
-							/* ���е������ʾ��
-							1�������ɹ�*/
-							/* 2��ת���ȶ���2300���ϳ���10s
-							3������һ��30%����
-							4��ת���ȶ���3400���ϳ���5s*/
+							/* run to here means :
+							1.warmup successful
+							2.RPM>2300 for 10s*/
+
+							/* now we should :
+							1.set thro to 30%
+							2.check RPM>3400 for 5s*/
 							SetEngineThrot(30.0f);
 							if(rpm > 3400)
 							{
@@ -364,7 +367,6 @@ OS_U8 AutoLuanchProcess()
 								}
 								else
 								{
-									// �ж�ʱ���Ƿ����5s
 									if((tx_time_get() - startStamp) > 5000)
 									{
 										ThrFlag = true;
@@ -556,16 +558,16 @@ static OS_U8 SelfCheckCollpse()
 	//�ռ����豸ͨ��״̬
 	g_DeviceState.hilCountDown = g_DeviceState.hilCountDown > 0?g_DeviceState.hilCountDown-1:0;
 	g_DeviceState.ecuCountDown  = g_DeviceState.ecuCountDown > 0?g_DeviceState.ecuCountDown-1:0;
-	g_DeviceState.battCountDown  = g_DeviceState.battCountDown > 0?g_DeviceState.battCountDown-1:0;
+	// g_DeviceState.battCountDown  = g_DeviceState.battCountDown > 0?g_DeviceState.battCountDown-1:0;
     g_DeviceState.powerCountDown  = g_DeviceState.powerCountDown > 0?g_DeviceState.powerCountDown-1:0;
 	g_DeviceState.navCountDown  = g_DeviceState.navCountDown > 0?g_DeviceState.navCountDown - 1:0;
 	g_DeviceState.srvCountDown  = g_DeviceState.srvCountDown > 0?g_DeviceState.srvCountDown-1:0;
-    //g_DeviceState.fuseCountDown = g_DeviceState.fuseCountDown > 0?g_DeviceState.fuseCountDown-1:0;
+    g_DeviceState.fuseCountDown = g_DeviceState.fuseCountDown > 0?g_DeviceState.fuseCountDown-1:0;
 	g_DeviceState.imuCountDown = g_DeviceState.imuCountDown > 0?g_DeviceState.imuCountDown-1:0;
 	g_DeviceState.scoutCountDown = g_DeviceState.scoutCountDown >0? g_DeviceState.scoutCountDown-1:0;
 
 	SETDATA(pDataPoolSelf,	"commHil",	g_DeviceState.hilCountDown,		OS_U8);
-	SETDATA(pDataPoolSelf,	"commBatt",	g_DeviceState.battCountDown,	OS_U8);
+	// SETDATA(pDataPoolSelf,	"commBatt",	g_DeviceState.battCountDown,	OS_U8);
 	SETDATA(pDataPoolSelf,	"commPwr",	g_DeviceState.powerCountDown,	OS_U8);
 	SETDATA(pDataPoolSelf,	"commEcu",	g_DeviceState.ecuCountDown,		OS_U8);
 	SETDATA(pDataPoolSelf,	"commNav",	g_DeviceState.navCountDown,		OS_U8);

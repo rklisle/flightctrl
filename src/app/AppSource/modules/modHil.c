@@ -286,7 +286,7 @@ static void HilWriteSimNavTelemetry(void)
 
 	SETDATA(pDataPoolSelf, "GrdSpd", (OS_S16)(groundSpd * 10.0), OS_S16);
 	HilWriteSimAirTelemetry();
-	SETDATA(pDataPoolSelf, "ecuGetRp", (OS_U16)(hilInput.rpm_engine_state * 10.0), OS_U16);
+	SETDATA(pDataPoolSelf, "ecuRPM", (OS_U16)(hilInput.rpm_engine_state * 10.0), OS_U16);
 	SETDATA(pDataPoolSelf, "ecuState", hilInput.engine_state, OS_U16);
 	SETDATA(pDataPoolFly, "EngineRp", (OS_U16)(hilInput.rpm_engine_state * 10.0), OS_U16);
 

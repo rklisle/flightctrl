@@ -5,6 +5,8 @@
  *      Author: Lenovo
  */
 #include "FlightSupport.h"
+/* 必须在 mission.h/fuse.h 等 #pragma pack(1) 之前包含，保证与 control 侧布局一致 */
+#include "flightPort.h"
 #include "stmToZynq.h"
 #include "./modules/modPwrSeqCtl.h"
 #include "./modules/modSrvCtl.h"
@@ -36,7 +38,6 @@ int airHighArray[1000] = {0};
 int safePointCount;
 
 // MISSION homeMsn = {0};
-extern Stru_Data_Controller_To_DatalinkTel  g_CtrltoDL_tel;
 extern double	g_flight_time;
 extern int		g_time_tick;
 
@@ -357,7 +358,7 @@ void FlightInputGenerate()
 		GetDataFast(pDataPoolImu, "navHigh", 	&tempf);	g_ins_data.height = tempf;
 		GetDataFast(pDataPoolImu, "navState", &g_ins_data.GPS_status);
 
-		GetDataFast(pDataPoolSelf, "ecuGetRp", &g_engine_data.rpm_engine);
+		GetDataFast(pDataPoolSelf, "ecuRPM", &g_engine_data.rpm_engine);
 		GetDataFast(pDataPoolSelf, "ecuState", &g_engine_data.ECU_work_status);
 
 		g_baro_data.static_pressure = static_pressure;
@@ -479,12 +480,20 @@ OS_U8 JudgeHomeward()	//02 起飞2s后，每1s判断一次，是否出了安全�
 	if(g_DeviceState.CurrTick < 200 * 2)//2s后起判安全区
 		return 1;
 
-	int ilon,ilat;
-	double lon,lat;
-	GetDataFast(pDataPoolImu, "navLon", &ilon);
-	GetDataFast(pDataPoolImu, "navLat", &ilat);
-	lon = ilon * 1e-7;
-	lat = ilat * 1e-7;
+	double lon, lat;
+	if((g_DeviceState.workStage & DOM_HILSMODE) == DOM_HILSMODE)
+	{
+		lon = g_CtrltoDL_tel.curLon;
+		lat = g_CtrltoDL_tel.curLat;
+	}
+	else
+	{
+		OS_S32 ilon, ilat;
+		GetDataFast(pDataPoolImu, "navLon", &ilon);
+		GetDataFast(pDataPoolImu, "navLat", &ilat);
+		lon = ilon * 1e-7;
+		lat = ilat * 1e-7;
+	}
 
 	if(OutSafeArea)
 	{
@@ -519,7 +528,9 @@ OS_U8 JudgeHomeward()	//02 起飞2s后，每1s判断一次，是否出了安全�
 			{
 				// 出安全区，且时间超过3s
 				SETDATA(pDataPoolSelf,  "flyError", 0xCC,	OS_U8);
-				
+				if((g_DeviceState.workStage & DOM_HILSMODE) == DOM_HILSMODE)
+					StopHilTest();
+
 				if(OutSafeArea == false)
 					OutSafeCount = 35;
 				OutSafeArea = true;
